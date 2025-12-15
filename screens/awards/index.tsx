@@ -15,9 +15,7 @@ export default function HomeScreen() {
         className=" px-4 py-6 space-y-6"
       >
         <View className="border-2 border-primary rounded-lg px-4 pb-4">
-          <Text className="text-3xl font-bold pt-4 text-primary">
-            Track yor habits like a pro!
-          </Text>
+          <Text className="text-3xl font-bold pt-4 text-primary">Awards</Text>
         </View>
       </ScrollView>
     </View>

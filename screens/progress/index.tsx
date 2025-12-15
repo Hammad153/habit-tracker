@@ -3,7 +3,7 @@ import { View, ScrollView, Text } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import ApHeader from "@/components/Header";
 
-export default function HomeScreen() {
+export default function ProgressScreen() {
   return (
     <View className="h-screen">
       <ApHeader
@@ -15,9 +15,7 @@ export default function HomeScreen() {
         className=" px-4 py-6 space-y-6"
       >
         <View className="border-2 border-primary rounded-lg px-4 pb-4">
-          <Text className="text-3xl font-bold pt-4 text-primary">
-            Track yor habits like a pro!
-          </Text>
+          <Text className="text-3xl font-bold pt-4 text-primary">Progress</Text>
         </View>
       </ScrollView>
     </View>

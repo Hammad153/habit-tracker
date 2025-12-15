@@ -41,6 +41,58 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="habits"
+        options={{
+          title: "Habits",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "checkbox" : "checkbox-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />{" "}
+      <Tabs.Screen
+        name="progress"
+        options={{
+          title: "Progress",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "stats-chart-sharp" : "stats-chart-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />{" "}
+      <Tabs.Screen
+        name="awards"
+        options={{
+          title: "Awards",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "trophy-sharp" : "trophy-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />{" "}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "person-sharp" : "person-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
