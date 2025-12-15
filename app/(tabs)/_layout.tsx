@@ -53,7 +53,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />{" "}
+      />
       <Tabs.Screen
         name="progress"
         options={{
@@ -66,7 +66,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />{" "}
+      />
       <Tabs.Screen
         name="awards"
         options={{
@@ -79,7 +79,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />{" "}
+      />
       <Tabs.Screen
         name="profile"
         options={{
