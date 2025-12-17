@@ -1,11 +1,9 @@
 import React from "react";
 import { View, ScrollView, Text } from "react-native";
-import ApHeader from "@/components/Header";
 
 export default function ProfileScreen() {
   return (
     <View className="h-screen">
-      <ApHeader title="Profile" hasBackButton />
       <ScrollView
         showsVerticalScrollIndicator={false}
         className=" px-4 py-6 space-y-6"
