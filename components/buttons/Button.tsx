@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Pressable, Text } from "react-native";
+import { View, Pressable } from "react-native";
+import { ApText } from "../Text";
 
 type Props = {
   label: string;
@@ -18,9 +19,9 @@ export default function Button({
   return (
     <View className={`${className} p-2 w-[200px] bg-primary my-2 rounded-lg`}>
       <Pressable onPress={onPress} className={`items-center justify-center`}>
-        <Text className={`text-white text-center text-2xl ${labelClassname}`}>
+        <ApText className={`text-white text-center text-2xl ${labelClassname}`}>
           {label}
-        </Text>
+        </ApText>
       </Pressable>
     </View>
   );

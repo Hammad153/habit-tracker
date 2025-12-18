@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ApTheme } from "@/components/theme";
 import "../../global.css";
 import { View, Text } from "react-native";
+import { ApText } from "@/components/Text";
 
 export default function TabLayout() {
   return (
@@ -69,7 +70,7 @@ export default function TabLayout() {
                   color="#fff"
                 />
               </View>
-              <Text
+              <ApText
                 numberOfLines={1}
                 style={{
                   color: focused
@@ -81,7 +82,7 @@ export default function TabLayout() {
                 }}
               >
                 Progress
-              </Text>
+              </ApText>
             </View>
           ),
           tabBarLabel: "",

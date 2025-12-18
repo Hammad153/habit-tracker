@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { ApText } from "@/components/Text";
 
 const MotivatingWords = () => {
   const date = new Date();
@@ -30,12 +31,12 @@ const MotivatingWords = () => {
   return (
     <View className="my-2">
       <View className="flex flex-row w-full justify-between items-center mb-2">
-        <Text className="text-3xl font-display font-black text-slate-900 dark:text-white tracking-tight">
+        <ApText className="text-3xl font-display font-black text-slate-900 dark:text-white tracking-tight">
           {days[date.getDay()]},{" "}
-          <Text className="text-primary">
+          <ApText className="text-primary">
             {months[date.getMonth()]} {date.getDate()}
-          </Text>
-        </Text>
+          </ApText>
+        </ApText>
 
         <View>
           <View className="relative size-14 flex items-center justify-center">
@@ -57,16 +58,16 @@ const MotivatingWords = () => {
                 strokeWidth="4"
               ></Path>
             </Svg>
-            <Text className="absolute text-xs font-bold text-slate-900 dark:text-white">
+            <ApText className="absolute text-xs font-bold text-slate-900 dark:text-white">
               40%
-            </Text>
+            </ApText>
           </View>
         </View>
       </View>
 
-      <Text className="text-xl font-medium text-primary">
+      <ApText className="text-xl font-medium text-primary">
         {motivatingWords[Math.floor(Math.random() * motivatingWords.length)]}
-      </Text>
+      </ApText>
     </View>
   );
 };

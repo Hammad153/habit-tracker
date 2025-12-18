@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Pressable, Text } from "react-native";
+import { View, Pressable } from "react-native";
 import ToggleButton from "@/components/buttons/SwitchButton";
+import { ApText } from "@/components/Text";
 
 interface HabitCardProps {
   icon?: React.ReactNode;
@@ -20,12 +21,12 @@ const HabitCard: React.FC<HabitCardProps> = ({ icon, title, description }) => {
           <View className="m-auto">{icon}</View>
         </View>
         <View className="ml-4">
-          <Text className="text-slate-900 text-base font-semibold truncate leading-tight">
+          <ApText className="text-slate-900 text-base font-semibold truncate leading-tight">
             {title}
-          </Text>
-          <Text className="text-primary text-xs font-medium mt-0.5">
+          </ApText>
+          <ApText className="text-primary text-xs font-medium mt-0.5">
             {description}
-          </Text>
+          </ApText>
         </View>
 
         <View className="ml-auto">
