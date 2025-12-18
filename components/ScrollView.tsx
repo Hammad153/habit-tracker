@@ -24,7 +24,7 @@ export const ApScrollView: React.FC<IProps> = ({
   return (
     <ScrollView
       {...props}
-      className={`px-4 py-2 ${className}`}
+      className={`px-4 py-2 bg-[#013220] ${className}`}
       contentContainerClassName={contentContainerClassName}
       refreshControl={refreshControl}
     >

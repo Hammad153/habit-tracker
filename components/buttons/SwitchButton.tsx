@@ -1,30 +1,76 @@
-import React, { useState } from "react";
-import { View, Switch, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Pressable, Animated, StyleSheet } from "react-native";
+import { ApTheme } from "@/components/theme";
 
-const ToggleButton = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+interface ToggleProps {
+  isEnabled: boolean;
+  onToggle: () => void;
+}
+
+const TRACK_WIDTH = 48;
+const TRACK_HEIGHT = 28;
+const THUMB_SIZE = 22;
+const TRACK_PADDING = 3;
+
+const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
+  const translateX = useRef(
+    new Animated.Value(
+      isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0
+    )
+  ).current;
+
+  useEffect(() => {
+    Animated.spring(translateX, {
+      toValue: isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0,
+      useNativeDriver: true,
+      tension: 60,
+      friction: 8,
+    }).start();
+  }, [isEnabled]);
 
   return (
-    <View style={styles.container}>
-      <Switch
-        trackColor={{ false: "#767577", true: "#81b0ff" }}
-        thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-        ios_backgroundColor="#3e3e3e"
-        onValueChange={toggleSwitch}
-        value={isEnabled}
-      />
-    </View>
+    <Pressable onPress={onToggle}>
+      <View
+        style={[
+          styles.track,
+          {
+            backgroundColor: isEnabled
+              ? ApTheme.Color.primary
+              : ApTheme.Color.toggleInactive,
+          },
+        ]}
+      >
+        <Animated.View
+          style={[
+            styles.thumb,
+            {
+              transform: [{ translateX }],
+              backgroundColor: ApTheme.Color.white,
+            },
+          ]}
+        />
+      </View>
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
+  track: {
+    width: TRACK_WIDTH,
+    height: TRACK_HEIGHT,
+    borderRadius: TRACK_HEIGHT / 2,
+    padding: TRACK_PADDING,
     justifyContent: "center",
-    flexDirection: "row",
-    gap: 10,
+  },
+  thumb: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
 });
 
