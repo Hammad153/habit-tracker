@@ -7,7 +7,7 @@ export default function AwardsScreen() {
   return (
     <ApContainer>
       <View className="h-screen">
-        <ApHeader title="Awards" hasBackButton />
+        {/*<ApHeader title="Awards" hasBackButton />*/}
         <ScrollView
           showsVerticalScrollIndicator={false}
           className=" px-4 py-6 space-y-6"

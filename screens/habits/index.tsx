@@ -11,7 +11,7 @@ export default function HabitScreen() {
   return (
     <ApContainer>
       <View className="h-screen">
-        <ApHeader title="Habits" hasBackButton />
+        {/*<ApHeader title="Habits" hasBackButton />*/}
         <ScrollView
           showsVerticalScrollIndicator={false}
           className=" px-4 py-6 space-y-6"
