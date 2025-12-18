@@ -1,5 +1,6 @@
 import React from "react";
 import { ScrollView, ScrollViewProps, RefreshControl } from "react-native";
+import { ApTheme } from "./theme";
 
 export interface IProps extends ScrollViewProps {
   children: React.ReactNode;
@@ -24,7 +25,8 @@ export const ApScrollView: React.FC<IProps> = ({
   return (
     <ScrollView
       {...props}
-      className={`px-4 py-2 bg-[#013220] ${className}`}
+      className={`px-4 py-2 ${className}`}
+      style={{ backgroundColor: ApTheme.Color.background }}
       contentContainerClassName={contentContainerClassName}
       refreshControl={refreshControl}
     >

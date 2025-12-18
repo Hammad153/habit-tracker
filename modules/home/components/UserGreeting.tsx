@@ -18,12 +18,12 @@ const getGreeting = (): string => {
 };
 
 const UserGreeting: React.FC<Props> = ({
-  userName = "Alex Johnson",
+  userName = "Habit Tracker",
   avatarUri,
   onNotificationPress,
 }) => {
   return (
-    <View className="flex-row items-center justify-between w-full py-3">
+    <View className="flex-row items-center justify-between w-full py-2">
       <View className="flex-row items-center">
         <View
           className="w-11 h-11 rounded-full items-center justify-center overflow-hidden"
