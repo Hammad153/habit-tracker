@@ -11,7 +11,7 @@ const ApContainer: React.FC<Iprops> = ({ children, className }) => {
   return (
     <View
       style={{ backgroundColor: ApTheme.Color.container }}
-      className={`pt-10 ${className}`}
+      className={`${className}`}
     >
       {children}
     </View>

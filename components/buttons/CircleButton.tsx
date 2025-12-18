@@ -9,7 +9,7 @@ interface Props {
   onLongPress?: () => void;
 }
 
-const CircleButton: React.FC<Props> = ({
+const ApCircleButton: React.FC<Props> = ({
   onPress,
   className,
   children,
@@ -28,4 +28,4 @@ const CircleButton: React.FC<Props> = ({
   );
 };
 
-export default CircleButton;
+export default ApCircleButton;

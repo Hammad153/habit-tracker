@@ -20,8 +20,8 @@ export default function HomeScreen() {
         <DailyGoalsCard completed={5} total={5} />
 
         <View className="mt-4">
-          <ApText size="2xl" font="bold" color={ApTheme.Color.white}>
-            Your Habits
+          <ApText size="xl" font="bold" color={ApTheme.Color.white}>
+            Your Routine
           </ApText>
           <Habits />
         </View>

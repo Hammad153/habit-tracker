@@ -10,7 +10,7 @@ type Props = {
   containerClassName?: string;
 };
 
-export default function Button({
+export default function ApButton({
   label,
   onPress,
   className,

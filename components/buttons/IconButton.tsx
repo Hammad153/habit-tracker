@@ -9,7 +9,7 @@ type Props = {
   onPress: () => void;
 };
 
-export default function IconButton({ icon, label, onPress }: Props) {
+export default function ApIconButton({ icon, label, onPress }: Props) {
   return (
     <Pressable onPress={onPress}>
       <MaterialIcons name={icon} size={24} color="#fff" />
