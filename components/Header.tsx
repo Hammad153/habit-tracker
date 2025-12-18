@@ -43,14 +43,14 @@ export const ApHeader: React.FC<IProps> = ({
       ]}
       className={`w-full ${containerClassName}`}
     >
-      <View className={`px-4 py-3 ${headerClassName}`}>
+      <View className={`px-4 py-3 mb-2 ${headerClassName}`}>
         <View className="absolute inset-0 items-center justify-center">
           {typeof title === "string" ? (
             <ApText
               font="semibold"
               size="2xl"
               numberOfLines={1}
-              className={titleClassName}
+              className={` ${titleClassName}`}
               color={ApTheme.Color.primary}
             >
               {title}
@@ -65,7 +65,7 @@ export const ApHeader: React.FC<IProps> = ({
             {hasBackButton && (
               <Pressable
                 onPress={onBack}
-                className={`p-2 rounded-full bg-surface ${backContainerClassName}`}
+                className={`rounded-full bg-surface ${backContainerClassName}`}
                 hitSlop={10}
               >
                 <Ionicons
@@ -96,6 +96,11 @@ export const ApHeader: React.FC<IProps> = ({
           )}
         </View>
       )}
+
+      <View
+        style={{ backgroundColor: ApTheme.Color.border }}
+        className="h-[1px] w-full my-2"
+      />
     </View>
   );
 };

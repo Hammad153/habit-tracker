@@ -8,7 +8,7 @@ export default function ProgressScreen() {
   return (
     <ApContainer>
       <View className="h-screen">
-        <ApHeader title="Progress" hasBackButton />
+        <ApHeader title="Progress" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <View></View>
         </ApScrollView>

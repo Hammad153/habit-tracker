@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { ApScrollView } from "@/components/ScrollView";
 import ApContainer from "@/components/containers/container";
 import { ApHeader } from "@/components/Header";
@@ -8,7 +8,7 @@ export default function ProfileScreen() {
   return (
     <ApContainer>
       <View className="h-screen">
-        <ApHeader title="Profile" hasBackButton />
+        <ApHeader title="Profile" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <View></View>
         </ApScrollView>

@@ -9,7 +9,7 @@ export default function HabitScreen() {
   return (
     <ApContainer>
       <View className="h-screen">
-        <ApHeader title="Habits" hasBackButton />
+        <ApHeader title="Habits" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <Habits />
         </ApScrollView>
