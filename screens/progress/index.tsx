@@ -1,17 +1,17 @@
 import React from "react";
-import { View, ScrollView, Text } from "react-native";
+import { View } from "react-native";
+import { ApScrollView } from "@/components/ScrollView";
+import { ApText } from "@/components/Text";
+import { ApTheme } from "@/components/theme";
 
 export default function ProgressScreen() {
   return (
     <View className="h-screen">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className=" px-4 py-6 space-y-6"
-      >
-        <View className="rounded-lg px-4 pb-4">
-          <Text className="text-3xl font-bold text-primary">Progress</Text>
-        </View>
-      </ScrollView>
+      <ApScrollView showsVerticalScrollIndicator={false}>
+        <ApText size="2xl" font="bold" color={ApTheme.Color.primary}>
+          Progress
+        </ApText>
+      </ApScrollView>
     </View>
   );
 }

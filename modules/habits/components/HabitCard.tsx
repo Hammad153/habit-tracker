@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { ApText } from "@/components/Text";
+import { ApTheme } from "@/components/theme";
 import ToggleButton from "@/components/buttons/SwitchButton";
 
 interface HabitCardProps {
@@ -16,8 +18,10 @@ const HabitCard: React.FC<HabitCardProps> = ({ icon, title, description }) => {
         <View className="m-auto">{icon}</View>
       </View>
       <View className="ml-4">
-        <Text className="text-xl font-bold">{title}</Text>
-        <Text className="text-gray-500">{description}</Text>
+        <ApText size="xl" font="bold">
+          {title}
+        </ApText>
+        <ApText color={ApTheme.Color.textSecondary}>{description}</ApText>
       </View>
       <View className="flex flex-row justify-end w-[10%] ml-auto">
         <ToggleButton />

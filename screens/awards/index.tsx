@@ -1,17 +1,19 @@
 import React from "react";
-import { View, ScrollView, Text } from "react-native";
+import { View } from "react-native";
+import { ApScrollView } from "@/components/ScrollView";
+import { ApText } from "@/components/Text";
+import { ApTheme } from "@/components/theme";
 
-export default function HomeScreen() {
+export default function AwardsScreen() {
   return (
     <View className="h-screen">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className=" px-4 py-6 space-y-6"
-      >
-        <View className="px-4 pb-4">
-          <Text className="text-3xl font-bold text-primary">Awards</Text>
+      <ApScrollView showsVerticalScrollIndicator={false}>
+        <View className=" pb-4">
+          <ApText size="2xl" font="bold" color={ApTheme.Color.primary}>
+            Awards
+          </ApText>
         </View>
-      </ScrollView>
+      </ApScrollView>
     </View>
   );
 }

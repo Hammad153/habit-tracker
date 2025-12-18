@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { ApText } from "@/components/Text";
+import { ApTheme } from "@/components/theme";
 
 const MotivatingWords = () => {
   const date = new Date();
@@ -28,16 +30,14 @@ const MotivatingWords = () => {
 
   return (
     <View className="my-2">
-      <Text>
+      <ApText>
         {days[date.getDay()]}, {months[date.getMonth()]} {date.getDate()}
-      </Text>
-      <Text className="text-xl font-medium text-primary">
+      </ApText>
+      <ApText size="xl" font="medium" color={ApTheme.Color.primary}>
         {motivatingWords[Math.floor(Math.random() * motivatingWords.length)]}
-      </Text>
+      </ApText>
 
-      <View>
-        {/* Progress Icon here*/}
-      </View>
+      <View>{/* Progress Icon here*/}</View>
     </View>
   );
 };

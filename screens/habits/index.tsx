@@ -1,22 +1,22 @@
 import React from "react";
-import { View, ScrollView, Text } from "react-native";
+import { View } from "react-native";
+import { ApScrollView } from "@/components/ScrollView";
+import { ApText } from "@/components/Text";
+import { ApTheme } from "@/components/theme";
 import Habits from "@/modules/habits/habits";
 
 export default function HabitScreen() {
   return (
     <View className="h-screen">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className=" px-4 py-6 space-y-6"
-      >
-        <View className="rounded-lg px-4 pb-4">
-          <Text className="text-3xl font-bold text-primary">Your Habits</Text>
-        </View>
+      <ApScrollView showsVerticalScrollIndicator={false}>
+        <ApText size="2xl" font="bold" color={ApTheme.Color.primary}>
+          Your Habits
+        </ApText>
 
         <View>
           <Habits />
         </View>
-      </ScrollView>
+      </ApScrollView>
     </View>
   );
 }
