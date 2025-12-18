@@ -7,10 +7,11 @@ import Habits from "@/modules/habits/habits";
 import MotivatingWords from "@/modules/home/components/motivationSection";
 import DailyGoalsCard from "@/modules/home/components/DailyGoalsCard";
 import UserGreeting from "@/modules/home/components/UserGreeting";
+import ApContainer from "@/components/containers/container";
 
 export default function HomeScreen() {
   return (
-    <View className="h-screen">
+    <ApContainer className="h-screen">
       <ApScrollView showsVerticalScrollIndicator={false}>
         <UserGreeting userName="Ismail Hammad" />
 
@@ -25,6 +26,6 @@ export default function HomeScreen() {
           <Habits />
         </View>
       </ApScrollView>
-    </View>
+    </ApContainer>
   );
 }
