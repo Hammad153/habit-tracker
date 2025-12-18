@@ -17,7 +17,7 @@ const MotivatingWords: React.FC<Props> = ({
   const { dayName, month, day } = formatDate(new Date());
 
   return (
-    <View className="my-2 px-1">
+    <View className="my-4 px-1">
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <ApText size="2xl">
