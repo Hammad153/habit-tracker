@@ -36,10 +36,10 @@ const UserGreeting: React.FC<Props> = ({
               resizeMode="cover"
             />
           ) : (
-            <Ionicons
-              name="person"
-              size={22}
-              color={ApTheme.Color.background}
+            <Image
+              source={require("../../../assets/images/user_profile.png")}
+              className="w-full h-full"
+              resizeMode="cover"
             />
           )}
         </View>
