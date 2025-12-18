@@ -1,14 +1,9 @@
 export const ApTheme = {
   Color: {
-    // Primary accent color
     primary: "#13ec5b",
-
-    // Background colors
     background: "#102216",
     backgroundLight: "#f6f8f6",
-
-    // Surface colors (cards, containers)
-    surface: "#1A2C20",
+    surface: "#31553dff",
     surfaceLight: "#ffffff",
     surfaceBorder: "#23482f",
     surfaceInactive: "#232423",

@@ -17,6 +17,14 @@ const getGreeting = (): string => {
   return "GOOD EVENING";
 };
 
+const getInitials = (name: string): string => {
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].substring(0, 2).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
 const UserGreeting: React.FC<Props> = ({
   userName = "Habit Tracker",
   avatarUri,
@@ -36,11 +44,9 @@ const UserGreeting: React.FC<Props> = ({
               resizeMode="cover"
             />
           ) : (
-            <Image
-              source={require("../../../assets/images/user_profile.png")}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
+            <ApText size="xl" font="bold" color={ApTheme.Color.white}>
+              {getInitials(userName)}
+            </ApText>
           )}
         </View>
 
@@ -68,7 +74,7 @@ const UserGreeting: React.FC<Props> = ({
         <Ionicons
           name="notifications-outline"
           size={20}
-          color={ApTheme.Color.white}
+          color={ApTheme.Color.primary}
         />
       </TouchableOpacity>
     </View>
