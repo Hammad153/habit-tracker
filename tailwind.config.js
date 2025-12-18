@@ -26,6 +26,10 @@ module.exports = {
 
         // Text colors
         textPrimary: "#FFFFFF",
+        primary: "#13ec5b",
+        background: "#0F172A",
+        surface: "#1E293B",
+        textPrimary: "#F8FAFC",
         textSecondary: "#94A3B8",
         textMuted: "#64748B",
 

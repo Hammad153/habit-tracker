@@ -1,17 +1,24 @@
 import React from "react";
-import { View } from "react-native";
-import { ApScrollView } from "@/components/ScrollView";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { View, ScrollView, Text } from "react-native";
+import ApHeader from "@/components/Header";
+import ApContainer from "@/components/containers/container";
 
 export default function ProfileScreen() {
   return (
-    <View className="h-screen">
-      <ApScrollView showsVerticalScrollIndicator={false}>
-        <ApText size="2xl" font="bold" color={ApTheme.Color.primary}>
-          Profile
-        </ApText>
-      </ApScrollView>
-    </View>
+    <ApContainer>
+      <View className="h-screen">
+        <ApHeader title="Profile" hasBackButton />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          className=" px-4 py-6 space-y-6"
+        >
+          <View className="rounded-lg px-4 pb-4">
+            <Text className="text-3xl font-bold pt-4 text-primary">
+              Profile
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
+    </ApContainer>
   );
 }

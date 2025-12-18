@@ -35,5 +35,7 @@ export const ApTheme = {
     muted: "#64748B",
     border: "#23482f",
     input: "#1A2C20",
+    accent: "#38BDF8",
+    container: "#102216",
   },
 };
