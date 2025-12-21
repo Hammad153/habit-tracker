@@ -1,35 +1,20 @@
 import { View } from "react-native";
 import HabitCard from "./components/HabitCard";
-import { Ionicons } from "@expo/vector-icons";
-
 import React from "react";
+import { ACTIVE_HABITS } from "@/screens/manage-habits/habitsStatusData";
 
 const Habits = () => {
-  const habits = [
-    {
-      title: "Run 5km",
-      description: "Completed 7am",
-      icon: <Ionicons name="analytics" size={24} color="black" />,
-    },
-    {
-      title: "Morning Adhkar",
-      description: "15 mins remaining",
-      icon: <Ionicons name="analytics" size={24} color="black" />,
-    },
-    {
-      title: "Read 20 pages",
-      description: "Completed 10 pages",
-      icon: <Ionicons name="analytics" size={24} color="black" />,
-    },
-  ];
   return (
     <View>
-      {habits.map((habit, index) => (
+      {ACTIVE_HABITS.map((habit) => (
         <HabitCard
-          key={index}
+          key={habit.id}
           title={habit.title}
-          description={habit.description}
+          subtitle={habit.subtitle}
           icon={habit.icon}
+          iconColor={habit.iconColor}
+          iconBg={habit.iconBg}
+          variant="toggle"
         />
       ))}
     </View>

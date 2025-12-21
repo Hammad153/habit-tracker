@@ -36,7 +36,7 @@ const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
           {
             backgroundColor: isEnabled
               ? ApTheme.Color.primary
-              : ApTheme.Color.toggleInactive,
+              : ApTheme.Color.surfaceInactive,
           },
         ]}
       >

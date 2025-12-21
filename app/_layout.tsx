@@ -9,14 +9,15 @@ export default function RootLayout() {
     <ApSafeAreaView>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="manage-habits"
-          options={{
-            headerShown: false,
-            presentation: "modal",
-          }}
-        />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="timeline" options={{ headerShown: false }} />
+        <Stack.Screen
+           name="manage-habits"
+           options={{
+             headerShown: false,
+             presentation: "modal",
+           }}
+         />
       </Stack>
       <StatusBar style="light" />
     </ApSafeAreaView>

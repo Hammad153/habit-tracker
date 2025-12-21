@@ -53,7 +53,7 @@ export default function TabLayout() {
         options={{
           title: "Progress",
           tabBarIcon: ({ color, focused }) => (
-            <View className="absolute bottom-1 items-center">
+            <View className="absolute bottom-[-10px] items-center">
               <View
                 className="bg-primary rounded-full w-[60px] h-[60px] justify-center items-center"
                 style={{

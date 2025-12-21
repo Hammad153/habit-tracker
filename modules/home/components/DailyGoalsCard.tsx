@@ -23,7 +23,6 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
         borderColor: ApTheme.Color.surfaceBorder,
       }}
     >
-      {/* Header row */}
       <View className="flex-row items-center justify-between mb-3">
         <ApText size="base" font="semibold" color={ApTheme.Color.textPrimary}>
           Daily Goal
@@ -33,7 +32,6 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
         </ApText>
       </View>
 
-      {/* Progress bar */}
       <View
         className="h-3 w-full rounded-full overflow-hidden"
         style={{ backgroundColor: ApTheme.Color.progressBg }}
