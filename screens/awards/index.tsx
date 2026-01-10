@@ -7,20 +7,79 @@ import { ApTheme } from "@/components/theme";
 import { ApText } from "@/components/Text";
 import LevelProgress from "./components/LevelProgress";
 import BadgeCard from "./components/BadgeCard";
+import { awardsApi } from "@/libs/api";
+import { useState, useEffect } from "react";
 
 const STREAK_BADGES = [
-  { id: 1, title: "7 Day Streak", icon: "flame", description: "Completed habits for 7 days in a row", isLocked: false },
-  { id: 2, title: "30 Day Streak", icon: "flame", description: "Completed habits for 30 days in a row", isLocked: true },
-  { id: 3, title: "100 Day Streak", icon: "flame", description: "Completed habits for 100 days in a row", isLocked: true },
+  {
+    id: 1,
+    title: "7 Day Streak",
+    icon: "flame",
+    description: "Completed habits for 7 days in a row",
+    isLocked: false,
+  },
+  {
+    id: 2,
+    title: "30 Day Streak",
+    icon: "flame",
+    description: "Completed habits for 30 days in a row",
+    isLocked: true,
+  },
+  {
+    id: 3,
+    title: "100 Day Streak",
+    icon: "flame",
+    description: "Completed habits for 100 days in a row",
+    isLocked: true,
+  },
 ];
 
 const MILESTONE_BADGES = [
-  { id: 4, title: "Early Bird", icon: "sunny", description: "Completed 10 morning habits", isLocked: false },
-  { id: 5, title: "Night Owl", icon: "moon", description: "Completed 10 evening habits", isLocked: false },
-  { id: 6, title: "Habit Master", icon: "trophy", description: "Completed 100 total habits", isLocked: true },
+  {
+    id: 4,
+    title: "Early Bird",
+    icon: "sunny",
+    description: "Completed 10 morning habits",
+    isLocked: false,
+  },
+  {
+    id: 5,
+    title: "Night Owl",
+    icon: "moon",
+    description: "Completed 10 evening habits",
+    isLocked: false,
+  },
+  {
+    id: 6,
+    title: "Habit Master",
+    icon: "trophy",
+    description: "Completed 100 total habits",
+    isLocked: true,
+  },
 ];
 
 export default function AwardsScreen() {
+  const [badges, setBadges] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [badgesRes] = await Promise.all([awardsApi.getAll()]);
+        setBadges(badgesRes.data);
+      } catch (error) {
+        console.error("Failed to fetch awards:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const STREAK_BADGES = badges.filter((b) => b.type === "STREAK");
+  const MILESTONE_BADGES = badges.filter((b) => b.type === "MILESTONE");
+
   return (
     <ApContainer>
       <View className="h-screen bg-background">
@@ -29,7 +88,12 @@ export default function AwardsScreen() {
           <LevelProgress level={5} currentXp={750} neededXp={1000} />
 
           <View className="px-5 mt-4">
-            <ApText size="xl" font="bold" color={ApTheme.Color.white} className="mb-4">
+            <ApText
+              size="xl"
+              font="bold"
+              color={ApTheme.Color.white}
+              className="mb-4"
+            >
               Streak Badges
             </ApText>
             <View className="flex-row flex-wrap justify-between">
@@ -47,7 +111,12 @@ export default function AwardsScreen() {
           </View>
 
           <View className="px-5 mt-8 mb-20">
-            <ApText size="xl" font="bold" color={ApTheme.Color.white} className="mb-4">
+            <ApText
+              size="xl"
+              font="bold"
+              color={ApTheme.Color.white}
+              className="mb-4"
+            >
               Milestones
             </ApText>
             <View className="flex-row flex-wrap justify-between">

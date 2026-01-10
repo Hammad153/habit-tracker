@@ -10,72 +10,91 @@ import DailyGoalsCard from "@/modules/home/components/DailyGoalsCard";
 import UserGreeting from "@/modules/home/components/UserGreeting";
 import ApContainer from "@/components/containers/container";
 import HabitCard from "@/modules/habits/components/HabitCard";
+import { habitApi, profileApi } from "@/libs/api";
+import { useState, useEffect } from "react";
 
 const Home: React.FC = () => {
+  const [habits, setHabits] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [habitsRes, profileRes] = await Promise.all([
+        habitApi.getAll(),
+        profileApi.get(),
+      ]);
+      setHabits(habitsRes.data);
+      setProfile(profileRes.data);
+    } catch (error) {
+      console.error("Failed to fetch home data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const today = new Date().toISOString().split("T")[0];
+
   return (
     <ApContainer className="h-screen bg-background relative">
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <UserGreeting userName="Ismail Hammad" />
+        <UserGreeting userName={profile?.name || "User"} />
 
-        <DateProgressSection percentage={40} />
+        <DateProgressSection percentage={profile?.completionRate || 0} />
 
-        <DailyGoalsCard completed={2} total={5} />
+        <DailyGoalsCard
+          completed={
+            habits.filter((h: any) =>
+              h.completions?.some((c: any) => c.date === today)
+            ).length
+          }
+          total={habits.length}
+        />
 
         <View className="mt-6 mb-20">
-          <ApText size="xl" font="bold" color={ApTheme.Color.white} className="mb-2">
+          <ApText
+            size="xl"
+            font="bold"
+            color={ApTheme.Color.white}
+            className="mb-2"
+          >
             Your Habits
           </ApText>
-           <View>
-             <HabitCard
-                title="Run 5km"
-                description="Completed at 7:00 AM"
-                icon="walk"
-                iconColor="#EF4444"
-                iconBg="rgba(239, 68, 68, 0.1)"
-             />
+          <View>
+            {habits.map((habit) => (
               <HabitCard
-                title="Morning Meditation"
-                description="15 mins remaining"
-                icon="flower"
-                iconColor="#A855F7"
-                iconBg="rgba(168, 85, 247, 0.1)"
-             />
-              <HabitCard
-                title="Read 10 Pages"
-                description="Daily Goal"
-                icon="book"
-                iconColor="#F59E0B"
-                iconBg="rgba(245, 158, 11, 0.1)"
-             />
-              <HabitCard
-                title="Drink Water"
-                description="2L Completed"
-                icon="water"
-                iconColor="#38BDF8"
-                iconBg="rgba(56, 189, 248, 0.1)"
-             />
-              <HabitCard
-                title="Sleep 8h"
-                description="Tonight"
-                icon="moon"
-                iconColor="#64748B"
-                iconBg="rgba(100, 116, 139, 0.1)"
-             />
-           </View>
+                key={habit.id}
+                id={habit.id}
+                title={habit.title}
+                description={habit.subtitle}
+                icon={habit.icon}
+                iconColor={habit.iconColor}
+                iconBg={habit.iconBg}
+                isCompleted={habit.completions?.some(
+                  (c: any) => c.date === today
+                )}
+                onRefresh={fetchData}
+              />
+            ))}
+          </View>
         </View>
       </ApScrollView>
 
       <TouchableOpacity
-         onPress={() => router.push("/manage-habits")}
-         className="absolute bottom-10 right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg z-50"
-         style={{
-            backgroundColor: ApTheme.Color.primary,
-            shadowColor: ApTheme.Color.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 5
-         }}
+        onPress={() => router.push("/manage-habits")}
+        className="absolute bottom-10 right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg z-50"
+        style={{
+          backgroundColor: ApTheme.Color.primary,
+          shadowColor: ApTheme.Color.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 5,
+        }}
       >
         <Ionicons name="add" size={30} color="#000" />
       </TouchableOpacity>

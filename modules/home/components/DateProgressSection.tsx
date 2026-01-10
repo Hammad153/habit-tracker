@@ -3,14 +3,16 @@ import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
-import { formatDate } from "@/utils/date";
+import { formatDate } from "@/src/utils/date";
 
 interface DateProgressSectionProps {
   percentage: number;
 }
 
-const DateProgressSection: React.FC<DateProgressSectionProps> = ({ percentage }) => {
-    const { dayName, month, day } = formatDate(new Date());
+const DateProgressSection: React.FC<DateProgressSectionProps> = ({
+  percentage,
+}) => {
+  const { dayName, month, day } = formatDate(new Date());
 
   const size = 60;
   const strokeWidth = 6;
@@ -23,10 +25,10 @@ const DateProgressSection: React.FC<DateProgressSectionProps> = ({ percentage })
       <View>
         <View className="flex-row items-baseline mb-1">
           <ApText size="3xl" font="bold" color="white" className="mr-2">
-             {dayName},{" "}
+            {dayName},{" "}
           </ApText>
           <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
-             {month} {day}
+            {month} {day}
           </ApText>
         </View>
         <ApText size="sm" color={ApTheme.Color.textSecondary}>

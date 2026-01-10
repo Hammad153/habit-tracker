@@ -4,19 +4,24 @@ import { Ionicons } from "@expo/vector-icons";
 import ToggleButton from "@/components/buttons/SwitchButton";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
+import { habitApi } from "@/libs/api";
 
 interface HabitCardProps {
+  id: string;
   title: string;
   subtitle?: string;
-  description?: string; 
-  icon?: string; 
+  description?: string;
+  icon?: string;
   iconColor?: string;
   iconBg?: string;
   customIconNode?: React.ReactNode;
   variant?: "toggle" | "edit" | "restore";
+  isCompleted?: boolean;
+  onRefresh?: () => void;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
+  id,
   title,
   subtitle,
   description,
@@ -25,11 +30,20 @@ const HabitCard: React.FC<HabitCardProps> = ({
   iconBg = "rgba(255,255,255,0.1)",
   customIconNode,
   variant = "toggle",
+  isCompleted = false,
+  onRefresh,
 }) => {
-  const [isDone, setIsDone] = useState(false);
-
   const subText = subtitle || description;
-  const toggleHabit = () => setIsDone((prev) => !prev);
+
+  const toggleHabit = async () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      await habitApi.toggle(id, today);
+      onRefresh?.();
+    } catch (error) {
+      console.error("Failed to toggle habit:", error);
+    }
+  };
 
   return (
     <Pressable onPress={variant === "toggle" ? toggleHabit : undefined}>
@@ -43,14 +57,24 @@ const HabitCard: React.FC<HabitCardProps> = ({
       >
         {variant === "edit" && (
           <View className="mr-4">
-            <Ionicons name="grid" size={20} color={ApTheme.Color.textMuted} style={{ opacity: 0.5 }} />
+            <Ionicons
+              name="grid"
+              size={20}
+              color={ApTheme.Color.textMuted}
+              style={{ opacity: 0.5 }}
+            />
           </View>
         )}
-         {variant === "restore" && (
-           <View className="mr-4 ml-1">
-             <Ionicons name="lock-closed" size={20} color={ApTheme.Color.textMuted} style={{ opacity: 0.5 }} />
-           </View>
-         )}
+        {variant === "restore" && (
+          <View className="mr-4 ml-1">
+            <Ionicons
+              name="lock-closed"
+              size={20}
+              color={ApTheme.Color.textMuted}
+              style={{ opacity: 0.5 }}
+            />
+          </View>
+        )}
 
         <View
           className="w-12 h-12 rounded-2xl items-center justify-center"
@@ -63,8 +87,15 @@ const HabitCard: React.FC<HabitCardProps> = ({
           )}
         </View>
 
-        <View className={`ml-4 flex-1 ${variant === "restore" ? "opacity-50" : ""}`}>
-          <ApText size="lg" font="semibold" color={variant === "restore" ? ApTheme.Color.textMuted : "white"} numberOfLines={1}>
+        <View
+          className={`ml-4 flex-1 ${variant === "restore" ? "opacity-50" : ""}`}
+        >
+          <ApText
+            size="lg"
+            font="semibold"
+            color={variant === "restore" ? ApTheme.Color.textMuted : "white"}
+            numberOfLines={1}
+          >
             {title}
           </ApText>
           {subText && (
@@ -72,7 +103,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
               size="xs"
               font="medium"
               color={
-                isDone && variant === "toggle"
+                isCompleted && variant === "toggle"
                   ? ApTheme.Color.primary
                   : ApTheme.Color.textSecondary
               }
@@ -84,16 +115,20 @@ const HabitCard: React.FC<HabitCardProps> = ({
 
         <View className="ml-2">
           {variant === "toggle" && (
-            <ToggleButton isEnabled={isDone} onToggle={toggleHabit} />
+            <ToggleButton isEnabled={isCompleted} onToggle={toggleHabit} />
           )}
           {variant === "edit" && (
             <TouchableOpacity hitSlop={10}>
-              <Ionicons name="pencil" size={20} color={ApTheme.Color.textMuted} />
+              <Ionicons
+                name="pencil"
+                size={20}
+                color={ApTheme.Color.textMuted}
+              />
             </TouchableOpacity>
           )}
           {variant === "restore" && (
-             <TouchableOpacity>
-               <ApText size="sm" color={ApTheme.Color.textMuted}>
+            <TouchableOpacity>
+              <ApText size="sm" color={ApTheme.Color.textMuted}>
                 Restore
               </ApText>
             </TouchableOpacity>

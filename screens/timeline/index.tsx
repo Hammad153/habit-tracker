@@ -5,13 +5,33 @@ import { ApText } from "../../components/Text";
 import { ApTheme } from "../../components/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { TIMELINE_DATA } from "./data";
+import { timelineApi } from "@/libs/api";
+import { useState, useEffect } from "react";
 
 export default function TimelineScreen() {
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await timelineApi.get();
+        setTimeline(res.data);
+        // Stats could be derived or fetched separately
+      } catch (error) {
+        console.error("Failed to fetch timeline:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
-      edges={['top', 'left', 'right']}
+      edges={["top", "left", "right"]}
     >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -57,7 +77,11 @@ export default function TimelineScreen() {
             <ApText size="3xl" font="bold" color="white">
               12
             </ApText>
-            <ApText size="xs" color={ApTheme.Color.textSecondary} style={{ letterSpacing: 0.5 }}>
+            <ApText
+              size="xs"
+              color={ApTheme.Color.textSecondary}
+              style={{ letterSpacing: 0.5 }}
+            >
               DAY STREAK
             </ApText>
           </View>
@@ -77,7 +101,11 @@ export default function TimelineScreen() {
             <ApText size="3xl" font="bold" color="white">
               85%
             </ApText>
-            <ApText size="xs" color={ApTheme.Color.textSecondary} style={{ letterSpacing: 0.5 }}>
+            <ApText
+              size="xs"
+              color={ApTheme.Color.textSecondary}
+              style={{ letterSpacing: 0.5 }}
+            >
               COMPLETION
             </ApText>
           </View>
@@ -85,8 +113,8 @@ export default function TimelineScreen() {
 
         {/* Timeline */}
         <View className="px-5">
-          {TIMELINE_DATA.map((item, index) => {
-            const isLast = index === TIMELINE_DATA.length - 1;
+          {timeline.map((item, index) => {
+            const isLast = index === timeline.length - 1;
             return (
               <View key={item.id} className="flex-row relative">
                 {/* Vertical Line */}
@@ -96,28 +124,20 @@ export default function TimelineScreen() {
                     style={{ backgroundColor: ApTheme.Color.surfaceBorder }}
                   />
                 )}
-                {/* Active Line Highlight - rough approx for first item */}
-                {index === 0 && (
-                   <View
-                    className="absolute left-[24px] top-[50px] h-[50px] w-[2px] z-10"
-                    style={{ backgroundColor: ApTheme.Color.primary }}
-                  />
-                )}
 
                 {/* Icon Column */}
                 <View className="mr-4 items-center z-10">
                   <View
-                    className={`w-12 h-12 rounded-full items-center justify-center border-4 ${
-                      item.isCurrent ? "border-green-500/30" : "border-transparent"
-                    }`}
+                    className={`w-12 h-12 rounded-full items-center justify-center border-4 border-transparent`}
                     style={{
-                      backgroundColor: item.isCurrent ? ApTheme.Color.primary : ApTheme.Color.surfaceInactive,
+                      backgroundColor:
+                        item.habit?.iconBg || ApTheme.Color.surfaceInactive,
                     }}
                   >
                     <Ionicons
-                      name={(item.icon as any)}
+                      name={(item.habit?.icon as any) || "checkmark"}
                       size={24}
-                      color={item.isCurrent ? "#000" : item.iconColor}
+                      color={item.habit?.iconColor || "#fff"}
                     />
                   </View>
                 </View>
@@ -132,37 +152,24 @@ export default function TimelineScreen() {
                 >
                   <View className="flex-row justify-between items-start mb-1">
                     <ApText size="lg" font="bold" color="white">
-                      {item.cardTitle}
+                      {item.habit?.title}
                     </ApText>
-                    {item.percentage && (
-                      <View className="px-2 py-1 rounded bg-black/30">
-                        <ApText size="xs" font="bold" color={ApTheme.Color.textMuted}>
-                          {item.percentage}
-                        </ApText>
-                      </View>
-                    )}
-                     {!item.percentage && (
-                      <ApText size="xs" color={ApTheme.Color.textMuted} className="pt-1">
-                        {item.date}
-                      </ApText>
-                    )}
+                    <ApText
+                      size="xs"
+                      color={ApTheme.Color.textMuted}
+                      className="pt-1"
+                    >
+                      {item.date}
+                    </ApText>
                   </View>
 
                   <ApText
                     size="base"
-                    color={item.isCurrent ? ApTheme.Color.primary : ApTheme.Color.textSecondary}
+                    color={ApTheme.Color.textSecondary}
                     className="mb-3"
                   >
-                    {item.cardSubtitle}
+                    {item.habit?.subtitle || "Habit completed"}
                   </ApText>
-
-                  {/* Tiny progress bars mock */}
-                  <View className="flex-row space-x-2">
-                    <View className="h-1.5 flex-1 rounded-full bg-green-500" />
-                    <View className="h-1.5 flex-1 rounded-full bg-green-500" />
-                    <View className={`h-1.5 flex-1 rounded-full ${item.isCurrent ? 'bg-green-500' : 'bg-white/10'}`} />
-                     <View className={`h-1.5 flex-1 rounded-full ${item.isCurrent ? 'bg-green-500' : 'bg-green-500'}`} />
-                  </View>
                 </View>
               </View>
             );
@@ -185,9 +192,9 @@ export default function TimelineScreen() {
       >
         <Ionicons name="calendar" size={24} color="#000" />
       </TouchableOpacity>
-      
+
       {/* Back Button (since it's not a tab) */}
-       <TouchableOpacity
+      <TouchableOpacity
         className="absolute bottom-8 left-5 w-12 h-12 rounded-full items-center justify-center bg-surface border border-white/10"
         onPress={() => router.back()}
       >

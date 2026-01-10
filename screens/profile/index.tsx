@@ -8,8 +8,27 @@ import { ApText } from "@/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import StatCard from "./components/StatCard";
 import SettingsItem from "./components/SettingsItem";
+import { profileApi } from "@/libs/api";
+import { useState, useEffect } from "react";
 
 export default function ProfileScreen() {
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await profileApi.get();
+        setProfile(res.data);
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   return (
     <ApContainer>
       <View className="h-screen bg-background">
@@ -17,7 +36,11 @@ export default function ProfileScreen() {
           title="Profile"
           right={
             <TouchableOpacity>
-              <Ionicons name="settings" size={24} color={ApTheme.Color.primary} />
+              <Ionicons
+                name="settings"
+                size={24}
+                color={ApTheme.Color.primary}
+              />
             </TouchableOpacity>
           }
         />
@@ -31,9 +54,9 @@ export default function ProfileScreen() {
                   borderColor: ApTheme.Color.primary,
                 }}
               >
-                 <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
-                    HI
-                 </ApText>
+                <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
+                  HI
+                </ApText>
               </View>
               <View className="absolute bottom-0 right-0 bg-primary rounded-full p-1 border-2 border-background">
                 <Ionicons name="camera" size={12} color="black" />
@@ -41,48 +64,82 @@ export default function ProfileScreen() {
             </View>
 
             <ApText size="xl" font="bold" color="white" className="mt-4">
-              Hammad Ismail
+              {profile?.name || "User"}
             </ApText>
             <ApText size="sm" color={ApTheme.Color.textMuted}>
-              hammadismail2005@gmail.com
+              {profile?.email || ""}
             </ApText>
 
-             <TouchableOpacity className="mt-3 px-4 py-1.5 rounded-full border border-surface">
-                <ApText size="xs" color={ApTheme.Color.primary} font="bold">
-                    Edit Profile
-                </ApText>
-             </TouchableOpacity>
+            <TouchableOpacity className="mt-3 px-4 py-1.5 rounded-full border border-surface">
+              <ApText size="xs" color={ApTheme.Color.primary} font="bold">
+                Edit Profile
+              </ApText>
+            </TouchableOpacity>
           </View>
 
           {/* Stats Section */}
           <View className="px-5 mb-8">
             <View className="flex-row">
-              <StatCard label="Total Habits" value="142" />
-              <StatCard label="Longest Streak" value="32" />
-              <StatCard label="Compilation" value="85%" />
+              <StatCard
+                label="Total Habits"
+                value={profile?.totalHabits?.toString() || "0"}
+              />
+              <StatCard
+                label="Longest Streak"
+                value={profile?.longestStreak?.toString() || "0"}
+              />
+              <StatCard
+                label="Completion"
+                value={`${Math.round((profile?.completionRate || 0) * 100)}%`}
+              />
             </View>
           </View>
 
           {/* Settings Section */}
           <View className="px-5 mb-20 space-y-2">
-            <ApText size="sm" font="bold" color={ApTheme.Color.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
+            <ApText
+              size="sm"
+              font="bold"
+              color={ApTheme.Color.textMuted}
+              className="mb-2 uppercase"
+              style={{ letterSpacing: 1 }}
+            >
               General
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
-                <SettingsItem label="Notifications" icon="notifications" value="On" />
-                <SettingsItem label="Sounds & Haptics" icon="musical-note" />
-                <SettingsItem label="Appearance" icon="color-palette" value="Dark" />
+              <SettingsItem
+                label="Notifications"
+                icon="notifications"
+                value="On"
+              />
+              <SettingsItem label="Sounds & Haptics" icon="musical-note" />
+              <SettingsItem
+                label="Appearance"
+                icon="color-palette"
+                value="Dark"
+              />
             </View>
 
-            <ApText size="sm" font="bold" color={ApTheme.Color.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
+            <ApText
+              size="sm"
+              font="bold"
+              color={ApTheme.Color.textMuted}
+              className="mb-2 uppercase"
+              style={{ letterSpacing: 1 }}
+            >
               Account
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
-                <SettingsItem label="Subscription" icon="star" value="Pro" />
-                <SettingsItem label="Change Password" icon="lock-closed" />
+              <SettingsItem label="Subscription" icon="star" value="Pro" />
+              <SettingsItem label="Change Password" icon="lock-closed" />
             </View>
 
-            <SettingsItem label="Log Out" icon="log-out" isDestructive onPress={() => {}} />
+            <SettingsItem
+              label="Log Out"
+              icon="log-out"
+              isDestructive
+              onPress={() => {}}
+            />
           </View>
         </ApScrollView>
       </View>
