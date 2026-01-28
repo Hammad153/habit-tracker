@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image, TouchableOpacity, Alert } from "react-native";
 import { ApScrollView } from "@/components/ScrollView";
 import ApContainer from "@/components/containers/container";
 import { ApHeader } from "@/components/Header";
@@ -10,8 +10,11 @@ import StatCard from "./components/StatCard";
 import SettingsItem from "./components/SettingsItem";
 import { profileApi } from "@/libs/api";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/src/components/AuthContext";
+import { authService } from "@/src/services/auth.service";
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +31,25 @@ export default function ProfileScreen() {
     };
     fetchProfile();
   }, []);
+
+  const handleLogout = () => {
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await authService.logout();
+            await signOut();
+          } catch (e) {
+            // Even if backend logout fails, we sign out locally
+            await signOut();
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <ApContainer>
@@ -54,9 +76,16 @@ export default function ProfileScreen() {
                   borderColor: ApTheme.Color.primary,
                 }}
               >
-                <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
-                  HI
-                </ApText>
+                {user?.avatar ? (
+                  <Image
+                    source={{ uri: user.avatar }}
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
+                    {user?.name?.substring(0, 2).toUpperCase() || "HI"}
+                  </ApText>
+                )}
               </View>
               <View className="absolute bottom-0 right-0 bg-primary rounded-full p-1 border-2 border-background">
                 <Ionicons name="camera" size={12} color="black" />
@@ -64,10 +93,10 @@ export default function ProfileScreen() {
             </View>
 
             <ApText size="xl" font="bold" color="white" className="mt-4">
-              {profile?.name || "User"}
+              {user?.name || profile?.name || "User"}
             </ApText>
             <ApText size="sm" color={ApTheme.Color.textMuted}>
-              {profile?.email || ""}
+              {user?.email || profile?.email || ""}
             </ApText>
 
             <TouchableOpacity className="mt-3 px-4 py-1.5 rounded-full border border-surface">
@@ -138,7 +167,7 @@ export default function ProfileScreen() {
               label="Log Out"
               icon="log-out"
               isDestructive
-              onPress={() => {}}
+              onPress={handleLogout}
             />
           </View>
         </ApScrollView>
