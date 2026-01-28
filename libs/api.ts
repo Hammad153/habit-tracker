@@ -12,6 +12,7 @@ export const api = axios.create({
 export const habitApi = {
   getAll: (userId: string = "default-user") =>
     api.get(`/habit?userId=${userId}`),
+  getById: (id: string) => api.get(`/habit/${id}`),
   create: (data: any) =>
     api.post("/habit", { ...data, userId: "default-user" }),
   update: (id: string, data: any) => api.patch(`/habit/${id}`, data),

@@ -1,36 +1,26 @@
 import React from "react";
-import { View, Image, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { ApScrollView } from "@/components/ScrollView";
 import ApContainer from "@/components/containers/container";
 import { ApHeader } from "@/components/Header";
 import { ApTheme } from "@/components/theme";
 import { ApText } from "@/components/Text";
 import { Ionicons } from "@expo/vector-icons";
-import StatCard from "./components/StatCard";
-import SettingsItem from "./components/SettingsItem";
-import { profileApi } from "@/libs/api";
-import { useState, useEffect } from "react";
+import StatCard from "../../modules/profiles/components/StatCard";
+import SettingsItem from "../../modules/profiles/components/SettingsItem";
 import { useAuth } from "@/src/components/AuthContext";
 import { authService } from "@/src/services/auth.service";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await profileApi.get();
-        setProfile(res.data);
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+  const { data: profile, isLoading } = useProfile();
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -49,6 +39,16 @@ export default function ProfileScreen() {
       },
     ]);
   };
+
+  if (isLoading) {
+    return (
+      <ApContainer>
+        <View className="flex-1 justify-center items-center bg-background">
+          <ActivityIndicator color={ApTheme.Color.primary} />
+        </View>
+      </ApContainer>
+    );
+  }
 
   return (
     <ApContainer>
@@ -75,14 +75,16 @@ export default function ProfileScreen() {
                   borderColor: ApTheme.Color.primary,
                 }}
               >
-                {user?.avatar ? (
+                {user?.avatar || profile?.avatar ? (
                   <Image
-                    source={{ uri: user.avatar }}
+                    source={{ uri: user?.avatar || profile?.avatar }}
                     className="w-full h-full"
                   />
                 ) : (
                   <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
-                    {user?.name?.substring(0, 2).toUpperCase() || "HI"}
+                    {(user?.name || profile?.name)
+                      ?.substring(0, 2)
+                      .toUpperCase() || "HI"}
                   </ApText>
                 )}
               </View>

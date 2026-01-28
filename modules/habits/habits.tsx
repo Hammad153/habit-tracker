@@ -1,32 +1,21 @@
-import { View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import HabitCard from "./components/HabitCard";
-import React, { useState, useEffect } from "react";
-import { habitApi } from "@/libs/api";
+import React from "react";
+import { useHabits } from "@/hooks/useHabits";
+import { ApTheme } from "@/components/theme";
 
 const Habits = () => {
-  const [habits, setHabits] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: habits, isLoading, refetch } = useHabits();
 
-  const fetchData = async () => {
-    try {
-      const res = await habitApi.getAll();
-      setHabits(res.data);
-    } catch (error) {
-      console.error("Failed to fetch habits:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  if (isLoading) {
+    return <ActivityIndicator color={ApTheme.Color.primary} />;
+  }
 
   const today = new Date().toISOString().split("T")[0];
 
   return (
     <View>
-      {habits.map((habit) => (
+      {habits?.map((habit) => (
         <HabitCard
           key={habit.id}
           id={habit.id}
@@ -37,7 +26,7 @@ const Habits = () => {
           iconBg={habit.iconBg}
           isCompleted={habit.completions?.some((c: any) => c.date === today)}
           variant="toggle"
-          onRefresh={fetchData}
+          onRefresh={refetch}
         />
       ))}
     </View>

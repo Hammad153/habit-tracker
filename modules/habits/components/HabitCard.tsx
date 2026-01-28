@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ToggleButton from "@/components/buttons/SwitchButton";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
-import { habitApi } from "@/libs/api";
+import { useToggleHabit } from "@/hooks/useHabits";
 
 interface HabitCardProps {
   id: string;
@@ -33,16 +33,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
   isCompleted = false,
   onRefresh,
 }) => {
+  const { mutate: toggle } = useToggleHabit();
   const subText = subtitle || description;
 
-  const toggleHabit = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      await habitApi.toggle(id, today);
-      onRefresh?.();
-    } catch (error) {
-      console.error("Failed to toggle habit:", error);
-    }
+  const toggleHabit = () => {
+    const today = new Date().toISOString().split("T")[0];
+    toggle({ id, date: today });
   };
 
   return (

@@ -1,32 +1,32 @@
 import React from "react";
-import { View, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "../../components/Text";
 import { ApTheme } from "../../components/theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { timelineApi } from "@/libs/api";
-import { useState, useEffect } from "react";
+import { useTimeline } from "@/hooks/useTimeline";
 
 export default function TimelineScreen() {
-  const [timeline, setTimeline] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: timeline, isLoading } = useTimeline();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await timelineApi.get();
-        setTimeline(res.data);
-        // Stats could be derived or fetched separately
-      } catch (error) {
-        console.error("Failed to fetch timeline:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
+        edges={["top", "left", "right"]}
+      >
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator color={ApTheme.Color.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -113,7 +113,7 @@ export default function TimelineScreen() {
 
         {/* Timeline */}
         <View className="px-5">
-          {timeline.map((item, index) => {
+          {timeline?.map((item, index) => {
             const isLast = index === timeline.length - 1;
             return (
               <View key={item.id} className="flex-row relative">

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApTheme } from "@/components/theme";
@@ -10,32 +10,24 @@ import DailyGoalsCard from "@/modules/home/components/DailyGoalsCard";
 import UserGreeting from "@/modules/home/components/UserGreeting";
 import ApContainer from "@/components/containers/container";
 import HabitCard from "@/modules/habits/components/HabitCard";
-import { habitApi, profileApi } from "@/libs/api";
-import { useState, useEffect } from "react";
+import { useHabits } from "@/hooks/useHabits";
+import { useProfile } from "@/hooks/useProfile";
 
 const Home: React.FC = () => {
-  const [habits, setHabits] = useState<any[]>([]);
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: habits,
+    isLoading: loadingHabits,
+    refetch: refetchHabits,
+  } = useHabits();
+  const { data: profile, isLoading: loadingProfile } = useProfile();
 
-  const fetchData = async () => {
-    try {
-      const [habitsRes, profileRes] = await Promise.all([
-        habitApi.getAll(),
-        profileApi.get(),
-      ]);
-      setHabits(habitsRes.data);
-      setProfile(profileRes.data);
-    } catch (error) {
-      console.error("Failed to fetch home data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  if (loadingHabits || loadingProfile) {
+    return (
+      <ApContainer className="flex-1 justify-center items-center bg-background">
+        <ActivityIndicator color={ApTheme.Color.primary} />
+      </ApContainer>
+    );
+  }
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -48,11 +40,11 @@ const Home: React.FC = () => {
 
         <DailyGoalsCard
           completed={
-            habits.filter((h: any) =>
-              h.completions?.some((c: any) => c.date === today)
-            ).length
+            habits?.filter((h: any) =>
+              h.completions?.some((c: any) => c.date === today),
+            ).length || 0
           }
-          total={habits.length}
+          total={habits?.length || 0}
         />
 
         <View className="mt-6 mb-20">
@@ -65,19 +57,19 @@ const Home: React.FC = () => {
             Your Habits
           </ApText>
           <View>
-            {habits.map((habit) => (
+            {habits?.map((habit) => (
               <HabitCard
                 key={habit.id}
                 id={habit.id}
                 title={habit.title}
-                description={habit.subtitle}
+                subtitle={habit.subtitle}
                 icon={habit.icon}
                 iconColor={habit.iconColor}
                 iconBg={habit.iconBg}
                 isCompleted={habit.completions?.some(
-                  (c: any) => c.date === today
+                  (c: any) => c.date === today,
                 )}
-                onRefresh={fetchData}
+                onRefresh={refetchHabits}
               />
             ))}
           </View>
