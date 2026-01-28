@@ -1,5 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApScrollView } from "@/components/ScrollView";
 import Habits from "@/modules/habits/habits";
@@ -15,11 +16,16 @@ export default function HabitScreen() {
         <ApHeader
           title="Habits"
           right={
-            <TouchableOpacity onPress={() => router.push("/manage-habits")}>
-              <ApText color={ApTheme.Color.primary} font="bold">
-                Manage
-              </ApText>
-            </TouchableOpacity>
+            <View className="flex-row items-center space-x-4">
+              <TouchableOpacity onPress={() => router.push("/create-habit")}>
+                <Ionicons name="add" size={28} color={ApTheme.Color.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/manage-habits")}>
+                <ApText color={ApTheme.Color.primary} font="bold">
+                  Manage
+                </ApText>
+              </TouchableOpacity>
+            </View>
           }
         />
         <ApScrollView showsVerticalScrollIndicator={false}>

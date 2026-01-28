@@ -77,7 +77,7 @@ const Home: React.FC = () => {
       </ApScrollView>
 
       <TouchableOpacity
-        onPress={() => router.push("/manage-habits")}
+        onPress={() => router.push("/create-habit")}
         className="absolute bottom-10 right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg z-50"
         style={{
           backgroundColor: ApTheme.Color.primary,

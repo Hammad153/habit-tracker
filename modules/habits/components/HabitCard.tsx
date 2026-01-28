@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ToggleButton from "@/components/buttons/SwitchButton";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
-import { useToggleHabit } from "@/hooks/useHabits";
+import { useToggleHabit, useUpdateHabit } from "@/hooks/useHabits";
 
 interface HabitCardProps {
   id: string;
@@ -34,11 +34,16 @@ const HabitCard: React.FC<HabitCardProps> = ({
   onRefresh,
 }) => {
   const { mutate: toggle } = useToggleHabit();
+  const { mutate: update } = useUpdateHabit();
   const subText = subtitle || description;
 
   const toggleHabit = () => {
     const today = new Date().toISOString().split("T")[0];
     toggle({ id, date: today });
+  };
+
+  const handleRestore = () => {
+    update({ id, data: { isArchived: false } });
   };
 
   return (
@@ -123,7 +128,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
             </TouchableOpacity>
           )}
           {variant === "restore" && (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleRestore}>
               <ApText size="sm" color={ApTheme.Color.textMuted}>
                 Restore
               </ApText>

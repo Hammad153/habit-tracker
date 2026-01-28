@@ -7,6 +7,7 @@ import { ApText } from "../../../components/Text";
 import { ApTheme } from "../../../components/theme";
 import { useCreateHabit } from "@/hooks/useHabits";
 import { useState } from "react";
+import { toast } from "@/src/services/toast";
 
 export default function CreateHabitScreen() {
   const [name, setName] = useState("");
@@ -14,7 +15,10 @@ export default function CreateHabitScreen() {
   const { mutate: createHabit, isPending: loading } = useCreateHabit();
 
   const handleCreate = () => {
-    if (!name) return;
+    if (!name.trim()) {
+      toast.show("Please enter a habit name", "error");
+      return;
+    }
     createHabit(
       {
         title: name,
@@ -25,6 +29,7 @@ export default function CreateHabitScreen() {
       {
         onSuccess: () => {
           router.back();
+          toast.show("Habit created successfully", "success");
         },
       },
     );
