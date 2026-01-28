@@ -43,7 +43,6 @@ export default function ProfileScreen() {
             await authService.logout();
             await signOut();
           } catch (e) {
-            // Even if backend logout fails, we sign out locally
             await signOut();
           }
         },

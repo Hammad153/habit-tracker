@@ -3,6 +3,7 @@ import { View, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
+import { useAuth } from "@/src/components/AuthContext";
 
 interface Props {
   userName?: string;
@@ -30,6 +31,7 @@ const UserGreeting: React.FC<Props> = ({
   avatarUri,
   onNotificationPress,
 }) => {
+  const user = useAuth();
   return (
     <View className="flex-row items-center justify-between w-full py-2">
       <View className="flex-row items-center">
@@ -45,7 +47,7 @@ const UserGreeting: React.FC<Props> = ({
             />
           ) : (
             <ApText size="xl" font="bold" color={ApTheme.Color.white}>
-              {getInitials(userName)}
+              {getInitials(user?.user?.name || "USER")}
             </ApText>
           )}
         </View>
@@ -60,7 +62,7 @@ const UserGreeting: React.FC<Props> = ({
             {getGreeting()}
           </ApText>
           <ApText size="base" font="bold" color={ApTheme.Color.white}>
-            {userName}
+            {user?.user?.name || "USER"}
           </ApText>
         </View>
       </View>
