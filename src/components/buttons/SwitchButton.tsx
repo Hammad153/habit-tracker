@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { View, Pressable, Animated, StyleSheet } from "react-native";
-import { ApTheme } from "@/components/theme";
+import { ApTheme } from "@/src/components/theme";
 
 interface ToggleProps {
   isEnabled: boolean;
@@ -15,8 +15,8 @@ const TRACK_PADDING = 3;
 const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
   const translateX = useRef(
     new Animated.Value(
-      isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0
-    )
+      isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0,
+    ),
   ).current;
 
   useEffect(() => {

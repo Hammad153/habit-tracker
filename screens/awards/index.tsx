@@ -1,10 +1,10 @@
 import React from "react";
-import ApContainer from "@/components/containers/container";
-import { ApHeader } from "@/components/Header";
+import ApContainer from "@/src/components/containers/container";
+import { ApHeader } from "@/src/components/Header";
 import { View, ActivityIndicator } from "react-native";
-import { ApScrollView } from "@/components/ScrollView";
-import { ApTheme } from "@/components/theme";
-import { ApText } from "@/components/Text";
+import { ApScrollView } from "@/src/components/ScrollView";
+import { ApTheme } from "@/src/components/theme";
+import { ApText } from "@/src/components/Text";
 import LevelProgress from "./components/LevelProgress";
 import BadgeCard from "./components/BadgeCard";
 import { useAwards, useUserBadges } from "@/hooks/useAwards";

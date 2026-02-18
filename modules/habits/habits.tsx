@@ -2,7 +2,7 @@ import { View, ActivityIndicator } from "react-native";
 import HabitCard from "./components/HabitCard";
 import React from "react";
 import { useHabits } from "@/hooks/useHabits";
-import { ApTheme } from "@/components/theme";
+import { ApTheme } from "@/src/components/theme";
 
 const Habits = () => {
   const { data: habits, isLoading, refetch } = useHabits();

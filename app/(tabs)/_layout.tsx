@@ -1,10 +1,10 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ApTheme } from "@/components/theme";
+import { ApTheme } from "@/src/components/theme";
 import "../../global.css";
-import { View, Text } from "react-native";
-import { ApText } from "@/components/Text";
+import { View } from "react-native";
+import { ApText } from "@/src/components/Text";
 
 export default function TabLayout() {
   return (

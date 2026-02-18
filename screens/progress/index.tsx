@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
-import { ApHeader } from "@/components/Header";
-import ApContainer from "@/components/containers/container";
-import { ApScrollView } from "@/components/ScrollView";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApHeader } from "@/src/components/Header";
+import ApContainer from "@/src/components/containers/container";
+import { ApScrollView } from "@/src/components/ScrollView";
+import { ApText } from "@/src/components/Text";
 import TimeFilterTabs from "../../modules/progress/components/TimeFilterTabs";
 import OverviewStats from "../../modules/progress/components/OverviewStats";
 import CompletionChart from "../../modules/progress/components/CompletionChart";
@@ -14,6 +13,8 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useHabits } from "@/hooks/useHabits";
 import { Habit } from "@/src/types";
+import { ApTheme } from "@/src/components/theme";
+import { PERIOD_DAYS } from "@/src/constants";
 
 function getCompletionPercentage(habit: Habit, periodDays: number): number {
   const completions = habit.completions ?? [];
@@ -30,12 +31,6 @@ function getCompletionPercentage(habit: Habit, periodDays: number): number {
 
   return Math.round((completedInPeriod / periodDays) * 100);
 }
-
-const PERIOD_DAYS: Record<string, number> = {
-  Week: 7,
-  Month: 30,
-  Year: 365,
-};
 
 export default function ProgressScreen() {
   const [selectedTab, setSelectedTab] = useState<"Week" | "Month" | "Year">(

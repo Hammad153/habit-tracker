@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 import { useAuth } from "@/src/components/AuthContext";
 
 interface Props {

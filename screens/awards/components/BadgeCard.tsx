@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 
 interface BadgeCardProps {
   title: string;
@@ -29,9 +29,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
             ? ApTheme.Color.surfaceInactive
             : "rgba(19, 236, 91, 0.1)",
           borderWidth: 1,
-          borderColor: isLocked
-            ? "transparent"
-            : ApTheme.Color.primary,
+          borderColor: isLocked ? "transparent" : ApTheme.Color.primary,
         }}
       >
         <Ionicons

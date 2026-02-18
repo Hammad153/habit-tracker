@@ -2,9 +2,9 @@ import React, { useMemo } from "react";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
 import { Completion } from "@/src/types";
+import { ApTheme } from "@/src/components/theme";
 
 interface HabitBreakdownCardProps {
   title: string;

@@ -2,7 +2,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "../global.css";
-import { ApSafeAreaView } from "@/components/SafeAreaView";
+import { ApSafeAreaView } from "@/src/components/SafeAreaView";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/src/components/AuthContext";
 

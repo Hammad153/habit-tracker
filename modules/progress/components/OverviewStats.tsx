@@ -1,8 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 
 const OverviewStats = () => {
   return (
@@ -54,7 +54,9 @@ const OverviewStats = () => {
             <ApText size="xs" color={ApTheme.Color.textMuted}>
               Total Done
             </ApText>
-            <ApText size="xs" color="transparent">.</ApText>
+            <ApText size="xs" color="transparent">
+              .
+            </ApText>
           </View>
         </View>
         <View className="flex-row items-baseline">

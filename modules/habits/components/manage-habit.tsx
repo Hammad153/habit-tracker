@@ -8,10 +8,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApText } from "../../../components/Text";
-import { ApTheme } from "../../../components/theme";
+import { ApText } from "../../../src/components/Text";
 import HabitCard from "@/modules/habits/components/HabitCard";
 import { useHabits } from "@/hooks/useHabits";
+import { ApTheme } from "@/src/components/theme";
 
 export default function ManageHabitsScreen() {
   const { data: habits, isLoading } = useHabits();

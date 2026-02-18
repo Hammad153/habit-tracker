@@ -2,12 +2,12 @@ import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApScrollView } from "@/components/ScrollView";
+import { ApScrollView } from "@/src/components/ScrollView";
 import Habits from "@/modules/habits/habits";
-import ApContainer from "@/components/containers/container";
-import { ApHeader } from "@/components/Header";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import ApContainer from "@/src/components/containers/container";
+import { ApHeader } from "@/src/components/Header";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 
 export default function HabitScreen() {
   return (

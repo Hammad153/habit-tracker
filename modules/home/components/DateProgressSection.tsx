@@ -1,8 +1,8 @@
 import React from "react";
 import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 import { formatDate } from "@/src/utils/date";
 
 interface DateProgressSectionProps {

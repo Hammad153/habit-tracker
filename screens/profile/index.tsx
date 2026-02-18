@@ -6,11 +6,11 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { ApScrollView } from "@/components/ScrollView";
-import ApContainer from "@/components/containers/container";
-import { ApHeader } from "@/components/Header";
-import { ApTheme } from "@/components/theme";
-import { ApText } from "@/components/Text";
+import { ApScrollView } from "@/src/components/ScrollView";
+import ApContainer from "@/src/components/containers/container";
+import { ApHeader } from "@/src/components/Header";
+import { ApTheme } from "@/src/components/theme";
+import { ApText } from "@/src/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import StatCard from "../../modules/profiles/components/StatCard";
 import SettingsItem from "../../modules/profiles/components/SettingsItem";

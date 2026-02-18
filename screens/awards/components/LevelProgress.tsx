@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 
 interface LevelProgressProps {
   level: number;

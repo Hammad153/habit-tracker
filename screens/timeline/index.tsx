@@ -6,11 +6,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "../../components/Text";
-import { ApTheme } from "../../components/theme";
+import { ApText } from "../../src/components/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTimeline } from "@/hooks/useTimeline";
+import { ApTheme } from "@/src/components/theme";
 
 export default function TimelineScreen() {
   const { data: timeline, isLoading } = useTimeline();

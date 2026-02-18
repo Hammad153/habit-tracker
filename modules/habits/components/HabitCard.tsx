@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ToggleButton from "@/components/buttons/SwitchButton";
-import { ApText } from "@/components/Text";
-import { ApTheme } from "@/components/theme";
+import { ApText } from "@/src/components/Text";
+import { ApTheme } from "@/src/components/theme";
 import { useToggleHabit, useUpdateHabit } from "@/hooks/useHabits";
 
 interface HabitCardProps {
