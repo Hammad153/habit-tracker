@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Pressable } from "react-native";
+import React, { useState, useMemo } from "react";
+import { View, Pressable, ActivityIndicator } from "react-native";
 import { ApHeader } from "@/components/Header";
 import ApContainer from "@/components/containers/container";
 import { ApScrollView } from "@/components/ScrollView";
@@ -12,41 +12,53 @@ import HabitBreakdownCard from "../../modules/progress/components/HabitBreakdown
 import ActivityHeatmap from "../../modules/progress/components/ActivityHeatmap";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useHabits } from "@/hooks/useHabits";
+import { Habit } from "@/src/types";
 
-const HABIT_BREAKDOWN_DATA = [
-  {
-    id: 1,
-    title: "Read Quran",
-    category: "Consistency",
-    percentage: 80,
-    icon: "book",
-    iconBg: "rgba(56, 189, 248, 0.2)",
-    iconColor: "#38BDF8",
-  },
-  {
-    id: 2,
-    title: "Morning Jog",
-    category: "Consistency",
-    percentage: 65,
-    icon: "walk",
-    iconBg: "rgba(168, 85, 247, 0.2)",
-    iconColor: "#A855F7",
-  },
-  {
-    id: 3,
-    title: "Drink Water",
-    category: "Consistency",
-    percentage: 100,
-    icon: "water",
-    iconBg: "rgba(16, 185, 129, 0.2)",
-    iconColor: "#10B981",
-  },
-];
+function getCompletionPercentage(habit: Habit, periodDays: number): number {
+  const completions = habit.completions ?? [];
+  if (completions.length === 0) return 0;
+
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() - periodDays + 1);
+  const startStr = startDate.toISOString().split("T")[0];
+
+  const completedInPeriod = completions.filter(
+    (c) => c.date >= startStr && c.status,
+  ).length;
+
+  return Math.round((completedInPeriod / periodDays) * 100);
+}
+
+const PERIOD_DAYS: Record<string, number> = {
+  Week: 7,
+  Month: 30,
+  Year: 365,
+};
 
 export default function ProgressScreen() {
   const [selectedTab, setSelectedTab] = useState<"Week" | "Month" | "Year">(
     "Week",
   );
+  const { data: habits, isLoading } = useHabits();
+
+  const habitBreakdown = useMemo(() => {
+    if (!habits) return [];
+    const days = PERIOD_DAYS[selectedTab];
+    return habits
+      .filter((h) => !h.isArchived)
+      .map((habit) => ({
+        id: habit.id,
+        title: habit.title,
+        category: habit.category ?? "General",
+        percentage: getCompletionPercentage(habit, days),
+        icon: habit.icon,
+        iconBg: habit.iconBg,
+        iconColor: habit.iconColor,
+        completions: habit.completions ?? [],
+      }));
+  }, [habits, selectedTab]);
 
   return (
     <ApContainer>
@@ -81,17 +93,34 @@ export default function ProgressScreen() {
               >
                 Habit Breakdown
               </ApText>
-              {HABIT_BREAKDOWN_DATA.map((habit) => (
-                <HabitBreakdownCard
-                  key={habit.id}
-                  title={habit.title}
-                  category={habit.category}
-                  percentage={habit.percentage}
-                  icon={habit.icon}
-                  iconBg={habit.iconBg}
-                  iconColor={habit.iconColor}
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color={ApTheme.Color.primary}
+                  className="my-4"
                 />
-              ))}
+              ) : habitBreakdown.length === 0 ? (
+                <ApText
+                  size="sm"
+                  color={ApTheme.Color.textMuted}
+                  className="text-center my-4"
+                >
+                  No habits yet. Create one to see your breakdown!
+                </ApText>
+              ) : (
+                habitBreakdown.map((habit) => (
+                  <HabitBreakdownCard
+                    key={habit.id}
+                    title={habit.title}
+                    category={habit.category}
+                    percentage={habit.percentage}
+                    icon={habit.icon}
+                    iconBg={habit.iconBg}
+                    iconColor={habit.iconColor}
+                    completions={habit.completions}
+                  />
+                ))
+              )}
             </View>
             <View className="mb-20">
               <ApText

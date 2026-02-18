@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import { ApText } from "@/components/Text";
 import { ApTheme } from "@/components/theme";
+import { Completion } from "@/src/types";
 
 interface HabitBreakdownCardProps {
   title: string;
@@ -12,6 +13,7 @@ interface HabitBreakdownCardProps {
   icon: string;
   iconBg: string;
   iconColor: string;
+  completions?: Completion[];
 }
 
 const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
@@ -21,12 +23,23 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
   icon,
   iconBg,
   iconColor,
+  completions = [],
 }) => {
   const size = 32;
   const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const last7DaysCompleted = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - i));
+      const dateStr = date.toISOString().split("T")[0];
+      return completions.some((c) => c.date === dateStr && c.status);
+    });
+  }, [completions]);
 
   return (
     <View
@@ -56,46 +69,48 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
         </View>
 
         <View className="flex-row items-center">
-            <ApText size="lg" font="bold" color="white" className="mr-2">
-                {percentage}%
-            </ApText>
-            <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              <Circle
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                stroke={ApTheme.Color.surfaceInactive}
-                strokeWidth={strokeWidth}
-                fill="transparent"
-              />
-              <Circle
-                 cx={size / 2}
-                 cy={size / 2}
-                 r={radius}
-                 stroke={ApTheme.Color.primary}
-                 strokeWidth={strokeWidth}
-                 strokeDasharray={`${circumference} ${circumference}`}
-                 strokeDashoffset={strokeDashoffset}
-                 strokeLinecap="round"
-                 fill="transparent"
-                 transform={`rotate(-90 ${size / 2} ${size / 2})`}
-               />
-            </Svg>
+          <ApText size="lg" font="bold" color="white" className="mr-2">
+            {percentage}%
+          </ApText>
+          <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke={ApTheme.Color.surfaceInactive}
+              strokeWidth={strokeWidth}
+              fill="transparent"
+            />
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke={ApTheme.Color.primary}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${circumference} ${circumference}`}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+            />
+          </Svg>
         </View>
       </View>
 
-      {/* Mock Consistency Bars */}
+      {/* Consistency Bars — last 7 days */}
       <View className="flex-row justify-between h-2 gap-1 px-1">
-         {[...Array(7)].map((_, i) => (
-             <View
-                key={i}
-                className="flex-1 rounded-full"
-                style={{
-                    backgroundColor: Math.random() > 0.3 ? ApTheme.Color.primary : ApTheme.Color.surfaceInactive,
-                    opacity: 0.8
-                }}
-             />
-         ))}
+        {last7DaysCompleted.map((completed, i) => (
+          <View
+            key={i}
+            className="flex-1 rounded-full"
+            style={{
+              backgroundColor: completed
+                ? ApTheme.Color.primary
+                : ApTheme.Color.surfaceInactive,
+              opacity: 0.8,
+            }}
+          />
+        ))}
       </View>
     </View>
   );
