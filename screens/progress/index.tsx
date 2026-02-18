@@ -102,7 +102,9 @@ export default function ProgressScreen() {
               >
                 Monthly Activity
               </ApText>
-              <ActivityHeatmap />
+              <View className="mb-20">
+                <ActivityHeatmap />
+              </View>
             </View>
           </View>
         </ApScrollView>
