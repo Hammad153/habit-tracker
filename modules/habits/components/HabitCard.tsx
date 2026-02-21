@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import ToggleButton from "@/components/buttons/SwitchButton";
 import { ApText } from "@/src/components/Text";
 import { ApTheme } from "@/src/components/theme";
 import { useToggleHabit, useUpdateHabit } from "@/hooks/useHabits";
+import ToggleButton from "@/src/components/buttons/SwitchButton";
 
 interface HabitCardProps {
   id: string;
@@ -54,8 +54,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
           backgroundColor: ApTheme.Color.surface,
           borderColor: ApTheme.Color.surfaceBorder,
           borderWidth: 1,
-        }}
-      >
+        }}>
         {variant === "edit" && (
           <View className="mr-4">
             <Ionicons
@@ -79,8 +78,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
 
         <View
           className="w-12 h-12 rounded-2xl items-center justify-center"
-          style={{ backgroundColor: iconBg }}
-        >
+          style={{ backgroundColor: iconBg }}>
           {customIconNode ? (
             customIconNode
           ) : (
@@ -89,14 +87,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
         </View>
 
         <View
-          className={`ml-4 flex-1 ${variant === "restore" ? "opacity-50" : ""}`}
-        >
+          className={`ml-4 flex-1 ${variant === "restore" ? "opacity-50" : ""}`}>
           <ApText
             size="lg"
             font="semibold"
             color={variant === "restore" ? ApTheme.Color.textMuted : "white"}
-            numberOfLines={1}
-          >
+            numberOfLines={1}>
             {title}
           </ApText>
           {subText && (
@@ -107,8 +103,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 isCompleted && variant === "toggle"
                   ? ApTheme.Color.primary
                   : ApTheme.Color.textSecondary
-              }
-            >
+              }>
               {subText}
             </ApText>
           )}
