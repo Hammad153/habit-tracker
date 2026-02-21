@@ -19,8 +19,7 @@ export default function ManageHabitsScreen() {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
-      >
+        style={{ flex: 1, backgroundColor: ApTheme.Color.background }}>
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator color={ApTheme.Color.primary} />
         </View>
@@ -33,30 +32,24 @@ export default function ManageHabitsScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
-    >
-      <View className="flex-row items-center justify-between px-5 py-4">
-        <TouchableOpacity onPress={() => router.back()}>
-          <ApText size="base" color={ApTheme.Color.textMuted}>
-            Cancel
-          </ApText>
-        </TouchableOpacity>
-        <ApText size="xl" font="bold" color="white">
+      style={{
+        flex: 1,
+        marginTop: -60,
+        backgroundColor: ApTheme.Color.background,
+      }}>
+      {/* Centered Header */}
+      <View className="flex-row items-center justify-center px-5 py-4">
+        <ApText size="lg" font="bold" color="white">
           Manage Habits
         </ApText>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ApText size="base" font="bold" color={ApTheme.Color.primary}>
-            Done
-          </ApText>
-        </TouchableOpacity>
       </View>
 
       <ScrollView
+        showsVerticalScrollIndicator={false}
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 120 }}
-      >
+        contentContainerStyle={{ paddingBottom: 120 }}>
         <View className="px-5 mt-4">
-          <View className="flex-row justify-between items-center mb-4">
+          <View className="flex-row justify-between items-center mb-6">
             <ApText size="2xl" font="bold" color="white">
               Your Routine
             </ApText>
@@ -64,13 +57,12 @@ export default function ManageHabitsScreen() {
               size="xs"
               font="bold"
               color={ApTheme.Color.textMuted}
-              style={{ letterSpacing: 1 }}
-            >
+              style={{ letterSpacing: 1 }}>
               {activeHabits.length} ACTIVE
             </ApText>
           </View>
 
-          <View className="space-y-3">
+          <View className="space-y-4">
             {activeHabits.map((habit) => (
               <HabitCard
                 id={habit.id}
@@ -83,12 +75,27 @@ export default function ManageHabitsScreen() {
                 variant="edit"
               />
             ))}
+            {activeHabits.length === 0 && (
+              <View className="bg-surface rounded-2xl p-8 items-center border border-white/5">
+                <Ionicons
+                  name="leaf-outline"
+                  size={48}
+                  color={ApTheme.Color.textMuted}
+                />
+                <ApText
+                  size="base"
+                  color={ApTheme.Color.textMuted}
+                  className="mt-4 text-center">
+                  No active habits yet. Start by adding one!
+                </ApText>
+              </View>
+            )}
           </View>
         </View>
 
         {archivedHabits.length > 0 && (
-          <View className="px-5 mt-8">
-            <View className="flex-row justify-between items-center mb-4">
+          <View className="px-5 mt-10">
+            <View className="flex-row justify-between items-center mb-6">
               <ApText size="xl" font="bold" color={ApTheme.Color.textMuted}>
                 Archived
               </ApText>
@@ -96,13 +103,12 @@ export default function ManageHabitsScreen() {
                 size="xs"
                 font="bold"
                 color={ApTheme.Color.textMuted}
-                style={{ letterSpacing: 1 }}
-              >
+                style={{ letterSpacing: 1 }}>
                 {archivedHabits.length} HIDDEN
               </ApText>
             </View>
 
-            <View className="space-y-3">
+            <View className="space-y-4">
               {archivedHabits.map((habit) => (
                 <HabitCard
                   id={habit.id}
@@ -120,22 +126,25 @@ export default function ManageHabitsScreen() {
         )}
       </ScrollView>
 
-      <View className="absolute bottom-10 left-5 right-5">
+      {/* Consistent Bottom Navigation */}
+      <View className="flex-row items-center justify-between px-5 py-6 bg-background border-t border-white/5">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="w-2/5 h-12 border flex items-center justify-center border-green-500/30 rounded-full px-5 py-2">
+          <ApText size="base" font="semibold" color={ApTheme.Color.textMuted}>
+            Cancel
+          </ApText>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => router.push("/create-habit" as any)}
-          className="w-full py-4 rounded-2xl items-center flex-row justify-center space-x-2 shadow-lg"
-          style={{
-            backgroundColor: ApTheme.Color.primary,
-            shadowColor: ApTheme.Color.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-          }}
-        >
-          <Ionicons name="add" size={24} color="#000" />
-          <ApText size="lg" font="bold" color="#000">
-            Add New Habit
-          </ApText>
+          className="w-2/5 h-12 flex items-center justify-center rounded-full bg-primary">
+          <View className="flex-row items-center">
+            <Ionicons name="add" size={20} color="#FFFFFF" />
+            <ApText size="sm" font="bold" color="#FFFFFF" className="ml-1">
+              Add New
+            </ApText>
+          </View>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

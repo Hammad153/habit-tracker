@@ -23,7 +23,6 @@ export const HABIT_ICONS = [
   "moon",
   "create",
   "walk",
-  "meditation",
   "restaurant",
   "bed",
   "code",
