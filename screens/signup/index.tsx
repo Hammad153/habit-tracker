@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Link, useRouter } from "expo-router";
+import { toast } from "@/src/services/toast";
 import {
   View,
   Text,
@@ -8,15 +10,15 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
 import { authService } from "@/src/services/auth.service";
 import { useAuth } from "@/src/components/AuthContext";
-import { toast } from "@/src/services/toast";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function SignupScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
@@ -50,12 +52,10 @@ export default function SignupScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[#121212]"
-    >
+      className="flex-1 bg-[#121212]">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        className="px-6 pt-20"
-      >
+        className="px-6 pt-20">
         <View className="mb-12">
           <Text className="text-4xl font-bold text-white mb-2">
             Create Account
@@ -92,21 +92,31 @@ export default function SignupScreen() {
 
           <View className="mt-4">
             <Text className="text-white mb-2 font-medium">Password</Text>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Create a password"
-              placeholderTextColor="#666"
-              secureTextEntry
-              className="bg-[#1E1E1E] text-white px-4 py-4 rounded-xl border border-[#333]"
-            />
+            <View className="relative">
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Create a password"
+                placeholderTextColor="#666"
+                secureTextEntry={!showPassword}
+                className="bg-[#1E1E1E] text-white px-4 py-4 rounded-xl border border-[#333]"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2">
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color="#999"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity
             onPress={handleSignup}
             disabled={loading}
-            className={`bg-[#6C38FF] py-4 rounded-xl mt-8 items-center ${loading ? "opacity-70" : ""}`}
-          >
+            className={`bg-[#6C38FF] py-4 rounded-xl mt-8 items-center ${loading ? "opacity-70" : ""}`}>
             <Text className="text-white font-bold text-lg">
               {loading ? "Creating Account..." : "Create Account"}
             </Text>
