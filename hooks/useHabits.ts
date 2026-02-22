@@ -2,6 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { habitApi } from "@/libs/api";
 import { Habit } from "@/src/types";
 
+interface HabitParams {
+  id: string;
+  date: string;
+  value?: number;
+}
+
 export const useHabits = (userId: string = "default-user") => {
   return useQuery({
     queryKey: ["habits", userId],
@@ -58,8 +64,8 @@ export const useDeleteHabit = () => {
 export const useToggleHabit = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, date }: { id: string; date: string }) =>
-      habitApi.toggle(id, date),
+    mutationFn: ({ id, date, value }: HabitParams) =>
+      habitApi.toggle(id, date, value),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] });
       queryClient.invalidateQueries({ queryKey: ["timeline"] });

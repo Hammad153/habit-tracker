@@ -17,8 +17,8 @@ export const habitApi = {
     api.post("/habit", { ...data, userId: "default-user" }),
   update: (id: string, data: any) => api.patch(`/habit/${id}`, data),
   delete: (id: string) => api.delete(`/habit/${id}`),
-  toggle: (id: string, date: string) =>
-    api.post(`/habit/${id}/toggle`, { date }),
+  toggle: (id: string, date: string, value?: number) =>
+    api.post(`/habit/${id}/toggle`, { date, value }),
 };
 
 export const profileApi = {

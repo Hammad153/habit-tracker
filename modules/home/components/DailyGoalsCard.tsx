@@ -1,7 +1,8 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Dimensions } from "react-native";
 import { ApText } from "@/src/components/Text";
 import { ApTheme } from "@/src/components/theme";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 interface DailyGoalsCardProps {
   completed: number;
@@ -13,6 +14,15 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
   total,
 }) => {
   const percentage = total > 0 ? (completed / total) * 100 : 0;
+  const confettiRef = useRef<any>(null);
+  const prevPercentageRef = useRef(percentage);
+
+  useEffect(() => {
+    if (percentage === 100 && prevPercentageRef.current < 100) {
+      confettiRef.current?.start();
+    }
+    prevPercentageRef.current = percentage;
+  }, [percentage]);
 
   return (
     <View
@@ -21,8 +31,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
         backgroundColor: ApTheme.Color.surface,
         borderWidth: 1,
         borderColor: ApTheme.Color.surfaceBorder,
-      }}
-    >
+      }}>
       <View className="flex-row items-center justify-between mb-3">
         <ApText size="base" font="semibold" color={ApTheme.Color.textPrimary}>
           Daily Goal
@@ -34,8 +43,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
 
       <View
         className="h-3 w-full rounded-full overflow-hidden"
-        style={{ backgroundColor: ApTheme.Color.progressBg }}
-      >
+        style={{ backgroundColor: ApTheme.Color.progressBg }}>
         <View
           className="h-full rounded-full"
           style={{
@@ -48,6 +56,14 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
           }}
         />
       </View>
+
+      <ConfettiCannon
+        count={200}
+        origin={{ x: Dimensions.get("window").width / 2, y: -20 }}
+        autoStart={false}
+        ref={confettiRef}
+        fadeOut={true}
+      />
     </View>
   );
 };

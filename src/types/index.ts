@@ -13,6 +13,7 @@ export interface User {
   longestStreak: number;
   totalHabits: number;
   completionRate: number;
+  perfectDays: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +29,8 @@ export interface Habit {
   category?: string;
   frequency?: string;
   priority?: string;
+  goal: number;
+  unit?: string;
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
@@ -39,6 +42,7 @@ export interface Completion {
   habitId: string;
   date: string;
   status: boolean;
+  value: number;
   habit?: Habit;
 }
 

@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import { ApTheme } from "@/src/components/theme";
 import { ApText } from "@/src/components/Text";
 import { ApScrollView } from "@/src/components/ScrollView";
-import DateProgressSection from "@/modules/home/components/DateProgressSection";
+import HorizontalDatePicker from "@/modules/home/components/HorizontalDatePicker";
 import DailyGoalsCard from "@/modules/home/components/DailyGoalsCard";
 import UserGreeting from "@/modules/home/components/UserGreeting";
 import ApContainer from "@/src/components/containers/container";
@@ -14,6 +14,7 @@ import { useHabits } from "@/hooks/useHabits";
 import { useProfile } from "@/hooks/useProfile";
 
 const Home: React.FC = () => {
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
   const {
     data: habits,
     isLoading: loadingHabits,
@@ -29,19 +30,22 @@ const Home: React.FC = () => {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const dateStr = selectedDate.toISOString().split("T")[0];
 
   return (
     <ApContainer className="h-screen bg-background relative">
       <ApScrollView showsVerticalScrollIndicator={false}>
         <UserGreeting userName={profile?.name || "User"} />
 
-        <DateProgressSection percentage={profile?.completionRate || 0} />
+        <HorizontalDatePicker
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
 
         <DailyGoalsCard
           completed={
             habits?.filter((h: any) =>
-              h.completions?.some((c: any) => c.date === today),
+              h.completions?.some((c: any) => c.date === dateStr && c.status),
             ).length || 0
           }
           total={habits?.length || 0}
@@ -52,8 +56,7 @@ const Home: React.FC = () => {
             size="xl"
             font="bold"
             color={ApTheme.Color.white}
-            className="mb-2"
-          >
+            className="mb-2">
             Your Habits
           </ApText>
           <View>
@@ -67,9 +70,15 @@ const Home: React.FC = () => {
                 iconColor={habit.iconColor}
                 iconBg={habit.iconBg}
                 isCompleted={habit.completions?.some(
-                  (c: any) => c.date === today,
+                  (c: any) => c.date === dateStr && c.status,
                 )}
+                selectedDate={dateStr}
                 onRefresh={refetchHabits}
+                goal={habit.goal}
+                value={
+                  habit.completions?.find((c: any) => c.date === dateStr)
+                    ?.value || 0
+                }
               />
             ))}
           </View>
@@ -86,8 +95,7 @@ const Home: React.FC = () => {
           shadowOpacity: 0.3,
           shadowRadius: 8,
           elevation: 5,
-        }}
-      >
+        }}>
         <Ionicons name="add" size={30} color="#000" />
       </TouchableOpacity>
     </ApContainer>
