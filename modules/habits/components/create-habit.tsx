@@ -178,10 +178,10 @@ export default function CreateHabitScreen() {
         </View>
       </ScrollView>
 
-      <View className="flex-row items-center justify-between px-5 py-4">
+      <View className="flex-row items-center gap-2 justify-between px-4 py-4">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-2/5 h-12 border flex items-center justify-center border-green-500/30 rounded-full px-5 py-2">
+          className="w-3/6 h-12 border flex items-center justify-center border-green-500/30 rounded-full px-5 py-2">
           <ApText size="base" color={ApTheme.Color.textMuted}>
             Cancel
           </ApText>
@@ -190,7 +190,7 @@ export default function CreateHabitScreen() {
         <TouchableOpacity
           onPress={handleCreate}
           disabled={loading}
-          className={`w-2/5 h-12 flex items-center justify-center rounded-full ${
+          className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
             loading ? "bg-gray-200" : "bg-primary"
           }`}>
           <ApText
