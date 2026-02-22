@@ -16,14 +16,30 @@ export default function HabitScreen() {
         <ApHeader
           title="Habits"
           right={
-            <View className="flex-row items-center space-x-4">
+            <View className="flex-row items-center gap-4">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>
-                <Ionicons name="add" size={28} color={ApTheme.Color.primary} />
+                <View className="flex-row items-center gap-2 bg-primary/10 p-2 rounded-full">
+                  <Ionicons
+                    name="add"
+                    size={20}
+                    color={ApTheme.Color.primary}
+                  />
+                  <ApText color={ApTheme.Color.primary} font="bold">
+                    Add
+                  </ApText>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push("/manage-habits")}>
-                <ApText color={ApTheme.Color.primary} font="bold">
-                  Manage
-                </ApText>
+                <View className="flex-row items-center gap-2 bg-primary/10 p-2 rounded-full">
+                  <Ionicons
+                    name="settings"
+                    size={20}
+                    color={ApTheme.Color.primary}
+                  />
+                  <ApText color={ApTheme.Color.primary} font="bold">
+                    Manage
+                  </ApText>
+                </View>
               </TouchableOpacity>
             </View>
           }
