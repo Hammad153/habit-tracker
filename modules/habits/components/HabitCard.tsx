@@ -169,18 +169,40 @@ const HabitCard: React.FC<HabitCardProps> = ({
 
           <View className="ml-2">
             {variant === "toggle" && (
-              <View className="items-end">
-                <ApText
-                  size="xs"
-                  font="bold"
-                  color={isCompleted ? ApTheme.Color.primary : "white"}>
-                  {value}/{goal}
-                </ApText>
-                {unit && (
-                  <ApText size="xs" color={ApTheme.Color.textMuted}>
-                    {unit}
+              <View className="flex-row items-center">
+                <View className="items-end mr-3">
+                  <ApText
+                    size="xs"
+                    font="bold"
+                    color={isCompleted ? ApTheme.Color.primary : "white"}>
+                    {value}/{goal}
                   </ApText>
-                )}
+                  {unit && (
+                    <ApText size="xs" color={ApTheme.Color.textMuted}>
+                      {unit}
+                    </ApText>
+                  )}
+                </View>
+                <TouchableOpacity
+                  onPress={handleToggle}
+                  onLongPress={handleLongPress}
+                  delayLongPress={500}
+                  className="w-10 h-10 rounded-xl items-center justify-center"
+                  style={{
+                    backgroundColor: isCompleted
+                      ? ApTheme.Color.primary
+                      : "rgba(255,255,255,0.05)",
+                    borderWidth: 1,
+                    borderColor: isCompleted
+                      ? ApTheme.Color.primary
+                      : ApTheme.Color.surfaceBorder,
+                  }}>
+                  <Ionicons
+                    name={isCompleted ? "checkmark" : "add"}
+                    size={22}
+                    color={isCompleted ? "#000" : ApTheme.Color.primary}
+                  />
+                </TouchableOpacity>
               </View>
             )}
             {variant === "edit" && (
