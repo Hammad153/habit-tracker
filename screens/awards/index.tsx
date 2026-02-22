@@ -8,12 +8,14 @@ import { ApText } from "@/src/components/Text";
 import LevelProgress from "./components/LevelProgress";
 import BadgeCard from "./components/BadgeCard";
 import { useAwards, useUserBadges } from "@/hooks/useAwards";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function AwardsScreen() {
   const { data: allBadges, isLoading: loadingAwards } = useAwards();
   const { data: userBadges, isLoading: loadingUserBadges } = useUserBadges();
+  const { data: profile, isLoading: loadingProfile } = useProfile();
 
-  if (loadingAwards || loadingUserBadges) {
+  if (loadingAwards || loadingUserBadges || loadingProfile) {
     return (
       <ApContainer>
         <View className="flex-1 justify-center items-center bg-background">
@@ -44,15 +46,18 @@ export default function AwardsScreen() {
       <View className="h-screen bg-background">
         <ApHeader title="Awards" />
         <ApScrollView showsVerticalScrollIndicator={false}>
-          <LevelProgress level={5} currentXp={750} neededXp={1000} />
+          <LevelProgress
+            level={profile?.level || 3}
+            currentXp={profile?.xp || 250}
+            neededXp={100}
+          />
 
           <View className="px-5 mt-4">
             <ApText
               size="xl"
               font="bold"
               color={ApTheme.Color.white}
-              className="mb-4"
-            >
+              className="mb-4">
               Streak Badges
             </ApText>
             <View className="flex-row flex-wrap justify-between">
@@ -74,8 +79,7 @@ export default function AwardsScreen() {
               size="xl"
               font="bold"
               color={ApTheme.Color.white}
-              className="mb-4"
-            >
+              className="mb-4">
               Milestones
             </ApText>
             <View className="flex-row flex-wrap justify-between">
