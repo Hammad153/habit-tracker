@@ -191,7 +191,7 @@ export default function CreateHabitScreen() {
           onPress={handleCreate}
           disabled={loading}
           className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
-            loading ? "bg-gray-200" : "bg-primary"
+            loading ? "bg-gray-200" : "bg-background"
           }`}>
           <ApText
             size="sm"
