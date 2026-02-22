@@ -12,7 +12,8 @@ import ActivityHeatmap from "../../modules/progress/components/ActivityHeatmap";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useHabits } from "@/hooks/useHabits";
-import { Habit } from "@/src/types";
+import { useProfile } from "@/hooks/useProfile";
+import { Habit, Completion } from "@/src/types";
 import { ApTheme } from "@/src/components/theme";
 import { PERIOD_DAYS } from "@/src/constants";
 
@@ -36,7 +37,8 @@ export default function ProgressScreen() {
   const [selectedTab, setSelectedTab] = useState<"Week" | "Month" | "Year">(
     "Week",
   );
-  const { data: habits, isLoading } = useHabits();
+  const { data: habits, isLoading: isLoadingHabits } = useHabits();
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
 
   const habitBreakdown = useMemo(() => {
     if (!habits) return [];
@@ -54,6 +56,13 @@ export default function ProgressScreen() {
         completions: habit.completions ?? [],
       }));
   }, [habits, selectedTab]);
+
+  const allCompletions = useMemo(() => {
+    if (!habits) return [];
+    return habits.flatMap((h) => h.completions ?? []);
+  }, [habits]);
+
+  const isLoading = isLoadingHabits || isLoadingProfile;
 
   return (
     <ApContainer>
@@ -76,16 +85,21 @@ export default function ProgressScreen() {
               selectedTab={selectedTab}
               onSelectTab={setSelectedTab}
             />
-            <OverviewStats />
-            <CompletionChart />
+            <OverviewStats
+              streak={profile?.currentStreak ?? 0}
+              totalDone={allCompletions.filter((c) => c.status).length}
+            />
+            <CompletionChart
+              habits={habits ?? []}
+              periodDays={PERIOD_DAYS[selectedTab]}
+            />
 
             <View className="mt-4 mb-6">
               <ApText
                 size="xl"
                 font="bold"
                 color={ApTheme.Color.white}
-                className="mb-4"
-              >
+                className="mb-4">
                 Habit Breakdown
               </ApText>
               {isLoading ? (
@@ -98,8 +112,7 @@ export default function ProgressScreen() {
                 <ApText
                   size="sm"
                   color={ApTheme.Color.textMuted}
-                  className="text-center my-4"
-                >
+                  className="text-center my-4">
                   No habits yet. Create one to see your breakdown!
                 </ApText>
               ) : (
@@ -122,12 +135,11 @@ export default function ProgressScreen() {
                 size="xl"
                 font="bold"
                 color={ApTheme.Color.white}
-                className="mb-4"
-              >
+                className="mb-4">
                 Monthly Activity
               </ApText>
               <View className="mb-20">
-                <ActivityHeatmap />
+                <ActivityHeatmap completions={allCompletions} />
               </View>
             </View>
           </View>

@@ -13,6 +13,7 @@ export interface User {
   longestStreak: number;
   totalHabits: number;
   completionRate: number;
+  currentStreak: number;
   perfectDays: number;
   createdAt: string;
   updatedAt: string;

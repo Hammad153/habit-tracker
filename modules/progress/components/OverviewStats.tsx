@@ -4,7 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
 import { ApTheme } from "@/src/components/theme";
 
-const OverviewStats = () => {
+interface OverviewStatsProps {
+  streak: number;
+  totalDone: number;
+}
+
+const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
   return (
     <View className="flex-row gap-4 mb-6">
       <View
@@ -13,8 +18,7 @@ const OverviewStats = () => {
           backgroundColor: ApTheme.Color.surface,
           borderColor: ApTheme.Color.surfaceBorder,
           borderWidth: 1,
-        }}
-      >
+        }}>
         <View className="flex-row items-center mb-3">
           <View className="w-8 h-8 rounded-full bg-orange-500/20 items-center justify-center mr-2">
             <Ionicons name="flame" size={16} color="#F97316" />
@@ -30,7 +34,7 @@ const OverviewStats = () => {
         </View>
         <View className="flex-row items-baseline">
           <ApText size="3xl" font="bold" color="white" className="mr-1">
-            12
+            {streak}
           </ApText>
           <ApText size="sm" color={ApTheme.Color.textMuted}>
             Days
@@ -44,8 +48,7 @@ const OverviewStats = () => {
           backgroundColor: ApTheme.Color.surface,
           borderColor: ApTheme.Color.surfaceBorder,
           borderWidth: 1,
-        }}
-      >
+        }}>
         <View className="flex-row items-center mb-3">
           <View className="w-8 h-8 rounded-full bg-green-500/20 items-center justify-center mr-2">
             <Ionicons name="checkmark-circle" size={16} color="#22C55E" />
@@ -61,10 +64,10 @@ const OverviewStats = () => {
         </View>
         <View className="flex-row items-baseline">
           <ApText size="3xl" font="bold" color="white" className="mr-1">
-            45
+            {totalDone}
           </ApText>
           <ApText size="sm" color={ApTheme.Color.textMuted}>
-            Habits
+            Log{totalDone !== 1 ? "s" : ""}
           </ApText>
         </View>
       </View>
