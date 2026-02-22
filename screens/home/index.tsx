@@ -35,7 +35,15 @@ const Home: React.FC = () => {
   return (
     <ApContainer className="h-screen bg-background relative">
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <UserGreeting userName={profile?.name || "User"} />
+        <View
+          style={{
+            backgroundColor: ApTheme.Color.surfaceGlow,
+            borderRadius: 20,
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}>
+          <UserGreeting userName={profile?.name || "User"} />
+        </View>
 
         <HorizontalDatePicker
           selectedDate={selectedDate}
