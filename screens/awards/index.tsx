@@ -47,9 +47,9 @@ export default function AwardsScreen() {
         <ApHeader title="Awards" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <LevelProgress
-            level={profile?.level || 3}
-            currentXp={profile?.xp || 250}
-            neededXp={100}
+            level={profile?.level || 1}
+            currentXp={profile?.xp || 0}
+            neededXp={profile?.neededXp || 100}
           />
 
           <View className="px-5 mt-4">

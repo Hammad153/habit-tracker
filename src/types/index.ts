@@ -14,6 +14,7 @@ export interface User {
   totalHabits: number;
   completionRate: number;
   currentStreak: number;
+  neededXp: number;
   perfectDays: number;
   createdAt: string;
   updatedAt: string;
