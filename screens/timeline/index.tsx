@@ -24,7 +24,8 @@ export default function TimelineScreen() {
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
-        edges={["top", "left", "right"]}>
+        edges={["top", "left", "right"]}
+      >
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator color={ApTheme.Color.primary} />
         </View>
@@ -40,10 +41,12 @@ export default function TimelineScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
-      edges={["top", "left", "right"]}>
+      edges={["top", "left", "right"]}
+    >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <View className="px-5 pt-2 pb-6 flex-row justify-between items-start">
           <View>
             <ApText size="2xl" font="bold" color="white" className="mb-1">
@@ -52,13 +55,15 @@ export default function TimelineScreen() {
             <ApText
               size="sm"
               font="bold"
-              style={{ color: ApTheme.Color.primary, letterSpacing: 1 }}>
+              style={{ color: ApTheme.Color.primary, letterSpacing: 1 }}
+            >
               {currentMonthYear}
             </ApText>
           </View>
           <TouchableOpacity
             className="flex-row items-center px-4 py-2 rounded-full border border-white/20"
-            style={{ backgroundColor: "rgba(255,255,255,0.05)" }}>
+            style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+          >
             <Ionicons name="filter" size={16} color={ApTheme.Color.primary} />
             <ApText size="sm" color="white" className="ml-2">
               Filter
@@ -74,7 +79,8 @@ export default function TimelineScreen() {
               backgroundColor: ApTheme.Color.surface,
               borderColor: ApTheme.Color.surfaceBorder,
               borderWidth: 1,
-            }}>
+            }}
+          >
             <View className="w-10 h-10 rounded-full items-center justify-center bg-green-500/20 mb-1">
               <Ionicons name="flame" size={20} color={ApTheme.Color.primary} />
             </View>
@@ -84,7 +90,8 @@ export default function TimelineScreen() {
             <ApText
               size="xs"
               color={ApTheme.Color.textSecondary}
-              style={{ letterSpacing: 0.5 }}>
+              style={{ letterSpacing: 0.5 }}
+            >
               DAY STREAK
             </ApText>
           </View>
@@ -96,7 +103,8 @@ export default function TimelineScreen() {
               backgroundColor: ApTheme.Color.surface,
               borderColor: ApTheme.Color.surfaceBorder,
               borderWidth: 1,
-            }}>
+            }}
+          >
             <View className="w-10 h-10 rounded-full items-center justify-center bg-blue-500/20 mb-1">
               <Ionicons name="pie-chart" size={20} color="#38BDF8" />
             </View>
@@ -106,7 +114,8 @@ export default function TimelineScreen() {
             <ApText
               size="xs"
               color={ApTheme.Color.textSecondary}
-              style={{ letterSpacing: 0.5 }}>
+              style={{ letterSpacing: 0.5 }}
+            >
               COMPLETION
             </ApText>
           </View>
@@ -140,7 +149,8 @@ export default function TimelineScreen() {
                       style={{
                         backgroundColor:
                           item.habit?.iconBg || ApTheme.Color.surfaceInactive,
-                      }}>
+                      }}
+                    >
                       <Ionicons
                         name={(item.habit?.icon as any) || "checkmark"}
                         size={24}
@@ -155,7 +165,8 @@ export default function TimelineScreen() {
                     style={{
                       backgroundColor: ApTheme.Color.surface,
                       borderColor: ApTheme.Color.surfaceBorder,
-                    }}>
+                    }}
+                  >
                     <View className="flex-row justify-between items-start mb-1">
                       <ApText size="lg" font="bold" color="white">
                         {item.habit?.title}
@@ -163,7 +174,8 @@ export default function TimelineScreen() {
                       <ApText
                         size="xs"
                         color={ApTheme.Color.textMuted}
-                        className="pt-1">
+                        className="pt-1"
+                      >
                         {format(new Date(item.date), "MMM d, yyyy")}
                       </ApText>
                     </View>
@@ -171,7 +183,8 @@ export default function TimelineScreen() {
                     <ApText
                       size="base"
                       color={ApTheme.Color.textSecondary}
-                      className="mb-3">
+                      className="mb-3"
+                    >
                       {item.habit?.subtitle || "Habit completed!"}
                     </ApText>
                   </View>
@@ -193,13 +206,15 @@ export default function TimelineScreen() {
           shadowRadius: 8,
           elevation: 5,
         }}
-        onPress={() => router.push("/")}>
+        onPress={() => router.push("/")}
+      >
         <Ionicons name="home" size={24} color="#000" />
       </TouchableOpacity>
 
       <TouchableOpacity
         className="absolute bottom-8 left-5 w-12 h-12 rounded-full items-center justify-center bg-surface border border-white/10"
-        onPress={() => router.back()}>
+        onPress={() => router.back()}
+      >
         <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
