@@ -13,6 +13,7 @@ import { useTimeline } from "@/hooks/useTimeline";
 import { useProfile } from "@/hooks/useProfile";
 import { ApTheme } from "@/src/components/theme";
 import { format } from "date-fns";
+import { ApHeader } from "@/src/components/Header";
 
 export default function TimelineScreen() {
   const { data: timeline, isLoading: isLoadingTimeline } = useTimeline();
@@ -43,23 +44,10 @@ export default function TimelineScreen() {
       style={{ flex: 1, backgroundColor: ApTheme.Color.background }}
       edges={["top", "left", "right"]}
     >
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View className="px-5 pt-2 pb-6 flex-row justify-between items-start">
-          <View>
-            <ApText size="2xl" font="bold" color="white" className="mb-1">
-              Your Journey
-            </ApText>
-            <ApText
-              size="sm"
-              font="bold"
-              style={{ color: ApTheme.Color.primary, letterSpacing: 1 }}
-            >
-              {currentMonthYear}
-            </ApText>
-          </View>
+      <ApHeader
+        title="Your Journey"
+        subheader={currentMonthYear}
+        right={
           <TouchableOpacity
             className="flex-row items-center px-4 py-2 rounded-full border border-white/20"
             style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
@@ -69,9 +57,13 @@ export default function TimelineScreen() {
               Filter
             </ApText>
           </TouchableOpacity>
-        </View>
-
-        <View className="flex-row px-5 space-x-3 mb-8">
+        }
+      />
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-row px-5 space-x-3 mb-8 mt-4">
           {/* Day Streak Card */}
           <View
             className="flex-1 rounded-2xl p-4 items-center justify-center space-y-2"
