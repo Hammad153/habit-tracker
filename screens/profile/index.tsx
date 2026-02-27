@@ -73,7 +73,8 @@ export default function ProfileScreen() {
                 style={{
                   backgroundColor: ApTheme.Color.surface,
                   borderColor: ApTheme.Color.primary,
-                }}>
+                }}
+              >
                 {user?.avatar || profile?.avatar ? (
                   <Image
                     source={{ uri: user?.avatar || profile?.avatar }}
@@ -107,7 +108,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Stats Section */}
-          <View className="px-5 mb-8">
+          <View className="px-3 mb-8">
             <View className="flex-row">
               <StatCard
                 label="Total Habits"
@@ -125,13 +126,14 @@ export default function ProfileScreen() {
           </View>
 
           {/* Settings Section */}
-          <View className="px-5 mb-20 space-y-2">
+          <View className="px-3 mb-20 space-y-2">
             <ApText
               size="sm"
               font="bold"
               color={ApTheme.Color.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}>
+              style={{ letterSpacing: 1 }}
+            >
               General
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
@@ -153,7 +155,8 @@ export default function ProfileScreen() {
               font="bold"
               color={ApTheme.Color.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}>
+              style={{ letterSpacing: 1 }}
+            >
               Account
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">

@@ -15,7 +15,6 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Generate dates for current week
   const startDate = startOfWeek(new Date(), { weekStartsOn: 1 }); // Start Monday
   const weekDates = Array.from({ length: 7 }).map((_, i) =>
     addDays(startDate, i),
