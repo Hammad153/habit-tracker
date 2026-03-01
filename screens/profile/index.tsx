@@ -17,10 +17,13 @@ import SettingsItem from "../../modules/profiles/components/SettingsItem";
 import { useAuth } from "@/src/components/AuthContext";
 import { authService } from "@/src/services/auth.service";
 import { useProfile } from "@/hooks/useProfile";
+import ChangePasswordModal from "../../modules/profiles/components/ChangePasswordModal";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { data: profile, isLoading } = useProfile();
+  const [isChangePasswordVisible, setIsChangePasswordVisible] =
+    React.useState(false);
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -73,8 +76,7 @@ export default function ProfileScreen() {
                 style={{
                   backgroundColor: ApTheme.Color.surface,
                   borderColor: ApTheme.Color.primary,
-                }}
-              >
+                }}>
                 {user?.avatar || profile?.avatar ? (
                   <Image
                     source={{ uri: user?.avatar || profile?.avatar }}
@@ -132,8 +134,7 @@ export default function ProfileScreen() {
               font="bold"
               color={ApTheme.Color.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}
-            >
+              style={{ letterSpacing: 1 }}>
               General
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
@@ -155,13 +156,16 @@ export default function ProfileScreen() {
               font="bold"
               color={ApTheme.Color.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}
-            >
+              style={{ letterSpacing: 1 }}>
               Account
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
               <SettingsItem label="Subscription" icon="star" value="Pro" />
-              <SettingsItem label="Change Password" icon="lock-closed" />
+              <SettingsItem
+                label="Change Password"
+                icon="lock-closed"
+                onPress={() => setIsChangePasswordVisible(true)}
+              />
             </View>
 
             <SettingsItem
@@ -172,6 +176,11 @@ export default function ProfileScreen() {
             />
           </View>
         </ApScrollView>
+
+        <ChangePasswordModal
+          isVisible={isChangePasswordVisible}
+          onClose={() => setIsChangePasswordVisible(false)}
+        />
       </View>
     </ApContainer>
   );

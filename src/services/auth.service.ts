@@ -23,4 +23,9 @@ export const authService = {
     const response = await axiosInstance.get("/auth/profile");
     return response.data;
   },
+
+  changePassword: async (data: any) => {
+    const response = await axiosInstance.post("/profile/change-password", data);
+    return response.data;
+  },
 };
