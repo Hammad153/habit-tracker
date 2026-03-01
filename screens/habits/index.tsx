@@ -6,7 +6,6 @@ import { ApScrollView } from "@/src/components/ScrollView";
 import Habits from "@/modules/habits/habits";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
-import { ApText } from "@/src/components/Text";
 import { ApTheme } from "@/src/components/theme";
 
 export default function HabitScreen() {
@@ -15,6 +14,8 @@ export default function HabitScreen() {
       <View className="h-screen">
         <ApHeader
           title="Habits"
+          hasBackButton
+          onBack={() => router.back()}
           right={
             <View className="flex-row items-center gap-3">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>

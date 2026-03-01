@@ -18,14 +18,7 @@ export default function AppearanceScreen() {
 
   return (
     <ApContainer className="flex-1">
-      <ApHeader
-        title="Appearance"
-        left={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        }
-      />
+      <ApHeader title="Appearance" hasBackButton onBack={() => router.back()} />
       <ScrollView className="flex-1 px-5 pt-6">
         <ApText
           size="sm"

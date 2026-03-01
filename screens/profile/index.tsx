@@ -62,6 +62,8 @@ export default function ProfileScreen() {
       <View className="h-screen bg-background">
         <ApHeader
           title="Profile"
+          hasBackButton
+          onBack={() => router.back()}
           right={
             <TouchableOpacity>
               <Ionicons name="settings" size={24} color={colors.primary} />

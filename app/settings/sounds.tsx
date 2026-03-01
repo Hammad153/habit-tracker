@@ -41,11 +41,8 @@ export default function SoundsScreen() {
     <ApContainer className="flex-1">
       <ApHeader
         title="Sounds & Haptics"
-        left={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={colors.primary} />
-          </TouchableOpacity>
-        }
+        hasBackButton
+        onBack={() => router.back()}
       />
       <ScrollView className="flex-1 px-5 pt-6">
         <ApText

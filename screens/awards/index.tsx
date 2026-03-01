@@ -9,6 +9,7 @@ import LevelProgress from "./components/LevelProgress";
 import BadgeCard from "./components/BadgeCard";
 import { useAwards, useUserBadges } from "@/hooks/useAwards";
 import { useProfile } from "@/hooks/useProfile";
+import { router } from "expo-router";
 
 export default function AwardsScreen() {
   const { data: allBadges, isLoading: loadingAwards } = useAwards();
@@ -44,7 +45,7 @@ export default function AwardsScreen() {
   return (
     <ApContainer>
       <View className="h-screen bg-background">
-        <ApHeader title="Awards" />
+        <ApHeader title="Awards" hasBackButton onBack={() => router.back()} />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <LevelProgress
             level={profile?.level || 1}
