@@ -2,7 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import { ApText } from "@/src/components/Text";
 import { ApScrollView } from "@/src/components/ScrollView";
 import HorizontalDatePicker from "@/modules/home/components/HorizontalDatePicker";
@@ -15,6 +15,7 @@ import { useProfile } from "@/hooks/useProfile";
 
 const Home: React.FC = () => {
   const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const colors = useTheme();
   const {
     data: habits,
     isLoading: loadingHabits,
@@ -24,8 +25,8 @@ const Home: React.FC = () => {
 
   if (loadingHabits || loadingProfile) {
     return (
-      <ApContainer className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator color={ApTheme.Color.primary} />
+      <ApContainer className="flex-1 justify-center items-center">
+        <ActivityIndicator color={colors.primary} />
       </ApContainer>
     );
   }
@@ -37,7 +38,7 @@ const Home: React.FC = () => {
       <ApScrollView showsVerticalScrollIndicator={false}>
         <View
           style={{
-            backgroundColor: ApTheme.Color.surfaceGlow,
+            backgroundColor: colors.surfaceGlow,
             borderRadius: 20,
             paddingLeft: 20,
             paddingRight: 20,
@@ -63,7 +64,7 @@ const Home: React.FC = () => {
           <ApText
             size="xl"
             font="bold"
-            color={ApTheme.Color.white}
+            color={colors.textPrimary}
             className="mb-2">
             Your Habits
           </ApText>
@@ -97,14 +98,14 @@ const Home: React.FC = () => {
         onPress={() => router.push("/create-habit")}
         className="absolute bottom-10 right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg z-50"
         style={{
-          backgroundColor: ApTheme.Color.primary,
-          shadowColor: ApTheme.Color.primary,
+          backgroundColor: colors.primary,
+          shadowColor: colors.primary,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.3,
           shadowRadius: 8,
           elevation: 5,
         }}>
-        <Ionicons name="add" size={30} color="#000" />
+        <Ionicons name="add" size={30} color={colors.background} />
       </TouchableOpacity>
     </ApContainer>
   );

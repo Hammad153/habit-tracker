@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { View, ScrollView, TouchableOpacity } from "react-native";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface HorizontalDatePickerProps {
   selectedDate: Date;
@@ -14,6 +14,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   onDateChange,
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
+  const colors = useTheme();
 
   const startDate = startOfWeek(new Date(), { weekStartsOn: 1 }); // Start Monday
   const weekDates = Array.from({ length: 7 }).map((_, i) =>
@@ -43,34 +44,34 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
               style={
                 isSelected
                   ? {
-                      backgroundColor: ApTheme.Color.primary,
-                      shadowColor: ApTheme.Color.primary,
+                      backgroundColor: colors.primary,
+                      shadowColor: colors.primary,
                       shadowOffset: { width: 0, height: 4 },
                       shadowOpacity: 0.3,
                       shadowRadius: 8,
                     }
                   : {
-                      backgroundColor: "rgba(255,255,255,0.05)",
+                      backgroundColor: colors.surface,
                     }
               }>
               <ApText
                 size="xs"
                 font="semibold"
-                color={isSelected ? "black" : ApTheme.Color.textMuted}
+                color={isSelected ? colors.background : colors.textMuted}
                 className="uppercase">
                 {dayName}
               </ApText>
               <ApText
                 size="lg"
                 font="bold"
-                color={isSelected ? "black" : "white"}
+                color={isSelected ? colors.background : colors.textPrimary}
                 className="mt-1">
                 {dayNumber}
               </ApText>
               {isToday && !isSelected && (
                 <View
                   className="w-1 h-1 rounded-full absolute bottom-2"
-                  style={{ backgroundColor: ApTheme.Color.primary }}
+                  style={{ backgroundColor: colors.primary }}
                 />
               )}
             </TouchableOpacity>

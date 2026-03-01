@@ -3,14 +3,16 @@ import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
 import { View, ActivityIndicator } from "react-native";
 import { ApScrollView } from "@/src/components/ScrollView";
-import { ApTheme } from "@/src/components/theme";
 import { ApText } from "@/src/components/Text";
 import LevelProgress from "./components/LevelProgress";
 import BadgeCard from "./components/BadgeCard";
 import { useAwards, useUserBadges } from "@/hooks/useAwards";
 import { useProfile } from "@/hooks/useProfile";
+import { useSettings } from "@/src/context/SettingsContext";
+import { router } from "expo-router";
 
 export default function AwardsScreen() {
+  const { colors } = useSettings();
   const { data: allBadges, isLoading: loadingAwards } = useAwards();
   const { data: userBadges, isLoading: loadingUserBadges } = useUserBadges();
   const { data: profile, isLoading: loadingProfile } = useProfile();
@@ -19,7 +21,7 @@ export default function AwardsScreen() {
     return (
       <ApContainer>
         <View className="flex-1 justify-center items-center bg-background">
-          <ActivityIndicator color={ApTheme.Color.primary} />
+          <ActivityIndicator color={colors.primary} />
         </View>
       </ApContainer>
     );
@@ -44,7 +46,7 @@ export default function AwardsScreen() {
   return (
     <ApContainer>
       <View className="h-screen bg-background">
-        <ApHeader title="Awards" />
+        <ApHeader title="Awards" hasBackButton onBack={() => router.back()} />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <LevelProgress
             level={profile?.level || 1}
@@ -56,7 +58,7 @@ export default function AwardsScreen() {
             <ApText
               size="xl"
               font="bold"
-              color={ApTheme.Color.white}
+              color={colors.textPrimary}
               className="mb-4">
               Streak Badges
             </ApText>
@@ -78,7 +80,7 @@ export default function AwardsScreen() {
             <ApText
               size="xl"
               font="bold"
-              color={ApTheme.Color.white}
+              color={colors.textPrimary}
               className="mb-4">
               Milestones
             </ApText>

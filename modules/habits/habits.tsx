@@ -2,13 +2,14 @@ import { View, ActivityIndicator } from "react-native";
 import HabitCard from "./components/HabitCard";
 import React from "react";
 import { useHabits } from "@/hooks/useHabits";
-import { ApTheme } from "@/src/components/theme";
+import { useSettings } from "@/src/context/SettingsContext";
 
 const Habits = () => {
   const { data: habits, isLoading, refetch } = useHabits();
+  const { colors } = useSettings();
 
   if (isLoading) {
-    return <ActivityIndicator color={ApTheme.Color.primary} />;
+    return <ActivityIndicator color={colors.primary} />;
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -25,6 +26,7 @@ const Habits = () => {
           iconColor={habit.iconColor}
           iconBg={habit.iconBg}
           isCompleted={habit.completions?.some((c: any) => c.date === today)}
+          selectedDate={today}
           variant="toggle"
           onRefresh={refetch}
         />

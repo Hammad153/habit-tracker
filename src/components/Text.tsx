@@ -54,9 +54,11 @@ const WEIGHT_MAP: Record<
   extrabold: "800",
 };
 
+import { useTheme } from "../context/SettingsContext";
+
 export const ApText: React.FC<IProps> = ({
   children,
-  color = "#000",
+  color,
   numberOfLines,
   textAlign = "left",
   font = "normal",
@@ -66,6 +68,9 @@ export const ApText: React.FC<IProps> = ({
   style,
   className,
 }) => {
+  const colors = useTheme();
+  const textColor = color || colors.textPrimary;
+
   if (html) {
     return (
       <Text
@@ -73,15 +78,14 @@ export const ApText: React.FC<IProps> = ({
         numberOfLines={numberOfLines}
         style={[
           {
-            color,
+            color: textColor,
             textAlign,
             fontSize: SIZE_MAP[size],
             fontWeight: WEIGHT_MAP[font],
             fontFamily: FONT_MAP[font],
           },
           style,
-        ]}
-      >
+        ]}>
         {children}
       </Text>
     );
@@ -93,15 +97,14 @@ export const ApText: React.FC<IProps> = ({
       numberOfLines={numberOfLines}
       style={[
         {
-          color,
+          color: textColor,
           textAlign,
           fontSize: SIZE_MAP[size],
           fontWeight: WEIGHT_MAP[font],
           fontFamily: FONT_MAP[font],
         },
         style,
-      ]}
-    >
+      ]}>
       {children}
     </Text>
   );

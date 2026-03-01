@@ -2,7 +2,7 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface BadgeCardProps {
   title: string;
@@ -17,37 +17,39 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
   description,
   isLocked = false,
 }) => {
+  const colors = useTheme();
   return (
     <View
       className="items-center m-2 flex-1"
-      style={{ opacity: isLocked ? 0.5 : 1 }}
-    >
+      style={{ opacity: isLocked ? 0.5 : 1 }}>
       <View
         className="w-20 h-20 rounded-full items-center justify-center mb-2"
         style={{
           backgroundColor: isLocked
-            ? ApTheme.Color.surfaceInactive
-            : "rgba(19, 236, 91, 0.1)",
+            ? colors.surfaceInactive
+            : colors.primary + "1A", // 10% opacity
           borderWidth: 1,
-          borderColor: isLocked ? "transparent" : ApTheme.Color.primary,
-        }}
-      >
+          borderColor: isLocked ? "transparent" : colors.primary,
+        }}>
         <Ionicons
           name={icon as any}
           size={32}
-          color={isLocked ? ApTheme.Color.textMuted : ApTheme.Color.primary}
+          color={isLocked ? colors.textMuted : colors.primary}
         />
       </View>
-      <ApText size="sm" font="bold" color="white" textAlign="center">
+      <ApText
+        size="sm"
+        font="bold"
+        color={colors.textPrimary}
+        textAlign="center">
         {title}
       </ApText>
       <ApText
         size="xs"
-        color={ApTheme.Color.textMuted}
+        color={colors.textMuted}
         textAlign="center"
         numberOfLines={2}
-        className="mt-1"
-      >
+        className="mt-1">
         {description}
       </ApText>
     </View>

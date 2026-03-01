@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Pressable } from "react-native";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface TimeFilterTabsProps {
   selectedTab: "Week" | "Month" | "Year";
@@ -14,11 +14,11 @@ const TimeFilterTabs: React.FC<TimeFilterTabsProps> = ({
   selectedTab,
   onSelectTab,
 }) => {
+  const colors = useTheme();
   return (
     <View
       className="flex-row rounded-xl p-1 mb-6"
-      style={{ backgroundColor: ApTheme.Color.surface }}
-    >
+      style={{ backgroundColor: colors.surface }}>
       {TABS.map((tab) => {
         const isSelected = selectedTab === tab;
         return (
@@ -27,16 +27,12 @@ const TimeFilterTabs: React.FC<TimeFilterTabsProps> = ({
             onPress={() => onSelectTab(tab)}
             className="flex-1 py-2 items-center rounded-lg"
             style={{
-              backgroundColor: isSelected
-                ? ApTheme.Color.primary
-                : "transparent",
-            }}
-          >
+              backgroundColor: isSelected ? colors.primary : "transparent",
+            }}>
             <ApText
               size="sm"
               font="bold"
-              color={isSelected ? "black" : ApTheme.Color.textMuted}
-            >
+              color={isSelected ? colors.background : colors.textMuted}>
               {tab}
             </ApText>
           </Pressable>

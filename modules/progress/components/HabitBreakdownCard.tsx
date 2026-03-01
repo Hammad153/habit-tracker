@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import { ApText } from "@/src/components/Text";
 import { Completion } from "@/src/types";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface HabitBreakdownCardProps {
   title: string;
@@ -25,6 +25,7 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
   iconColor,
   completions = [],
 }) => {
+  const colors = useTheme();
   const size = 32;
   const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
@@ -45,31 +46,33 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
     <View
       className="p-4 rounded-2xl mb-3"
       style={{
-        backgroundColor: ApTheme.Color.surface,
-        borderColor: ApTheme.Color.surfaceBorder,
+        backgroundColor: colors.surface,
+        borderColor: colors.surfaceBorder,
         borderWidth: 1,
-      }}
-    >
+      }}>
       <View className="flex-row justify-between items-center mb-4">
         <View className="flex-row items-center">
           <View
             className="w-10 h-10 rounded-full items-center justify-center mr-3"
-            style={{ backgroundColor: iconBg }}
-          >
+            style={{ backgroundColor: iconBg }}>
             <Ionicons name={icon as any} size={20} color={iconColor} />
           </View>
           <View>
-            <ApText size="base" font="bold" color="white">
+            <ApText size="base" font="bold" color={colors.textPrimary}>
               {title}
             </ApText>
-            <ApText size="xs" color={ApTheme.Color.textMuted}>
+            <ApText size="xs" color={colors.textMuted}>
               {category}
             </ApText>
           </View>
         </View>
 
         <View className="flex-row items-center">
-          <ApText size="lg" font="bold" color="white" className="mr-2">
+          <ApText
+            size="lg"
+            font="bold"
+            color={colors.textPrimary}
+            className="mr-2">
             {percentage}%
           </ApText>
           <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -77,7 +80,7 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={ApTheme.Color.surfaceInactive}
+              stroke={colors.surfaceInactive}
               strokeWidth={strokeWidth}
               fill="transparent"
             />
@@ -85,7 +88,7 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={ApTheme.Color.primary}
+              stroke={colors.primary}
               strokeWidth={strokeWidth}
               strokeDasharray={`${circumference} ${circumference}`}
               strokeDashoffset={strokeDashoffset}
@@ -105,8 +108,8 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
             className="flex-1 rounded-full"
             style={{
               backgroundColor: completed
-                ? ApTheme.Color.primary
-                : ApTheme.Color.surfaceInactive,
+                ? colors.primary
+                : colors.surfaceInactive,
               opacity: 0.8,
             }}
           />

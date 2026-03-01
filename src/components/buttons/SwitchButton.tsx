@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { View, Pressable, Animated, StyleSheet } from "react-native";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface ToggleProps {
   isEnabled: boolean;
@@ -13,6 +13,7 @@ const THUMB_SIZE = 22;
 const TRACK_PADDING = 3;
 
 const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
+  const colors = useTheme();
   const translateX = useRef(
     new Animated.Value(
       isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0,
@@ -35,17 +36,16 @@ const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
           styles.track,
           {
             backgroundColor: isEnabled
-              ? ApTheme.Color.primary
-              : ApTheme.Color.surfaceInactive,
+              ? colors.primary
+              : colors.surfaceInactive,
           },
-        ]}
-      >
+        ]}>
         <Animated.View
           style={[
             styles.thumb,
             {
               transform: [{ translateX }],
-              backgroundColor: ApTheme.Color.white,
+              backgroundColor: colors.background,
             },
           ]}
         />
