@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, ScrollView, Switch } from "react-native";
+import { View, ScrollView, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText } from "@/src/components/Text";
@@ -69,7 +69,10 @@ export default function SoundsScreen() {
                       color={colors.primary}
                     />
                   </View>
-                  <ApText size="base" color="white" font="semibold">
+                  <ApText
+                    size="base"
+                    color={colors.textPrimary}
+                    font="semibold">
                     {item.label}
                   </ApText>
                 </View>

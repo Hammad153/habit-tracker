@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { View, Dimensions } from "react-native";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import ConfettiCannon from "react-native-confetti-cannon";
 import Svg, { Circle } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +15,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
   completed,
   total,
 }) => {
+  const colors = useTheme();
   const percentage = total > 0 ? (completed / total) * 100 : 0;
   const confettiRef = useRef<any>(null);
   const prevPercentageRef = useRef(percentage);
@@ -46,10 +47,10 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
     <View
       className="rounded-[32px] p-6 shadow-2xl overflow-hidden"
       style={{
-        backgroundColor: ApTheme.Color.surface,
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: ApTheme.Color.surfaceBorder,
-        shadowColor: ApTheme.Color.primary,
+        borderColor: colors.surfaceBorder,
+        shadowColor: colors.primary,
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.1,
         shadowRadius: 20,
@@ -57,7 +58,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
       }}>
       <View
         className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10"
-        style={{ backgroundColor: ApTheme.Color.primary }}
+        style={{ backgroundColor: colors.primary }}
       />
 
       <View className="flex-row items-center justify-between">
@@ -66,17 +67,21 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             <Ionicons
               name="flash"
               size={14}
-              color={ApTheme.Color.primary}
+              color={colors.primary}
               style={{ marginRight: 4 }}
             />
-            <ApText size="xs" font="bold" color={ApTheme.Color.primary}>
+            <ApText size="xs" font="bold" color={colors.primary}>
               DAILY PROGRESS
             </ApText>
           </View>
-          <ApText size="2xl" font="bold" color="white" className="mb-2">
+          <ApText
+            size="2xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mb-2">
             {completed}/{total} Habits
           </ApText>
-          <ApText size="sm" color={ApTheme.Color.textSecondary} font="medium">
+          <ApText size="sm" color={colors.textSecondary} font="medium">
             {getMotivationalText()}
           </ApText>
         </View>
@@ -87,14 +92,15 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
               cx={center}
               cy={center}
               r={radius}
-              stroke="rgba(255,255,255,0.05)"
+              stroke={colors.surfaceBorder}
+              strokeOpacity={0.5}
               strokeWidth={strokeWidth}
             />
             <Circle
               cx={center}
               cy={center}
               r={radius}
-              stroke={ApTheme.Color.primary}
+              stroke={colors.primary}
               strokeWidth={strokeWidth}
               strokeDasharray={`${circumference} ${circumference}`}
               strokeDashoffset={strokeDashoffset}
@@ -102,8 +108,8 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
               transform={`rotate(-90 ${center} ${center})`}
             />
           </Svg>
-          <View className="absolute">
-            <ApText size="xs" font="bold" color="white">
+          <View className="absolute inset-0 items-center justify-center">
+            <ApText size="xs" font="bold" color={colors.textPrimary}>
               {Math.round(percentage)}%
             </ApText>
           </View>

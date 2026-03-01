@@ -42,7 +42,7 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
         <ApText
           size="base"
           font="medium"
-          color={isDestructive ? colors.danger : "white"}>
+          color={isDestructive ? colors.danger : colors.textPrimary}>
           {label}
         </ApText>
       </View>

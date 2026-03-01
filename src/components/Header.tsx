@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { ApText } from "./Text";
-import { ApTheme } from "./theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 export interface IProps {
   title: React.ReactNode | string;
@@ -39,6 +39,7 @@ export const ApHeader: React.FC<IProps> = ({
   hasBackGround = true,
   transparent = false,
 }) => {
+  const colors = useTheme();
   return (
     <View
       style={[
@@ -46,16 +47,15 @@ export const ApHeader: React.FC<IProps> = ({
         {
           overflow: "hidden",
           borderBottomWidth: transparent ? 0 : 1,
-          borderBottomColor: ApTheme.Color.surfaceBorder,
+          borderBottomColor: colors.surfaceBorder,
         },
       ]}
-      className={`w-full ${containerClassName}`}
-    >
+      className={`w-full ${containerClassName}`}>
       {!transparent && hasBackGround && (
         <>
           <BlurView
             intensity={80}
-            tint="dark"
+            tint={colors.isDark ? "dark" : "light"}
             style={[
               {
                 position: "absolute",
@@ -67,7 +67,11 @@ export const ApHeader: React.FC<IProps> = ({
             ]}
           />
           <LinearGradient
-            colors={["rgba(16, 34, 22, 0.8)", "rgba(16, 34, 22, 0.6)"]}
+            colors={
+              colors.isDark
+                ? ["rgba(16, 34, 22, 0.8)", "rgba(16, 34, 22, 0.6)"]
+                : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.6)"]
+            }
             style={{
               position: "absolute",
               top: 0,
@@ -87,13 +91,8 @@ export const ApHeader: React.FC<IProps> = ({
                 onPress={onBack}
                 className={`mr-4 w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
                 style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                hitSlop={10}
-              >
-                <Ionicons
-                  name="arrow-back"
-                  size={20}
-                  color={ApTheme.Color.primary}
-                />
+                hitSlop={10}>
+                <Ionicons name="arrow-back" size={20} color={colors.primary} />
               </Pressable>
             )}
 
@@ -104,8 +103,7 @@ export const ApHeader: React.FC<IProps> = ({
                   size="3xl"
                   numberOfLines={1}
                   className={titleClassName}
-                  color={ApTheme.Color.white}
-                >
+                  color={colors.textPrimary}>
                   {title}
                 </ApText>
               ) : (
@@ -117,10 +115,9 @@ export const ApHeader: React.FC<IProps> = ({
                   {typeof subheader === "string" ? (
                     <ApText
                       size="sm"
-                      color={ApTheme.Color.primary}
+                      color={colors.primary}
                       font="bold"
-                      style={{ letterSpacing: 0.5 }}
-                    >
+                      style={{ letterSpacing: 0.5 }}>
                       {subheader.toUpperCase()}
                     </ApText>
                   ) : (

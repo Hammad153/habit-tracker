@@ -9,7 +9,6 @@ import {
 import { ApScrollView } from "@/src/components/ScrollView";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
-import { ApTheme } from "@/src/components/theme";
 import { ApText } from "@/src/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import StatCard from "../../modules/profiles/components/StatCard";
@@ -92,12 +91,21 @@ export default function ProfileScreen() {
                   </ApText>
                 )}
               </View>
-              <View className="absolute bottom-0 right-0 bg-primary rounded-full p-1 border-2 border-background">
-                <Ionicons name="camera" size={12} color="black" />
+              <View
+                className="absolute bottom-0 right-0 rounded-full p-1 border-2"
+                style={{
+                  backgroundColor: colors.primary,
+                  borderColor: colors.background,
+                }}>
+                <Ionicons name="camera" size={12} color={colors.background} />
               </View>
             </View>
 
-            <ApText size="xl" font="bold" color="white" className="mt-4">
+            <ApText
+              size="xl"
+              font="bold"
+              color={colors.textPrimary}
+              className="mt-4">
               {user?.name || profile?.name || "User"}
             </ApText>
             <ApText size="sm" color={colors.textMuted}>
@@ -162,7 +170,7 @@ export default function ProfileScreen() {
             <ApText
               size="sm"
               font="bold"
-              color={ApTheme.Color.textMuted}
+              color={colors.textMuted}
               className="mb-2 uppercase"
               style={{ letterSpacing: 1 }}>
               Account

@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface OverviewStatsProps {
   streak: number;
@@ -10,13 +10,15 @@ interface OverviewStatsProps {
 }
 
 const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
+  const colors = useTheme();
+
   return (
     <View className="flex-row gap-4 mb-6">
       <View
         className="flex-1 p-4 rounded-2xl"
         style={{
-          backgroundColor: ApTheme.Color.surface,
-          borderColor: ApTheme.Color.surfaceBorder,
+          backgroundColor: colors.surface,
+          borderColor: colors.surfaceBorder,
           borderWidth: 1,
         }}>
         <View className="flex-row items-center mb-3">
@@ -24,19 +26,23 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
             <Ionicons name="flame" size={16} color="#F97316" />
           </View>
           <View>
-            <ApText size="xs" color={ApTheme.Color.textMuted}>
+            <ApText size="xs" color={colors.textMuted}>
               Current
             </ApText>
-            <ApText size="xs" color={ApTheme.Color.textMuted}>
+            <ApText size="xs" color={colors.textMuted}>
               Streak
             </ApText>
           </View>
         </View>
         <View className="flex-row items-baseline">
-          <ApText size="3xl" font="bold" color="white" className="mr-1">
+          <ApText
+            size="3xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mr-1">
             {streak}
           </ApText>
-          <ApText size="sm" color={ApTheme.Color.textMuted}>
+          <ApText size="sm" color={colors.textMuted}>
             Days
           </ApText>
         </View>
@@ -45,8 +51,8 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
       <View
         className="flex-1 p-4 rounded-2xl"
         style={{
-          backgroundColor: ApTheme.Color.surface,
-          borderColor: ApTheme.Color.surfaceBorder,
+          backgroundColor: colors.surface,
+          borderColor: colors.surfaceBorder,
           borderWidth: 1,
         }}>
         <View className="flex-row items-center mb-3">
@@ -54,7 +60,7 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
             <Ionicons name="checkmark-circle" size={16} color="#22C55E" />
           </View>
           <View>
-            <ApText size="xs" color={ApTheme.Color.textMuted}>
+            <ApText size="xs" color={colors.textMuted}>
               Total Done
             </ApText>
             <ApText size="xs" color="transparent">
@@ -63,10 +69,14 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
           </View>
         </View>
         <View className="flex-row items-baseline">
-          <ApText size="3xl" font="bold" color="white" className="mr-1">
+          <ApText
+            size="3xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mr-1">
             {totalDone}
           </ApText>
-          <ApText size="sm" color={ApTheme.Color.textMuted}>
+          <ApText size="sm" color={colors.textMuted}>
             Log{totalDone !== 1 ? "s" : ""}
           </ApText>
         </View>

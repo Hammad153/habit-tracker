@@ -6,9 +6,11 @@ import { ApScrollView } from "@/src/components/ScrollView";
 import Habits from "@/modules/habits/habits";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
-import { ApTheme } from "@/src/components/theme";
+import { useSettings } from "@/src/context/SettingsContext";
 
 export default function HabitScreen() {
+  const { colors } = useSettings();
+
   return (
     <ApContainer>
       <View className="h-screen">
@@ -20,11 +22,7 @@ export default function HabitScreen() {
             <View className="flex-row items-center gap-3">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>
                 <View className="w-10 h-10 items-center justify-center rounded-full bg-primary/10">
-                  <Ionicons
-                    name="add"
-                    size={24}
-                    color={ApTheme.Color.primary}
-                  />
+                  <Ionicons name="add" size={24} color={colors.primary} />
                 </View>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => router.push("/manage-habits")}>
@@ -32,7 +30,7 @@ export default function HabitScreen() {
                   <Ionicons
                     name="settings-outline"
                     size={20}
-                    color={ApTheme.Color.primary}
+                    color={colors.primary}
                   />
                 </View>
               </TouchableOpacity>

@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from "react-native";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 
 interface LogValueModalProps {
@@ -33,6 +33,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
   title,
 }) => {
   const [value, setValue] = useState(initialValue.toString());
+  const colors = useTheme();
 
   useEffect(() => {
     if (isVisible) {
@@ -60,17 +61,18 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
             <KeyboardAvoidingView
               behavior={Platform.OS === "ios" ? "padding" : "height"}
               className="w-full">
-              <View className="bg-surface rounded-3xl p-6 border border-surfaceBorder">
+              <View
+                className="bg-surface rounded-3xl p-6 border"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.surfaceBorder,
+                }}>
                 <View className="flex-row justify-between items-center mb-6">
-                  <ApText size="xl" font="bold" color="white">
+                  <ApText size="xl" font="bold" color={colors.textPrimary}>
                     Log {title}
                   </ApText>
                   <TouchableOpacity onPress={onClose}>
-                    <Ionicons
-                      name="close"
-                      size={24}
-                      color={ApTheme.Color.textMuted}
-                    />
+                    <Ionicons name="close" size={24} color={colors.textMuted} />
                   </TouchableOpacity>
                 </View>
 
@@ -80,15 +82,12 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
                       value={value}
                       onChangeText={setValue}
                       keyboardType="numeric"
-                      className="text-5xl font-bold text-primary mr-2"
-                      style={{ color: ApTheme.Color.primary }}
+                      className="text-5xl font-bold mr-2"
+                      style={{ color: colors.primary }}
                       autoFocus
                       selectTextOnFocus
                     />
-                    <ApText
-                      size="lg"
-                      color={ApTheme.Color.textMuted}
-                      font="semibold">
+                    <ApText size="lg" color={colors.textMuted} font="semibold">
                       / {goal} {unit}
                     </ApText>
                   </View>
@@ -97,16 +96,20 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
                 <View className="flex-row space-x-3 gap-x-2">
                   <TouchableOpacity
                     onPress={onClose}
-                    className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 items-center">
-                    <ApText font="semibold" color="white">
+                    className="flex-1 py-4 rounded-2xl border items-center"
+                    style={{
+                      backgroundColor: colors.surface,
+                      borderColor: colors.surfaceBorder,
+                    }}>
+                    <ApText font="semibold" color={colors.textMuted}>
                       Cancel
                     </ApText>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleSave}
-                    className="flex-1 py-4 rounded-2xl bg-primary items-center"
-                    style={{ backgroundColor: ApTheme.Color.primary }}>
-                    <ApText font="bold" color="black">
+                    className="flex-1 py-4 rounded-2xl items-center"
+                    style={{ backgroundColor: colors.primary }}>
+                    <ApText font="bold" color={colors.background}>
                       Save Progress
                     </ApText>
                   </TouchableOpacity>

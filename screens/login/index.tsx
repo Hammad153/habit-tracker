@@ -14,6 +14,8 @@ import { authService } from "@/src/services/auth.service";
 import { useAuth } from "@/src/components/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
+import { useTheme } from "@/src/context/SettingsContext";
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +23,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
+  const colors = useTheme();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -51,43 +54,64 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[#121212]">
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}>
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         className="px-6 pt-20">
         <View className="mb-12">
-          <Text className="text-4xl font-bold text-white mb-2">
+          <Text
+            className="text-4xl font-bold mb-2"
+            style={{ color: colors.textPrimary }}>
             Welcome Back
           </Text>
-          <Text className="text-gray-400 text-lg">
+          <Text className="text-lg" style={{ color: colors.textSecondary }}>
             Sign in to continue your habit journey
           </Text>
         </View>
 
         <View className="space-y-6">
           <View>
-            <Text className="text-white mb-2 font-medium">Email Address</Text>
+            <Text
+              className="mb-2 font-medium"
+              style={{ color: colors.textPrimary }}>
+              Email Address
+            </Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
               placeholder="Enter your email"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
-              className="bg-[#1E1E1E] text-white px-4 py-4 rounded-xl border border-[#333]"
+              className="px-4 py-4 rounded-xl border"
+              style={{
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                borderColor: colors.surfaceBorder,
+              }}
             />
           </View>
 
           <View className="mt-4">
-            <Text className="text-white mb-2 font-medium">Password</Text>
+            <Text
+              className="mb-2 font-medium"
+              style={{ color: colors.textPrimary }}>
+              Password
+            </Text>
             <View className="relative">
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Enter your password"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.textMuted}
                 secureTextEntry={!showPassword}
-                className="bg-[#1E1E1E] text-white px-4 py-4 rounded-xl border border-[#333]"
+                className="px-4 py-4 rounded-xl border"
+                style={{
+                  backgroundColor: colors.surface,
+                  color: colors.textPrimary,
+                  borderColor: colors.surfaceBorder,
+                }}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -95,7 +119,7 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
                   size={24}
-                  color="#999"
+                  color={colors.textMuted}
                 />
               </TouchableOpacity>
             </View>
@@ -104,18 +128,25 @@ export default function LoginScreen() {
           <TouchableOpacity
             onPress={handleLogin}
             disabled={loading}
-            className={`bg-[#6C38FF] py-4 rounded-xl mt-8 items-center ${loading ? "opacity-70" : ""}`}>
-            <Text className="text-white font-bold text-lg">
+            className={`py-4 rounded-xl mt-8 items-center ${loading ? "opacity-70" : ""}`}
+            style={{ backgroundColor: colors.primary }}>
+            <Text
+              className="font-bold text-lg"
+              style={{ color: colors.background }}>
               {loading ? "Signing In..." : "Sign In"}
             </Text>
           </TouchableOpacity>
         </View>
 
         <View className="flex-row justify-center mt-8">
-          <Text className="text-gray-400">Don't have an account? </Text>
+          <Text style={{ color: colors.textSecondary }}>
+            Don't have an account?{" "}
+          </Text>
           <Link href="/signup" asChild>
             <TouchableOpacity>
-              <Text className="text-[#6C38FF] font-bold">Sign Up</Text>
+              <Text className="font-bold" style={{ color: colors.primary }}>
+                Sign Up
+              </Text>
             </TouchableOpacity>
           </Link>
         </View>

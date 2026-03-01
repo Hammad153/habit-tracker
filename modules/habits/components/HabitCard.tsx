@@ -33,8 +33,8 @@ const HabitCard: React.FC<HabitCardProps> = ({
   subtitle,
   description,
   icon,
-  iconColor = "#fff",
-  iconBg = "rgba(255,255,255,0.1)",
+  iconColor,
+  iconBg,
   customIconNode,
   variant = "toggle",
   isCompleted = false,
@@ -48,6 +48,13 @@ const HabitCard: React.FC<HabitCardProps> = ({
   const { mutate: toggle } = useToggleHabit();
   const { mutate: update } = useUpdateHabit();
   const colors = useTheme();
+
+  // Theme-aware defaults
+  const activeIconColor =
+    iconColor || (isCompleted ? colors.primary : colors.textPrimary);
+  const activeIconBg =
+    iconBg ||
+    (isCompleted ? colors.primary + "1A" : colors.surfaceBorder + "40");
   const { triggerHaptic } = useFeedback();
 
   const subText = subtitle || description;
@@ -118,14 +125,14 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 cx={center}
                 cy={center}
                 r={radius}
-                stroke="rgba(255,255,255,0.05)"
+                stroke={colors.surfaceBorder}
                 strokeWidth={strokeWidth}
               />
               <Circle
                 cx={center}
                 cy={center}
                 r={radius}
-                stroke={isCompleted ? colors.primary : iconColor}
+                stroke={isCompleted ? colors.primary : activeIconColor}
                 strokeWidth={strokeWidth}
                 strokeDasharray={`${circumference} ${circumference}`}
                 strokeDashoffset={strokeDashoffset}
@@ -135,14 +142,14 @@ const HabitCard: React.FC<HabitCardProps> = ({
             </Svg>
             <View
               className="w-10 h-10 rounded-xl items-center justify-center z-10"
-              style={{ backgroundColor: iconBg }}>
+              style={{ backgroundColor: activeIconBg }}>
               {customIconNode ? (
                 customIconNode
               ) : (
                 <Ionicons
                   name={icon as any}
                   size={20}
-                  color={isCompleted ? colors.primary : iconColor}
+                  color={activeIconColor}
                 />
               )}
             </View>
@@ -153,7 +160,9 @@ const HabitCard: React.FC<HabitCardProps> = ({
             <ApText
               size="lg"
               font="semibold"
-              color={variant === "restore" ? colors.textMuted : "white"}
+              color={
+                variant === "restore" ? colors.textMuted : colors.textPrimary
+              }
               numberOfLines={1}>
               {title}
             </ApText>
@@ -164,7 +173,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 color={
                   isCompleted && variant === "toggle"
                     ? colors.primary
-                    : colors.textMuted
+                    : colors.textSecondary
                 }>
                 {subText}
               </ApText>
@@ -178,7 +187,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                   <ApText
                     size="xs"
                     font="bold"
-                    color={isCompleted ? colors.primary : "white"}>
+                    color={isCompleted ? colors.primary : colors.textPrimary}>
                     {value}/{goal}
                   </ApText>
                   {unit && (
@@ -195,7 +204,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                   style={{
                     backgroundColor: isCompleted
                       ? colors.primary
-                      : "rgba(255,255,255,0.05)",
+                      : colors.backgroundLight,
                     borderWidth: 1,
                     borderColor: isCompleted
                       ? colors.primary
@@ -204,7 +213,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                   <Ionicons
                     name={isCompleted ? "checkmark" : "add"}
                     size={22}
-                    color={isCompleted ? "#000" : colors.primary}
+                    color={isCompleted ? colors.background : colors.primary}
                   />
                 </TouchableOpacity>
               </View>

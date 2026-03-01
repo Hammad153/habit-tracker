@@ -51,7 +51,9 @@ export default function AppearanceScreen() {
                 <ApText
                   size="base"
                   color={
-                    themeMode === theme.id ? "white" : colors.textSecondary
+                    themeMode === theme.id
+                      ? colors.primary
+                      : colors.textSecondary
                   }
                   font={themeMode === theme.id ? "bold" : "medium"}>
                   {theme.label}

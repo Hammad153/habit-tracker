@@ -2,7 +2,7 @@ import React from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import { useAuth } from "@/src/components/AuthContext";
 
 interface Props {
@@ -29,6 +29,7 @@ const getInitials = (name: string): string => {
 
 const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
   const { user } = useAuth();
+  const colors = useTheme();
   const greeting = getGreeting();
 
   return (
@@ -37,8 +38,8 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
         <View
           className="w-12 h-12 rounded-2xl items-center justify-center overflow-hidden"
           style={{
-            backgroundColor: ApTheme.Color.primary,
-            shadowColor: ApTheme.Color.primary,
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 8,
@@ -50,7 +51,7 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
               resizeMode="cover"
             />
           ) : (
-            <ApText size="xl" font="bold" color="#000">
+            <ApText size="xl" font="bold" color={colors.background}>
               {getInitials(user?.name || "HT")}
             </ApText>
           )}
@@ -61,18 +62,18 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
             <Ionicons
               name={greeting.icon as any}
               size={12}
-              color={ApTheme.Color.primary}
+              color={colors.primary}
               style={{ marginRight: 4 }}
             />
             <ApText
               size="xs"
               font="bold"
-              color={ApTheme.Color.primary}
+              color={colors.primary}
               style={{ letterSpacing: 1 }}>
               {greeting.text.toUpperCase()}
             </ApText>
           </View>
-          <ApText size="xl" font="bold" color={ApTheme.Color.white}>
+          <ApText size="xl" font="bold" color={colors.textPrimary}>
             {user?.name || "Habit Tracker"}
           </ApText>
         </View>
@@ -83,19 +84,15 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
         activeOpacity={0.7}
         className="w-11 h-11 rounded-2xl items-center justify-center border"
         style={{
-          backgroundColor: ApTheme.Color.surface,
-          borderColor: ApTheme.Color.surfaceBorder,
+          backgroundColor: colors.surface,
+          borderColor: colors.surfaceBorder,
         }}>
-        <Ionicons
-          name="notifications"
-          size={22}
-          color={ApTheme.Color.primary}
-        />
+        <Ionicons name="notifications" size={22} color={colors.primary} />
         <View
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border-2"
           style={{
             backgroundColor: "#ff5252",
-            borderColor: ApTheme.Color.surface,
+            borderColor: colors.surface,
           }}
         />
       </TouchableOpacity>

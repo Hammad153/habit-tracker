@@ -2,7 +2,7 @@ import React from "react";
 import { Habit } from "@/src/types";
 import { subDays, format, isSameDay } from "date-fns";
 import { View } from "react-native";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import { ApText } from "@/src/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
@@ -16,6 +16,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
   habits,
   periodDays,
 }) => {
+  const colors = useTheme();
   const today = new Date();
 
   const chartData = Array.from({ length: 7 }).map((_, i) => {
@@ -56,18 +57,22 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
     <View
       className="p-4 rounded-3xl mb-6 relative overflow-hidden"
       style={{
-        backgroundColor: ApTheme.Color.surface,
-        borderColor: ApTheme.Color.surfaceBorder,
+        backgroundColor: colors.surface,
+        borderColor: colors.surfaceBorder,
         borderWidth: 1,
         minHeight: 220,
       }}>
       <View className="flex-row justify-between items-start mb-8 z-10">
         <View>
-          <ApText size="sm" color={ApTheme.Color.textMuted} className="mb-1">
+          <ApText size="sm" color={colors.textMuted} className="mb-1">
             Overall Completion
           </ApText>
           <View className="flex-row items-center">
-            <ApText size="3xl" font="bold" color="white" className="mr-2">
+            <ApText
+              size="3xl"
+              font="bold"
+              color={colors.textPrimary}
+              className="mr-2">
               {overallCompletion}%
             </ApText>
             {trend !== 0 && (
@@ -86,7 +91,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
         <Ionicons
           name="ellipsis-horizontal"
           size={20}
-          color={ApTheme.Color.textMuted}
+          color={colors.textMuted}
         />
       </View>
 
@@ -100,23 +105,15 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
           preserveAspectRatio="none">
           <Defs>
             <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop
-                offset="0"
-                stopColor={ApTheme.Color.primary}
-                stopOpacity="0.5"
-              />
-              <Stop
-                offset="1"
-                stopColor={ApTheme.Color.primary}
-                stopOpacity="0"
-              />
+              <Stop offset="0" stopColor={colors.primary} stopOpacity="0.5" />
+              <Stop offset="1" stopColor={colors.primary} stopOpacity="0" />
             </LinearGradient>
           </Defs>
           <Path d={areaPath} fill="url(#gradient)" />
           <Path
             d={linePath}
             fill="none"
-            stroke={ApTheme.Color.primary}
+            stroke={colors.primary}
             strokeWidth="3"
             strokeLinecap="round"
           />
@@ -128,7 +125,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
           <ApText
             key={index}
             size="xs"
-            color={ApTheme.Color.textMuted}
+            color={colors.textMuted}
             style={{ fontSize: 10 }}>
             {label}
           </ApText>

@@ -2,13 +2,14 @@ import React from "react";
 import { Completion } from "@/src/types";
 import { subDays, format, isSameDay } from "date-fns";
 import { View } from "react-native";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 
 interface ActivityHeatmapProps {
   completions: Completion[];
 }
 
 const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ completions }) => {
+  const colors = useTheme();
   const days = 7;
   const weeks = 12;
 
@@ -28,10 +29,10 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ completions }) => {
             (c) => isSameDay(new Date(c.date), date) && c.status,
           ).length;
 
-          let color = ApTheme.Color.surfaceInactive;
-          if (completionCount >= 3) color = ApTheme.Color.primary;
-          else if (completionCount === 2) color = "rgba(19, 236, 91, 0.6)";
-          else if (completionCount === 1) color = "rgba(19, 236, 91, 0.3)";
+          let color = colors.surfaceInactive;
+          if (completionCount >= 3) color = colors.primary;
+          else if (completionCount === 2) color = colors.primary + "99";
+          else if (completionCount === 1) color = colors.primary + "4D";
 
           return (
             <View
@@ -49,8 +50,8 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ completions }) => {
     <View
       className="p-6 rounded-2xl items-center justify-center w-full mb-4"
       style={{
-        backgroundColor: ApTheme.Color.surface,
-        borderColor: ApTheme.Color.surfaceBorder,
+        backgroundColor: colors.surface,
+        borderColor: colors.surfaceBorder,
         borderWidth: 1,
       }}>
       <View className="flex-row gap-2">{renderGrid()}</View>

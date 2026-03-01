@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
+import { useTheme } from "@/src/context/SettingsContext";
 import { formatDate } from "@/src/utils/date";
 
 interface DateProgressSectionProps {
@@ -12,6 +12,7 @@ interface DateProgressSectionProps {
 const DateProgressSection: React.FC<DateProgressSectionProps> = ({
   percentage,
 }) => {
+  const colors = useTheme();
   const { dayName, month, day } = formatDate(new Date());
 
   const size = 60;
@@ -24,14 +25,18 @@ const DateProgressSection: React.FC<DateProgressSectionProps> = ({
     <View className="flex-row justify-between items-center py-4">
       <View>
         <View className="flex-row items-baseline mb-1">
-          <ApText size="3xl" font="bold" color="white" className="mr-2">
+          <ApText
+            size="3xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mr-2">
             {dayName},{" "}
           </ApText>
-          <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
+          <ApText size="3xl" font="bold" color={colors.primary}>
             {month} {day}
           </ApText>
         </View>
-        <ApText size="sm" color={ApTheme.Color.textSecondary}>
+        <ApText size="sm" color={colors.textSecondary}>
           Keep up the good work!
         </ApText>
       </View>
@@ -43,7 +48,7 @@ const DateProgressSection: React.FC<DateProgressSectionProps> = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={ApTheme.Color.surface}
+            stroke={colors.surface}
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -51,7 +56,7 @@ const DateProgressSection: React.FC<DateProgressSectionProps> = ({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={ApTheme.Color.primary}
+            stroke={colors.primary}
             strokeWidth={strokeWidth}
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
@@ -61,7 +66,7 @@ const DateProgressSection: React.FC<DateProgressSectionProps> = ({
           />
         </Svg>
         <View className="absolute inset-0 items-center justify-center">
-          <ApText size="xs" font="bold" color="white">
+          <ApText size="xs" font="bold" color={colors.textPrimary}>
             {percentage}%
           </ApText>
         </View>

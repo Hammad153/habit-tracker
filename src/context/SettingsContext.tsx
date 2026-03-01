@@ -112,5 +112,6 @@ export const useSettings = () => {
 };
 
 export const useTheme = () => {
-  return useSettings().colors;
+  const { colors, isDark } = useSettings();
+  return { ...colors, isDark };
 };
