@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
-import { useToggleHabit, useUpdateHabit } from "@/hooks/useHabits";
+import { useTheme, useSettings } from "@/src/context/SettingsContext";
+import { useFeedback } from "@/src/utils/feedback";
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import LogValueModal from "./LogValueModal";
+import { useToggleHabit, useUpdateHabit } from "@/hooks/useHabits";
 
 interface HabitCardProps {
   id: string;
@@ -46,6 +47,9 @@ const HabitCard: React.FC<HabitCardProps> = ({
   const [isModalVisible, setModalVisible] = useState(false);
   const { mutate: toggle } = useToggleHabit();
   const { mutate: update } = useUpdateHabit();
+  const colors = useTheme();
+  const { triggerHaptic } = useFeedback();
+
   const subText = subtitle || description;
 
   const progress = Math.min(value / goal, 1);
@@ -57,12 +61,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
   const strokeDashoffset = circumference - progress * circumference;
 
   const handleToggle = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    triggerHaptic(Haptics.NotificationFeedbackType.Success);
     toggle({ id, date: selectedDate });
   };
 
   const handleLongPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
     setModalVisible(true);
   };
 
@@ -83,8 +87,8 @@ const HabitCard: React.FC<HabitCardProps> = ({
         <View
           className="w-full flex-row items-center p-4 my-2 rounded-2xl"
           style={{
-            backgroundColor: ApTheme.Color.surface,
-            borderColor: ApTheme.Color.surfaceBorder,
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
             borderWidth: 1,
           }}>
           {variant === "edit" && (
@@ -92,7 +96,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
               <Ionicons
                 name="grid"
                 size={20}
-                color={ApTheme.Color.textMuted}
+                color={colors.textMuted}
                 style={{ opacity: 0.5 }}
               />
             </View>
@@ -102,7 +106,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
               <Ionicons
                 name="lock-closed"
                 size={20}
-                color={ApTheme.Color.textMuted}
+                color={colors.textMuted}
                 style={{ opacity: 0.5 }}
               />
             </View>
@@ -121,7 +125,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 cx={center}
                 cy={center}
                 r={radius}
-                stroke={isCompleted ? ApTheme.Color.primary : iconColor}
+                stroke={isCompleted ? colors.primary : iconColor}
                 strokeWidth={strokeWidth}
                 strokeDasharray={`${circumference} ${circumference}`}
                 strokeDashoffset={strokeDashoffset}
@@ -138,7 +142,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 <Ionicons
                   name={icon as any}
                   size={20}
-                  color={isCompleted ? ApTheme.Color.primary : iconColor}
+                  color={isCompleted ? colors.primary : iconColor}
                 />
               )}
             </View>
@@ -149,7 +153,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
             <ApText
               size="lg"
               font="semibold"
-              color={variant === "restore" ? ApTheme.Color.textMuted : "white"}
+              color={variant === "restore" ? colors.textMuted : "white"}
               numberOfLines={1}>
               {title}
             </ApText>
@@ -159,8 +163,8 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 font="medium"
                 color={
                   isCompleted && variant === "toggle"
-                    ? ApTheme.Color.primary
-                    : ApTheme.Color.textMuted
+                    ? colors.primary
+                    : colors.textMuted
                 }>
                 {subText}
               </ApText>
@@ -174,11 +178,11 @@ const HabitCard: React.FC<HabitCardProps> = ({
                   <ApText
                     size="xs"
                     font="bold"
-                    color={isCompleted ? ApTheme.Color.primary : "white"}>
+                    color={isCompleted ? colors.primary : "white"}>
                     {value}/{goal}
                   </ApText>
                   {unit && (
-                    <ApText size="xs" color={ApTheme.Color.textMuted}>
+                    <ApText size="xs" color={colors.textMuted}>
                       {unit}
                     </ApText>
                   )}
@@ -190,33 +194,29 @@ const HabitCard: React.FC<HabitCardProps> = ({
                   className="w-10 h-10 rounded-xl items-center justify-center"
                   style={{
                     backgroundColor: isCompleted
-                      ? ApTheme.Color.primary
+                      ? colors.primary
                       : "rgba(255,255,255,0.05)",
                     borderWidth: 1,
                     borderColor: isCompleted
-                      ? ApTheme.Color.primary
-                      : ApTheme.Color.surfaceBorder,
+                      ? colors.primary
+                      : colors.surfaceBorder,
                   }}>
                   <Ionicons
                     name={isCompleted ? "checkmark" : "add"}
                     size={22}
-                    color={isCompleted ? "#000" : ApTheme.Color.primary}
+                    color={isCompleted ? "#000" : colors.primary}
                   />
                 </TouchableOpacity>
               </View>
             )}
             {variant === "edit" && (
               <TouchableOpacity hitSlop={10}>
-                <Ionicons
-                  name="pencil"
-                  size={20}
-                  color={ApTheme.Color.textMuted}
-                />
+                <Ionicons name="pencil" size={20} color={colors.textMuted} />
               </TouchableOpacity>
             )}
             {variant === "restore" && (
               <TouchableOpacity onPress={handleRestore}>
-                <ApText size="sm" color={ApTheme.Color.textMuted}>
+                <ApText size="sm" color={colors.textMuted}>
                   Restore
                 </ApText>
               </TouchableOpacity>

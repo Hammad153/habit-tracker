@@ -17,10 +17,13 @@ import SettingsItem from "../../modules/profiles/components/SettingsItem";
 import { useAuth } from "@/src/components/AuthContext";
 import { authService } from "@/src/services/auth.service";
 import { useProfile } from "@/hooks/useProfile";
+import { useSettings } from "@/src/context/SettingsContext";
+import { router } from "expo-router";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { data: profile, isLoading } = useProfile();
+  const { themeMode, soundEnabled, hapticEnabled, colors } = useSettings();
 
   const handleLogout = () => {
     Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -44,11 +47,15 @@ export default function ProfileScreen() {
     return (
       <ApContainer>
         <View className="flex-1 justify-center items-center bg-background">
-          <ActivityIndicator color={ApTheme.Color.primary} />
+          <ActivityIndicator color={colors.primary} />
         </View>
       </ApContainer>
     );
   }
+
+  const appearanceValue =
+    themeMode === "system" ? "System" : themeMode === "dark" ? "Dark" : "Light";
+  const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
 
   return (
     <ApContainer>
@@ -57,11 +64,7 @@ export default function ProfileScreen() {
           title="Profile"
           right={
             <TouchableOpacity>
-              <Ionicons
-                name="settings"
-                size={24}
-                color={ApTheme.Color.primary}
-              />
+              <Ionicons name="settings" size={24} color={colors.primary} />
             </TouchableOpacity>
           }
         />
@@ -71,8 +74,8 @@ export default function ProfileScreen() {
               <View
                 className="w-24 h-24 rounded-full items-center justify-center overflow-hidden border-2"
                 style={{
-                  backgroundColor: ApTheme.Color.surface,
-                  borderColor: ApTheme.Color.primary,
+                  backgroundColor: colors.surface,
+                  borderColor: colors.primary,
                 }}>
                 {user?.avatar || profile?.avatar ? (
                   <Image
@@ -80,7 +83,7 @@ export default function ProfileScreen() {
                     className="w-full h-full"
                   />
                 ) : (
-                  <ApText size="3xl" font="bold" color={ApTheme.Color.primary}>
+                  <ApText size="3xl" font="bold" color={colors.primary}>
                     {(user?.name || profile?.name)
                       ?.substring(0, 2)
                       .toUpperCase() || "HI"}
@@ -95,12 +98,12 @@ export default function ProfileScreen() {
             <ApText size="xl" font="bold" color="white" className="mt-4">
               {user?.name || profile?.name || "User"}
             </ApText>
-            <ApText size="sm" color={ApTheme.Color.textMuted}>
+            <ApText size="sm" color={colors.textMuted}>
               {user?.email || profile?.email || ""}
             </ApText>
 
             <TouchableOpacity className="mt-3 px-4 py-1.5 rounded-full border border-surface">
-              <ApText size="xs" color={ApTheme.Color.primary} font="bold">
+              <ApText size="xs" color={colors.primary} font="bold">
                 Edit Profile
               </ApText>
             </TouchableOpacity>
@@ -129,7 +132,7 @@ export default function ProfileScreen() {
             <ApText
               size="sm"
               font="bold"
-              color={ApTheme.Color.textMuted}
+              color={colors.textMuted}
               className="mb-2 uppercase"
               style={{ letterSpacing: 1 }}>
               General
@@ -140,11 +143,17 @@ export default function ProfileScreen() {
                 icon="notifications"
                 value="On"
               />
-              <SettingsItem label="Sounds & Haptics" icon="musical-note" />
+              <SettingsItem
+                label="Sounds & Haptics"
+                icon="musical-note"
+                value={soundsValue}
+                onPress={() => router.push("/settings/sounds")}
+              />
               <SettingsItem
                 label="Appearance"
                 icon="color-palette"
-                value="Dark"
+                value={appearanceValue}
+                onPress={() => router.push("/settings/appearance")}
               />
             </View>
 
