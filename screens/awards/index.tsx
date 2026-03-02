@@ -46,7 +46,7 @@ export default function AwardsScreen() {
   return (
     <ApContainer>
       <View className="h-screen bg-background">
-        <ApHeader title="Awards" hasBackButton onBack={() => router.back()} />
+        <ApHeader title="Awards" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <LevelProgress
             level={profile?.level || 1}
@@ -59,7 +59,8 @@ export default function AwardsScreen() {
               size="xl"
               font="bold"
               color={colors.textPrimary}
-              className="mb-4">
+              className="mb-4"
+            >
               Streak Badges
             </ApText>
             <View className="flex-row flex-wrap justify-between">
@@ -81,7 +82,8 @@ export default function AwardsScreen() {
               size="xl"
               font="bold"
               color={colors.textPrimary}
-              className="mb-4">
+              className="mb-4"
+            >
               Milestones
             </ApText>
             <View className="flex-row flex-wrap justify-between">

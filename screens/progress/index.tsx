@@ -70,12 +70,11 @@ export default function ProgressScreen() {
       <View className="h-screen bg-background">
         <ApHeader
           title="Progress"
-          hasBackButton
-          onBack={() => router.back()}
           right={
             <Pressable
               onPress={() => router.push("/timeline")}
-              className="w-10 h-10 items-center justify-center rounded-full bg-primary/10">
+              className="w-10 h-10 items-center justify-center rounded-full bg-primary/10"
+            >
               <Ionicons name="calendar" size={22} color={colors.primary} />
             </Pressable>
           }
@@ -100,7 +99,8 @@ export default function ProgressScreen() {
                 size="xl"
                 font="bold"
                 color={colors.textPrimary}
-                className="mb-4">
+                className="mb-4"
+              >
                 Habit Breakdown
               </ApText>
               {isLoading ? (
@@ -113,7 +113,8 @@ export default function ProgressScreen() {
                 <ApText
                   size="sm"
                   color={colors.textMuted}
-                  className="text-center my-4">
+                  className="text-center my-4"
+                >
                   No habits yet. Create one to see your breakdown!
                 </ApText>
               ) : (
@@ -136,7 +137,8 @@ export default function ProgressScreen() {
                 size="xl"
                 font="bold"
                 color={colors.textPrimary}
-                className="mb-4">
+                className="mb-4"
+              >
                 Monthly Activity
               </ApText>
               <View className="mb-20">

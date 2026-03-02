@@ -16,8 +16,6 @@ export default function HabitScreen() {
       <View className="h-screen">
         <ApHeader
           title="Habits"
-          hasBackButton
-          onBack={() => router.back()}
           right={
             <View className="flex-row items-center gap-3">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>

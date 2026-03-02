@@ -50,7 +50,8 @@ export const ApHeader: React.FC<IProps> = ({
           borderBottomColor: colors.surfaceBorder,
         },
       ]}
-      className={`w-full ${containerClassName}`}>
+      className={`w-full ${containerClassName}`}
+    >
       {!transparent && hasBackGround && (
         <>
           <BlurView
@@ -84,51 +85,58 @@ export const ApHeader: React.FC<IProps> = ({
       )}
 
       <View className={`px-5 pt-4 pb-4 ${headerClassName}`}>
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1 flex-row items-center">
+        <View className="flex-row items-center">
+          <View className="flex-row items-center" style={{ width: 60 }}>
             {hasBackButton && (
               <Pressable
                 onPress={onBack}
-                className={`mr-4 w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
+                className={`w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
                 style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                hitSlop={10}>
+                hitSlop={10}
+              >
                 <Ionicons name="arrow-back" size={20} color={colors.primary} />
               </Pressable>
             )}
-
-            <View className="flex-1">
-              {typeof title === "string" ? (
-                <ApText
-                  font="bold"
-                  size="3xl"
-                  numberOfLines={1}
-                  className={titleClassName}
-                  color={colors.textPrimary}>
-                  {title}
-                </ApText>
-              ) : (
-                title
-              )}
-
-              {subheader && (
-                <View className="mt-1">
-                  {typeof subheader === "string" ? (
-                    <ApText
-                      size="sm"
-                      color={colors.primary}
-                      font="bold"
-                      style={{ letterSpacing: 0.5 }}>
-                      {subheader.toUpperCase()}
-                    </ApText>
-                  ) : (
-                    subheader
-                  )}
-                </View>
-              )}
-            </View>
+            {left}
           </View>
 
-          <View className="flex-row items-center space-x-3">
+          <View className="flex-1 items-center justify-center">
+            {typeof title === "string" ? (
+              <ApText
+                font="bold"
+                size="2xl"
+                numberOfLines={1}
+                className={titleClassName}
+                color={colors.textPrimary}
+              >
+                {title}
+              </ApText>
+            ) : (
+              title
+            )}
+
+            {subheader && (
+              <View className="mt-1">
+                {typeof subheader === "string" ? (
+                  <ApText
+                    size="sm"
+                    color={colors.primary}
+                    font="bold"
+                    style={{ letterSpacing: 0.5 }}
+                  >
+                    {subheader.toUpperCase()}
+                  </ApText>
+                ) : (
+                  subheader
+                )}
+              </View>
+            )}
+          </View>
+
+          <View
+            className="flex-row items-center justify-end"
+            style={{ width: 60 }}
+          >
             {icons}
             {right}
           </View>

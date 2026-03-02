@@ -57,18 +57,9 @@ export default function ProfileScreen() {
   const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
 
   return (
-    <ApContainer>
+    <ApContainer className="-px-2">
       <View className="h-screen bg-background">
-        <ApHeader
-          title="Profile"
-          hasBackButton
-          onBack={() => router.back()}
-          right={
-            <TouchableOpacity>
-              <Ionicons name="settings" size={24} color={colors.primary} />
-            </TouchableOpacity>
-          }
-        />
+        <ApHeader title="Profile" />
         <ApScrollView showsVerticalScrollIndicator={false}>
           <View className="items-center mt-6 mb-8">
             <View className="relative">
@@ -77,7 +68,8 @@ export default function ProfileScreen() {
                 style={{
                   backgroundColor: colors.surface,
                   borderColor: colors.primary,
-                }}>
+                }}
+              >
                 {user?.avatar || profile?.avatar ? (
                   <Image
                     source={{ uri: user?.avatar || profile?.avatar }}
@@ -96,7 +88,8 @@ export default function ProfileScreen() {
                 style={{
                   backgroundColor: colors.primary,
                   borderColor: colors.background,
-                }}>
+                }}
+              >
                 <Ionicons name="camera" size={12} color={colors.background} />
               </View>
             </View>
@@ -105,7 +98,8 @@ export default function ProfileScreen() {
               size="xl"
               font="bold"
               color={colors.textPrimary}
-              className="mt-4">
+              className="mt-4"
+            >
               {user?.name || profile?.name || "User"}
             </ApText>
             <ApText size="sm" color={colors.textMuted}>
@@ -144,7 +138,8 @@ export default function ProfileScreen() {
               font="bold"
               color={colors.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}>
+              style={{ letterSpacing: 1 }}
+            >
               General
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
@@ -172,7 +167,8 @@ export default function ProfileScreen() {
               font="bold"
               color={colors.textMuted}
               className="mb-2 uppercase"
-              style={{ letterSpacing: 1 }}>
+              style={{ letterSpacing: 1 }}
+            >
               Account
             </ApText>
             <View className="bg-surface rounded-2xl overflow-hidden mb-6">
