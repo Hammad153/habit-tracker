@@ -68,83 +68,81 @@ export default function ProgressScreen() {
 
   return (
     <ApContainer>
-      <View className="h-screen bg-background">
-        <ApHeader
-          title="Progress"
-          right={
-            <Pressable
-              onPress={() => router.push("/timeline")}
-              className="w-10 h-10 items-center justify-center rounded-full bg-primary/10"
-            >
-              <Ionicons name="calendar" size={22} color={colors.primary} />
-            </Pressable>
-          }
-        />
-        <ApScrollView showsVerticalScrollIndicator={false}>
-          <View className="px-5">
-            <TimeFilterTabs
-              selectedTab={selectedTab}
-              onSelectTab={setSelectedTab}
-            />
-            <OverviewStats
-              streak={profile?.currentStreak ?? 0}
-              totalDone={allCompletions.filter((c) => c.status).length}
-            />
-            <CompletionChart
-              habits={habits ?? []}
-              periodDays={PERIOD_DAYS[selectedTab]}
-            />
+      <ApHeader
+        title="Progress"
+        right={
+          <Pressable
+            onPress={() => router.push("/timeline")}
+            className="w-10 h-10 items-center justify-center rounded-full bg-primary/10"
+          >
+            <Ionicons name="calendar" size={22} color={colors.primary} />
+          </Pressable>
+        }
+      />
+      <ApScrollView showsVerticalScrollIndicator={false}>
+        <View className="px-5">
+          <TimeFilterTabs
+            selectedTab={selectedTab}
+            onSelectTab={setSelectedTab}
+          />
+          <OverviewStats
+            streak={profile?.currentStreak ?? 0}
+            totalDone={allCompletions.filter((c) => c.status).length}
+          />
+          <CompletionChart
+            habits={habits ?? []}
+            periodDays={PERIOD_DAYS[selectedTab]}
+          />
 
-            <View className="mt-4 mb-6">
+          <View className="mt-4 mb-6">
+            <ApText
+              size="xl"
+              font="bold"
+              color={colors.textPrimary}
+              className="mb-4"
+            >
+              Habit Breakdown
+            </ApText>
+            {isLoading ? (
+              <ApLoader size="small" />
+            ) : habitBreakdown.length === 0 ? (
               <ApText
-                size="xl"
-                font="bold"
-                color={colors.textPrimary}
-                className="mb-4"
+                size="sm"
+                color={colors.textMuted}
+                className="text-center my-4"
               >
-                Habit Breakdown
+                No habits yet. Create one to see your breakdown!
               </ApText>
-              {isLoading ? (
-                <ApLoader size="small" />
-              ) : habitBreakdown.length === 0 ? (
-                <ApText
-                  size="sm"
-                  color={colors.textMuted}
-                  className="text-center my-4"
-                >
-                  No habits yet. Create one to see your breakdown!
-                </ApText>
-              ) : (
-                habitBreakdown.map((habit) => (
-                  <HabitBreakdownCard
-                    key={habit.id}
-                    title={habit.title}
-                    category={habit.category}
-                    percentage={habit.percentage}
-                    icon={habit.icon}
-                    iconBg={habit.iconBg}
-                    iconColor={habit.iconColor}
-                    completions={habit.completions}
-                  />
-                ))
-              )}
-            </View>
+            ) : (
+              habitBreakdown.map((habit) => (
+                <HabitBreakdownCard
+                  key={habit.id}
+                  title={habit.title}
+                  category={habit.category}
+                  percentage={habit.percentage}
+                  icon={habit.icon}
+                  iconBg={habit.iconBg}
+                  iconColor={habit.iconColor}
+                  completions={habit.completions}
+                />
+              ))
+            )}
+          </View>
+          <View className="mb-20">
+            <ApText
+              size="xl"
+              font="bold"
+              color={colors.textPrimary}
+              className="mb-4"
+            >
+              Monthly Activity
+            </ApText>
             <View className="mb-20">
-              <ApText
-                size="xl"
-                font="bold"
-                color={colors.textPrimary}
-                className="mb-4"
-              >
-                Monthly Activity
-              </ApText>
-              <View className="mb-20">
-                <ActivityHeatmap completions={allCompletions} />
-              </View>
+              <ActivityHeatmap completions={allCompletions} />
             </View>
           </View>
-        </ApScrollView>
-      </View>
+        </View>
+      </ApScrollView>
     </ApContainer>
   );
 }

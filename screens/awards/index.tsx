@@ -40,62 +40,60 @@ export default function AwardsScreen() {
 
   return (
     <ApContainer>
-      <View className="h-screen bg-background">
-        <ApHeader title="Awards" />
-        <ApScrollView showsVerticalScrollIndicator={false}>
-          <LevelProgress
-            level={profile?.level || 1}
-            currentXp={profile?.xp || 0}
-            neededXp={profile?.neededXp || 100}
-          />
+      <ApHeader title="Awards" />
+      <ApScrollView showsVerticalScrollIndicator={false}>
+        <LevelProgress
+          level={profile?.level || 1}
+          currentXp={profile?.xp || 0}
+          neededXp={profile?.neededXp || 100}
+        />
 
-          <View className="px-5 mt-4">
-            <ApText
-              size="xl"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-4"
-            >
-              Streak Badges
-            </ApText>
-            <View className="flex-row flex-wrap justify-between">
-              {STREAK_BADGES.map((badge) => (
-                <View key={badge.id} style={{ width: "30%" }}>
-                  <BadgeCard
-                    title={badge.title}
-                    icon={badge.icon}
-                    description={badge.description}
-                    isLocked={badge.isLocked}
-                  />
-                </View>
-              ))}
-            </View>
+        <View className="px-5 mt-4">
+          <ApText
+            size="xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mb-4"
+          >
+            Streak Badges
+          </ApText>
+          <View className="flex-row flex-wrap justify-between">
+            {STREAK_BADGES.map((badge) => (
+              <View key={badge.id} style={{ width: "30%" }}>
+                <BadgeCard
+                  title={badge.title}
+                  icon={badge.icon}
+                  description={badge.description}
+                  isLocked={badge.isLocked}
+                />
+              </View>
+            ))}
           </View>
+        </View>
 
-          <View className="px-5 mt-8 mb-20">
-            <ApText
-              size="xl"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-4"
-            >
-              Milestones
-            </ApText>
-            <View className="flex-row flex-wrap justify-between">
-              {MILESTONE_BADGES.map((badge) => (
-                <View key={badge.id} style={{ width: "30%" }}>
-                  <BadgeCard
-                    title={badge.title}
-                    icon={badge.icon}
-                    description={badge.description}
-                    isLocked={badge.isLocked}
-                  />
-                </View>
-              ))}
-            </View>
+        <View className="px-5 mt-8 mb-20">
+          <ApText
+            size="xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mb-4"
+          >
+            Milestones
+          </ApText>
+          <View className="flex-row flex-wrap justify-between">
+            {MILESTONE_BADGES.map((badge) => (
+              <View key={badge.id} style={{ width: "30%" }}>
+                <BadgeCard
+                  title={badge.title}
+                  icon={badge.icon}
+                  description={badge.description}
+                  isLocked={badge.isLocked}
+                />
+              </View>
+            ))}
           </View>
-        </ApScrollView>
-      </View>
+        </View>
+      </ApScrollView>
     </ApContainer>
   );
 }
