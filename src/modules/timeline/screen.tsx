@@ -186,7 +186,7 @@ const TimelineScreen = () => {
       </ApScrollView>
 
       <TouchableOpacity
-        className="absolute bottom-8 right-5 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        className="absolute bottom-8 right-5 w-14 h-14 rounded-full items-center justify-center"
         style={{
           backgroundColor: colors.primary,
           shadowColor: colors.primary,

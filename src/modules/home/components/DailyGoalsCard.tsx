@@ -45,7 +45,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
 
   return (
     <View
-      className="rounded-[32px] p-6 shadow-2xl overflow-hidden"
+      className="rounded-[32px] p-6 overflow-hidden"
       style={{
         backgroundColor: colors.surface,
         borderWidth: 1,
