@@ -20,11 +20,7 @@ export default function TimelineScreen() {
   const isLoading = isLoadingTimeline || isLoadingProfile;
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ApLoader />
-      </View>
-    );
+    return <ApLoader />;
   }
 
   const completionPercentage = profile?.completionRate

@@ -38,13 +38,7 @@ export default function ProfileScreen() {
   };
 
   if (isLoading) {
-    return (
-      <ApContainer>
-        <View className="flex-1 justify-center items-center bg-background">
-          <ApLoader />
-        </View>
-      </ApContainer>
-    );
+    return <ApLoader />;
   }
 
   const appearanceValue =

@@ -25,11 +25,7 @@ const Home: React.FC = () => {
   const { data: profile, isLoading: loadingProfile } = useProfile();
 
   if (loadingHabits || loadingProfile) {
-    return (
-      <ApContainer className="flex-1 justify-center items-center">
-        <ApLoader />
-      </ApContainer>
-    );
+    return <ApLoader />;
   }
 
   const dateStr = selectedDate.toISOString().split("T")[0];

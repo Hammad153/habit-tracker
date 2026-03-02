@@ -16,11 +16,7 @@ export default function ManageHabitsScreen() {
   const colors = useTheme();
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ApLoader />
-      </View>
-    );
+    return <ApLoader />;
   }
 
   const activeHabits = habits?.filter((h) => !h.isArchived) || [];

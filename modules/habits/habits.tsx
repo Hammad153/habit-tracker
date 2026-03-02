@@ -3,11 +3,9 @@ import ApLoader from "@/src/components/Loader";
 import HabitCard from "./components/HabitCard";
 import React from "react";
 import { useHabits } from "@/hooks/useHabits";
-import { useSettings } from "@/src/context/SettingsContext";
 
 const Habits = () => {
   const { data: habits, isLoading, refetch } = useHabits();
-  const { colors } = useSettings();
 
   if (isLoading) {
     return <ApLoader />;
