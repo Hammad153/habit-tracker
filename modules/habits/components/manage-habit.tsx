@@ -31,7 +31,7 @@ export default function ManageHabitsScreen() {
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        <View className="px-5 mt-4">
+        <View className="px-2 mt-4">
           <View className="flex-row justify-between items-center mb-6">
             <ApText size="2xl" font="bold" color={colors.textPrimary}>
               Your Routine

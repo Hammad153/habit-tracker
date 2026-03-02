@@ -108,7 +108,7 @@ export default function CreateHabitScreen() {
           >
             <TextInput
               className="text-lg p-0"
-              style={{ color: colors.textPrimary }}
+              style={{ color: colors.white }}
               placeholder="e.g. Drink 2L Water"
               placeholderTextColor={colors.textMuted}
               value={name}

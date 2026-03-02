@@ -1,10 +1,11 @@
-import React from "react";
-import { View, Image, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Image, TouchableOpacity } from "react-native";
 import ApLoader from "@/src/components/Loader";
 import { ApScrollView } from "@/src/components/ScrollView";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
 import { ApText } from "@/src/components/Text";
+import { ApModal } from "@/src/components/Modal";
 import { Ionicons } from "@expo/vector-icons";
 import StatCard from "../../modules/profiles/components/StatCard";
 import SettingsItem from "../../modules/profiles/components/SettingsItem";
@@ -18,23 +19,18 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const { themeMode, soundEnabled, hapticEnabled, colors } = useSettings();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await authService.logout();
-            await signOut();
-          } catch (e) {
-            await signOut();
-          }
-        },
-      },
-    ]);
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    authService
+      .logout()
+      .then(() => signOut())
+      .catch(() => signOut());
   };
 
   if (isLoading) {
@@ -172,6 +168,37 @@ export default function ProfileScreen() {
           />
         </View>
       </ApScrollView>
+
+      <ApModal
+        visible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        title="Log Out"
+        subTitle="Are you sure you want to log out?"
+      >
+        <View className="flex-row gap-x-2 mt-2">
+          <TouchableOpacity
+            onPress={() => setShowLogoutModal(false)}
+            className="flex-1 py-4 rounded-2xl border items-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <ApText font="semibold" color={colors.textMuted}>
+              Cancel
+            </ApText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={confirmLogout}
+            className="flex-1 py-4 rounded-2xl items-center"
+            style={{ backgroundColor: colors.danger }}
+          >
+            <ApText font="bold" color={colors.white}>
+              Log Out
+            </ApText>
+          </TouchableOpacity>
+        </View>
+      </ApModal>
     </ApContainer>
   );
 }
