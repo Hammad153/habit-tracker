@@ -3,7 +3,7 @@ import { Pressable } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ApText } from "../Text";
 
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 type Props = {
   icon: keyof typeof MaterialIcons.glyphMap;

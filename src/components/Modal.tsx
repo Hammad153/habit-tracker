@@ -10,7 +10,7 @@ import {
   Keyboard,
 } from "react-native";
 import { ApText } from "./Text";
-import { useTheme } from "../context/SettingsContext";
+import { useTheme } from "../modules/settings/context";
 import { Ionicons } from "@expo/vector-icons";
 
 interface IProps extends ModalProps {

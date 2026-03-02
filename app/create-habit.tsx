@@ -1,6 +1,8 @@
 import React from "react";
-import CreateHabitScreen from "@/modules/habits/components/create-habit";
+import CreateHabitScreen from "@/src/modules/habits/components/create-habit";
 
-export default function CreateHabitRoute() {
+const CreateHabitRoute = () => {
   return <CreateHabitScreen />;
-}
+};
+
+export default CreateHabitRoute;

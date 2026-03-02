@@ -1,6 +1,8 @@
 import React from "react";
-import HomeScreen from "@/screens/home";
+import HomeScreen from "@/src/modules/home/screen";
 
-export default function Index() {
+const Home = () => {
   return <HomeScreen />;
-}
+};
+
+export default Home;

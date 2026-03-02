@@ -54,7 +54,7 @@ const WEIGHT_MAP: Record<
   extrabold: "800",
 };
 
-import { useTheme } from "../context/SettingsContext";
+import { useTheme } from "../modules/settings/context";
 
 export const ApText: React.FC<IProps> = ({
   children,

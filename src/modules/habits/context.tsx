@@ -1,0 +1,149 @@
+import React, {
+  createContext,
+  ReactNode,
+  SetStateAction,
+  useContext,
+  useState,
+} from "react";
+import { ToastService } from "@/src/services";
+import { IHabit } from "./model";
+import { HabitService } from "./api";
+
+interface IProps {
+  children: ReactNode;
+}
+
+type THabitContext = {
+  loading: boolean;
+  habits: IHabit[];
+  habit: IHabit;
+  setHabit: React.Dispatch<SetStateAction<IHabit>>;
+  fetchHabits: (userId?: string) => Promise<void>;
+  fetchOneHabit: (id: string) => Promise<void>;
+  createHabit: (data: Partial<IHabit>) => Promise<void>;
+  updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
+  deleteHabit: (id: string) => Promise<void>;
+  toggleHabit: (id: string, date: string, value?: number) => Promise<void>;
+};
+
+export const HabitContext = createContext<THabitContext | undefined>(undefined);
+
+export const useHabitState = () => {
+  const context = useContext(HabitContext);
+  if (context === undefined) {
+    throw new Error("useHabitState must be used within the HabitProvider");
+  }
+  return context;
+};
+
+export const HabitProvider: React.FC<IProps> = ({ children }) => {
+  const [loading, setLoading] = useState(false);
+  const [habits, setHabits] = useState<IHabit[]>([]);
+  const [habit, setHabit] = useState<IHabit>({} as IHabit);
+
+  const fetchHabits = (userId?: string) => {
+    setLoading(true);
+    return HabitService.getAll(userId)
+      .then((data) => {
+        if (data) {
+          setHabits(data);
+        }
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const fetchOneHabit = (id: string) => {
+    setLoading(true);
+    return HabitService.getById(id)
+      .then((data) => {
+        if (data) {
+          setHabit(data);
+        }
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const createHabit = (data: Partial<IHabit>) => {
+    setLoading(true);
+    return HabitService.create(data)
+      .then(() => {
+        ToastService.Success("Habit created successfully");
+        return fetchHabits();
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const updateHabit = (id: string, data: Partial<IHabit>) => {
+    setLoading(true);
+    return HabitService.update(id, data)
+      .then(() => {
+        ToastService.Success("Habit updated successfully");
+        return fetchHabits();
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const deleteHabit = (id: string) => {
+    setLoading(true);
+    return HabitService.delete(id)
+      .then(() => {
+        ToastService.Success("Habit deleted successfully");
+        return fetchHabits();
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const toggleHabit = (id: string, date: string, value?: number) => {
+    return HabitService.toggle(id, date, value)
+      .then(() => {
+        return fetchHabits();
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      });
+  };
+
+  return (
+    <HabitContext.Provider
+      value={{
+        loading,
+        habits,
+        habit,
+        setHabit,
+        fetchHabits,
+        fetchOneHabit,
+        createHabit,
+        updateHabit,
+        deleteHabit,
+        toggleHabit,
+      }}
+    >
+      {children}
+    </HabitContext.Provider>
+  );
+};

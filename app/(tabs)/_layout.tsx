@@ -1,12 +1,12 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 import "../../global.css";
 import { View } from "react-native";
-import { ApText } from "@/src/components/Text";
+import { ApText } from "@/src/components";
 
-export default function TabLayout() {
+const TabLayout = () => {
   const colors = useTheme();
   return (
     <Tabs
@@ -21,7 +21,8 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -63,7 +64,8 @@ export default function TabLayout() {
                   shadowOpacity: 0.3,
                   shadowRadius: 4,
                   elevation: 8,
-                }}>
+                }}
+              >
                 <Ionicons
                   name={focused ? "stats-chart-sharp" : "stats-chart-outline"}
                   size={28}
@@ -77,7 +79,8 @@ export default function TabLayout() {
                   fontSize: 12,
                   fontWeight: focused ? "600" : "400",
                   marginTop: 4,
-                }}>
+                }}
+              >
                 Progress
               </ApText>
             </View>
@@ -113,4 +116,6 @@ export default function TabLayout() {
       />
     </Tabs>
   );
-}
+};
+
+export default TabLayout;

@@ -1,6 +1,8 @@
 import React from "react";
-import ProgressScreen from "@/screens/progress";
+import ProgressScreen from "@/src/modules/progress/screen";
 
-export default function Index() {
+const Progress = () => {
   return <ProgressScreen />;
-}
+};
+
+export default Progress;

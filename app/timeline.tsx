@@ -1,6 +1,8 @@
 import React from "react";
-import TimelineScreen from "../screens/timeline";
+import TimelineScreen from "@/src/modules/timeline/screen";
 
-export default function TimelineRoute() {
+const Timeline = () => {
   return <TimelineScreen />;
-}
+};
+
+export default Timeline;

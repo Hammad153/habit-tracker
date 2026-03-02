@@ -5,7 +5,7 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { ApText } from "./Text";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 export interface IProps {
   title: React.ReactNode | string;

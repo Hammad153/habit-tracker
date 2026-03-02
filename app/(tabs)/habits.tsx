@@ -1,6 +1,8 @@
 import React from "react";
-import HabitsScreen from "@/screens/habits";
+import HabitPageScreen from "@/src/modules/habits/screen";
 
-export default function Index() {
-  return <HabitsScreen />;
-}
+const Habits = () => {
+  return <HabitPageScreen />;
+};
+
+export default Habits;

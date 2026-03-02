@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Easing } from "react-native";
 import { ApText } from "./Text";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 type LoaderVariant = "orbit" | "pulse" | "wave" | "ripple";
 type LoaderSize = "small" | "medium" | "large";

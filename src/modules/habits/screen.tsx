@@ -1,0 +1,94 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { View, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import {
+  ApScrollView,
+  ApLoader,
+  ApContainer,
+  ApHeader,
+} from "@/src/components";
+import { useSettingsState } from "@/src/modules/settings/context";
+import { useHabitState } from "./context";
+import HabitCard from "./components/HabitCard";
+
+const HabitPageScreen = () => {
+  const { colors } = useSettingsState();
+  const { loading, habits, fetchHabits } = useHabitState();
+  const [refreshing, setRefreshing] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    fetchHabits();
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchHabits().finally(() => {
+      setRefreshing(false);
+    });
+  }, []);
+
+  if (loading && !refreshing) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ApLoader />
+      </View>
+    );
+  }
+
+  return (
+    <ApContainer>
+      <View className="h-screen">
+        <ApHeader
+          title="Habits"
+          right={
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity onPress={() => router.push("/create-habit")}>
+                <View className="w-10 h-10 items-center justify-center rounded-full bg-primary/10">
+                  <Ionicons name="add" size={24} color={colors.primary} />
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/manage-habits")}>
+                <View className="w-10 h-10 items-center justify-center rounded-full bg-primary/10">
+                  <Ionicons
+                    name="settings-outline"
+                    size={20}
+                    color={colors.primary}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+        <ApScrollView
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+        >
+          <View>
+            {habits?.map((habit) => (
+              <HabitCard
+                key={habit.id}
+                id={habit.id}
+                title={habit.title}
+                subtitle={habit.subtitle}
+                icon={habit.icon}
+                iconColor={habit.iconColor}
+                iconBg={habit.iconBg}
+                isCompleted={habit.completions?.some(
+                  (c: any) => c.date === today,
+                )}
+                selectedDate={today}
+                variant="toggle"
+                onRefresh={handleRefresh}
+              />
+            ))}
+          </View>
+        </ApScrollView>
+      </View>
+    </ApContainer>
+  );
+};
+
+export default HabitPageScreen;

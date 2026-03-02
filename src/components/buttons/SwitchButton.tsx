@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { View, Pressable, Animated, StyleSheet } from "react-native";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 interface ToggleProps {
   isEnabled: boolean;

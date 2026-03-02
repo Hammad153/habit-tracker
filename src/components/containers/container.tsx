@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 interface Iprops {
   children: React.ReactNode;

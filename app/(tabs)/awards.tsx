@@ -1,6 +1,8 @@
 import React from "react";
-import AwardScreen from "@/screens/awards";
+import AwardsScreen from "@/src/modules/awards/screen";
 
-export default function Index() {
-  return <AwardScreen />;
-}
+const Awards = () => {
+  return <AwardsScreen />;
+};
+
+export default Awards;

@@ -1,6 +1,8 @@
 import React from "react";
-import ManageHabitsScreen from "@/modules/habits/components/manage-habit";
+import ManageHabitsScreen from "@/src/modules/habits/components/manage-habit";
 
-export default function ManageHabitsRoute() {
+const ManageHabitsRoute = () => {
   return <ManageHabitsScreen />;
-}
+};
+
+export default ManageHabitsRoute;

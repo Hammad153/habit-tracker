@@ -1,6 +1,8 @@
 import React from "react";
-import ProfileScreen from "@/screens/profile";
+import ProfileScreen from "@/src/modules/profile/screen";
 
-export default function Index() {
+const Profile = () => {
   return <ProfileScreen />;
-}
+};
+
+export default Profile;

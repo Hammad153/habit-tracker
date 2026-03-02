@@ -1,8 +1,8 @@
 import * as Haptics from "expo-haptics";
-import { SettingsProvider, useSettings } from "../context/SettingsContext";
+import { useSettingsState } from "../modules/settings/context";
 
 export const useFeedback = () => {
-  const { soundEnabled, hapticEnabled } = useSettings();
+  const { soundEnabled, hapticEnabled } = useSettingsState();
 
   const triggerHaptic = async (
     type:
