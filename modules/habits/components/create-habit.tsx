@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
 import ApContainer from "@/src/components/containers/container";
+import { ApHeader } from "@/src/components/Header";
 
 export default function CreateHabitScreen() {
   const colors = useTheme();
@@ -51,15 +52,10 @@ export default function CreateHabitScreen() {
 
   return (
     <ApContainer>
-      <View className="flex-row items-center justify-center px-5 py-4">
-        <ApText size="lg" font="bold" color={colors.textPrimary}>
-          New Habit
-        </ApText>
-      </View>
-
+      <ApHeader title="New Habit" hasBackButton />
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         {/* Live Preview Card */}
-        <View className="px-5 mt-4">
+        <View className="px-5 mt-4 rounded-3xl">
           <LinearGradient
             colors={[selectedColor + "40", colors.surface]}
             start={{ x: 0, y: 0 }}

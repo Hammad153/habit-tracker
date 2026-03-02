@@ -12,7 +12,8 @@ const ApContainer: React.FC<Iprops> = ({ children, className }) => {
   return (
     <View
       style={{ backgroundColor: colors.background }}
-      className={`${className}`}>
+      className={`flex-1 ${className}`}
+    >
       {children}
     </View>
   );

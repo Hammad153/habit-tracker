@@ -55,7 +55,8 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
         shadowOpacity: 0.1,
         shadowRadius: 20,
         elevation: 5,
-      }}>
+      }}
+    >
       <View
         className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10"
         style={{ backgroundColor: colors.primary }}
@@ -78,7 +79,8 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             size="2xl"
             font="bold"
             color={colors.textPrimary}
-            className="mb-2">
+            className="mb-2"
+          >
             {completed}/{total} Habits
           </ApText>
           <ApText size="sm" color={colors.textSecondary} font="medium">
@@ -109,7 +111,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             />
           </Svg>
           <View className="absolute inset-0 items-center justify-center">
-            <ApText size="xs" font="bold" color={colors.textPrimary}>
+            <ApText size="sm" font="bold" color={colors.white}>
               {Math.round(percentage)}%
             </ApText>
           </View>
