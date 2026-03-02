@@ -1,4 +1,5 @@
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
+import ApLoader from "@/src/components/Loader";
 import HabitCard from "./components/HabitCard";
 import React from "react";
 import { useHabits } from "@/hooks/useHabits";
@@ -9,7 +10,7 @@ const Habits = () => {
   const { colors } = useSettings();
 
   if (isLoading) {
-    return <ActivityIndicator color={colors.primary} />;
+    return <ApLoader />;
   }
 
   const today = new Date().toISOString().split("T")[0];

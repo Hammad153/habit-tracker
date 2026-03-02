@@ -1,7 +1,8 @@
 import React from "react";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
+import ApLoader from "@/src/components/Loader";
 import { ApScrollView } from "@/src/components/ScrollView";
 import { ApText } from "@/src/components/Text";
 import LevelProgress from "./components/LevelProgress";
@@ -18,13 +19,7 @@ export default function AwardsScreen() {
   const { data: profile, isLoading: loadingProfile } = useProfile();
 
   if (loadingAwards || loadingUserBadges || loadingProfile) {
-    return (
-      <ApContainer>
-        <View className="flex-1 justify-center items-center bg-background">
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      </ApContainer>
-    );
+    return <ApLoader />;
   }
 
   const STREAK_BADGES =

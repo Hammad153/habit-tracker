@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { View, Pressable, ActivityIndicator } from "react-native";
+import { View, Pressable } from "react-native";
+import ApLoader from "@/src/components/Loader";
 import { ApHeader } from "@/src/components/Header";
 import ApContainer from "@/src/components/containers/container";
 import { ApScrollView } from "@/src/components/ScrollView";
@@ -104,11 +105,7 @@ export default function ProgressScreen() {
                 Habit Breakdown
               </ApText>
               {isLoading ? (
-                <ActivityIndicator
-                  size="large"
-                  color={colors.primary}
-                  className="my-4"
-                />
+                <ApLoader size="small" />
               ) : habitBreakdown.length === 0 ? (
                 <ApText
                   size="sm"

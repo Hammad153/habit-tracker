@@ -1,11 +1,11 @@
 import React from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { ApText } from "@/src/components/Text";
 import { useSettings } from "@/src/context/SettingsContext";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
+import { ApScrollView } from "@/src/components/ScrollView";
 
 export default function AppearanceScreen() {
   const { themeMode, setThemeMode, colors } = useSettings();
@@ -18,13 +18,14 @@ export default function AppearanceScreen() {
 
   return (
     <ApContainer className="flex-1">
-      <ApHeader title="Appearance" hasBackButton onBack={() => router.back()} />
-      <ScrollView className="flex-1 px-5 pt-6">
+      <ApHeader title="Appearance" hasBackButton />
+      <ApScrollView className="flex-1 px-5 pt-6">
         <ApText
           size="sm"
           color={colors.textMuted}
           className="mb-4 uppercase"
-          font="bold">
+          font="bold"
+        >
           Theme Mode
         </ApText>
         <View className="bg-surface rounded-2xl overflow-hidden">
@@ -35,11 +36,13 @@ export default function AppearanceScreen() {
               className={`flex-row items-center justify-between p-4 ${
                 index !== themes.length - 1 ? "border-b" : ""
               }`}
-              style={{ borderBottomColor: colors.surfaceBorder }}>
+              style={{ borderBottomColor: colors.surfaceBorder }}
+            >
               <View className="flex-row items-center">
                 <View
                   className="w-10 h-10 rounded-full items-center justify-center mr-4"
-                  style={{ backgroundColor: colors.background }}>
+                  style={{ backgroundColor: colors.background }}
+                >
                   <Ionicons
                     name={theme.icon as any}
                     size={20}
@@ -55,7 +58,8 @@ export default function AppearanceScreen() {
                       ? colors.primary
                       : colors.textSecondary
                   }
-                  font={themeMode === theme.id ? "bold" : "medium"}>
+                  font={themeMode === theme.id ? "bold" : "medium"}
+                >
                   {theme.label}
                 </ApText>
               </View>
@@ -73,7 +77,7 @@ export default function AppearanceScreen() {
           System mode will automatically switch between light and dark themes
           based on your device settings.
         </ApText>
-      </ScrollView>
+      </ApScrollView>
     </ApContainer>
   );
 }

@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+import { View, Image, TouchableOpacity, Alert } from "react-native";
+import ApLoader from "@/src/components/Loader";
 import { ApScrollView } from "@/src/components/ScrollView";
 import ApContainer from "@/src/components/containers/container";
 import { ApHeader } from "@/src/components/Header";
@@ -46,7 +41,7 @@ export default function ProfileScreen() {
     return (
       <ApContainer>
         <View className="flex-1 justify-center items-center bg-background">
-          <ActivityIndicator color={colors.primary} />
+          <ApLoader />
         </View>
       </ApContainer>
     );

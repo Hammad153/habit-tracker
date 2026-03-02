@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText } from "../../../src/components/Text";
@@ -10,6 +9,7 @@ import { toast } from "@/src/services/toast";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
+import ApContainer from "@/src/components/containers/container";
 
 export default function CreateHabitScreen() {
   const colors = useTheme();
@@ -50,12 +50,7 @@ export default function CreateHabitScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        marginTop: -60,
-        backgroundColor: colors.background,
-      }}>
+    <ApContainer>
       <View className="flex-row items-center justify-center px-5 py-4">
         <ApText size="lg" font="bold" color={colors.textPrimary}>
           New Habit
@@ -70,11 +65,13 @@ export default function CreateHabitScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="p-6 rounded-3xl border"
-            style={{ borderColor: colors.surfaceBorder }}>
+            style={{ borderColor: colors.surfaceBorder }}
+          >
             <View className="flex-row items-center">
               <View
                 className="w-16 h-16 rounded-2xl items-center justify-center"
-                style={{ backgroundColor: `${selectedColor}20` }}>
+                style={{ backgroundColor: `${selectedColor}20` }}
+              >
                 <Ionicons
                   name={selectedIcon as any}
                   size={32}
@@ -86,7 +83,8 @@ export default function CreateHabitScreen() {
                   size="lg"
                   font="bold"
                   color={colors.textPrimary}
-                  numberOfLines={1}>
+                  numberOfLines={1}
+                >
                   {name || "Habit Name"}
                 </ApText>
                 <ApText size="xs" color={colors.textMuted}>
@@ -104,12 +102,14 @@ export default function CreateHabitScreen() {
             font="bold"
             color={colors.textMuted}
             className="mb-2 uppercase"
-            style={{ letterSpacing: 1 }}>
+            style={{ letterSpacing: 1 }}
+          >
             Basic Information
           </ApText>
           <View
             className="bg-surface rounded-2xl p-4 border"
-            style={{ borderColor: colors.surfaceBorder }}>
+            style={{ borderColor: colors.surfaceBorder }}
+          >
             <TextInput
               className="text-lg p-0"
               style={{ color: colors.textPrimary }}
@@ -126,18 +126,21 @@ export default function CreateHabitScreen() {
             font="bold"
             color={colors.textMuted}
             className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}>
+            style={{ letterSpacing: 1 }}
+          >
             Appearance - Color
           </ApText>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row">
+            className="flex-row"
+          >
             {HABIT_COLORS.map((color) => (
               <TouchableOpacity
                 key={color}
                 onPress={() => handleColorSelect(color)}
-                className="mr-3 items-center justify-center">
+                className="mr-3 items-center justify-center"
+              >
                 <View
                   className="w-12 h-12 rounded-full items-center justify-center border-2"
                   style={{
@@ -146,7 +149,8 @@ export default function CreateHabitScreen() {
                       selectedColor === color
                         ? colors.textPrimary
                         : "transparent",
-                  }}>
+                  }}
+                >
                   {selectedColor === color && (
                     <Ionicons
                       name="checkmark"
@@ -165,7 +169,8 @@ export default function CreateHabitScreen() {
             font="bold"
             color={colors.textMuted}
             className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}>
+            style={{ letterSpacing: 1 }}
+          >
             Appearance - Icon
           </ApText>
           <View className="flex-row flex-wrap justify-between">
@@ -181,7 +186,8 @@ export default function CreateHabitScreen() {
                     selectedIcon === icon
                       ? colors.primary
                       : colors.surfaceBorder,
-                }}>
+                }}
+              >
                 <Ionicons
                   name={icon as any}
                   size={24}
@@ -199,7 +205,8 @@ export default function CreateHabitScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           className="w-3/6 h-12 border flex items-center justify-center rounded-full px-5 py-2"
-          style={{ borderColor: colors.surfaceBorder }}>
+          style={{ borderColor: colors.surfaceBorder }}
+        >
           <ApText size="base" color={colors.textMuted}>
             Cancel
           </ApText>
@@ -213,15 +220,17 @@ export default function CreateHabitScreen() {
           }`}
           style={{
             backgroundColor: loading ? colors.surfaceInactive : colors.primary,
-          }}>
+          }}
+        >
           <ApText
             size="sm"
             font="bold"
-            color={loading ? colors.textMuted : colors.background}>
+            color={loading ? colors.textMuted : colors.background}
+          >
             {loading ? "Creating..." : "Create"}
           </ApText>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </ApContainer>
   );
 }

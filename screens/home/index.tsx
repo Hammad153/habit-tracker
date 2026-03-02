@@ -1,5 +1,6 @@
 import React from "react";
-import { View, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import ApLoader from "@/src/components/Loader";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTheme } from "@/src/context/SettingsContext";
@@ -26,7 +27,7 @@ const Home: React.FC = () => {
   if (loadingHabits || loadingProfile) {
     return (
       <ApContainer className="flex-1 justify-center items-center">
-        <ActivityIndicator color={colors.primary} />
+        <ApLoader />
       </ApContainer>
     );
   }
@@ -42,7 +43,8 @@ const Home: React.FC = () => {
             borderRadius: 20,
             paddingLeft: 20,
             paddingRight: 20,
-          }}>
+          }}
+        >
           <UserGreeting userName={profile?.name || "User"} />
         </View>
 
@@ -65,7 +67,8 @@ const Home: React.FC = () => {
             size="xl"
             font="bold"
             color={colors.textPrimary}
-            className="mb-2">
+            className="mb-2"
+          >
             Your Habits
           </ApText>
           <View>
@@ -104,7 +107,8 @@ const Home: React.FC = () => {
           shadowOpacity: 0.3,
           shadowRadius: 8,
           elevation: 5,
-        }}>
+        }}
+      >
         <Ionicons name="add" size={30} color={colors.background} />
       </TouchableOpacity>
     </ApContainer>

@@ -3,6 +3,7 @@ import { View, StyleProp, ViewStyle, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { ApText } from "./Text";
 import { useTheme } from "@/src/context/SettingsContext";
 
@@ -40,6 +41,16 @@ export const ApHeader: React.FC<IProps> = ({
   transparent = false,
 }) => {
   const colors = useTheme();
+  const router = useRouter();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.back();
+    }
+  };
+
   return (
     <View
       style={[
@@ -89,7 +100,7 @@ export const ApHeader: React.FC<IProps> = ({
           <View className="flex-row items-center" style={{ width: 60 }}>
             {hasBackButton && (
               <Pressable
-                onPress={onBack}
+                onPress={handleBack}
                 className={`w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
                 style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
                 hitSlop={10}

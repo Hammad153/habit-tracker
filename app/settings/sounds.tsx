@@ -39,17 +39,14 @@ export default function SoundsScreen() {
 
   return (
     <ApContainer className="flex-1">
-      <ApHeader
-        title="Sounds & Haptics"
-        hasBackButton
-        onBack={() => router.back()}
-      />
+      <ApHeader title="Sounds & Haptics" hasBackButton />
       <ScrollView className="flex-1 px-5 pt-6">
         <ApText
           size="sm"
           color={colors.textMuted}
           className="mb-4 uppercase"
-          font="bold">
+          font="bold"
+        >
           Feedback
         </ApText>
         <View className="bg-surface rounded-2xl overflow-hidden">
@@ -57,12 +54,14 @@ export default function SoundsScreen() {
             <View
               key={item.id}
               className={`p-4 ${index !== settings.length - 1 ? "border-b" : ""}`}
-              style={{ borderBottomColor: colors.surfaceBorder }}>
+              style={{ borderBottomColor: colors.surfaceBorder }}
+            >
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <View
                     className="w-10 h-10 rounded-full items-center justify-center mr-4"
-                    style={{ backgroundColor: colors.background }}>
+                    style={{ backgroundColor: colors.background }}
+                  >
                     <Ionicons
                       name={item.icon as any}
                       size={20}
@@ -72,7 +71,8 @@ export default function SoundsScreen() {
                   <ApText
                     size="base"
                     color={colors.textPrimary}
-                    font="semibold">
+                    font="semibold"
+                  >
                     {item.label}
                   </ApText>
                 </View>
