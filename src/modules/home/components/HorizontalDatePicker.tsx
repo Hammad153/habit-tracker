@@ -1,8 +1,9 @@
-import React, { useRef } from "react";
-import { View, ScrollView, TouchableOpacity } from "react-native";
-import { format, addDays, startOfWeek, isSameDay } from "date-fns";
+import React from "react";
+import { View, TouchableOpacity } from "react-native";
+import { format, addDays, startOfWeek, isSameDay, endOfWeek } from "date-fns";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
+import { ApScrollView } from "@/src/components";
 
 interface HorizontalDatePickerProps {
   selectedDate: Date;
@@ -13,22 +14,16 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   selectedDate,
   onDateChange,
 }) => {
-  const scrollViewRef = useRef<ScrollView>(null);
   const colors = useTheme();
 
-  // Generate dates for current week
-  const startDate = startOfWeek(new Date(), { weekStartsOn: 1 }); // Start Monday
-  const weekDates = Array.from({ length: 7 }).map((_, i) =>
+  const startDate = startOfWeek(new Date(), { weekStartsOn: 0 }); // Start Monday
+  const weekDates = Array.from({ length: 14 }).map((_, i) =>
     addDays(startDate, i),
   );
 
   return (
     <View className="my-4">
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20 }}>
+      <ApScrollView horizontal className="px-0">
         {weekDates.map((date, index) => {
           const isSelected = isSameDay(date, selectedDate);
           const isToday = isSameDay(date, new Date());
@@ -54,19 +49,22 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
                   : {
                       backgroundColor: colors.surface,
                     }
-              }>
+              }
+            >
               <ApText
                 size="xs"
                 font="semibold"
                 color={isSelected ? colors.background : colors.textMuted}
-                className="uppercase">
+                className="uppercase"
+              >
                 {dayName}
               </ApText>
               <ApText
                 size="lg"
                 font="bold"
                 color={isSelected ? colors.background : colors.textPrimary}
-                className="mt-1">
+                className="mt-1"
+              >
                 {dayNumber}
               </ApText>
               {isToday && !isSelected && (
@@ -78,7 +76,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </ApScrollView>
     </View>
   );
 };

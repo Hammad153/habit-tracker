@@ -39,13 +39,14 @@ const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
               ? colors.primary
               : colors.surfaceInactive,
           },
-        ]}>
+        ]}
+      >
         <Animated.View
           style={[
             styles.thumb,
             {
               transform: [{ translateX }],
-              backgroundColor: colors.background,
+              backgroundColor: colors.white,
             },
           ]}
         />

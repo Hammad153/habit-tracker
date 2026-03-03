@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
+import { ToggleButton } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useFeedback } from "@/src/utils/feedback";
 import Svg, { Circle } from "react-native-svg";
@@ -202,27 +203,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                     </ApText>
                   )}
                 </View>
-                <TouchableOpacity
-                  onPress={handleToggle}
-                  onLongPress={handleLongPress}
-                  delayLongPress={500}
-                  className="w-10 h-10 rounded-xl items-center justify-center"
-                  style={{
-                    backgroundColor: isCompleted
-                      ? colors.primary
-                      : colors.backgroundLight,
-                    borderWidth: 1,
-                    borderColor: isCompleted
-                      ? colors.primary
-                      : colors.surfaceBorder,
-                  }}
-                >
-                  <Ionicons
-                    name={isCompleted ? "checkmark" : "add"}
-                    size={22}
-                    color={isCompleted ? colors.background : colors.primary}
-                  />
-                </TouchableOpacity>
+                <ToggleButton isEnabled={isCompleted} onToggle={handleToggle} />
               </View>
             )}
             {variant === "edit" && (
