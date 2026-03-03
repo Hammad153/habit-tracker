@@ -93,7 +93,7 @@ const HomeScreen = () => {
 
       <TouchableOpacity
         onPress={() => router.push("/create-habit")}
-        className="absolute bottom-10 right-5 w-14 h-14 rounded-full items-center justify-center z-50"
+        className="absolute bottom-8 right-5 w-16 h-16 rounded-full items-center justify-center z-50"
         style={{
           backgroundColor: colors.primary,
           shadowColor: colors.primary,
@@ -103,7 +103,7 @@ const HomeScreen = () => {
           elevation: 5,
         }}
       >
-        <Ionicons name="add" size={30} color={colors.background} />
+        <Ionicons name="add" size={28} color={colors.background} />
       </TouchableOpacity>
     </ApContainer>
   );

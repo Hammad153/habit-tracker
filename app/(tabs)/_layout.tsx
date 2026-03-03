@@ -63,7 +63,7 @@ const TabLayout = () => {
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.3,
                   shadowRadius: 4,
-                  elevation: 8,
+                  elevation: 4,
                 }}
               >
                 <Ionicons

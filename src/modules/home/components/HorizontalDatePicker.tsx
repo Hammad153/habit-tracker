@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { format, addDays, startOfWeek, isSameDay, endOfWeek } from "date-fns";
+import {
+  format,
+  addDays,
+  startOfWeek,
+  isSameDay,
+  isAfter,
+  startOfDay,
+} from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
-import { ApScrollView } from "@/src/components";
+import { ApScrollView, ApDatePicker } from "@/src/components";
 
 interface HorizontalDatePickerProps {
   selectedDate: Date;
@@ -15,11 +23,17 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   onDateChange,
 }) => {
   const colors = useTheme();
+  const [showPicker, setShowPicker] = useState(false);
+  const today = startOfDay(new Date());
 
-  const startDate = startOfWeek(new Date(), { weekStartsOn: 0 }); // Start Monday
-  const weekDates = Array.from({ length: 14 }).map((_, i) =>
-    addDays(startDate, i),
-  );
+  const startDate = startOfWeek(new Date(), { weekStartsOn: 0 });
+  const weekDates = Array.from({ length: 7 })
+    .map((_, i) => addDays(startDate, i))
+    .filter((date) => !isAfter(startOfDay(date), today));
+
+  const handlePickerSelect = (date: Date) => {
+    onDateChange(date);
+  };
 
   return (
     <View className="my-4">
@@ -76,7 +90,39 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
             </TouchableOpacity>
           );
         })}
+
+        <TouchableOpacity
+          onPress={() => setShowPicker(true)}
+          className="items-center justify-center w-14 h-20 mx-1.5 rounded-2xl"
+          style={{
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.surfaceBorder,
+            borderStyle: "dashed",
+          }}
+        >
+          <Ionicons
+            name="calendar-outline"
+            size={22}
+            color={colors.textMuted}
+          />
+          <ApText
+            size="xs"
+            font="medium"
+            color={colors.textMuted}
+            className="mt-1"
+          >
+            Filter
+          </ApText>
+        </TouchableOpacity>
       </ApScrollView>
+
+      <ApDatePicker
+        visible={showPicker}
+        onClose={() => setShowPicker(false)}
+        onSelect={handlePickerSelect}
+        selectedDate={selectedDate}
+      />
     </View>
   );
 };
