@@ -81,7 +81,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             color={colors.textPrimary}
             className="mb-2"
           >
-            {completed}/{total} Habits
+            {completed}/{total}Habits
           </ApText>
           <ApText size="sm" color={colors.textSecondary} font="medium">
             {getMotivationalText()}

@@ -189,20 +189,6 @@ const HabitCard: React.FC<HabitCardProps> = ({
           <View className="ml-2">
             {variant === "toggle" && (
               <View className="flex-row items-center">
-                <View className="items-end mr-3">
-                  <ApText
-                    size="xs"
-                    font="bold"
-                    color={isCompleted ? colors.primary : colors.textPrimary}
-                  >
-                    {value}/{goal}
-                  </ApText>
-                  {unit && (
-                    <ApText size="xs" color={colors.textMuted}>
-                      {unit}
-                    </ApText>
-                  )}
-                </View>
                 <ToggleButton isEnabled={isCompleted} onToggle={handleToggle} />
               </View>
             )}
