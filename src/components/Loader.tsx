@@ -24,6 +24,8 @@ const SIZES: Record<LoaderSize, number> = {
   large: 90,
 };
 
+import { Portal } from "react-native-paper";
+
 const ApLoader: React.FC<IProps> = ({
   variant = "orbit",
   size = "medium",
@@ -54,11 +56,13 @@ const ApLoader: React.FC<IProps> = ({
   );
 
   return overlay ? (
-    <View
-      style={[styles.overlay, { backgroundColor: colors.background + "DD" }]}
-    >
-      {inner}
-    </View>
+    <Portal>
+      <View
+        style={[styles.overlay, { backgroundColor: colors.background + "DD" }]}
+      >
+        {inner}
+      </View>
+    </Portal>
   ) : (
     inner
   );

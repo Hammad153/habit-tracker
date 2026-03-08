@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { Appbar } from "react-native-paper";
 import { ApText } from "./Text";
 import { useTheme } from "@/src/modules/settings/context";
 
@@ -95,24 +96,25 @@ export const ApHeader: React.FC<IProps> = ({
         </>
       )}
 
-      <View className={`px-5 pt-4 pb-4 ${headerClassName}`}>
-        <View className="flex-row items-center">
-          <View className="flex-row items-center" style={{ width: 60 }}>
-            {hasBackButton && (
-              <Pressable
-                onPress={handleBack}
-                className={`w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
-                style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
-                hitSlop={10}
-              >
-                <Ionicons name="arrow-back" size={20} color={colors.primary} />
-              </Pressable>
-            )}
-            {left}
-          </View>
+      <Appbar.Header
+        style={{ backgroundColor: "transparent", elevation: 0 }}
+        className={`px-2 ${headerClassName}`}
+      >
+        <View className="flex-row items-center" style={{ width: 60 }}>
+          {hasBackButton && (
+            <Appbar.BackAction
+              onPress={handleBack}
+              color={colors.primary}
+              className={`${backContainerClassName}`}
+              style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+            />
+          )}
+          {left}
+        </View>
 
-          <View className="flex-1 items-center justify-center">
-            {typeof title === "string" ? (
+        <Appbar.Content
+          title={
+            typeof title === "string" ? (
               <ApText
                 font="bold"
                 size="2xl"
@@ -124,35 +126,35 @@ export const ApHeader: React.FC<IProps> = ({
               </ApText>
             ) : (
               title
-            )}
+            )
+          }
+          subtitle={
+            subheader ? (
+              typeof subheader === "string" ? (
+                <ApText
+                  size="sm"
+                  color={colors.primary}
+                  font="bold"
+                  style={{ letterSpacing: 0.5 }}
+                >
+                  {subheader.toUpperCase()}
+                </ApText>
+              ) : (
+                subheader
+              )
+            ) : undefined
+          }
+          style={{ alignItems: "center" }}
+        />
 
-            {subheader && (
-              <View className="mt-1">
-                {typeof subheader === "string" ? (
-                  <ApText
-                    size="sm"
-                    color={colors.primary}
-                    font="bold"
-                    style={{ letterSpacing: 0.5 }}
-                  >
-                    {subheader.toUpperCase()}
-                  </ApText>
-                ) : (
-                  subheader
-                )}
-              </View>
-            )}
-          </View>
-
-          <View
-            className="flex-row items-center justify-end"
-            style={{ width: 60 }}
-          >
-            {icons}
-            {right}
-          </View>
+        <View
+          className="flex-row items-center justify-end"
+          style={{ width: 60 }}
+        >
+          {icons}
+          {right}
         </View>
-      </View>
+      </Appbar.Header>
     </View>
   );
 };

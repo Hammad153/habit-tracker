@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, TextInput } from "react-native";
+import { View } from "react-native";
+import { TextInput, Button } from "react-native-paper";
 import { ApText } from "@/src/components/Text";
 import { ApModal } from "@/src/components/Modal";
 import { useTheme } from "@/src/modules/settings/context";
@@ -48,8 +49,15 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
             value={value}
             onChangeText={setValue}
             keyboardType="numeric"
-            className="text-5xl font-bold mr-2"
-            style={{ color: colors.primary }}
+            mode="flat"
+            textColor={colors.primary}
+            style={{
+              backgroundColor: "transparent",
+              fontSize: 48,
+              fontWeight: "bold",
+              textAlign: "center",
+              width: 120,
+            }}
             autoFocus
             selectTextOnFocus
           />
@@ -60,27 +68,28 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       </View>
 
       <View className="flex-row space-x-3 gap-x-2">
-        <TouchableOpacity
+        <Button
+          mode="outlined"
           onPress={onClose}
-          className="flex-1 py-4 rounded-2xl border items-center"
+          textColor={colors.textMuted}
           style={{
-            backgroundColor: colors.surface,
+            flex: 1,
             borderColor: colors.surfaceBorder,
+            borderRadius: 16,
           }}
         >
-          <ApText font="semibold" color={colors.textMuted}>
-            Cancel
-          </ApText>
-        </TouchableOpacity>
-        <TouchableOpacity
+          Cancel
+        </Button>
+        <Button
+          mode="contained"
           onPress={handleSave}
-          className="flex-1 py-4 rounded-2xl items-center"
-          style={{ backgroundColor: colors.primary }}
+          buttonColor={colors.primary}
+          textColor={colors.background}
+          labelStyle={{ fontWeight: "bold" }}
+          style={{ flex: 1, borderRadius: 16 }}
         >
-          <ApText font="bold" color={colors.background}>
-            Save Progress
-          </ApText>
-        </TouchableOpacity>
+          Save Progress
+        </Button>
       </View>
     </ApModal>
   );

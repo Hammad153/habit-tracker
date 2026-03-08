@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Button } from "react-native-paper";
 import {
   ApLoader,
   ApScrollView,
@@ -173,27 +174,28 @@ const ProfileScreen = () => {
         subTitle="Are you sure you want to log out?"
       >
         <View className="flex-row gap-x-2 mt-2">
-          <TouchableOpacity
+          <Button
+            mode="outlined"
             onPress={() => setShowLogoutModal(false)}
-            className="flex-1 py-4 rounded-2xl border items-center"
+            textColor={colors.textMuted}
             style={{
-              backgroundColor: colors.surface,
+              flex: 1,
               borderColor: colors.surfaceBorder,
+              borderRadius: 16,
             }}
           >
-            <ApText font="semibold" color={colors.textMuted}>
-              Cancel
-            </ApText>
-          </TouchableOpacity>
-          <TouchableOpacity
+            Cancel
+          </Button>
+          <Button
+            mode="contained"
             onPress={confirmLogout}
-            className="flex-1 py-4 rounded-2xl items-center"
-            style={{ backgroundColor: colors.danger }}
+            buttonColor={colors.danger}
+            textColor={colors.white}
+            labelStyle={{ fontWeight: "bold" }}
+            style={{ flex: 1, borderRadius: 16 }}
           >
-            <ApText font="bold" color={colors.white}>
-              Log Out
-            </ApText>
-          </TouchableOpacity>
+            Log Out
+          </Button>
         </View>
       </ApModal>
     </ApContainer>

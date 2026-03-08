@@ -1,6 +1,7 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppContextProvider } from "@/src/context";
+import { PaperProvider } from "react-native-paper";
 
 interface IProps {
   children: React.ReactNode;
@@ -18,9 +19,11 @@ const queryClient = new QueryClient({
 
 const ApProvider: React.FC<IProps> = ({ children }) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AppContextProvider>{children}</AppContextProvider>
-    </QueryClientProvider>
+    <PaperProvider>
+      <QueryClientProvider client={queryClient}>
+        <AppContextProvider>{children}</AppContextProvider>
+      </QueryClientProvider>
+    </PaperProvider>
   );
 };
 

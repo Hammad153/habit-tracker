@@ -1,6 +1,7 @@
 import React from "react";
-import { View, ScrollView, Switch } from "react-native";
+import { View, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Switch } from "react-native-paper";
 import { ApText, ApContainer, ApHeader } from "@/src/components";
 import { useSettingsState } from "./context";
 
@@ -46,7 +47,10 @@ const SoundsScreen = () => {
         >
           Feedback
         </ApText>
-        <View className="bg-surface rounded-2xl overflow-hidden">
+        <View
+          className="rounded-2xl overflow-hidden"
+          style={{ backgroundColor: colors.surface }}
+        >
           {settings.map((item, index) => (
             <View
               key={item.id}
@@ -76,11 +80,7 @@ const SoundsScreen = () => {
                 <Switch
                   value={item.value}
                   onValueChange={item.onToggle}
-                  trackColor={{
-                    false: colors.surfaceInactive,
-                    true: colors.primary + "80",
-                  }}
-                  thumbColor={item.value ? colors.primary : colors.textMuted}
+                  color={colors.primary}
                 />
               </View>
               <ApText size="xs" color={colors.textMuted} className="mt-2 ml-14">

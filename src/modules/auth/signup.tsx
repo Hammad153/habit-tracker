@@ -1,15 +1,8 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { TextInput, Button } from "react-native-paper";
+import { ApText } from "@/src/components/Text";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
@@ -64,121 +57,104 @@ const SignupScreen = () => {
         className="px-6 pt-20"
       >
         <View className="mb-12">
-          <Text
-            className="text-4xl font-bold mb-2"
-            style={{ color: colors.textPrimary }}
+          <ApText
+            size="3xl"
+            font="bold"
+            color={colors.textPrimary}
+            className="mb-2"
           >
             Create Account
-          </Text>
-          <Text className="text-lg" style={{ color: colors.textSecondary }}>
+          </ApText>
+          <ApText size="lg" color={colors.textSecondary}>
             Join us and start tracking your habits
-          </Text>
+          </ApText>
         </View>
 
         <View className="space-y-6">
-          <View>
-            <Text
-              className="mb-2 font-medium"
-              style={{ color: colors.textPrimary }}
-            >
-              Full Name
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter your name"
-              placeholderTextColor={colors.textMuted}
-              className="px-4 py-4 rounded-xl border"
-              style={{
-                backgroundColor: colors.surface,
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-              }}
-            />
-          </View>
+          <TextInput
+            label="Full Name"
+            value={name}
+            onChangeText={setName}
+            placeholder="Enter your name"
+            mode="outlined"
+            outlineColor={colors.surfaceBorder}
+            activeOutlineColor={colors.primary}
+            textColor={colors.textPrimary}
+            outlineStyle={{ borderRadius: 12 }}
+            style={{ backgroundColor: colors.surface, marginBottom: 16 }}
+            left={
+              <TextInput.Icon icon="account-outline" color={colors.textMuted} />
+            }
+          />
 
-          <View className="mt-4">
-            <Text
-              className="mb-2 font-medium"
-              style={{ color: colors.textPrimary }}
-            >
-              Email Address
-            </Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              placeholderTextColor={colors.textMuted}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              className="px-4 py-4 rounded-xl border"
-              style={{
-                backgroundColor: colors.surface,
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-              }}
-            />
-          </View>
+          <TextInput
+            label="Email Address"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            mode="outlined"
+            outlineColor={colors.surfaceBorder}
+            activeOutlineColor={colors.primary}
+            textColor={colors.textPrimary}
+            outlineStyle={{ borderRadius: 12 }}
+            style={{ backgroundColor: colors.surface, marginBottom: 16 }}
+            left={
+              <TextInput.Icon icon="email-outline" color={colors.textMuted} />
+            }
+          />
 
-          <View className="mt-4">
-            <Text
-              className="mb-2 font-medium"
-              style={{ color: colors.textPrimary }}
-            >
-              Password
-            </Text>
-            <View className="relative">
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Create a password"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry={!showPassword}
-                className="px-4 py-4 rounded-xl border"
-                style={{
-                  backgroundColor: colors.surface,
-                  color: colors.textPrimary,
-                  borderColor: colors.surfaceBorder,
-                }}
-              />
-              <TouchableOpacity
+          <TextInput
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Create a password"
+            secureTextEntry={!showPassword}
+            mode="outlined"
+            outlineColor={colors.surfaceBorder}
+            activeOutlineColor={colors.primary}
+            textColor={colors.textPrimary}
+            outlineStyle={{ borderRadius: 12 }}
+            style={{ backgroundColor: colors.surface, marginBottom: 16 }}
+            left={
+              <TextInput.Icon icon="lock-outline" color={colors.textMuted} />
+            }
+            right={
+              <TextInput.Icon
+                icon={showPassword ? "eye-off" : "eye"}
+                color={colors.textMuted}
                 onPress={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2"
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={24}
-                  color={colors.textMuted}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
+              />
+            }
+          />
 
-          <TouchableOpacity
+          <Button
+            mode="contained"
             onPress={handleSignup}
+            loading={loading}
             disabled={loading}
-            className={`py-4 rounded-xl mt-8 items-center ${loading ? "opacity-70" : ""}`}
-            style={{ backgroundColor: colors.primary }}
+            buttonColor={colors.primary}
+            textColor={colors.background}
+            labelStyle={{
+              fontSize: 18,
+              paddingVertical: 6,
+              fontWeight: "bold",
+            }}
+            style={{ borderRadius: 12, marginTop: 24 }}
           >
-            <Text
-              className="font-bold text-lg"
-              style={{ color: colors.background }}
-            >
-              {loading ? "Creating Account..." : "Create Account"}
-            </Text>
-          </TouchableOpacity>
+            {loading ? "Creating Account..." : "Create Account"}
+          </Button>
         </View>
 
         <View className="flex-row justify-center mt-8 pb-10">
-          <Text style={{ color: colors.textSecondary }}>
+          <ApText color={colors.textSecondary}>
             Already have an account?{" "}
-          </Text>
+          </ApText>
           <Link href="/login" asChild>
-            <TouchableOpacity>
-              <Text className="font-bold" style={{ color: colors.primary }}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
+            <ApText font="bold" color={colors.primary} onPress={() => {}}>
+              Sign In
+            </ApText>
           </Link>
         </View>
       </ScrollView>

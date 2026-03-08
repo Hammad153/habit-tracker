@@ -1,5 +1,6 @@
 import React from "react";
-import { Text, TextStyle, StyleProp, Pressable } from "react-native";
+import { TextStyle, StyleProp, Pressable } from "react-native";
+import { Text } from "react-native-paper";
 
 export interface IProps {
   children: React.ReactNode;
@@ -85,7 +86,8 @@ export const ApText: React.FC<IProps> = ({
             fontFamily: FONT_MAP[font],
           },
           style,
-        ]}>
+        ]}
+      >
         {children}
       </Text>
     );
@@ -104,7 +106,8 @@ export const ApText: React.FC<IProps> = ({
           fontFamily: FONT_MAP[font],
         },
         style,
-      ]}>
+      ]}
+    >
       {children}
     </Text>
   );

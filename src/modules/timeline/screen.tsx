@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { format } from "date-fns";
+import { Chip, FAB } from "react-native-paper";
 import {
   ApLoader,
   ApText,
@@ -49,18 +50,17 @@ const TimelineScreen = () => {
         title="Your Journey"
         subheader={currentMonthYear}
         right={
-          <TouchableOpacity
-            className="flex-row items-center px-4 py-2 rounded-full border"
+          <Chip
+            icon="filter-variant"
+            mode="outlined"
+            textStyle={{ color: colors.textPrimary, fontSize: 12 }}
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
             }}
           >
-            <Ionicons name="filter" size={16} color={colors.primary} />
-            <ApText size="sm" color={colors.textPrimary} className="ml-2">
-              Filter
-            </ApText>
-          </TouchableOpacity>
+            Filter
+          </Chip>
         }
       />
       <ApScrollView
@@ -185,31 +185,33 @@ const TimelineScreen = () => {
         </View>
       </ApScrollView>
 
-      <TouchableOpacity
-        className="absolute bottom-8 right-5 w-14 h-14 rounded-full items-center justify-center"
-        style={{
-          backgroundColor: colors.primary,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 5,
-        }}
+      <FAB
+        icon="home"
         onPress={() => router.push("/")}
-      >
-        <Ionicons name="home" size={24} color={colors.background} />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        className="absolute bottom-8 left-5 w-12 h-12 rounded-full items-center justify-center border"
+        color={colors.background}
         style={{
+          position: "absolute",
+          bottom: 32,
+          right: 20,
+          backgroundColor: colors.primary,
+          borderRadius: 28,
+        }}
+      />
+
+      <FAB
+        icon="arrow-left"
+        size="small"
+        onPress={() => router.back()}
+        color={colors.textPrimary}
+        style={{
+          position: "absolute",
+          bottom: 32,
+          left: 20,
           backgroundColor: colors.surface,
           borderColor: colors.surfaceBorder,
+          borderWidth: 1,
         }}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-      </TouchableOpacity>
+      />
     </ApContainer>
   );
 };
