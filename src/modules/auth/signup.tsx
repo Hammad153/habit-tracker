@@ -151,8 +151,8 @@ const SignupScreen = () => {
           <ApText color={colors.textSecondary}>
             Already have an account?{" "}
           </ApText>
-          <Link href="/login" asChild>
-            <ApText font="bold" color={colors.primary} onPress={() => {}}>
+          <Link href="/login">
+            <ApText font="bold" color={colors.primary}>
               Sign In
             </ApText>
           </Link>

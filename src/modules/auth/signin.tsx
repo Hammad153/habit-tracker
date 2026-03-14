@@ -132,8 +132,8 @@ const SigninScreen = () => {
 
         <View className="flex-row justify-center mt-8">
           <ApText color={colors.textSecondary}>Don't have an account? </ApText>
-          <Link href="/signup" asChild>
-            <ApText font="bold" color={colors.primary} onPress={() => {}}>
+          <Link href="/signup">
+            <ApText font="bold" color={colors.primary}>
               Sign Up
             </ApText>
           </Link>

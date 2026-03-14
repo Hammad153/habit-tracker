@@ -4,12 +4,16 @@ export class ToastService {
   static Success = (msg: string) => {
     if (Platform.OS === "android") {
       ToastAndroid.show(msg, ToastAndroid.LONG);
+    } else if (Platform.OS === "web") {
+      window.alert(msg);
     }
   };
 
   static Error = (msg: string) => {
     if (Platform.OS === "android") {
       ToastAndroid.show(msg, ToastAndroid.LONG);
+    } else if (Platform.OS === "web") {
+      window.alert(msg);
     }
   };
 

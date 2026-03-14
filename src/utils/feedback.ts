@@ -1,26 +1,26 @@
 import * as Haptics from "expo-haptics";
+import { Platform } from "react-native";
 import { useSettingsState } from "../modules/settings/context";
 
 export const useFeedback = () => {
   const { soundEnabled, hapticEnabled } = useSettingsState();
 
-  const triggerHaptic = async (
+  const triggerHaptic = (
     type:
       | Haptics.ImpactFeedbackStyle
       | Haptics.NotificationFeedbackType = Haptics.ImpactFeedbackStyle.Medium,
   ) => {
-    if (!hapticEnabled) return;
+    if (!hapticEnabled || Platform.OS === "web") return;
 
     if (Object.values(Haptics.ImpactFeedbackStyle).includes(type as any)) {
-      await Haptics.impactAsync(type as Haptics.ImpactFeedbackStyle);
+      Haptics.impactAsync(type as Haptics.ImpactFeedbackStyle);
     } else {
-      await Haptics.notificationAsync(type as Haptics.NotificationFeedbackType);
+      Haptics.notificationAsync(type as Haptics.NotificationFeedbackType);
     }
   };
 
-  const playSound = async (soundType: "success" | "click" | "error") => {
+  const playSound = (soundType: "success" | "click" | "error") => {
     if (!soundEnabled) return;
-
     console.log(`Playing sound: ${soundType}`);
   };
 
