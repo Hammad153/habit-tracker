@@ -1,7 +1,7 @@
 import axiosInstance from "@/src/libs/axios";
 
 export class ProfileService {
-  static get = (userId: string = "default-user") => {
+  static get = (userId: string) => {
     return axiosInstance
       .get(`/profile?userId=${userId}`)
       .then((res) => res.data);

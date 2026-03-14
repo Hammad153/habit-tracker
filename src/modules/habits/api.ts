@@ -1,7 +1,7 @@
 import axiosInstance from "@/src/libs/axios";
 
 export class HabitService {
-  static getAll = (userId: string = "default-user") => {
+  static getAll = (userId: string) => {
     return axiosInstance.get(`/habit?userId=${userId}`).then((res) => res.data);
   };
 
@@ -9,9 +9,9 @@ export class HabitService {
     return axiosInstance.get(`/habit/${id}`).then((res) => res.data);
   };
 
-  static create = (data: any) => {
+  static create = (data: any, userId: string) => {
     return axiosInstance
-      .post("/habit", { ...data, userId: "default-user" })
+      .post("/habit", { ...data, userId })
       .then((res) => res.data);
   };
 

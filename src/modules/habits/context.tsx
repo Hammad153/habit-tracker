@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import { IHabit } from "./model";
 import { HabitService } from "./api";
 
@@ -18,7 +19,7 @@ type THabitContext = {
   habits: IHabit[];
   habit: IHabit;
   setHabit: React.Dispatch<SetStateAction<IHabit>>;
-  fetchHabits: (userId?: string) => Promise<void>;
+  fetchHabits: () => Promise<void>;
   fetchOneHabit: (id: string) => Promise<void>;
   createHabit: (data: Partial<IHabit>) => Promise<void>;
   updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
@@ -37,13 +38,14 @@ export const useHabitState = () => {
 };
 
 export const HabitProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [habits, setHabits] = useState<IHabit[]>([]);
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
 
-  const fetchHabits = (userId?: string) => {
+  const fetchHabits = () => {
     setLoading(true);
-    return HabitService.getAll(userId)
+    return HabitService.getAll(user!.id)
       .then((data) => {
         if (data) {
           setHabits(data);
@@ -75,7 +77,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
 
   const createHabit = (data: Partial<IHabit>) => {
     setLoading(true);
-    return HabitService.create(data)
+    return HabitService.create(data, user!.id)
       .then(() => {
         ToastService.Success("Habit created successfully");
         return fetchHabits();

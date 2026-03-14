@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, useContext, useState } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import { IBadge, IUserBadge } from "./model";
 import { AwardsService } from "./api";
 
@@ -12,7 +13,7 @@ type TAwardsContext = {
   badges: IBadge[];
   userBadges: IUserBadge[];
   fetchBadges: () => Promise<void>;
-  fetchUserBadges: (userId?: string) => Promise<void>;
+  fetchUserBadges: () => Promise<void>;
 };
 
 export const AwardsContext = createContext<TAwardsContext | undefined>(
@@ -28,6 +29,7 @@ export const useAwardsState = () => {
 };
 
 export const AwardsProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [badges, setBadges] = useState<IBadge[]>([]);
   const [userBadges, setUserBadges] = useState<IUserBadge[]>([]);
@@ -48,9 +50,9 @@ export const AwardsProvider: React.FC<IProps> = ({ children }) => {
       });
   };
 
-  const fetchUserBadges = (userId?: string) => {
+  const fetchUserBadges = () => {
     setLoading(true);
-    return AwardsService.getUserBadges(userId)
+    return AwardsService.getUserBadges(user!.id)
       .then((data) => {
         if (data) {
           setUserBadges(data);

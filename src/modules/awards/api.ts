@@ -5,7 +5,7 @@ export class AwardsService {
     return axiosInstance.get("/awards").then((res) => res.data);
   };
 
-  static getUserBadges = (userId: string = "default-user") => {
+  static getUserBadges = (userId: string) => {
     return axiosInstance
       .get(`/awards/user?userId=${userId}`)
       .then((res) => res.data);

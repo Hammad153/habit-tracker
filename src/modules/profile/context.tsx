@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import { IProfile } from "./model";
 import { ProfileService } from "./api";
 
@@ -17,7 +18,7 @@ type TProfileContext = {
   loading: boolean;
   profile: IProfile;
   setProfile: React.Dispatch<SetStateAction<IProfile>>;
-  fetchProfile: (userId?: string) => Promise<void>;
+  fetchProfile: () => Promise<void>;
   updateProfile: (id: string, data: Partial<IProfile>) => Promise<void>;
 };
 
@@ -34,12 +35,13 @@ export const useProfileState = () => {
 };
 
 export const ProfileProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<IProfile>({} as IProfile);
 
-  const fetchProfile = (userId?: string) => {
+  const fetchProfile = () => {
     setLoading(true);
-    return ProfileService.get(userId)
+    return ProfileService.get(user!.id)
       .then((data) => {
         if (data) {
           setProfile(data);
