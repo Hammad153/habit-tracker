@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Pressable, TouchableOpacity } from "react-native";
+import { View, Pressable, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
 import { ToggleButton } from "@/src/components";
@@ -46,10 +46,9 @@ const HabitCard: React.FC<HabitCardProps> = ({
   unit,
 }) => {
   const [isModalVisible, setModalVisible] = useState(false);
-  const { toggleHabit, updateHabit } = useHabitState();
+  const { toggleHabit, updateHabit, deleteHabit } = useHabitState();
   const colors = useTheme();
 
-  // Theme-aware defaults
   const activeIconColor =
     iconColor || (isCompleted ? colors.primary : colors.textPrimary);
   const activeIconBg =
@@ -83,6 +82,21 @@ const HabitCard: React.FC<HabitCardProps> = ({
 
   const handleRestore = () => {
     updateHabit(id, { isArchived: false });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Habit",
+      `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteHabit(id),
+        },
+      ],
+    );
   };
 
   return (
@@ -193,16 +207,34 @@ const HabitCard: React.FC<HabitCardProps> = ({
               </View>
             )}
             {variant === "edit" && (
-              <TouchableOpacity hitSlop={10}>
-                <Ionicons name="pencil" size={20} color={colors.textMuted} />
-              </TouchableOpacity>
+              <View className="flex-row items-center gap-4">
+                <TouchableOpacity hitSlop={10}>
+                  <Ionicons name="pencil" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+                <TouchableOpacity hitSlop={10} onPress={handleDelete}>
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={colors.danger}
+                  />
+                </TouchableOpacity>
+              </View>
             )}
             {variant === "restore" && (
-              <TouchableOpacity onPress={handleRestore}>
-                <ApText size="sm" color={colors.textMuted}>
-                  Restore
-                </ApText>
-              </TouchableOpacity>
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity onPress={handleRestore}>
+                  <ApText size="sm" color={colors.textMuted}>
+                    Restore
+                  </ApText>
+                </TouchableOpacity>
+                <TouchableOpacity hitSlop={10} onPress={handleDelete}>
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={colors.danger}
+                  />
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>

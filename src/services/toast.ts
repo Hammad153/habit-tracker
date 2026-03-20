@@ -1,20 +1,12 @@
-import { ToastAndroid, Platform } from "react-native";
+import { toastEmitter } from "@/src/components/Toast";
 
 export class ToastService {
   static Success = (msg: string) => {
-    if (Platform.OS === "android") {
-      ToastAndroid.show(msg, ToastAndroid.LONG);
-    } else if (Platform.OS === "web") {
-      window.alert(msg);
-    }
+    toastEmitter.emit({ type: "success", message: msg });
   };
 
   static Error = (msg: string) => {
-    if (Platform.OS === "android") {
-      ToastAndroid.show(msg, ToastAndroid.LONG);
-    } else if (Platform.OS === "web") {
-      window.alert(msg);
-    }
+    toastEmitter.emit({ type: "error", message: msg });
   };
 
   static ApiError = (error: any) => {
