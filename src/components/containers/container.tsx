@@ -1,5 +1,5 @@
 import React from "react";
-import { Surface } from "react-native-paper";
+import { View } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 
 interface Iprops {
@@ -10,13 +10,12 @@ interface Iprops {
 const ApContainer: React.FC<Iprops> = ({ children, className }) => {
   const colors = useTheme();
   return (
-    <Surface
-      style={{ backgroundColor: colors.background, flex: 1 }}
-      className={`${className}`}
-      elevation={0}
+    <View
+      style={{ backgroundColor: colors.background }}
+      className={`flex-1 ${className}`}
     >
       {children}
-    </Surface>
+    </View>
   );
 };
 

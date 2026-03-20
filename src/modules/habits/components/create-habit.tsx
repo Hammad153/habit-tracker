@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { View, ScrollView } from "react-native";
+import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { TextInput, Button, TouchableRipple } from "react-native-paper";
 import { ApText, ApContainer, ApHeader } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -100,18 +99,19 @@ const CreateHabitScreen = () => {
           >
             Basic Information
           </ApText>
-          <TextInput
-            label="Habit Name"
-            value={name}
-            onChangeText={setName}
-            placeholder="e.g. Drink 2L Water"
-            mode="outlined"
-            outlineColor={colors.surfaceBorder}
-            activeOutlineColor={colors.primary}
-            textColor={colors.textPrimary}
-            outlineStyle={{ borderRadius: 12 }}
-            style={{ backgroundColor: colors.surface }}
-          />
+          <View
+            className="bg-surface rounded-2xl p-4 border"
+            style={{ borderColor: colors.surfaceBorder }}
+          >
+            <TextInput
+              className="text-lg p-0"
+              style={{ color: colors.white }}
+              placeholder="e.g. Drink 2L Water"
+              placeholderTextColor={colors.textMuted}
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
 
           <ApText
             size="xs"
@@ -128,11 +128,10 @@ const CreateHabitScreen = () => {
             className="flex-row"
           >
             {HABIT_COLORS.map((color) => (
-              <TouchableRipple
+              <TouchableOpacity
                 key={color}
                 onPress={() => handleColorSelect(color)}
-                className="mr-3 items-center justify-center rounded-full"
-                borderless
+                className="mr-3 items-center justify-center"
               >
                 <View
                   className="w-12 h-12 rounded-full items-center justify-center border-2"
@@ -152,7 +151,7 @@ const CreateHabitScreen = () => {
                     />
                   )}
                 </View>
-              </TouchableRipple>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -167,7 +166,7 @@ const CreateHabitScreen = () => {
           </ApText>
           <View className="flex-row flex-wrap justify-between">
             {HABIT_ICONS.map((icon) => (
-              <TouchableRipple
+              <TouchableOpacity
                 key={icon}
                 onPress={() => handleIconSelect(icon)}
                 className={`w-[22%] aspect-square mb-4 rounded-2xl items-center justify-center border ${
@@ -187,38 +186,41 @@ const CreateHabitScreen = () => {
                     selectedIcon === icon ? selectedColor : colors.textMuted
                   }
                 />
-              </TouchableRipple>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
       </ScrollView>
 
       <View className="flex-row items-center gap-2 justify-between px-4 py-4">
-        <Button
-          mode="outlined"
+        <TouchableOpacity
           onPress={() => router.back()}
-          textColor={colors.textMuted}
+          className="w-3/6 h-12 border flex items-center justify-center rounded-full px-5 py-2"
+          style={{ borderColor: colors.surfaceBorder }}
+        >
+          <ApText size="base" color={colors.textMuted}>
+            Cancel
+          </ApText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleCreate}
+          disabled={loading}
+          className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
+            loading ? "bg-gray-200" : ""
+          }`}
           style={{
-            flex: 1,
-            borderColor: colors.surfaceBorder,
-            borderRadius: 24,
+            backgroundColor: loading ? colors.surfaceInactive : colors.primary,
           }}
         >
-          Cancel
-        </Button>
-
-        <Button
-          mode="contained"
-          onPress={handleCreate}
-          loading={loading}
-          disabled={loading}
-          buttonColor={colors.primary}
-          textColor={colors.background}
-          style={{ flex: 1, borderRadius: 24 }}
-          labelStyle={{ fontWeight: "bold" }}
-        >
-          {loading ? "Creating..." : "Create"}
-        </Button>
+          <ApText
+            size="sm"
+            font="bold"
+            color={loading ? colors.textMuted : colors.background}
+          >
+            {loading ? "Creating..." : "Create"}
+          </ApText>
+        </TouchableOpacity>
       </View>
     </ApContainer>
   );

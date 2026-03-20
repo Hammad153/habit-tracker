@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View } from "react-native";
-import { TextInput, Button } from "react-native-paper";
+import { View, TouchableOpacity, TextInput } from "react-native";
 import { ApText } from "@/src/components/Text";
 import { ApModal } from "@/src/components/Modal";
 import { useTheme } from "@/src/modules/settings/context";
@@ -49,15 +48,8 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
             value={value}
             onChangeText={setValue}
             keyboardType="numeric"
-            mode="flat"
-            textColor={colors.primary}
-            style={{
-              backgroundColor: "transparent",
-              fontSize: 48,
-              fontWeight: "bold",
-              textAlign: "center",
-              width: 120,
-            }}
+            className="text-5xl font-bold mr-2"
+            style={{ color: colors.primary }}
             autoFocus
             selectTextOnFocus
           />
@@ -68,28 +60,27 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       </View>
 
       <View className="flex-row space-x-3 gap-x-2">
-        <Button
-          mode="outlined"
+        <TouchableOpacity
           onPress={onClose}
-          textColor={colors.textMuted}
+          className="flex-1 py-4 rounded-2xl border items-center"
           style={{
-            flex: 1,
+            backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
-            borderRadius: 16,
           }}
         >
-          Cancel
-        </Button>
-        <Button
-          mode="contained"
+          <ApText font="semibold" color={colors.textMuted}>
+            Cancel
+          </ApText>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={handleSave}
-          buttonColor={colors.primary}
-          textColor={colors.background}
-          labelStyle={{ fontWeight: "bold" }}
-          style={{ flex: 1, borderRadius: 16 }}
+          className="flex-1 py-4 rounded-2xl items-center"
+          style={{ backgroundColor: colors.primary }}
         >
-          Save Progress
-        </Button>
+          <ApText font="bold" color={colors.background}>
+            Save Progress
+          </ApText>
+        </TouchableOpacity>
       </View>
     </ApModal>
   );

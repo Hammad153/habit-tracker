@@ -1,7 +1,6 @@
 import React from "react";
-import { View } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableRipple, RadioButton } from "react-native-paper";
 import { ApText, ApContainer, ApHeader, ApScrollView } from "@/src/components";
 import { useSettingsState } from "./context";
 
@@ -26,58 +25,49 @@ const AppearanceScreen = () => {
         >
           Theme Mode
         </ApText>
-        <View
-          className="rounded-2xl overflow-hidden"
-          style={{ backgroundColor: colors.surface }}
-        >
+        <View className="bg-surface rounded-2xl overflow-hidden">
           {themes.map((theme, index) => (
-            <TouchableRipple
+            <TouchableOpacity
               key={theme.id}
               onPress={() => setThemeMode(theme.id as any)}
-              rippleColor={colors.primary + "20"}
+              className={`flex-row items-center justify-between p-4 ${
+                index !== themes.length - 1 ? "border-b" : ""
+              }`}
+              style={{ borderBottomColor: colors.surfaceBorder }}
             >
-              <View
-                className={`flex-row items-center justify-between p-4 ${
-                  index !== themes.length - 1 ? "border-b" : ""
-                }`}
-                style={{ borderBottomColor: colors.surfaceBorder }}
-              >
-                <View className="flex-row items-center">
-                  <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-4"
-                    style={{ backgroundColor: colors.background }}
-                  >
-                    <Ionicons
-                      name={theme.icon as any}
-                      size={20}
-                      color={
-                        themeMode === theme.id
-                          ? colors.primary
-                          : colors.textMuted
-                      }
-                    />
-                  </View>
-                  <ApText
-                    size="base"
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-4"
+                  style={{ backgroundColor: colors.background }}
+                >
+                  <Ionicons
+                    name={theme.icon as any}
+                    size={20}
                     color={
-                      themeMode === theme.id
-                        ? colors.primary
-                        : colors.textSecondary
+                      themeMode === theme.id ? colors.primary : colors.textMuted
                     }
-                    font={themeMode === theme.id ? "bold" : "medium"}
-                  >
-                    {theme.label}
-                  </ApText>
+                  />
                 </View>
-                <RadioButton
-                  value={theme.id}
-                  status={themeMode === theme.id ? "checked" : "unchecked"}
-                  onPress={() => setThemeMode(theme.id as any)}
-                  color={colors.primary}
-                  uncheckedColor={colors.textMuted}
-                />
+                <ApText
+                  size="base"
+                  color={
+                    themeMode === theme.id
+                      ? colors.primary
+                      : colors.textSecondary
+                  }
+                  font={themeMode === theme.id ? "bold" : "medium"}
+                >
+                  {theme.label}
+                </ApText>
               </View>
-            </TouchableRipple>
+              {themeMode === theme.id && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={24}
+                  color={colors.primary}
+                />
+              )}
+            </TouchableOpacity>
           ))}
         </View>
         <ApText size="xs" color={colors.textMuted} className="mt-4 px-2">

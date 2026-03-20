@@ -1,12 +1,12 @@
 import React from "react";
-import { View } from "react-native";
-import { IconButton } from "react-native-paper";
+import { Pressable } from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ApText } from "../Text";
 
 import { useTheme } from "@/src/modules/settings/context";
 
 type Props = {
-  icon: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
   label: string;
   onPress: () => void;
 };
@@ -14,14 +14,9 @@ type Props = {
 export default function ApIconButton({ icon, label, onPress }: Props) {
   const colors = useTheme();
   return (
-    <View className="items-center justify-center">
-      <IconButton
-        icon={icon}
-        iconColor={colors.primary}
-        size={24}
-        onPress={onPress}
-      />
+    <Pressable onPress={onPress}>
+      <MaterialIcons name={icon} size={24} color={colors.primary} />
       <ApText color={colors.textPrimary}>{label}</ApText>
-    </View>
+    </Pressable>
   );
 }

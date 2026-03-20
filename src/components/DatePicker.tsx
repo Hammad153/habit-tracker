@@ -18,7 +18,6 @@ import { ApText } from "./Text";
 import { ApModal } from "./Modal";
 import { useTheme } from "../modules/settings/context";
 import { Ionicons } from "@expo/vector-icons";
-import { TouchableRipple } from "react-native-paper";
 
 interface ApDatePickerProps {
   visible: boolean;
@@ -84,18 +83,15 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
       showCloseButton
     >
       <View className="flex-row justify-between items-center mb-4">
-        <TouchableRipple
-          onPress={handlePrevMonth}
-          className="p-2 rounded-full border border-purple-100 dark:border-purple-900 border-transparent"
-        >
+        <TouchableOpacity onPress={handlePrevMonth} className="p-2">
           <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
-        </TouchableRipple>
+        </TouchableOpacity>
         <ApText size="lg" font="bold" color={colors.textPrimary}>
           {format(currentMonth, "MMMM yyyy")}
         </ApText>
-        <TouchableRipple
+        <TouchableOpacity
           onPress={handleNextMonth}
-          className="p-2 rounded-full border border-purple-100 dark:border-purple-900 border-transparent"
+          className="p-2"
           disabled={!canGoNext}
           style={{ opacity: canGoNext ? 1 : 0.3 }}
         >
@@ -104,7 +100,7 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
             size={22}
             color={colors.textPrimary}
           />
-        </TouchableRipple>
+        </TouchableOpacity>
       </View>
 
       <View className="flex-row mb-2">
@@ -125,13 +121,13 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
           const isToday = isSameDay(day, today);
 
           return (
-            <TouchableRipple
+            <TouchableOpacity
               key={index}
               onPress={() =>
                 !isDisabled && isCurrentMonth && handleSelectDate(day)
               }
               disabled={isDisabled || !isCurrentMonth}
-              className="items-center justify-center rounded-full"
+              className="items-center justify-center"
               style={{
                 width: "14.28%",
                 height: 40,
@@ -166,7 +162,7 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
                   {format(day, "d")}
                 </ApText>
               </View>
-            </TouchableRipple>
+            </TouchableOpacity>
           );
         })}
       </View>

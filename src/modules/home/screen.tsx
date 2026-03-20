@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
-import { FAB } from "react-native-paper";
+import { View, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApLoader, ApScrollView, ApText, ApContainer } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -91,18 +91,20 @@ const HomeScreen = () => {
         </View>
       </ApScrollView>
 
-      <FAB
-        icon="plus"
+      <TouchableOpacity
         onPress={() => router.push("/create-habit")}
-        color={colors.background}
+        className="absolute bottom-8 right-5 w-16 h-16 rounded-full items-center justify-center z-50"
         style={{
-          position: "absolute",
-          bottom: 32,
-          right: 20,
           backgroundColor: colors.primary,
-          borderRadius: 28,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+          elevation: 5,
         }}
-      />
+      >
+        <Ionicons name="add" size={28} color={colors.background} />
+      </TouchableOpacity>
     </ApContainer>
   );
 };

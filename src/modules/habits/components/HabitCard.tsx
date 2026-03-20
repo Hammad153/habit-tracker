@@ -3,7 +3,6 @@ import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
 import { ToggleButton } from "@/src/components";
-import { Surface } from "react-native-paper";
 import { useTheme } from "@/src/modules/settings/context";
 import { useFeedback } from "@/src/utils/feedback";
 import Svg, { Circle } from "react-native-svg";
@@ -93,14 +92,13 @@ const HabitCard: React.FC<HabitCardProps> = ({
         onLongPress={variant === "toggle" ? handleLongPress : undefined}
         delayLongPress={500}
       >
-        <Surface
+        <View
           className="w-full flex-row items-center p-4 my-2 rounded-2xl"
           style={{
             backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
             borderWidth: 1,
           }}
-          elevation={1}
         >
           {variant === "edit" && (
             <View className="mr-4">
@@ -207,7 +205,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
               </TouchableOpacity>
             )}
           </View>
-        </Surface>
+        </View>
       </Pressable>
 
       <LogValueModal

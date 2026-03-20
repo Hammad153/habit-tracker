@@ -1,7 +1,6 @@
 import React from "react";
-import { View } from "react-native";
-import { Button } from "react-native-paper";
-import { useTheme } from "@/src/modules/settings/context";
+import { View, Pressable } from "react-native";
+import { ApText } from "../Text";
 
 type Props = {
   label: string;
@@ -17,19 +16,13 @@ export default function ApButton({
   className,
   labelClassname,
 }: Props) {
-  const colors = useTheme();
   return (
-    <View className={`${className} my-2 w-[200px]`}>
-      <Button
-        mode="contained"
-        onPress={onPress}
-        buttonColor={colors.primary}
-        textColor="#ffffff"
-        labelStyle={{ fontSize: 18, paddingVertical: 4 }}
-        className="rounded-lg"
-      >
-        {label}
-      </Button>
+    <View className={`${className} p-2 w-[200px] bg-primary my-2 rounded-lg`}>
+      <Pressable onPress={onPress} className={`items-center justify-center`}>
+        <ApText className={`text-white text-center text-2xl ${labelClassname}`}>
+          {label}
+        </ApText>
+      </Pressable>
     </View>
   );
 }

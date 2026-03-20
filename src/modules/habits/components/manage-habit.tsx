@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { View } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Button } from "react-native-paper";
 import {
   ApLoader,
   ApText,
@@ -125,37 +124,36 @@ const ManageHabitsScreen = () => {
       </ApScrollView>
 
       <View
-        className="flex-row items-center justify-between px-5 py-6 border-t"
-        style={{
-          borderTopColor: colors.surfaceBorder,
-          backgroundColor: colors.background,
-        }}
+        className="flex-row items-center justify-between px-5 py-6 bg-background border-t"
+        style={{ borderTopColor: colors.surfaceBorder }}
       >
-        <Button
-          mode="outlined"
+        <TouchableOpacity
           onPress={() => router.back()}
-          textColor={colors.textMuted}
-          style={{
-            flex: 1,
-            marginRight: 8,
-            borderColor: colors.surfaceBorder,
-            borderRadius: 24,
-          }}
+          className="w-2/5 h-12 border flex items-center justify-center rounded-full px-5 py-2"
+          style={{ borderColor: colors.surfaceBorder }}
         >
-          Cancel
-        </Button>
+          <ApText size="base" font="semibold" color={colors.textMuted}>
+            Cancel
+          </ApText>
+        </TouchableOpacity>
 
-        <Button
-          mode="contained"
+        <TouchableOpacity
           onPress={() => router.push("/create-habit" as any)}
-          buttonColor={colors.primary}
-          textColor={colors.background}
-          icon="plus"
-          labelStyle={{ fontWeight: "bold" }}
-          style={{ flex: 1, marginLeft: 8, borderRadius: 24 }}
+          className="w-2/5 h-12 flex items-center justify-center rounded-full"
+          style={{ backgroundColor: colors.primary }}
         >
-          Add New
-        </Button>
+          <View className="flex-row items-center">
+            <Ionicons name="add" size={20} color={colors.background} />
+            <ApText
+              size="sm"
+              font="bold"
+              color={colors.background}
+              className="ml-1"
+            >
+              Add New
+            </ApText>
+          </View>
+        </TouchableOpacity>
       </View>
     </ApContainer>
   );
