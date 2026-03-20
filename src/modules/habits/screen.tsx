@@ -7,6 +7,7 @@ import {
   ApLoader,
   ApContainer,
   ApHeader,
+  ApText,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
@@ -67,23 +68,34 @@ const HabitPageScreen = () => {
           onRefresh={handleRefresh}
         >
           <View>
-            {habits?.map((habit) => (
-              <HabitCard
-                key={habit.id}
-                id={habit.id}
-                title={habit.title}
-                subtitle={habit.subtitle}
-                icon={habit.icon}
-                iconColor={habit.iconColor}
-                iconBg={habit.iconBg}
-                isCompleted={habit.completions?.some(
-                  (c: any) => c.date === today,
-                )}
-                selectedDate={today}
-                variant="toggle"
-                onRefresh={handleRefresh}
-              />
-            ))}
+            {habits.length > 0 ? (
+              habits?.map((habit) => (
+                <HabitCard
+                  key={habit.id}
+                  id={habit.id}
+                  title={habit.title}
+                  subtitle={habit.subtitle}
+                  icon={habit.icon}
+                  iconColor={habit.iconColor}
+                  iconBg={habit.iconBg}
+                  isCompleted={habit.completions?.some(
+                    (c: any) => c.date === today,
+                  )}
+                  selectedDate={today}
+                  variant="toggle"
+                  onRefresh={handleRefresh}
+                />
+              ))
+            ) : (
+              <View className="flex-1 items-center justify-center">
+                <ApText
+                  className="text-lg mt-20"
+                  style={{ color: colors.textPrimary }}
+                >
+                  No habits found
+                </ApText>
+              </View>
+            )}
           </View>
         </ApScrollView>
       </View>
