@@ -1,4 +1,4 @@
-import { toastEmitter } from "@/src/components/Toast";
+import { toastEmitter } from "./toast-emitter";
 
 export class ToastService {
   static Success = (msg: string) => {

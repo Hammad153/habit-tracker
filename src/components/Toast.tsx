@@ -5,42 +5,14 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   withSpring,
-  runOnJS,
   Easing,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/src/modules/settings/context";
-
-// ─── Event Emitter ───────────────────────────────────────────────────────────
+import { toastEmitter, ToastPayload } from "@/src/services/toast-emitter";
 
 type ToastType = "success" | "error" | "info";
-
-interface ToastPayload {
-  type: ToastType;
-  message: string;
-}
-
-type Listener = (payload: ToastPayload) => void;
-
-class ToastEventEmitter {
-  private listeners: Listener[] = [];
-
-  on(listener: Listener) {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners = this.listeners.filter((l) => l !== listener);
-    };
-  }
-
-  emit(payload: ToastPayload) {
-    this.listeners.forEach((l) => l(payload));
-  }
-}
-
-export const toastEmitter = new ToastEventEmitter();
-
-// ─── Config ──────────────────────────────────────────────────────────────────
 
 const TOAST_DURATION = 3000;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -65,8 +37,6 @@ const variantConfig: Record<
     bgTint: "rgba(59, 130, 246, 0.12)",
   },
 };
-
-// ─── Toast Provider ──────────────────────────────────────────────────────────
 
 interface Props {
   children: React.ReactNode;
@@ -205,8 +175,6 @@ export const ToastProvider: React.FC<Props> = ({ children }) => {
     </>
   );
 };
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   container: {
