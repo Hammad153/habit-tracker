@@ -3,6 +3,7 @@ import { View, TouchableOpacity, TextInput } from "react-native";
 import { ApText } from "@/src/components/Text";
 import { ApModal } from "@/src/components/Modal";
 import { useTheme } from "@/src/modules/settings/context";
+import { useFeedback } from "@/src/utils/feedback";
 
 interface LogValueModalProps {
   isVisible: boolean;
@@ -25,6 +26,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
 }) => {
   const [value, setValue] = useState(initialValue.toString());
   const colors = useTheme();
+  const { triggerSuccess } = useFeedback();
 
   useEffect(() => {
     if (isVisible) {
@@ -35,6 +37,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
   const handleSave = () => {
     const numericValue = parseFloat(value);
     if (!isNaN(numericValue)) {
+      triggerSuccess();
       onSave(numericValue);
       onClose();
     }

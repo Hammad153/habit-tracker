@@ -8,7 +8,7 @@ import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { ToastService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Haptics from "expo-haptics";
+import { useFeedback } from "@/src/utils/feedback";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
 import { DAYS_OF_WEEK } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
@@ -23,6 +23,7 @@ const CreateHabitScreen = () => {
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
   const [loading, setLoading] = useState(false);
   const { createHabit } = useHabitState();
+  const { triggerSelection, triggerSuccess } = useFeedback();
 
   // Reminder state
   const [reminderEnabled, setReminderEnabled] = useState(false);
@@ -63,6 +64,7 @@ const CreateHabitScreen = () => {
         }
       })
       .then(() => {
+        triggerSuccess();
         router.back();
       })
       .finally(() => {
@@ -72,12 +74,12 @@ const CreateHabitScreen = () => {
 
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
-    Haptics.selectionAsync();
+    triggerSelection();
   };
 
   const handleIconSelect = (icon: string) => {
     setSelectedIcon(icon);
-    Haptics.selectionAsync();
+    triggerSelection();
   };
 
   return (

@@ -1,6 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { View, Pressable, Animated, StyleSheet } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
+import { useFeedback } from "@/src/utils/feedback";
 
 interface ToggleProps {
   isEnabled: boolean;
@@ -14,6 +15,7 @@ const TRACK_PADDING = 3;
 
 const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
   const colors = useTheme();
+  const { triggerSelection } = useFeedback();
   const translateX = useRef(
     new Animated.Value(
       isEnabled ? TRACK_WIDTH - THUMB_SIZE - TRACK_PADDING * 2 : 0,
@@ -29,8 +31,13 @@ const ToggleButton = ({ isEnabled, onToggle }: ToggleProps) => {
     }).start();
   }, [isEnabled]);
 
+  const handlePress = useCallback(() => {
+    triggerSelection();
+    onToggle();
+  }, [triggerSelection, onToggle]);
+
   return (
-    <Pressable onPress={onToggle}>
+    <Pressable onPress={handlePress}>
       <View
         style={[
           styles.track,
