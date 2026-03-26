@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Pressable, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { ApText } from "@/src/components/Text";
 import { ToggleButton } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -208,7 +209,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
             )}
             {variant === "edit" && (
               <View className="flex-row items-center gap-4">
-                <TouchableOpacity hitSlop={10}>
+                <TouchableOpacity hitSlop={10} onPress={() => router.push(`/edit-habit?habitId=${id}` as any)}>
                   <Ionicons name="pencil" size={20} color={colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity hitSlop={10} onPress={handleDelete}>

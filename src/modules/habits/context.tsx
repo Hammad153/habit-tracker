@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { ToastService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
+import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { IHabit } from "./model";
 import { HabitService } from "./api";
 
@@ -39,6 +40,7 @@ export const useHabitState = () => {
 
 export const HabitProvider: React.FC<IProps> = ({ children }) => {
   const { user } = useAuthState();
+  const { setShowUpgradeModal, fetchSubscription } = useSubscriptionState();
   const [loading, setLoading] = useState(false);
   const [habits, setHabits] = useState<IHabit[]>([]);
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
@@ -80,10 +82,20 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
     return HabitService.create(data, user!.id)
       .then(() => {
         ToastService.Success("Habit created successfully");
+        fetchSubscription();
         return fetchHabits();
       })
       .catch((err) => {
-        ToastService.ApiError(err);
+        const errorData = err?.response?.data;
+        if (
+          err?.response?.status === 403 &&
+          errorData?.message?.code === "HABIT_LIMIT_REACHED"
+        ) {
+          fetchSubscription();
+          setShowUpgradeModal(true);
+        } else {
+          ToastService.ApiError(err);
+        }
       })
       .finally(() => {
         setLoading(false);

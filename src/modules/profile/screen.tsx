@@ -153,7 +153,22 @@ const ProfileScreen = () => {
             Account
           </ApText>
           <View className="bg-surface rounded-2xl overflow-hidden mb-6">
-            <SettingsItem label="Subscription" icon="star" value="Pro" />
+            <SettingsItem
+              label="Subscription"
+              icon="star"
+              value="Manage"
+              onPress={() => router.push("/subscription")}
+            />
+            <SettingsItem
+              label="Export Data"
+              icon="download"
+              onPress={() => router.push("/export" as any)}
+            />
+            <SettingsItem
+              label="Advanced Analytics"
+              icon="analytics"
+              onPress={() => router.push("/analytics" as any)}
+            />
             <SettingsItem label="Change Password" icon="lock-closed" />
           </View>
 

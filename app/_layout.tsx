@@ -46,6 +46,13 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="edit-habit"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
+                  <Stack.Screen
                     name="settings/appearance"
                     options={{
                       headerShown: false,
@@ -57,6 +64,34 @@ const RootLayout = () => {
                     options={{
                       headerShown: false,
                       presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="subscription"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="templates"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="export"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="analytics"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
                     }}
                   />
                 </Stack>

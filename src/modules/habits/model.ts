@@ -13,6 +13,12 @@ export interface IHabit extends IBaseModel {
   goal: number;
   unit?: string;
   isArchived: boolean;
+  scheduleType?: string; // "daily" | "specific_days" | "times_per_week" | "interval"
+  scheduleDays?: string[]; // e.g., ["Mon", "Wed", "Fri"]
+  timesPerWeek?: number;
+  intervalDays?: number;
+  restDays?: string[];
+  tags?: string[];
   completions?: ICompletion[];
 }
 

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText, ApContainer, ApHeader } from "@/src/components";
@@ -14,20 +14,25 @@ import { DAYS_OF_WEEK } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
 import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
+import { IReminder } from "@/src/modules/reminders/model";
+import { HabitService } from "@/src/modules/habits/api";
 
-const CreateHabitScreen = () => {
+interface EditHabitScreenProps {
+  habitId: string;
+}
+
+const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   const colors = useTheme();
   const { user } = useAuthState();
+  const { updateHabit, fetchHabits } = useHabitState();
+
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Habit fields
   const [name, setName] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("water");
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
-  const [loading, setLoading] = useState(false);
-  const { createHabit } = useHabitState();
-
-  // Reminder state
-  const [reminderEnabled, setReminderEnabled] = useState(false);
-  const [reminderTime, setReminderTime] = useState("08:00");
-  const [reminderDays, setReminderDays] = useState<string[]>([...DAYS_OF_WEEK]);
 
   // Schedule state
   const [scheduleType, setScheduleType] = useState("daily");
@@ -35,39 +40,105 @@ const CreateHabitScreen = () => {
   const [timesPerWeek, setTimesPerWeek] = useState(3);
   const [intervalDays, setIntervalDays] = useState(2);
 
-  const handleCreate = () => {
+  // Reminder state
+  const [reminderEnabled, setReminderEnabled] = useState(false);
+  const [reminderTime, setReminderTime] = useState("08:00");
+  const [reminderDays, setReminderDays] = useState<string[]>([...DAYS_OF_WEEK]);
+  const [existingReminder, setExistingReminder] = useState<IReminder | null>(null);
+
+  // Load existing habit and reminder data
+  const loadData = useCallback(async () => {
+    try {
+      setInitialLoading(true);
+
+      // Fetch habit details
+      const habit = await HabitService.getById(habitId);
+      if (habit) {
+        setName(habit.title || "");
+        setSelectedIcon(habit.icon || "water");
+        setSelectedColor(habit.iconColor || HABIT_COLORS[0]);
+        setScheduleType(habit.scheduleType || "daily");
+        setScheduleDays(habit.scheduleDays || []);
+        setTimesPerWeek(habit.timesPerWeek || 3);
+        setIntervalDays(habit.intervalDays || 2);
+      }
+
+      // Fetch existing reminder for this habit
+      try {
+        const reminders = await ReminderApiService.getByHabit(habitId);
+        if (reminders && reminders.length > 0) {
+          const reminder = reminders[0];
+          setExistingReminder(reminder);
+          setReminderEnabled(reminder.enabled);
+          setReminderTime(reminder.time || "08:00");
+          setReminderDays(reminder.days || [...DAYS_OF_WEEK]);
+        }
+      } catch {
+        // No reminders for this habit — that's fine
+      }
+    } catch (err) {
+      ToastService.Error("Failed to load habit details");
+      router.back();
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [habitId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleSave = async () => {
     if (!name.trim()) {
       ToastService.Error("Please enter a habit name");
       return;
     }
-    setLoading(true);
-    createHabit({
-      title: name,
-      icon: selectedIcon,
-      iconColor: selectedColor,
-      iconBg: `${selectedColor}20`,
-      scheduleType,
-      scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
-      timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
-      intervalDays: scheduleType === "interval" ? intervalDays : undefined,
-    })
-      .then((result: any) => {
-        // Create reminder if enabled and habit was created
-        if (reminderEnabled && result?.id && user?.id) {
-          return ReminderApiService.create({
-            userId: user.id,
-            habitId: result.id,
+
+    setSaving(true);
+    try {
+      // Update the habit
+      await updateHabit(habitId, {
+        title: name,
+        icon: selectedIcon,
+        iconColor: selectedColor,
+        iconBg: `${selectedColor}20`,
+        scheduleType,
+        scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
+        timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
+        intervalDays: scheduleType === "interval" ? intervalDays : undefined,
+      });
+
+      // Handle reminder changes
+      if (existingReminder) {
+        if (reminderEnabled) {
+          // Update existing reminder
+          await ReminderApiService.update(existingReminder.id, {
             time: reminderTime,
             days: reminderDays,
+            enabled: true,
+          });
+        } else {
+          // Disable reminder
+          await ReminderApiService.update(existingReminder.id, {
+            enabled: false,
           });
         }
-      })
-      .then(() => {
-        router.back();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      } else if (reminderEnabled && user?.id) {
+        // Create new reminder
+        await ReminderApiService.create({
+          userId: user.id,
+          habitId,
+          time: reminderTime,
+          days: reminderDays,
+        });
+      }
+
+      router.back();
+    } catch (err) {
+      ToastService.Error("Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleColorSelect = (color: string) => {
@@ -80,28 +151,26 @@ const CreateHabitScreen = () => {
     Haptics.selectionAsync();
   };
 
-  return (
-    <ApContainer>
-      <ApHeader title="New Habit" hasBackButton />
-
-      {/* Browse Templates Banner */}
-      <TouchableOpacity
-        onPress={() => router.push("/templates")}
-        className="mx-5 mb-4 flex-row items-center justify-between px-4 py-3 rounded-2xl border"
-        style={{
-          backgroundColor: colors.primary + "10",
-          borderColor: colors.primary + "30",
-        }}
-      >
-        <View className="flex-row items-center">
-          <Ionicons name="grid" size={18} color={colors.primary} />
-          <ApText size="sm" font="semibold" color={colors.primary} className="ml-2">
-            Browse Templates
+  if (initialLoading) {
+    return (
+      <ApContainer>
+        <ApHeader title="Edit Habit" hasBackButton />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={colors.primary} />
+          <ApText size="sm" color={colors.textMuted} className="mt-4">
+            Loading habit...
           </ApText>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={colors.primary} />
-      </TouchableOpacity>
+      </ApContainer>
+    );
+  }
+
+  return (
+    <ApContainer>
+      <ApHeader title="Edit Habit" hasBackButton />
+
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+        {/* Live Preview */}
         <View className="px-5 mt-4 rounded-3xl">
           <LinearGradient
             colors={[selectedColor + "40", colors.surface]}
@@ -139,6 +208,7 @@ const CreateHabitScreen = () => {
         </View>
 
         <View className="px-5 mt-8">
+          {/* Name Input */}
           <ApText
             size="xs"
             font="bold"
@@ -183,6 +253,7 @@ const CreateHabitScreen = () => {
             onIntervalDaysChange={setIntervalDays}
           />
 
+          {/* Color Picker */}
           <ApText
             size="xs"
             font="bold"
@@ -225,6 +296,7 @@ const CreateHabitScreen = () => {
             ))}
           </ScrollView>
 
+          {/* Icon Picker */}
           <ApText
             size="xs"
             font="bold"
@@ -283,6 +355,7 @@ const CreateHabitScreen = () => {
         </View>
       </ScrollView>
 
+      {/* Action Buttons */}
       <View className="flex-row items-center gap-2 justify-between px-4 py-4">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -295,21 +368,21 @@ const CreateHabitScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={handleCreate}
-          disabled={loading}
+          onPress={handleSave}
+          disabled={saving}
           className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
-            loading ? "bg-gray-200" : ""
+            saving ? "bg-gray-200" : ""
           }`}
           style={{
-            backgroundColor: loading ? colors.surfaceInactive : colors.primary,
+            backgroundColor: saving ? colors.surfaceInactive : colors.primary,
           }}
         >
           <ApText
             size="sm"
             font="bold"
-            color={loading ? colors.textMuted : colors.background}
+            color={saving ? colors.textMuted : colors.background}
           >
-            {loading ? "Creating..." : "Create"}
+            {saving ? "Saving..." : "Save Changes"}
           </ApText>
         </TouchableOpacity>
       </View>
@@ -317,4 +390,4 @@ const CreateHabitScreen = () => {
   );
 };
 
-export default CreateHabitScreen;
+export default EditHabitScreen;

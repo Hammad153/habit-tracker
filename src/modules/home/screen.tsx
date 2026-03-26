@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -6,27 +6,40 @@ import { ApLoader, ApScrollView, ApText, ApContainer } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
+import { useSubscriptionState } from "@/src/modules/subscription/context";
+import { isHabitScheduledForDate } from "@/src/utils/schedule";
 import HorizontalDatePicker from "./components/HorizontalDatePicker";
 import DailyGoalsCard from "./components/DailyGoalsCard";
 import UserGreeting from "./components/UserGreeting";
 import HabitCard from "@/src/modules/habits/components/HabitCard";
+import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
 
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const colors = useTheme();
   const { habits, loading: loadingHabits, fetchHabits } = useHabitState();
   const { profile, loading: loadingProfile, fetchProfile } = useProfileState();
+  const { fetchSubscription } = useSubscriptionState();
 
   useEffect(() => {
     fetchHabits();
     fetchProfile();
+    fetchSubscription();
   }, []);
+
+  const dateStr = selectedDate.toISOString().split("T")[0];
+
+  // Filter habits by schedule for the selected date
+  const scheduledHabits = useMemo(() => {
+    if (!habits) return [];
+    return habits.filter(
+      (h) => !h.isArchived && isHabitScheduledForDate(h, selectedDate),
+    );
+  }, [habits, selectedDate]);
 
   if (loadingHabits || loadingProfile) {
     return <ApLoader />;
   }
-
-  const dateStr = selectedDate.toISOString().split("T")[0];
 
   return (
     <ApContainer>
@@ -49,11 +62,11 @@ const HomeScreen = () => {
 
         <DailyGoalsCard
           completed={
-            habits?.filter((h: any) =>
+            scheduledHabits.filter((h: any) =>
               h.completions?.some((c: any) => c.date === dateStr && c.status),
             ).length || 0
           }
-          total={habits?.length || 0}
+          total={scheduledHabits.length}
         />
 
         <View className="mt-6 mb-20">
@@ -66,7 +79,7 @@ const HomeScreen = () => {
             Your Habits
           </ApText>
           <View>
-            {habits?.map((habit) => (
+            {scheduledHabits.map((habit) => (
               <HabitCard
                 key={habit.id}
                 id={habit.id}
@@ -105,6 +118,8 @@ const HomeScreen = () => {
       >
         <Ionicons name="add" size={28} color={colors.background} />
       </TouchableOpacity>
+
+      <UpgradeModal />
     </ApContainer>
   );
 };
