@@ -46,7 +46,7 @@ const SoundsScreen = () => {
         >
           Feedback
         </ApText>
-        <View className="bg-surface rounded-2xl overflow-hidden">
+        <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
           {settings.map((item, index) => (
             <View
               key={item.id}

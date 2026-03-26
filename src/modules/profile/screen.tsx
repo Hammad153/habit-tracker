@@ -123,7 +123,7 @@ const ProfileScreen = () => {
           >
             General
           </ApText>
-          <View className="bg-surface rounded-2xl overflow-hidden mb-6">
+          <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
             <SettingsItem
               label="Notifications"
               icon="notifications"
@@ -152,7 +152,7 @@ const ProfileScreen = () => {
           >
             Account
           </ApText>
-          <View className="bg-surface rounded-2xl overflow-hidden mb-6">
+          <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
             <SettingsItem
               label="Subscription"
               icon="star"

@@ -25,7 +25,7 @@ const AppearanceScreen = () => {
         >
           Theme Mode
         </ApText>
-        <View className="bg-surface rounded-2xl overflow-hidden">
+        <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
           {themes.map((theme, index) => (
             <TouchableOpacity
               key={theme.id}

@@ -31,7 +31,7 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
       }}>
       <View
         className="w-10 h-10 rounded-full items-center justify-center mr-4"
-        style={{ backgroundColor: colors.surface }}>
+        style={{ backgroundColor: colors.surfaceLight }}>
         <Ionicons
           name={icon as any}
           size={20}
