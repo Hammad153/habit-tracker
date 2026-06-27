@@ -7,6 +7,7 @@ import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
+import { useAuthState } from "@/src/modules/auth/context";
 import { isHabitScheduledForDate } from "@/src/utils/schedule";
 import HorizontalDatePicker from "./components/HorizontalDatePicker";
 import DailyGoalsCard from "./components/DailyGoalsCard";
@@ -20,12 +21,14 @@ const HomeScreen = () => {
   const { habits, loading: loadingHabits, fetchHabits } = useHabitState();
   const { profile, loading: loadingProfile, fetchProfile } = useProfileState();
   const { fetchSubscription } = useSubscriptionState();
+  const { user } = useAuthState();
 
   useEffect(() => {
+    if (!user?.id) return;
     fetchHabits();
     fetchProfile();
     fetchSubscription();
-  }, []);
+  }, [user?.id]);
 
   const dateStr = selectedDate.toISOString().split("T")[0];
 

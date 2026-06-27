@@ -46,8 +46,9 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
 
   const fetchHabits = () => {
+    if (!user?.id) return Promise.resolve();
     setLoading(true);
-    return HabitService.getAll(user!.id)
+    return HabitService.getAll(user.id)
       .then((data) => {
         if (data) {
           setHabits(data);
@@ -78,8 +79,9 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   };
 
   const createHabit = (data: Partial<IHabit>) => {
+    if (!user?.id) return Promise.resolve();
     setLoading(true);
-    return HabitService.create(data, user!.id)
+    return HabitService.create(data, user.id)
       .then(() => {
         ToastService.Success("Habit created successfully");
         fetchSubscription();
