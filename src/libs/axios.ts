@@ -1,8 +1,9 @@
 import axios from "axios";
 import { ApStorageService, ApStorageKeys } from "@/src/services/storage";
+import { environment } from "@/src/environment";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000",
+  baseURL: environment.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
@@ -38,7 +39,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       return ApStorageService.getRawItemAsync(ApStorageKeys.RefreshToken)
         .then((refreshToken) => {
-          return axios.post(`${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`, {
+          return axios.post(`${environment.apiUrl}/auth/refresh`, {
             refresh_token: refreshToken,
           });
         })
