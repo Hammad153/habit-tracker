@@ -67,6 +67,13 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="settings/change-password"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
                     name="subscription"
                     options={{
                       headerShown: false,

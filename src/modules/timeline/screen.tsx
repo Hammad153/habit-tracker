@@ -49,20 +49,6 @@ const TimelineScreen = () => {
         title="Your Journey"
         subheader={currentMonthYear}
         hasBackButton
-        right={
-          <TouchableOpacity
-            className="flex-row items-center px-4 py-2 rounded-full border"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
-            <Ionicons name="filter" size={16} color={colors.primary} />
-            <ApText size="sm" color={colors.textPrimary} className="ml-2">
-              Filter
-            </ApText>
-          </TouchableOpacity>
-        }
       />
       <ApScrollView
         contentContainerStyle={{ paddingBottom: 100 }}

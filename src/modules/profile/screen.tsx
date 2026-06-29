@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   ApLoader,
@@ -14,6 +13,7 @@ import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useProfileState } from "./context";
 import { AuthService } from "@/src/modules/auth/api";
+import { ToastService } from "@/src/services";
 import StatCard from "./components/StatCard";
 import SettingsItem from "./components/SettingsItem";
 
@@ -22,6 +22,8 @@ const ProfileScreen = () => {
   const { profile, loading, fetchProfile } = useProfileState();
   const { themeMode, soundEnabled, hapticEnabled, colors } = useSettingsState();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -33,9 +35,23 @@ const ProfileScreen = () => {
 
   const confirmLogout = () => {
     setShowLogoutModal(false);
-    AuthService.logout()
-      .then(() => signOut())
-      .catch(() => signOut());
+    // signOut() invalidates the server-side refresh token before clearing
+    // local session (see auth context), so no separate logout call is needed.
+    signOut();
+  };
+
+  const confirmDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await AuthService.deleteAccount();
+      setShowDeleteModal(false);
+      ToastService.Success("Your account has been deleted");
+      await signOut();
+    } catch (err: any) {
+      ToastService.ApiError(err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -71,15 +87,6 @@ const ProfileScreen = () => {
                     .toUpperCase() || "HI"}
                 </ApText>
               )}
-            </View>
-            <View
-              className="absolute bottom-0 right-0 rounded-full p-1 border-2"
-              style={{
-                backgroundColor: colors.primary,
-                borderColor: colors.background,
-              }}
-            >
-              <Ionicons name="camera" size={12} color={colors.background} />
             </View>
           </View>
 
@@ -125,11 +132,6 @@ const ProfileScreen = () => {
           </ApText>
           <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
             <SettingsItem
-              label="Notifications"
-              icon="notifications"
-              value="On"
-            />
-            <SettingsItem
               label="Sounds & Haptics"
               icon="musical-note"
               value={soundsValue}
@@ -169,7 +171,11 @@ const ProfileScreen = () => {
               icon="analytics"
               onPress={() => router.push("/analytics" as any)}
             />
-            <SettingsItem label="Change Password" icon="lock-closed" />
+            <SettingsItem
+              label="Change Password"
+              icon="lock-closed"
+              onPress={() => router.push("/settings/change-password" as any)}
+            />
           </View>
 
           <SettingsItem
@@ -177,6 +183,13 @@ const ProfileScreen = () => {
             icon="log-out"
             isDestructive
             onPress={handleLogout}
+          />
+
+          <SettingsItem
+            label="Delete Account"
+            icon="trash"
+            isDestructive
+            onPress={() => setShowDeleteModal(true)}
           />
         </View>
       </ApScrollView>
@@ -207,6 +220,39 @@ const ProfileScreen = () => {
           >
             <ApText font="bold" color={colors.white}>
               Log Out
+            </ApText>
+          </TouchableOpacity>
+        </View>
+      </ApModal>
+
+      <ApModal
+        visible={showDeleteModal}
+        onClose={() => !deleting && setShowDeleteModal(false)}
+        title="Delete Account"
+        subTitle="This permanently deletes your account and all habits, completions and progress. This cannot be undone."
+      >
+        <View className="flex-row gap-x-2 mt-2">
+          <TouchableOpacity
+            onPress={() => setShowDeleteModal(false)}
+            disabled={deleting}
+            className="flex-1 py-4 rounded-2xl border items-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <ApText font="semibold" color={colors.textMuted}>
+              Cancel
+            </ApText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={confirmDeleteAccount}
+            disabled={deleting}
+            className="flex-1 py-4 rounded-2xl items-center"
+            style={{ backgroundColor: colors.danger, opacity: deleting ? 0.6 : 1 }}
+          >
+            <ApText font="bold" color={colors.white}>
+              {deleting ? "Deleting..." : "Delete"}
             </ApText>
           </TouchableOpacity>
         </View>

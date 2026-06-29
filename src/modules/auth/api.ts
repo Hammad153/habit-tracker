@@ -18,4 +18,8 @@ export class AuthService {
   static getProfile = () => {
     return axiosInstance.get("/auth/profile").then((res) => res.data);
   };
+
+  static deleteAccount = () => {
+    return axiosInstance.delete("/users/me").then((res) => res.data);
+  };
 }

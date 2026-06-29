@@ -10,4 +10,14 @@ export class ProfileService {
   static update = (id: string, data: any) => {
     return axiosInstance.patch(`/profile/${id}`, data).then((res) => res.data);
   };
+
+  static changePassword = (data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    return axiosInstance
+      .post("/profile/change-password", data)
+      .then((res) => res.data);
+  };
 }
