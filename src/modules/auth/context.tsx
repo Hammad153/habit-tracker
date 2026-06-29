@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ApStorageService, ApStorageKeys } from "@/src/services";
 import { IAuthUser, IAuthTokens } from "./model";
+import { AuthService } from "./api";
 
 interface IProps {
   children: React.ReactNode;
@@ -63,13 +64,17 @@ export const AuthProvider: React.FC<IProps> = ({ children }) => {
       });
   };
 
-  const signOut = () => {
-    return ApStorageService.removeItemAsync(ApStorageKeys.AccessToken)
-      .then(() => ApStorageService.removeItemAsync(ApStorageKeys.RefreshToken))
-      .then(() => ApStorageService.removeItemAsync(ApStorageKeys.User))
-      .then(() => {
-        setUser(null);
-      });
+  const signOut = async () => {
+    try {
+      await AuthService.logout();
+    } catch {
+      // ignore — proceed to clear local session regardless
+    }
+
+    await ApStorageService.removeItemAsync(ApStorageKeys.AccessToken);
+    await ApStorageService.removeItemAsync(ApStorageKeys.RefreshToken);
+    await ApStorageService.removeItemAsync(ApStorageKeys.User);
+    setUser(null);
   };
 
   return (
