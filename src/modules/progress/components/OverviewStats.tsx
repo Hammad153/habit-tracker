@@ -23,7 +23,7 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
         }}>
         <View className="flex-row items-center mb-3">
           <View className="w-8 h-8 rounded-full bg-orange-500/20 items-center justify-center mr-2">
-            <Ionicons name="flame" size={16} color="#F97316" />
+            <Ionicons name="flame" size={16} color={colors.warning} />
           </View>
           <View>
             <ApText size="xs" color={colors.textMuted}>
@@ -57,7 +57,7 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
         }}>
         <View className="flex-row items-center mb-3">
           <View className="w-8 h-8 rounded-full bg-green-500/20 items-center justify-center mr-2">
-            <Ionicons name="checkmark-circle" size={16} color="#22C55E" />
+            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
           </View>
           <View>
             <ApText size="xs" color={colors.textMuted}>

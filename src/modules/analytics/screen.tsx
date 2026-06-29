@@ -82,7 +82,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Monthly Rate
               </ApText>
-              <ApText size="2xl" font="bold" color="#8b5cf6">
+              <ApText size="2xl" font="bold" color={colors.accent}>
                 {data.monthlyCompletionRate}%
               </ApText>
             </View>
@@ -96,7 +96,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Best Day
               </ApText>
-              <ApText size="2xl" font="bold" color="#f59e0b">
+              <ApText size="2xl" font="bold" color={colors.warning}>
                 {data.bestDay}
               </ApText>
             </View>
@@ -221,11 +221,11 @@ const AdvancedAnalyticsScreen = () => {
                   font="bold"
                   color={
                     index === 0
-                      ? "#f59e0b"
+                      ? colors.warning
                       : index === 1
-                        ? "#94a3b8"
+                        ? colors.textSecondary
                         : index === 2
-                          ? "#b45309"
+                          ? "#b45309" // bronze — intentional, no theme token
                           : colors.textMuted
                   }
                   className="w-8"

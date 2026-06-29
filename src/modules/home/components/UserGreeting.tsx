@@ -94,7 +94,7 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
         <View
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border-2"
           style={{
-            backgroundColor: "#ff5252",
+            backgroundColor: colors.danger,
             borderColor: colors.surface,
           }}
         />

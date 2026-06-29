@@ -80,7 +80,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
                 className={`${trend > 0 ? "bg-green-500/20" : "bg-red-500/20"} px-2 py-0.5 rounded-full`}>
                 <ApText
                   size="xs"
-                  color={trend > 0 ? "#22C55E" : "#EF4444"}
+                  color={trend > 0 ? colors.success : colors.danger}
                   font="bold">
                   {trend > 0 ? `+${trend}%` : `${trend}%`} this week
                 </ApText>

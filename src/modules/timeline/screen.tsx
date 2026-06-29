@@ -87,7 +87,7 @@ const TimelineScreen = () => {
             }}
           >
             <View className="w-10 h-10 rounded-full items-center justify-center bg-blue-500/20 mb-1">
-              <Ionicons name="pie-chart" size={20} color="#38BDF8" />
+              <Ionicons name="pie-chart" size={20} color={colors.accent} />
             </View>
             <ApText size="3xl" font="bold" color={colors.textPrimary}>
               {completionPercentage}%

@@ -12,6 +12,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // NOTE: Tailwind/NativeWind color classes are resolved at build time and
+        // are NOT theme-reactive. They mirror the DarkTheme palette as a static
+        // fallback. For light/dark-aware styling use inline `style={{ ... }}`
+        // with the `useTheme()` colors, not these classes.
+
         // Primary accent color
         primary: "#13ec5b",
 
@@ -27,10 +32,6 @@ module.exports = {
 
         // Text colors
         textPrimary: "#FFFFFF",
-        primary: "#13ec5b",
-        background: "#0F172A",
-        surface: "#1E293B",
-        textPrimary: "#F8FAFC",
         textSecondary: "#94A3B8",
         textMuted: "#64748B",
 

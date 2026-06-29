@@ -62,14 +62,14 @@ const ExportScreen = () => {
       title: "CSV Spreadsheet",
       subtitle: "Compatible with Excel, Google Sheets",
       icon: "document-text",
-      color: "#10b981",
+      color: colors.success,
       onPress: handleExportCSV,
     },
     {
       title: "JSON Backup",
       subtitle: "Full data backup for developers",
       icon: "code-slash",
-      color: "#6366f1",
+      color: colors.accent,
       onPress: handleExportJSON,
     },
   ];
