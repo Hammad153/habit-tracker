@@ -48,6 +48,7 @@ const TimelineScreen = () => {
       <ApHeader
         title="Your Journey"
         subheader={currentMonthYear}
+        hasBackButton
         right={
           <TouchableOpacity
             className="flex-row items-center px-4 py-2 rounded-full border"

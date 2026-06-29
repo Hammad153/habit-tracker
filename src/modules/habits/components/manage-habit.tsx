@@ -68,8 +68,11 @@ const ManageHabitsScreen = () => {
             ))}
             {activeHabits.length === 0 && (
               <View
-                className="bg-surface rounded-2xl p-8 items-center border"
-                style={{ borderColor: colors.surfaceBorder }}
+                className="rounded-2xl p-8 items-center border"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.surfaceBorder,
+                }}
               >
                 <Ionicons
                   name="leaf-outline"
@@ -124,8 +127,11 @@ const ManageHabitsScreen = () => {
       </ApScrollView>
 
       <View
-        className="flex-row items-center justify-between px-5 py-6 bg-background border-t"
-        style={{ borderTopColor: colors.surfaceBorder }}
+        className="flex-row items-center justify-between px-5 py-6 border-t"
+        style={{
+          backgroundColor: colors.background,
+          borderTopColor: colors.surfaceBorder,
+        }}
       >
         <TouchableOpacity
           onPress={() => router.back()}

@@ -13,6 +13,7 @@ import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { SubscriptionTier } from "@/src/modules/subscription/model";
+import { ToastService } from "@/src/services";
 import { IHabitTemplate } from "./model";
 import { TemplateApiService } from "./api";
 
@@ -35,6 +36,7 @@ const TemplateScreen = () => {
   useEffect(() => {
     TemplateApiService.getAll()
       .then((data) => setTemplates(data || []))
+      .catch((err) => ToastService.ApiError(err))
       .finally(() => setLoading(false));
   }, []);
 

@@ -151,12 +151,15 @@ const CreateHabitScreen = () => {
             Basic Information
           </ApText>
           <View
-            className="bg-surface rounded-2xl p-4 border"
-            style={{ borderColor: colors.surfaceBorder }}
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
           >
             <TextInput
               className="text-lg p-0"
-              style={{ color: colors.white }}
+              style={{ color: colors.textPrimary }}
               placeholder="e.g. Drink 2L Water"
               placeholderTextColor={colors.textMuted}
               value={name}
@@ -241,10 +244,12 @@ const CreateHabitScreen = () => {
               <TouchableOpacity
                 key={icon}
                 onPress={() => handleIconSelect(icon)}
-                className={`w-[22%] aspect-square mb-4 rounded-2xl items-center justify-center border ${
-                  selectedIcon === icon ? "bg-primary/20" : "bg-surface"
-                }`}
+                className="w-[22%] aspect-square mb-4 rounded-2xl items-center justify-center border"
                 style={{
+                  backgroundColor:
+                    selectedIcon === icon
+                      ? colors.primary + "20"
+                      : colors.surface,
                   borderColor:
                     selectedIcon === icon
                       ? colors.primary

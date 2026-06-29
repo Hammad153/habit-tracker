@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { View, Pressable, TouchableOpacity, Alert } from "react-native";
+import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText } from "@/src/components/Text";
 import { ToggleButton } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useFeedback } from "@/src/utils/feedback";
+import { confirmAction } from "@/src/utils/confirm";
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import LogValueModal from "./LogValueModal";
@@ -86,18 +87,13 @@ const HabitCard: React.FC<HabitCardProps> = ({
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      "Delete Habit",
-      `Are you sure you want to delete "${title}"? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteHabit(id),
-        },
-      ],
-    );
+    confirmAction({
+      title: "Delete Habit",
+      message: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      destructive: true,
+      onConfirm: () => deleteHabit(id),
+    });
   };
 
   return (
