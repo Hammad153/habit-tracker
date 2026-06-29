@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useAuthState } from "@/src/modules/auth/context";
 import { ToastService } from "@/src/services";
-import { ISubscriptionInfo, SubscriptionTier } from "./model";
+import { FREE_SUBSCRIPTION, ISubscriptionInfo, SubscriptionTier } from "./model";
 import { SubscriptionApiService } from "./api";
 
 interface IProps {
@@ -50,9 +50,13 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
     setLoading(true);
     return SubscriptionApiService.get(user.id)
       .then((data) => {
-        if (data) setSubscription(data);
+        setSubscription(data ?? FREE_SUBSCRIPTION);
       })
       .catch((err) => {
+        if (err?.response?.status === 404) {
+          setSubscription(FREE_SUBSCRIPTION);
+          return;
+        }
         ToastService.ApiError(err);
       })
       .finally(() => {

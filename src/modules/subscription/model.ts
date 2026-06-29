@@ -11,6 +11,13 @@ export interface ISubscriptionInfo {
   canCreateHabit: boolean;
 }
 
+export const FREE_SUBSCRIPTION: ISubscriptionInfo = {
+  tier: SubscriptionTier.FREE,
+  habitLimit: 5,
+  currentHabitCount: 0,
+  canCreateHabit: true,
+};
+
 export const TIER_LABELS: Record<SubscriptionTier, string> = {
   [SubscriptionTier.FREE]: "Free",
   [SubscriptionTier.BASIC]: "Basic",
@@ -31,7 +38,12 @@ export interface ITierFeature {
 }
 
 export const TIER_FEATURES: ITierFeature[] = [
-  { name: "Track habits", free: "Up to 5", basic: "Unlimited", premium: "Unlimited" },
+  {
+    name: "Track habits",
+    free: "Up to 5",
+    basic: "Unlimited",
+    premium: "Unlimited",
+  },
   { name: "Basic analytics", free: true, basic: true, premium: true },
   { name: "Badges & XP", free: true, basic: true, premium: true },
   { name: "Smart reminders", free: false, basic: true, premium: true },
