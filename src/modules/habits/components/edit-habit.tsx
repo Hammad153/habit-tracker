@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApText, ApContainer, ApHeader } from "@/src/components";
+import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -157,12 +157,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
     return (
       <ApContainer>
         <ApHeader title="Edit Habit" hasBackButton />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.primary} />
-          <ApText size="sm" color={colors.textMuted} className="mt-4">
-            Loading habit...
-          </ApText>
-        </View>
+        <ApLoader label="Loading habit..." />
       </ApContainer>
     );
   }

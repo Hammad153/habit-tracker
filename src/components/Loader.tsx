@@ -11,6 +11,7 @@ interface IProps {
   size?: LoaderSize;
   label?: string;
   overlay?: boolean;
+  inline?: boolean;
 }
 
 interface ILoaderProps {
@@ -29,6 +30,7 @@ const ApLoader: React.FC<IProps> = ({
   size = "medium",
   label,
   overlay = false,
+  inline = false,
 }) => {
   const colors = useTheme();
   const dim = SIZES[size];
@@ -53,14 +55,24 @@ const ApLoader: React.FC<IProps> = ({
     </View>
   );
 
-  return overlay ? (
-    <View
-      style={[styles.overlay, { backgroundColor: colors.background + "DD" }]}
-    >
+  if (overlay) {
+    return (
+      <View
+        style={[styles.overlay, { backgroundColor: colors.background + "DD" }]}
+      >
+        {inner}
+      </View>
+    );
+  }
+
+  if (inline) {
+    return inner;
+  }
+
+  return (
+    <View style={[styles.fullscreen, { backgroundColor: colors.background }]}>
       {inner}
     </View>
-  ) : (
-    inner
   );
 };
 
@@ -391,6 +403,11 @@ const RippleLoader: React.FC<ILoaderProps> = ({ dim, color }) => {
 
 const styles = StyleSheet.create({
   wrapper: { alignItems: "center", justifyContent: "center", padding: 16 },
+  fullscreen: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",

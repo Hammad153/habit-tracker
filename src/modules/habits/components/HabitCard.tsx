@@ -3,10 +3,9 @@ import { View, Pressable, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText } from "@/src/components/Text";
-import { ToggleButton } from "@/src/components";
+import { ToggleButton, ApConfirmModal } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useFeedback } from "@/src/utils/feedback";
-import { confirmAction } from "@/src/utils/confirm";
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import LogValueModal from "./LogValueModal";
@@ -48,6 +47,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
   unit,
 }) => {
   const [isModalVisible, setModalVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { toggleHabit, updateHabit, deleteHabit } = useHabitState();
   const colors = useTheme();
 
@@ -87,13 +87,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
   };
 
   const handleDelete = () => {
-    confirmAction({
-      title: "Delete Habit",
-      message: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
-      confirmText: "Delete",
-      destructive: true,
-      onConfirm: () => deleteHabit(id),
-    });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteModal(false);
+    deleteHabit(id);
   };
 
   return (
@@ -245,6 +244,16 @@ const HabitCard: React.FC<HabitCardProps> = ({
         goal={goal}
         unit={unit}
         title={title}
+      />
+
+      <ApConfirmModal
+        visible={showDeleteModal}
+        title="Delete Habit"
+        subTitle={`Are you sure you want to delete "${title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onClose={() => setShowDeleteModal(false)}
       />
     </>
   );

@@ -115,7 +115,7 @@ const ProgressScreen = () => {
               Habit Breakdown
             </ApText>
             {isLoading ? (
-              <ApLoader size="small" />
+              <ApLoader size="small" inline />
             ) : habitBreakdown.length === 0 ? (
               <ApText
                 size="sm"

@@ -1,6 +1,7 @@
 export { ApText } from "./Text";
 export { ApHeader } from "./Header";
 export { ApModal } from "./Modal";
+export { ApConfirmModal } from "./ConfirmModal";
 export { ApSafeAreaView } from "./SafeAreaView";
 export { ApScrollView } from "./ScrollView";
 export { default as ApLoader } from "./Loader";
