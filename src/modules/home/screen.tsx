@@ -1,8 +1,15 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApLoader, ApScrollView, ApText, ApContainer } from "@/src/components";
+import {
+  ApLoader,
+  ApScrollView,
+  ApText,
+  ApContainer,
+  ApEmptyState,
+  ApErrorState,
+} from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
@@ -17,18 +24,31 @@ import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
 
 const HomeScreen = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
   const colors = useTheme();
-  const { habits, loading: loadingHabits, fetchHabits } = useHabitState();
+  const {
+    habits,
+    loading: loadingHabits,
+    error: habitsError,
+    fetchHabits,
+  } = useHabitState();
   const { profile, loading: loadingProfile, fetchProfile } = useProfileState();
   const { fetchSubscription } = useSubscriptionState();
   const { user } = useAuthState();
 
-  useEffect(() => {
-    if (!user?.id) return;
-    fetchHabits();
-    fetchProfile();
-    fetchSubscription();
+  const loadAll = useCallback(() => {
+    if (!user?.id) return Promise.resolve();
+    return Promise.all([fetchHabits(), fetchProfile(), fetchSubscription()]);
   }, [user?.id]);
+
+  useEffect(() => {
+    loadAll();
+  }, [user?.id]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadAll().finally(() => setRefreshing(false));
+  }, [loadAll]);
 
   const dateStr = selectedDate.toISOString().split("T")[0];
 
@@ -40,13 +60,25 @@ const HomeScreen = () => {
     );
   }, [habits, selectedDate]);
 
-  if (loadingHabits || loadingProfile) {
+  if ((loadingHabits || loadingProfile) && !refreshing) {
     return <ApLoader />;
+  }
+
+  if (habitsError && habits.length === 0) {
+    return (
+      <ApContainer>
+        <ApErrorState onRetry={handleRefresh} />
+      </ApContainer>
+    );
   }
 
   return (
     <ApContainer>
-      <ApScrollView showsVerticalScrollIndicator={false}>
+      <ApScrollView
+        showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+      >
         <View
           style={{
             backgroundColor: colors.surfaceGlow,
@@ -82,27 +114,45 @@ const HomeScreen = () => {
             Your Habits
           </ApText>
           <View>
-            {scheduledHabits.map((habit) => (
-              <HabitCard
-                key={habit.id}
-                id={habit.id}
-                title={habit.title}
-                subtitle={habit.subtitle}
-                icon={habit.icon}
-                iconColor={habit.iconColor}
-                iconBg={habit.iconBg}
-                isCompleted={habit.completions?.some(
-                  (c: any) => c.date === dateStr && c.status,
-                )}
-                selectedDate={dateStr}
-                onRefresh={() => fetchHabits()}
-                goal={habit.goal}
-                value={
-                  habit.completions?.find((c: any) => c.date === dateStr)
-                    ?.value || 0
+            {scheduledHabits.length === 0 ? (
+              <ApEmptyState
+                icon="calendar-outline"
+                title="Nothing scheduled"
+                subtitle={
+                  habits.length === 0
+                    ? "Add a habit to start your day."
+                    : "No habits are scheduled for this day."
+                }
+                actionLabel={habits.length === 0 ? "Create Habit" : undefined}
+                onAction={
+                  habits.length === 0
+                    ? () => router.push("/create-habit")
+                    : undefined
                 }
               />
-            ))}
+            ) : (
+              scheduledHabits.map((habit) => (
+                <HabitCard
+                  key={habit.id}
+                  id={habit.id}
+                  title={habit.title}
+                  subtitle={habit.subtitle}
+                  icon={habit.icon}
+                  iconColor={habit.iconColor}
+                  iconBg={habit.iconBg}
+                  isCompleted={habit.completions?.some(
+                    (c: any) => c.date === dateStr && c.status,
+                  )}
+                  selectedDate={dateStr}
+                  onRefresh={() => fetchHabits()}
+                  goal={habit.goal}
+                  value={
+                    habit.completions?.find((c: any) => c.date === dateStr)
+                      ?.value || 0
+                  }
+                />
+              ))
+            )}
           </View>
         </View>
       </ApScrollView>

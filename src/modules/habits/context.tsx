@@ -17,6 +17,7 @@ interface IProps {
 
 type THabitContext = {
   loading: boolean;
+  error: boolean;
   habits: IHabit[];
   habit: IHabit;
   setHabit: React.Dispatch<SetStateAction<IHabit>>;
@@ -42,12 +43,14 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   const { user } = useAuthState();
   const { setShowUpgradeModal, fetchSubscription } = useSubscriptionState();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [habits, setHabits] = useState<IHabit[]>([]);
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
 
   const fetchHabits = () => {
     if (!user?.id) return Promise.resolve();
     setLoading(true);
+    setError(false);
     return HabitService.getAll(user.id)
       .then((data) => {
         if (data) {
@@ -55,6 +58,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
         }
       })
       .catch((err) => {
+        setError(true);
         ToastService.ApiError(err);
       })
       .finally(() => {
@@ -148,6 +152,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
     <HabitContext.Provider
       value={{
         loading,
+        error,
         habits,
         habit,
         setHabit,

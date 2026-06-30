@@ -7,7 +7,8 @@ import {
   ApLoader,
   ApContainer,
   ApHeader,
-  ApText,
+  ApEmptyState,
+  ApErrorState,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
@@ -15,7 +16,7 @@ import HabitCard from "./components/HabitCard";
 
 const HabitPageScreen = () => {
   const { colors } = useSettingsState();
-  const { loading, habits, fetchHabits } = useHabitState();
+  const { loading, error, habits, fetchHabits } = useHabitState();
   const [refreshing, setRefreshing] = useState(false);
   const today = new Date().toISOString().split("T")[0];
 
@@ -68,7 +69,9 @@ const HabitPageScreen = () => {
           onRefresh={handleRefresh}
         >
           <View>
-            {habits.length > 0 ? (
+            {error && habits.length === 0 ? (
+              <ApErrorState onRetry={handleRefresh} />
+            ) : habits.length > 0 ? (
               habits?.map((habit) => (
                 <HabitCard
                   key={habit.id}
@@ -87,14 +90,13 @@ const HabitPageScreen = () => {
                 />
               ))
             ) : (
-              <View className="flex-1 items-center justify-center">
-                <ApText
-                  className="text-lg mt-20"
-                  style={{ color: colors.textPrimary }}
-                >
-                  No habits found
-                </ApText>
-              </View>
+              <ApEmptyState
+                icon="leaf-outline"
+                title="No habits yet"
+                subtitle="Create your first habit to start building your routine."
+                actionLabel="Create Habit"
+                onAction={() => router.push("/create-habit")}
+              />
             )}
           </View>
         </ApScrollView>

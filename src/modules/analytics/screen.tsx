@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -7,6 +7,8 @@ import {
   ApHeader,
   ApScrollView,
   ApLoader,
+  ApEmptyState,
+  ApErrorState,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -36,17 +38,55 @@ const AdvancedAnalyticsScreen = () => {
   const { user } = useAuthState();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const loadAnalytics = useCallback(() => {
     if (!user?.id) return;
+    setLoading(true);
+    setError(false);
     axiosInstance
       .get(`/analytics/overview?userId=${user.id}`)
       .then((res) => setData(res.data))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [user?.id]);
 
-  if (loading) return <ApLoader />;
-  if (!data) return null;
+  useEffect(() => {
+    loadAnalytics();
+  }, [loadAnalytics]);
+
+  if (loading) {
+    return (
+      <ApContainer>
+        <ApHeader title="Analytics" hasBackButton />
+        <View className="flex-1 items-center justify-center">
+          <ApLoader inline />
+        </View>
+      </ApContainer>
+    );
+  }
+
+  if (error) {
+    return (
+      <ApContainer>
+        <ApHeader title="Analytics" hasBackButton />
+        <ApErrorState onRetry={loadAnalytics} />
+      </ApContainer>
+    );
+  }
+
+  if (!data || data.totalHabits === 0) {
+    return (
+      <ApContainer>
+        <ApHeader title="Analytics" hasBackButton />
+        <ApEmptyState
+          icon="bar-chart-outline"
+          title="No analytics yet"
+          subtitle="Complete a few habits and your insights will show up here."
+        />
+      </ApContainer>
+    );
+  }
 
   const screenWidth = Dimensions.get("window").width - 40;
   const maxDayCount = Math.max(...data.dayDistribution.map((d) => d.count), 1);
