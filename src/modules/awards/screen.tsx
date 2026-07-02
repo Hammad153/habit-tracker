@@ -52,7 +52,7 @@ const AwardsScreen = () => {
 
   return (
     <ApContainer>
-      <ApHeader title="Awards" />
+      <ApHeader title="Awards" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
         <LevelProgress
           level={profile?.level || 1}

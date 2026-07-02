@@ -40,6 +40,7 @@ const HabitPageScreen = () => {
       <View className="h-screen">
         <ApHeader
           title="Habits"
+          hasBackButton
           right={
             <View className="flex-row items-center gap-3">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>

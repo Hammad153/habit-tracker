@@ -81,6 +81,7 @@ const ProgressScreen = () => {
     <ApContainer>
       <ApHeader
         title="Progress"
+        hasBackButton
         right={
           <Pressable
             onPress={() => router.push("/timeline")}

@@ -64,7 +64,7 @@ const ProfileScreen = () => {
 
   return (
     <ApContainer>
-      <ApHeader title="Profile" />
+      <ApHeader title="Profile" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
         <View className="items-center mt-6 mb-8">
           <View className="relative">
