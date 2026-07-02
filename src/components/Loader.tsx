@@ -405,6 +405,8 @@ const styles = StyleSheet.create({
   wrapper: { alignItems: "center", justifyContent: "center", padding: 16 },
   fullscreen: {
     flex: 1,
+    width: "100%",
+    alignSelf: "stretch",
     alignItems: "center",
     justifyContent: "center",
   },

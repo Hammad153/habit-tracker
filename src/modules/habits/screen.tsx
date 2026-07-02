@@ -32,11 +32,7 @@ const HabitPageScreen = () => {
   }, []);
 
   if (loading && !refreshing) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ApLoader />
-      </View>
-    );
+    return <ApLoader />;
   }
 
   return (

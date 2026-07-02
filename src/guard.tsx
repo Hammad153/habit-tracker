@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useRouter, useSegments } from "expo-router";
 import { ApLoader } from "@/src/components";
 import { useAuthState } from "@/src/modules/auth/context";
-import { View } from "react-native";
 
 interface IProps {
   children: React.ReactNode;
@@ -26,11 +25,7 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
   }, [user, segments, isLoading]);
 
   if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ApLoader />
-      </View>
-    );
+    return <ApLoader />;
   }
 
   return <>{children}</>;
