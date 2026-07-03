@@ -1,0 +1,262 @@
+import React, { useState } from "react";
+import { View, Pressable, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { ApText } from "@/src/components/Text";
+import { ToggleButton, ApConfirmModal } from "@/src/components";
+import { useTheme } from "@/src/modules/settings/context";
+import { useFeedback } from "@/src/utils/feedback";
+import Svg, { Circle } from "react-native-svg";
+import * as Haptics from "expo-haptics";
+import LogValueModal from "./LogValueModal";
+import { useHabitState } from "@/src/modules/habits/context";
+
+interface HabitCardProps {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  icon?: string;
+  iconColor?: string;
+  iconBg?: string;
+  customIconNode?: React.ReactNode;
+  variant?: "toggle" | "edit" | "restore";
+  isCompleted?: boolean;
+  onRefresh?: () => void;
+  selectedDate: string;
+  goal?: number;
+  value?: number;
+  unit?: string;
+}
+
+const HabitCard: React.FC<HabitCardProps> = ({
+  id,
+  title,
+  subtitle,
+  description,
+  icon,
+  iconColor,
+  iconBg,
+  customIconNode,
+  variant = "toggle",
+  isCompleted = false,
+  onRefresh,
+  selectedDate,
+  goal = 1,
+  value = 0,
+  unit,
+}) => {
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { toggleHabit, updateHabit, deleteHabit } = useHabitState();
+  const colors = useTheme();
+
+  const activeIconColor =
+    iconColor || (isCompleted ? colors.primary : colors.textPrimary);
+  const activeIconBg =
+    iconBg ||
+    (isCompleted ? colors.primary + "1A" : colors.surfaceBorder + "40");
+  const { triggerHaptic } = useFeedback();
+
+  const subText = subtitle || description;
+
+  const progress = Math.min(value / goal, 1);
+  const size = 48;
+  const strokeWidth = 3;
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - progress * circumference;
+
+  const handleToggle = () => {
+    triggerHaptic(Haptics.NotificationFeedbackType.Success);
+    toggleHabit(id, selectedDate);
+  };
+
+  const handleLongPress = () => {
+    triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+    setModalVisible(true);
+  };
+
+  const handleSaveValue = (newValue: number) => {
+    toggleHabit(id, selectedDate, newValue);
+  };
+
+  const handleRestore = () => {
+    updateHabit(id, { isArchived: false });
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteModal(false);
+    deleteHabit(id);
+  };
+
+  return (
+    <>
+      <Pressable
+        onPress={variant === "toggle" ? handleToggle : undefined}
+        onLongPress={variant === "toggle" ? handleLongPress : undefined}
+        delayLongPress={500}
+      >
+        <View
+          className="w-full flex-row items-center p-4 my-2 rounded-2xl"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
+            borderWidth: 1,
+          }}
+        >
+          {variant === "edit" && (
+            <View className="mr-4">
+              <Ionicons
+                name="grid"
+                size={20}
+                color={colors.textMuted}
+                style={{ opacity: 0.5 }}
+              />
+            </View>
+          )}
+          {variant === "restore" && (
+            <View className="mr-4 ml-1">
+              <Ionicons
+                name="lock-closed"
+                size={20}
+                color={colors.textMuted}
+                style={{ opacity: 0.5 }}
+              />
+            </View>
+          )}
+
+          <View className="items-center justify-center">
+            <Svg width={size} height={size} style={{ position: "absolute" }}>
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke={colors.surfaceBorder}
+                strokeWidth={strokeWidth}
+              />
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke={isCompleted ? colors.primary : activeIconColor}
+                strokeWidth={strokeWidth}
+                strokeDasharray={`${circumference} ${circumference}`}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                transform={`rotate(-90 ${center} ${center})`}
+              />
+            </Svg>
+            <View
+              className="w-10 h-10 rounded-xl items-center justify-center z-10"
+              style={{ backgroundColor: activeIconBg }}
+            >
+              {customIconNode ? (
+                customIconNode
+              ) : (
+                <Ionicons
+                  name={icon as any}
+                  size={20}
+                  color={activeIconColor}
+                />
+              )}
+            </View>
+          </View>
+
+          <View
+            className={`ml-4 flex-1 ${variant === "restore" ? "opacity-50" : ""}`}
+          >
+            <ApText
+              size="lg"
+              font="semibold"
+              color={
+                variant === "restore" ? colors.textMuted : colors.textPrimary
+              }
+              numberOfLines={1}
+            >
+              {title}
+            </ApText>
+            {subText && (
+              <ApText
+                size="xs"
+                font="medium"
+                color={
+                  isCompleted && variant === "toggle"
+                    ? colors.primary
+                    : colors.textSecondary
+                }
+              >
+                {subText}
+              </ApText>
+            )}
+          </View>
+
+          <View className="ml-2">
+            {variant === "toggle" && (
+              <View className="flex-row items-center">
+                <ToggleButton isEnabled={isCompleted} onToggle={handleToggle} />
+              </View>
+            )}
+            {variant === "edit" && (
+              <View className="flex-row items-center gap-4">
+                <TouchableOpacity hitSlop={10} onPress={() => router.push(`/edit-habit?habitId=${id}` as any)}>
+                  <Ionicons name="pencil" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+                <TouchableOpacity hitSlop={10} onPress={handleDelete}>
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={colors.danger}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            {variant === "restore" && (
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity onPress={handleRestore}>
+                  <ApText size="sm" color={colors.textMuted}>
+                    Restore
+                  </ApText>
+                </TouchableOpacity>
+                <TouchableOpacity hitSlop={10} onPress={handleDelete}>
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={colors.danger}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Pressable>
+
+      <LogValueModal
+        isVisible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={handleSaveValue}
+        initialValue={value}
+        goal={goal}
+        unit={unit}
+        title={title}
+      />
+
+      <ApConfirmModal
+        visible={showDeleteModal}
+        title="Delete Habit"
+        subTitle={`Are you sure you want to delete "${title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onClose={() => setShowDeleteModal(false)}
+      />
+    </>
+  );
+};
+
+export default HabitCard;

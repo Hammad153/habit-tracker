@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollView, ScrollViewProps, RefreshControl } from "react-native";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 export interface IProps extends ScrollViewProps {
   children: React.ReactNode;

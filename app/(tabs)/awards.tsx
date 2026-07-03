@@ -1,11 +1,8 @@
 import React from "react";
-import AwardScreen from "@/screens/awards";
-import { View } from "react-native";
+import AwardsScreen from "@/src/modules/awards/screen";
 
-export default function Index() {
-  return (
-    <View>
-      <AwardScreen />
-    </View>
-  );
-}
+const Awards = () => {
+  return <AwardsScreen />;
+};
+
+export default Awards;

@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { useTheme } from "@/src/context/SettingsContext";
+import { useTheme } from "@/src/modules/settings/context";
 
 interface Iprops {
   children: React.ReactNode;
@@ -12,7 +12,8 @@ const ApContainer: React.FC<Iprops> = ({ children, className }) => {
   return (
     <View
       style={{ backgroundColor: colors.background }}
-      className={`${className}`}>
+      className={`flex-1 ${className}`}
+    >
       {children}
     </View>
   );

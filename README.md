@@ -91,3 +91,88 @@ users/
     goals/
       {goalId}
 ```
+
+---
+
+## 🚀 Builds & OTA Updates — Cheat Sheet
+
+We use **EAS Update** (`expo-updates`) to push changes to already-installed apps
+without rebuilding. The single most important thing to know is **when you can ship
+over-the-air (OTA) vs. when you must rebuild the APK.**
+
+### The one rule
+
+> **JS/assets → OTA. Native → rebuild.**
+
+The `runtimeVersion` is set to the `fingerprint` policy, which computes a hash of
+your native dependencies and config. If that hash changes, the update simply won't
+be delivered to an incompatible build — so you can't accidentally brick installed
+apps. When in doubt, it's safe: worst case an update just doesn't appear until you
+rebuild.
+
+### What ships which way
+
+| Change | How it ships |
+|--------|--------------|
+| Screen / component / logic edits (`src/`, `app/`) | ✅ OTA |
+| Styling, copy, Tailwind classes | ✅ OTA |
+| Bundled images / fonts / JSON | ✅ OTA |
+| Bug fixes in TypeScript | ✅ OTA |
+| **Adding/removing a native module** (e.g. `expo-notifications`) | 🔁 Rebuild |
+| **Any `app.json` native config** (permissions, plugins, icon, splash, package) | 🔁 Rebuild |
+| **New app permission** | 🔁 Rebuild |
+| **Expo SDK upgrade** (54 → 55) | 🔁 Rebuild |
+| Dependency change that pulls in native code | 🔁 Rebuild |
+
+Rule of thumb: if you edited `package.json` (native dep) or `app.json`, assume a
+rebuild. If you only touched `.ts`/`.tsx` or assets, it's OTA.
+
+### Ship a JS/asset change (OTA — no rebuild)
+
+Automatic — just push:
+
+```bash
+git push origin main
+```
+
+The [`.github/workflows/eas-update.yml`](.github/workflows/eas-update.yml) workflow
+runs `eas update` and publishes to the `preview` channel. Installed apps download it
+silently and apply it **on next launch**.
+
+To publish manually instead:
+
+```bash
+eas update --branch preview --message "your change description"
+```
+
+### Ship a native change (rebuild required)
+
+```bash
+eas build -p android --profile preview     # installable APK
+```
+
+Install the new APK. From then on, JS changes flow OTA again against the new
+fingerprint. (Use `--profile production` for a Play Store `.aab`.)
+
+### Channels & branches
+
+The channel of the installed build **must match** the branch you publish updates to:
+
+| Build profile | Channel | Publish updates to branch |
+|---------------|---------|---------------------------|
+| `preview` (APK you distribute today) | `preview` | `preview` |
+| `production` (Play Store `.aab`) | `production` | `production` |
+
+The GitHub Action publishes to `preview` by default (see `UPDATE_BRANCH` in the
+workflow). If you switch to distributing the production build, change that value to
+`production`.
+
+### One-time setup (already done, for reference)
+
+1. `EXPO_TOKEN` secret added to the GitHub repo (Settings → Secrets → Actions).
+2. First APK built **with** `expo-updates` installed — OTA only works on a build
+   that already contains the updates runtime.
+
+> ⚠️ The OTA bundle bakes in `EXPO_PUBLIC_API_URL` at publish time. It's set in the
+> workflow `env` and in `eas.json` build profiles. If you change the backend URL,
+> update it in **both** places.

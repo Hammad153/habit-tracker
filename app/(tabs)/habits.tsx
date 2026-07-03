@@ -1,11 +1,8 @@
 import React from "react";
-import HabitsScreen from "@/screens/habits";
-import { View } from "react-native";
+import HabitPageScreen from "@/src/modules/habits/screen";
 
-export default function Index() {
-  return (
-    <View>
-      <HabitsScreen />
-    </View>
-  );
-}
+const Habits = () => {
+  return <HabitPageScreen />;
+};
+
+export default Habits;

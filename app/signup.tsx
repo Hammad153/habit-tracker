@@ -1,6 +1,8 @@
 import React from "react";
-import SignupScreen from "@/screens/signup";
+import SignupScreen from "@/src/modules/auth/signup";
 
-export default function Signup() {
+const Signup = () => {
   return <SignupScreen />;
-}
+};
+
+export default Signup;

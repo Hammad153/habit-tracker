@@ -1,11 +1,8 @@
 import React from "react";
-import ProgressScreen from "@/screens/progress";
-import { View } from "react-native";
+import ProgressScreen from "@/src/modules/progress/screen";
 
-export default function Index() {
-  return (
-    <View>
-      <ProgressScreen />
-    </View>
-  );
-}
+const Progress = () => {
+  return <ProgressScreen />;
+};
+
+export default Progress;

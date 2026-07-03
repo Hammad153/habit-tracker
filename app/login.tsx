@@ -1,6 +1,8 @@
 import React from "react";
-import LoginScreen from "@/screens/login";
+import SigninScreen from "@/src/modules/auth/signin";
 
-export default function Login() {
-  return <LoginScreen />;
-}
+const Login = () => {
+  return <SigninScreen />;
+};
+
+export default Login;

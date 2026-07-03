@@ -3,10 +3,10 @@
   "compilerOptions": {
     "jsx": "react",
     "strict": true,
+    "module": "ESNext",
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [

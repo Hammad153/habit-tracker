@@ -1,0 +1,50 @@
+name: EAS Update (OTA)
+
+# Publishes an over-the-air JS/asset update to installed apps on every push to
+# main. This does NOT rebuild the APK — only pure JavaScript/asset changes ship
+# this way. Native changes (new modules, permissions, app.json native config,
+# SDK bumps) change the fingerprint runtimeVersion and require a fresh build.
+
+on:
+  push:
+    branches: [development, main]
+
+# The branch to publish to. It must match the `channel` of the build profile
+# used for the installed app. You currently distribute the `preview` APK, whose
+# channel is "preview". Change to "production" when you ship the production build.
+env:
+  UPDATE_BRANCH: preview
+  # Baked into the OTA bundle at build time so the app reaches the backend.
+  EXPO_PUBLIC_API_URL: https://habit-tracker-be-six.vercel.app/api/v1/
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish update
+        env:
+          UPDATE_MESSAGE: ${{ github.event.head_commit.message }}
+        run: eas update --branch "$UPDATE_BRANCH" --message "$UPDATE_MESSAGE" --non-interactive
