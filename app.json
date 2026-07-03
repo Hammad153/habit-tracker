@@ -10,12 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.habittracker.app",
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ]
-      }
+      "bundleIdentifier": "com.habittracker.app"
     },
     "android": {
       "package": "com.habittracker.app",
@@ -48,9 +43,10 @@
         }
       ],
       [
-        "expo-audio",
+        "expo-notifications",
         {
-          "microphonePermission": "Allow habit-tracker to access your microphone."
+          "icon": "./assets/images/adaptive-icon.png",
+          "color": "#13ec5b"
         }
       ],
       "expo-secure-store",
