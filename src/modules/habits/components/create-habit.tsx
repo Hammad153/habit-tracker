@@ -158,10 +158,9 @@ const CreateHabitScreen = () => {
             Basic Information
           </ApText>
           <View
-            className="rounded-2xl p-4 border"
+            className="rounded-2xl p-4"
             style={{
               backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
             }}
           >
             <TextInput
