@@ -6,7 +6,7 @@ import { ApText, ApContainer, ApHeader } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
-import { ToastService } from "@/src/services";
+import { ToastService, NotificationService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
@@ -60,7 +60,14 @@ const CreateHabitScreen = () => {
             habitId: result.id,
             time: reminderTime,
             days: reminderDays,
-          });
+          }).then(() =>
+            NotificationService.scheduleHabitReminder(
+              result.id,
+              name,
+              reminderTime,
+              reminderDays,
+            ),
+          );
         }
       })
       .then(() => {

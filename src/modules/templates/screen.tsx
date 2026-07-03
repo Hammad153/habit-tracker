@@ -11,8 +11,6 @@ import {
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
-import { useSubscriptionState } from "@/src/modules/subscription/context";
-import { SubscriptionTier } from "@/src/modules/subscription/model";
 import { ToastService } from "@/src/services";
 import { IHabitTemplate } from "./model";
 import { TemplateApiService } from "./api";
@@ -28,7 +26,6 @@ const CATEGORY_ICONS: Record<string, string> = {
 const TemplateScreen = () => {
   const { colors } = useSettingsState();
   const { createHabit } = useHabitState();
-  const { subscription, setShowUpgradeModal } = useSubscriptionState();
   const [templates, setTemplates] = useState<IHabitTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -48,22 +45,6 @@ const TemplateScreen = () => {
       : templates.filter((t) => t.category === selectedCategory);
 
   const handleUseTemplate = (template: IHabitTemplate) => {
-    const userTier = subscription?.tier || SubscriptionTier.FREE;
-    const tierOrder = [
-      SubscriptionTier.FREE,
-      SubscriptionTier.BASIC,
-      SubscriptionTier.PREMIUM,
-    ];
-    const userTierIndex = tierOrder.indexOf(userTier);
-    const requiredTierIndex = tierOrder.indexOf(
-      template.tier as SubscriptionTier,
-    );
-
-    if (requiredTierIndex > userTierIndex) {
-      setShowUpgradeModal(true);
-      return;
-    }
-
     createHabit({
       title: template.title,
       subtitle: template.subtitle,
@@ -126,10 +107,6 @@ const TemplateScreen = () => {
         {/* Template cards */}
         <View className="px-5">
           {filteredTemplates.map((template) => {
-            const isLocked =
-              template.tier !== "FREE" &&
-              subscription?.tier === SubscriptionTier.FREE;
-
             return (
               <TouchableOpacity
                 key={template.id}
@@ -138,7 +115,6 @@ const TemplateScreen = () => {
                 style={{
                   backgroundColor: colors.surface,
                   borderColor: colors.surfaceBorder,
-                  opacity: isLocked ? 0.7 : 1,
                 }}
               >
                 <View
@@ -161,27 +137,6 @@ const TemplateScreen = () => {
                     >
                       {template.title}
                     </ApText>
-                    {template.tier !== "FREE" && (
-                      <View
-                        className="ml-2 px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor:
-                            template.tier === "PREMIUM"
-                              ? "#8b5cf620"
-                              : "#0ea5e920",
-                        }}
-                      >
-                        <ApText
-                          size="xs"
-                          font="bold"
-                          color={
-                            template.tier === "PREMIUM" ? "#8b5cf6" : "#0ea5e9"
-                          }
-                        >
-                          {template.tier === "PREMIUM" ? "PRO" : "BASIC"}
-                        </ApText>
-                      </View>
-                    )}
                   </View>
                   {template.subtitle && (
                     <ApText size="xs" color={colors.textMuted} className="mt-1">
@@ -198,11 +153,7 @@ const TemplateScreen = () => {
                   </ApText>
                 </View>
 
-                <Ionicons
-                  name={isLocked ? "lock-closed" : "add-circle"}
-                  size={24}
-                  color={isLocked ? colors.textMuted : colors.primary}
-                />
+                <Ionicons name="add-circle" size={24} color={colors.primary} />
               </TouchableOpacity>
             );
           })}

@@ -6,7 +6,7 @@ import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
-import { ToastService } from "@/src/services";
+import { ToastService, NotificationService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
@@ -118,11 +118,18 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             days: reminderDays,
             enabled: true,
           });
+          await NotificationService.scheduleHabitReminder(
+            habitId,
+            name,
+            reminderTime,
+            reminderDays,
+          );
         } else {
           // Disable reminder
           await ReminderApiService.update(existingReminder.id, {
             enabled: false,
           });
+          await NotificationService.cancelHabitReminder(habitId);
         }
       } else if (reminderEnabled && user?.id) {
         // Create new reminder
@@ -132,6 +139,12 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
           time: reminderTime,
           days: reminderDays,
         });
+        await NotificationService.scheduleHabitReminder(
+          habitId,
+          name,
+          reminderTime,
+          reminderDays,
+        );
       }
 
       triggerSuccess();

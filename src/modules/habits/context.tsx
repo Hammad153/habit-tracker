@@ -5,7 +5,7 @@ import React, {
   useContext,
   useState,
 } from "react";
-import { ToastService } from "@/src/services";
+import { ToastService, NotificationService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { IHabit } from "./model";
@@ -127,6 +127,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
     setLoading(true);
     return HabitService.delete(id)
       .then(() => {
+        NotificationService.cancelHabitReminder(id);
         ToastService.Success("Habit deleted successfully");
         return fetchHabits();
       })
