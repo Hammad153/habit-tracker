@@ -13,6 +13,9 @@ on:
 # used for the installed app. You currently distribute the `preview` APK, whose
 # channel is "preview". Change to "production" when you ship the production build.
 env:
+  # Tells Expo tooling it's a non-interactive CI environment (the recommended
+  # replacement for the --non-interactive flag during bundling).
+  CI: "1"
   UPDATE_BRANCH: preview
   # Baked into the OTA bundle at build time so the app reaches the backend.
   EXPO_PUBLIC_API_URL: https://habit-tracker-be-six.vercel.app/api/v1/

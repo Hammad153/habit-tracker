@@ -11,9 +11,9 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/src/components/Text";
-import { ApTheme } from "@/src/components/theme";
-import { authService } from "@/src/services/auth.service";
+import { ApText } from "../../../components/Text";
+import { ApTheme } from "../../../components/theme";
+import { authService } from "../../../services/auth.service";
 
 interface ChangePasswordModalProps {
   isVisible: boolean;
