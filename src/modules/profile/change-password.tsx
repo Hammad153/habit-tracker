@@ -32,8 +32,6 @@ const PasswordField: React.FC<FieldProps> = ({
         className="flex-row items-center rounded-2xl px-4"
         style={{
           backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: error ? colors.danger : colors.surfaceBorder,
         }}
       >
         <TextInput

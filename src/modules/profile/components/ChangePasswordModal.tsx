@@ -246,8 +246,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: ApTheme.Color.surface,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: ApTheme.Color.surfaceBorder,
   },
   input: {
     flex: 1,

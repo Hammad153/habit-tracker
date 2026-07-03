@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove browser focus ring/outline on web inputs */
+input, textarea, select {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
+}

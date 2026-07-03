@@ -88,11 +88,10 @@ const SignupScreen = () => {
               onChangeText={setName}
               placeholder="Enter your name"
               placeholderTextColor={colors.textMuted}
-              className="px-4 py-4 rounded-xl border"
+              className="px-4 py-4 rounded-xl"
               style={{
                 backgroundColor: colors.surface,
                 color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
               }}
             />
           </View>
@@ -111,11 +110,10 @@ const SignupScreen = () => {
               placeholderTextColor={colors.textMuted}
               keyboardType="email-address"
               autoCapitalize="none"
-              className="px-4 py-4 rounded-xl border"
+              className="px-4 py-4 rounded-xl"
               style={{
                 backgroundColor: colors.surface,
                 color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
               }}
             />
           </View>
@@ -134,11 +132,10 @@ const SignupScreen = () => {
                 placeholder="Create a password"
                 placeholderTextColor={colors.textMuted}
                 secureTextEntry={!showPassword}
-                className="px-4 py-4 rounded-xl border"
+                className="px-4 py-4 rounded-xl"
                 style={{
                   backgroundColor: colors.surface,
                   color: colors.textPrimary,
-                  borderColor: colors.surfaceBorder,
                 }}
               />
               <TouchableOpacity
