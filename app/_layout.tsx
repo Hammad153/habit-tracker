@@ -108,6 +108,13 @@ const RootLayout = () => {
                       presentation: "modal",
                     }}
                   />
+                  <Stack.Screen
+                    name="notifications"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
                 </Stack>
                 <StatusBar style="auto" />
               </ApSafeAreaView>

@@ -14,6 +14,7 @@ import { DAYS_OF_WEEK } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
 import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
+import { useNotificationsState } from "@/src/modules/notifications/context";
 
 const CreateHabitScreen = () => {
   const colors = useTheme();
@@ -23,6 +24,7 @@ const CreateHabitScreen = () => {
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
   const [loading, setLoading] = useState(false);
   const { createHabit } = useHabitState();
+  const { addNotification } = useNotificationsState();
   const { triggerSelection, triggerSuccess } = useFeedback();
 
   // Reminder state
@@ -53,6 +55,7 @@ const CreateHabitScreen = () => {
       intervalDays: scheduleType === "interval" ? intervalDays : undefined,
     })
       .then((result: any) => {
+        if (!result?.id) return;
         // Create reminder if enabled and habit was created
         if (reminderEnabled && result?.id && user?.id) {
           return ReminderApiService.create({
@@ -67,8 +70,21 @@ const CreateHabitScreen = () => {
               reminderTime,
               reminderDays,
             ),
+          ).then(() =>
+            addNotification({
+              title: "Reminder scheduled",
+              body: `${name} will remind you at ${reminderTime}.`,
+              type: "habit",
+              route: "/(tabs)/habits",
+            }),
           );
         }
+        return addNotification({
+          title: "Habit created",
+          body: `${name} is ready to track.`,
+          type: "habit",
+          route: "/(tabs)/habits",
+        });
       })
       .then(() => {
         triggerSuccess();
@@ -110,7 +126,11 @@ const CreateHabitScreen = () => {
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.primary} />
       </TouchableOpacity>
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 112 }}
+      >
         <View className="px-5 mt-4 rounded-3xl">
           <LinearGradient
             colors={[selectedColor + "40", colors.surface]}
@@ -296,7 +316,10 @@ const CreateHabitScreen = () => {
         </View>
       </ScrollView>
 
-      <View className="flex-row items-center gap-2 justify-between px-4 py-4">
+      <View
+        className="flex-row items-center gap-2 justify-between px-4 py-4 border-t"
+        style={{ backgroundColor: colors.background, borderColor: colors.surfaceBorder }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
           className="w-3/6 h-12 border flex items-center justify-center rounded-full px-5 py-2"

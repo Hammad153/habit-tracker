@@ -102,6 +102,19 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="journal"
+        options={{
+          title: "Journal",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "journal" : "journal-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",

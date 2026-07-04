@@ -8,6 +8,8 @@ export enum ApStorageKeys {
   SoundEnabled = "settings_sound_enabled",
   HapticEnabled = "settings_haptic_enabled",
   ThemeMode = "settings_theme_mode",
+  JournalEntries = "journal_entries",
+  AppNotifications = "app_notifications",
 }
 
 const isWeb = Platform.OS === "web";

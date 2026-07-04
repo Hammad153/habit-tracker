@@ -10,12 +10,12 @@ import { ToastService, NotificationService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
 import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
-import { DAYS_OF_WEEK } from "@/src/modules/reminders/model";
+import { DAYS_OF_WEEK, IReminder } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
 import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
-import { IReminder } from "@/src/modules/reminders/model";
 import { HabitService } from "@/src/modules/habits/api";
+import { useNotificationsState } from "@/src/modules/notifications/context";
 
 interface EditHabitScreenProps {
   habitId: string;
@@ -24,7 +24,8 @@ interface EditHabitScreenProps {
 const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   const colors = useTheme();
   const { user } = useAuthState();
-  const { updateHabit, fetchHabits } = useHabitState();
+  const { updateHabit } = useHabitState();
+  const { addNotification } = useNotificationsState();
   const { triggerSelection, triggerSuccess } = useFeedback();
 
   const [initialLoading, setInitialLoading] = useState(true);
@@ -77,7 +78,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
       } catch {
         // No reminders for this habit — that's fine
       }
-    } catch (err) {
+    } catch {
       ToastService.Error("Failed to load habit details");
       router.back();
     } finally {
@@ -124,12 +125,24 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             reminderTime,
             reminderDays,
           );
+          await addNotification({
+            title: "Reminder updated",
+            body: `${name} will remind you at ${reminderTime}.`,
+            type: "habit",
+            route: "/(tabs)/habits",
+          });
         } else {
           // Disable reminder
           await ReminderApiService.update(existingReminder.id, {
             enabled: false,
           });
           await NotificationService.cancelHabitReminder(habitId);
+          await addNotification({
+            title: "Reminder disabled",
+            body: `${name} reminders are turned off.`,
+            type: "habit",
+            route: "/(tabs)/habits",
+          });
         }
       } else if (reminderEnabled && user?.id) {
         // Create new reminder
@@ -145,11 +158,17 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
           reminderTime,
           reminderDays,
         );
+        await addNotification({
+          title: "Reminder scheduled",
+          body: `${name} will remind you at ${reminderTime}.`,
+          type: "habit",
+          route: "/(tabs)/habits",
+        });
       }
 
       triggerSuccess();
       router.back();
-    } catch (err) {
+    } catch {
       ToastService.Error("Failed to save changes");
     } finally {
       setSaving(false);
@@ -179,7 +198,11 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
     <ApContainer>
       <ApHeader title="Edit Habit" hasBackButton />
 
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 112 }}
+      >
         {/* Live Preview */}
         <View className="px-5 mt-4 rounded-3xl">
           <LinearGradient
@@ -370,7 +393,10 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
       </ScrollView>
 
       {/* Action Buttons */}
-      <View className="flex-row items-center gap-2 justify-between px-4 py-4">
+      <View
+        className="flex-row items-center gap-2 justify-between px-4 py-4 border-t"
+        style={{ backgroundColor: colors.background, borderColor: colors.surfaceBorder }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
           className="w-3/6 h-12 border flex items-center justify-center rounded-full px-5 py-2"

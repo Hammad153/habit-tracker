@@ -9,6 +9,7 @@ interface Props {
   userName?: string;
   avatarUri?: string;
   onNotificationPress?: () => void;
+  unreadCount?: number;
 }
 
 const getGreeting = () => {
@@ -27,7 +28,11 @@ const getInitials = (name: string): string => {
   return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
 
-const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
+const UserGreeting: React.FC<Props> = ({
+  avatarUri,
+  onNotificationPress,
+  unreadCount = 0,
+}) => {
   const { user } = useAuthState();
   const colors = useTheme();
   const greeting = getGreeting();
@@ -91,13 +96,19 @@ const UserGreeting: React.FC<Props> = ({ avatarUri, onNotificationPress }) => {
         }}
       >
         <Ionicons name="notifications" size={22} color={colors.primary} />
-        <View
-          className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border-2"
-          style={{
-            backgroundColor: colors.danger,
-            borderColor: colors.surface,
-          }}
-        />
+        {unreadCount > 0 && (
+          <View
+            className="absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full border-2 items-center justify-center px-1"
+            style={{
+              backgroundColor: colors.danger,
+              borderColor: colors.surface,
+            }}
+          >
+            <ApText size="xs" font="bold" color="#FFFFFF">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </ApText>
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
