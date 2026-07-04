@@ -17,8 +17,12 @@ interface HabitTimerProps {
   color?: string;
   defaultMinutes?: number;
   onClose: () => void;
-  /** Called when the user confirms the finished session should mark the habit done. */
-  onMarkComplete?: () => void;
+  /**
+   * Fired once, automatically, when the session finishes — the caller marks the
+   * habit complete for the day. Omit it (e.g. already completed today) and the
+   * session simply celebrates without re-toggling.
+   */
+  onComplete?: () => void;
 }
 
 type Phase = "setup" | "running" | "paused" | "done";
@@ -44,11 +48,11 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
   color,
   defaultMinutes = 15,
   onClose,
-  onMarkComplete,
+  onComplete,
 }) => {
   const colors = useTheme();
   const { soundEnabled } = useSettingsState();
-  const { triggerHaptic, triggerSuccess } = useFeedback();
+  const { triggerHaptic } = useFeedback();
   const accent = color || colors.primary;
 
   const player = useAudioPlayer(TIMER_COMPLETE_SOUND);
@@ -61,8 +65,14 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
   const [phase, setPhase] = useState<Phase>("setup");
   const [minutes, setMinutes] = useState(defaultMinutes);
   const [remaining, setRemaining] = useState(defaultMinutes * 60);
+  // Captured at finish time so the confirmation message doesn't flip when the
+  // parent re-renders (its onComplete prop clears once the habit is marked done).
+  const [autoCompleted, setAutoCompleted] = useState(false);
   const totalSecondsRef = useRef(defaultMinutes * 60);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Ensures the finish side effects (sound, haptic, auto-complete) run exactly
+  // once per session, even if the tick updater is invoked twice in dev.
+  const finishedRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -72,9 +82,12 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
   }, []);
 
   const handleFinish = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
     clearTimer();
     setRemaining(0);
     setPhase("done");
+    setAutoCompleted(!!onComplete);
     triggerHaptic(Haptics.NotificationFeedbackType.Success);
     if (soundEnabled) {
       try {
@@ -84,7 +97,10 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
         // Audio is best-effort; never let it break the completion flow.
       }
     }
-  }, [clearTimer, player, soundEnabled, triggerHaptic]);
+    // Finishing the session marks the habit done for the day automatically —
+    // no need to toggle it separately on the card.
+    onComplete?.();
+  }, [clearTimer, onComplete, player, soundEnabled, triggerHaptic]);
 
   // The single source of truth for the countdown. Ticks every second while
   // running and finishes exactly once when it crosses zero.
@@ -106,6 +122,8 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
     totalSecondsRef.current = total;
     setRemaining(total);
     setPhase("running");
+    finishedRef.current = false;
+    setAutoCompleted(false);
     triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
     startTicking();
   }, [minutes, startTicking, triggerHaptic]);
@@ -126,18 +144,14 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
     clearTimer();
     setRemaining(totalSecondsRef.current);
     setPhase("setup");
+    finishedRef.current = false;
+    setAutoCompleted(false);
   }, [clearTimer]);
 
   const handleClose = useCallback(() => {
     clearTimer();
     onClose();
   }, [clearTimer, onClose]);
-
-  const handleMarkComplete = useCallback(() => {
-    triggerSuccess();
-    onMarkComplete?.();
-    handleClose();
-  }, [handleClose, onMarkComplete, triggerSuccess]);
 
   // Reset everything back to a clean setup state whenever the modal reopens.
   useEffect(() => {
@@ -147,6 +161,8 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
       totalSecondsRef.current = defaultMinutes * 60;
       setRemaining(defaultMinutes * 60);
       setPhase("setup");
+      finishedRef.current = false;
+      setAutoCompleted(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
@@ -389,32 +405,34 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
             </View>
           )}
 
-          {/* Done actions */}
+          {/* Done actions — the habit is already marked complete automatically. */}
           {phase === "done" && (
-            <View className="mt-4">
-              {onMarkComplete && (
-                <Pressable
-                  onPress={handleMarkComplete}
-                  accessibilityRole="button"
-                  accessibilityLabel="Mark habit complete"
-                  className="h-14 rounded-full items-center justify-center flex-row"
-                  style={{ backgroundColor: colors.success }}
-                >
-                  <Ionicons name="checkmark" size={22} color={colors.background} />
-                  <ApText size="base" font="bold" color={colors.background} className="ml-2">
-                    Mark as Complete
+            <View className="mt-2">
+              <View className="items-center mb-4 px-2">
+                {autoCompleted ? (
+                  <View className="flex-row items-center">
+                    <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                    <ApText size="sm" font="semibold" color={colors.success} className="ml-1 text-center">
+                      Marked complete for today
+                    </ApText>
+                  </View>
+                ) : (
+                  <ApText size="sm" color={colors.textMuted} className="text-center">
+                    Already done today — nice work staying consistent!
                   </ApText>
-                </Pressable>
-              )}
-              <TouchableOpacity
+                )}
+              </View>
+              <Pressable
                 onPress={handleClose}
-                className="h-14 rounded-full items-center justify-center mt-3 border"
-                style={{ borderColor: colors.surfaceBorder }}
+                accessibilityRole="button"
+                accessibilityLabel="Close timer"
+                className="h-14 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors.success }}
               >
-                <ApText size="base" font="semibold" color={colors.textSecondary}>
-                  Close
+                <ApText size="base" font="bold" color={colors.background}>
+                  Done
                 </ApText>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           )}
         </View>

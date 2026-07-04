@@ -324,7 +324,7 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
         habitTitle={habit.title}
         color={accent}
         onClose={() => setShowTimer(false)}
-        onMarkComplete={isCompletedToday ? undefined : handleMarkComplete}
+        onComplete={isCompletedToday ? undefined : handleMarkComplete}
       />
     </ApContainer>
   );
