@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { format, isValid, parseISO } from "date-fns";
 import {
   ApContainer,
@@ -292,6 +293,14 @@ const JournalScreen = () => {
     <ApContainer>
       <ApHeader
         title="Journal"
+        hasBackButton
+        onBack={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/(tabs)");
+          }
+        }}
         right={
           <TouchableOpacity onPress={() => openTemplate(JOURNAL_TEMPLATES[0])}>
             <Ionicons name="add-circle" size={30} color={colors.primary} />
@@ -366,16 +375,26 @@ const JournalScreen = () => {
               <TouchableOpacity
                 key={template.id}
                 onPress={() => openTemplate(template)}
-                className="mr-3 w-48 rounded-2xl border p-4"
+                className="mr-3 w-44 rounded-2xl border p-4"
                 style={{
                   backgroundColor: colors.surface,
                   borderColor: colors.surfaceBorder,
                 }}
               >
-                <ApText size="base" font="bold" color={colors.textPrimary}>
+                <ApText
+                  size="base"
+                  font="bold"
+                  color={colors.textPrimary}
+                  numberOfLines={1}
+                >
                   {template.title}
                 </ApText>
-                <ApText size="xs" color={colors.textMuted} className="mt-2">
+                <ApText
+                  size="xs"
+                  color={colors.textMuted}
+                  className="mt-2"
+                  numberOfLines={2}
+                >
                   {template.description}
                 </ApText>
               </TouchableOpacity>
@@ -425,7 +444,7 @@ const JournalScreen = () => {
                           color={colors.primary}
                         />
                       </View>
-                      <View className="ml-3 flex-1">
+                      <View className="ml-3 flex-1 min-w-0">
                         <View className="flex-row items-center">
                           <ApText
                             size="base"
@@ -436,7 +455,11 @@ const JournalScreen = () => {
                           >
                             {entry.title}
                           </ApText>
-                          <TouchableOpacity onPress={() => toggleFavorite(entry.id)} hitSlop={8}>
+                          <TouchableOpacity
+                            onPress={() => toggleFavorite(entry.id)}
+                            hitSlop={8}
+                            className="ml-2"
+                          >
                             <Ionicons
                               name={entry.isFavorite ? "heart" : "heart-outline"}
                               size={19}
@@ -462,15 +485,19 @@ const JournalScreen = () => {
                         >
                           {entry.content || "No content yet."}
                         </ApText>
-                        <View className="mt-3 flex-row items-center justify-between">
-                          <View className="flex-row flex-wrap flex-1">
+                        <View className="mt-3 flex-row items-end justify-between">
+                          <View className="flex-row flex-wrap flex-1 pr-3">
                             {entry.tags.slice(0, 3).map((tag) => (
                               <View
                                 key={tag}
-                                className="mr-2 mt-1 rounded-full px-2 py-1"
+                                className="mr-2 mt-1 max-w-[145px] rounded-full px-2 py-1"
                                 style={{ backgroundColor: colors.background }}
                               >
-                                <ApText size="xs" color={colors.textMuted}>
+                                <ApText
+                                  size="xs"
+                                  color={colors.textMuted}
+                                  numberOfLines={1}
+                                >
                                   #{tag}
                                 </ApText>
                               </View>
