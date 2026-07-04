@@ -12,7 +12,9 @@
       "policy": "fingerprint"
     },
     "updates": {
-      "url": "https://u.expo.dev/22714853-7126-47d6-ab7b-522a6c857043"
+      "url": "https://u.expo.dev/22714853-7126-47d6-ab7b-522a6c857043",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 5000
     },
     "ios": {
       "supportsTablet": true,
