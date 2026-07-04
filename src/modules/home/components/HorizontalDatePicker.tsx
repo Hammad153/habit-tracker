@@ -36,7 +36,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   };
 
   return (
-    <View className="my-4 px-3">
+    <View className="my-4 px-1">
       <ApScrollView horizontal className="px-0">
         {weekDates.map((date, index) => {
           const isSelected = isSameDay(date, selectedDate);

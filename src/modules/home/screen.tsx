@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { View, TouchableOpacity } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { subDays } from "date-fns";
 import {
   ApLoader,
-  ApScrollView,
   ApText,
   ApContainer,
   ApEmptyState,
@@ -186,17 +190,21 @@ const HomeScreen = () => {
 
   return (
     <ApContainer>
-      <ApScrollView
-        className="px-0"
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
+        contentContainerStyle={{
+          paddingHorizontal: 6,
+          paddingTop: 8,
+          paddingBottom: 96,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
       >
         <View
           style={{
             backgroundColor: colors.surfaceGlow,
             borderRadius: 20,
-            marginHorizontal: 12,
             paddingLeft: 12,
             paddingRight: 12,
           }}
@@ -208,7 +216,7 @@ const HomeScreen = () => {
           />
         </View>
 
-        <View className="mt-5 px-3">
+        <View className="mt-5 px-2">
           <View
             className="rounded-3xl border p-4"
             style={{
@@ -266,7 +274,7 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        <View className="mt-4 px-3">
+        <View className="mt-4 px-2">
           <View
             className="rounded-3xl border p-4"
             style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
@@ -295,18 +303,18 @@ const HomeScreen = () => {
           onDateChange={setSelectedDate}
         />
 
-        <View className="px-3">
-          <DailyGoalsCard
-            completed={
-              scheduledHabits.filter((h: any) =>
-                h.completions?.some((c: any) => c.date === dateStr && c.status),
-              ).length || 0
-            }
-            total={scheduledHabits.length}
-          />
+       <View className="mt-4 px-2">
+        <DailyGoalsCard
+          completed={
+            scheduledHabits.filter((h: any) =>
+              h.completions?.some((c: any) => c.date === dateStr && c.status),
+            ).length || 0
+          }
+          total={scheduledHabits.length}
+        />
         </View>
-
-        <View className="mt-6 mb-20 px-3">
+        
+        <View className="mt-6 mb-20 px-2">
           <ApText
             size="xl"
             font="bold"
@@ -357,7 +365,7 @@ const HomeScreen = () => {
             )}
           </View>
         </View>
-      </ApScrollView>
+      </ScrollView>
 
       <TouchableOpacity
         onPress={() => router.push("/create-habit")}
