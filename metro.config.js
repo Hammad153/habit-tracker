@@ -3,4 +3,10 @@ const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname)
 
-module.exports = withNativeWind(config, { input: './global.css' })
+const nativeWindConfig = withNativeWind(config, { input: './global.css' })
+
+if (nativeWindConfig.watcher) {
+  delete nativeWindConfig.watcher.unstable_workerThreads
+}
+
+module.exports = nativeWindConfig
