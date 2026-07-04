@@ -73,6 +73,10 @@ const HabitCard: React.FC<HabitCardProps> = ({
     toggleHabit(id, selectedDate);
   };
 
+  const handleCardPress = () => {
+    router.push(`/habit-detail?habitId=${id}` as any);
+  };
+
   const handleLongPress = () => {
     triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
     setModalVisible(true);
@@ -98,9 +102,13 @@ const HabitCard: React.FC<HabitCardProps> = ({
   return (
     <>
       <Pressable
-        onPress={variant === "toggle" ? handleToggle : undefined}
+        onPress={variant === "toggle" ? handleCardPress : undefined}
         onLongPress={variant === "toggle" ? handleLongPress : undefined}
         delayLongPress={500}
+        accessibilityRole={variant === "toggle" ? "button" : undefined}
+        accessibilityLabel={
+          variant === "toggle" ? `Open ${title} details` : undefined
+        }
       >
         <View
           className="w-full flex-row items-center p-4 my-2 rounded-2xl"

@@ -47,6 +47,39 @@ export const isHabitScheduledForDate = (
 };
 
 /**
+ * Computes the current consecutive-day streak from a habit's completions.
+ * A streak counts back from today (or yesterday, so a not-yet-done-today habit
+ * keeps its streak) while each preceding day has a completed entry.
+ */
+export const getCurrentStreak = (
+  completions?: { date: string; status: boolean }[],
+): number => {
+  if (!completions || completions.length === 0) return 0;
+
+  const doneDates = new Set(
+    completions.filter((c) => c.status).map((c) => c.date),
+  );
+  if (doneDates.size === 0) return 0;
+
+  const toKey = (d: Date) => d.toISOString().split("T")[0];
+  const cursor = new Date();
+
+  // If today isn't completed yet, start counting from yesterday so an active
+  // streak isn't shown as broken before the day is over.
+  if (!doneDates.has(toKey(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  let streak = 0;
+  while (doneDates.has(toKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+};
+
+/**
  * Returns a user-friendly schedule description
  */
 export const getScheduleLabel = (habit: IHabit): string => {

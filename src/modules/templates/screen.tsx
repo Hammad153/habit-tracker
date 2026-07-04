@@ -10,10 +10,10 @@ import {
   ApLoader,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
-import { useHabitState } from "@/src/modules/habits/context";
 import { ToastService } from "@/src/services";
 import { IHabitTemplate } from "./model";
 import { TemplateApiService } from "./api";
+import TemplatePreviewModal from "./components/TemplatePreviewModal";
 
 const CATEGORY_ICONS: Record<string, string> = {
   Fitness: "barbell",
@@ -25,10 +25,12 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 const TemplateScreen = () => {
   const { colors } = useSettingsState();
-  const { createHabit } = useHabitState();
   const [templates, setTemplates] = useState<IHabitTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [previewTemplate, setPreviewTemplate] = useState<IHabitTemplate | null>(
+    null,
+  );
 
   useEffect(() => {
     TemplateApiService.getAll()
@@ -44,17 +46,10 @@ const TemplateScreen = () => {
       ? templates
       : templates.filter((t) => t.category === selectedCategory);
 
+  // Selecting a template opens a preview/customization step instead of adding
+  // the habit immediately, so the user can review and tweak it first.
   const handleUseTemplate = (template: IHabitTemplate) => {
-    createHabit({
-      title: template.title,
-      subtitle: template.subtitle,
-      icon: template.icon,
-      iconColor: template.iconColor,
-      iconBg: template.iconBg,
-      category: template.category,
-      goal: template.goal,
-      unit: template.unit,
-    }).then(() => router.back());
+    setPreviewTemplate(template);
   };
 
   if (loading) return <ApLoader />;
@@ -161,6 +156,16 @@ const TemplateScreen = () => {
 
         <View className="h-20" />
       </ApScrollView>
+
+      <TemplatePreviewModal
+        template={previewTemplate}
+        visible={previewTemplate !== null}
+        onClose={() => setPreviewTemplate(null)}
+        onAdded={() => {
+          setPreviewTemplate(null);
+          router.back();
+        }}
+      />
     </ApContainer>
   );
 };

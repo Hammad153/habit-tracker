@@ -53,6 +53,13 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="habit-detail"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
                     name="settings/appearance"
                     options={{
                       headerShown: false,

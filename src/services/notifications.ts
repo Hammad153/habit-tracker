@@ -90,6 +90,30 @@ export class NotificationService {
     }
   };
 
+  static presentLocalAlert = async (
+    title: string,
+    body: string,
+  ): Promise<void> => {
+    if (Platform.OS === "web") return;
+
+    const granted = await NotificationService.ensurePermissions();
+    if (!granted) return;
+
+    const soundEnabledRaw = await ApStorageService.getRawItemAsync(
+      ApStorageKeys.SoundEnabled,
+    );
+    const soundEnabled = soundEnabledRaw !== "false"; // default on
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: soundEnabled,
+      },
+      trigger: null, // deliver immediately
+    });
+  };
+
   /**
    * Cancels every scheduled notification belonging to a habit.
    */

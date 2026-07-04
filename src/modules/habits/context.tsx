@@ -23,7 +23,7 @@ type THabitContext = {
   setHabit: React.Dispatch<SetStateAction<IHabit>>;
   fetchHabits: () => Promise<void>;
   fetchOneHabit: (id: string) => Promise<void>;
-  createHabit: (data: Partial<IHabit>) => Promise<void>;
+  createHabit: (data: Partial<IHabit>) => Promise<IHabit | void>;
   updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
   toggleHabit: (id: string, date: string, value?: number) => Promise<void>;
@@ -86,10 +86,12 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
     if (!user?.id) return Promise.resolve();
     setLoading(true);
     return HabitService.create(data, user.id)
-      .then(() => {
+      .then((created: IHabit) => {
         ToastService.Success("Habit created successfully");
         fetchSubscription();
-        return fetchHabits();
+        // Refresh the list, but resolve with the created habit so callers can
+        // attach reminders or navigate to it.
+        return fetchHabits().then(() => created);
       })
       .catch((err) => {
         const errorData = err?.response?.data;
