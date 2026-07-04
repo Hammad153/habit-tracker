@@ -115,6 +115,13 @@ const RootLayout = () => {
                       presentation: "modal",
                     }}
                   />
+                  <Stack.Screen
+                    name="journal"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
                 </Stack>
                 <StatusBar style="auto" />
               </ApSafeAreaView>

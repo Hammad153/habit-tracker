@@ -132,6 +132,11 @@ const ProfileScreen = () => {
           </ApText>
           <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
             <SettingsItem
+              label="Journal"
+              icon="journal"
+              onPress={() => router.push("/journal")}
+            />
+            <SettingsItem
               label="Sounds & Haptics"
               icon="musical-note"
               value={soundsValue}

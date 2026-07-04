@@ -213,6 +213,7 @@ const HomeScreen = () => {
             userName={profile?.name || "User"}
             unreadCount={unreadCount}
             onNotificationPress={() => router.push("/notifications")}
+            onJournalPress={() => router.push("/journal")}
           />
         </View>
 

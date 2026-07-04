@@ -9,6 +9,7 @@ interface Props {
   userName?: string;
   avatarUri?: string;
   onNotificationPress?: () => void;
+  onJournalPress?: () => void;
   unreadCount?: number;
 }
 
@@ -31,6 +32,7 @@ const getInitials = (name: string): string => {
 const UserGreeting: React.FC<Props> = ({
   avatarUri,
   onNotificationPress,
+  onJournalPress,
   unreadCount = 0,
 }) => {
   const { user } = useAuthState();
@@ -86,30 +88,44 @@ const UserGreeting: React.FC<Props> = ({
         </View>
       </View>
 
-      <TouchableOpacity
-        onPress={onNotificationPress}
-        activeOpacity={0.7}
-        className="w-11 h-11 rounded-2xl items-center justify-center border"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
-        }}
-      >
-        <Ionicons name="notifications" size={22} color={colors.primary} />
-        {unreadCount > 0 && (
-          <View
-            className="absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full border-2 items-center justify-center px-1"
-            style={{
-              backgroundColor: colors.danger,
-              borderColor: colors.surface,
-            }}
-          >
-            <ApText size="xs" font="bold" color="#FFFFFF">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </ApText>
-          </View>
-        )}
-      </TouchableOpacity>
+      <View className="flex-row items-center">
+        <TouchableOpacity
+          onPress={onJournalPress}
+          activeOpacity={0.7}
+          className="w-11 h-11 rounded-2xl items-center justify-center border mr-2.5"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
+          }}
+        >
+          <Ionicons name="journal" size={22} color={colors.primary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={onNotificationPress}
+          activeOpacity={0.7}
+          className="w-11 h-11 rounded-2xl items-center justify-center border"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
+          }}
+        >
+          <Ionicons name="notifications" size={22} color={colors.primary} />
+          {unreadCount > 0 && (
+            <View
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full border-2 items-center justify-center px-1"
+              style={{
+                backgroundColor: colors.danger,
+                borderColor: colors.surface,
+              }}
+            >
+              <ApText size="xs" font="bold" color="#FFFFFF">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </ApText>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
