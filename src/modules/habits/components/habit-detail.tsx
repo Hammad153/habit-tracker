@@ -125,7 +125,7 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
 
   return (
     <ApContainer>
-      <ApHeader title="Habit Details" hasBackButton />
+      <ApHeader title="Habit Breakdown" hasBackButton />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         {/* Hero */}
