@@ -3,10 +3,13 @@ import { View, Modal, TouchableOpacity, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
+import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import { ApText } from "@/src/components";
-import { useTheme } from "@/src/modules/settings/context";
+import { useSettingsState, useTheme } from "@/src/modules/settings/context";
 import { useFeedback } from "@/src/utils/feedback";
-import { NotificationService } from "@/src/services";
+
+// Bundled completion chime played when the timer reaches zero.
+const TIMER_COMPLETE_SOUND = require("@/assets/sounds/timer-complete.wav");
 
 interface HabitTimerProps {
   visible: boolean;
@@ -44,8 +47,16 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
   onMarkComplete,
 }) => {
   const colors = useTheme();
+  const { soundEnabled } = useSettingsState();
   const { triggerHaptic, triggerSuccess } = useFeedback();
   const accent = color || colors.primary;
+
+  const player = useAudioPlayer(TIMER_COMPLETE_SOUND);
+
+  // Allow the chime to sound even when the device is on silent/vibrate.
+  useEffect(() => {
+    setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+  }, []);
 
   const [phase, setPhase] = useState<Phase>("setup");
   const [minutes, setMinutes] = useState(defaultMinutes);
@@ -65,11 +76,15 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
     setRemaining(0);
     setPhase("done");
     triggerHaptic(Haptics.NotificationFeedbackType.Success);
-    NotificationService.presentLocalAlert(
-      `${habitTitle} session complete!`,
-      "Great work — your timed session is done.",
-    ).catch(() => {});
-  }, [clearTimer, habitTitle, triggerHaptic]);
+    if (soundEnabled) {
+      try {
+        player.seekTo(0);
+        player.play();
+      } catch {
+        // Audio is best-effort; never let it break the completion flow.
+      }
+    }
+  }, [clearTimer, player, soundEnabled, triggerHaptic]);
 
   // The single source of truth for the countdown. Ticks every second while
   // running and finishes exactly once when it crosses zero.
