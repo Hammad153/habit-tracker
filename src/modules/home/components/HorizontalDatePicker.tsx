@@ -36,7 +36,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   };
 
   return (
-    <View className="my-4">
+    <View className="my-4 px-3">
       <ApScrollView horizontal className="px-0">
         {weekDates.map((date, index) => {
           const isSelected = isSameDay(date, selectedDate);
@@ -48,7 +48,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
             <TouchableOpacity
               key={index}
               onPress={() => onDateChange(date)}
-              className={`items-center justify-center w-14 h-20 mx-1.5 rounded-2xl ${
+              className={`items-center justify-center w-14 h-20 mr-2 rounded-2xl ${
                 isSelected ? "" : "bg-surface"
               }`}
               style={
@@ -93,7 +93,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
 
         <TouchableOpacity
           onPress={() => setShowPicker(true)}
-          className="items-center justify-center w-14 h-20 mx-1.5 rounded-2xl"
+          className="items-center justify-center w-14 h-20 rounded-2xl"
           style={{
             backgroundColor: colors.surface,
             borderWidth: 1,

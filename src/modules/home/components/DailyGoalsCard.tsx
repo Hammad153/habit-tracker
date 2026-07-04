@@ -45,7 +45,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
 
   return (
     <View
-      className="rounded-[32px] p-6 overflow-hidden"
+      className="rounded-[24px] p-4 overflow-hidden"
       style={{
         backgroundColor: colors.surface,
         borderWidth: 1,
@@ -81,7 +81,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             color={colors.textPrimary}
             className="mb-2"
           >
-            {completed}/{total}Habits
+            {completed}/{total} Habits
           </ApText>
           <ApText size="sm" color={colors.textSecondary} font="medium">
             {getMotivationalText()}

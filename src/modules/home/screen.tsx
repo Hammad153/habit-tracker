@@ -23,34 +23,8 @@ import DailyGoalsCard from "./components/DailyGoalsCard";
 import UserGreeting from "./components/UserGreeting";
 import HabitCard from "@/src/modules/habits/components/HabitCard";
 import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
+import { MOTIVATION_MESSAGES } from "@/src/constants";
 
-const MOTIVATION_MESSAGES = [
-  "Consistency is built in quiet repetitions.",
-  "Small promises kept today become identity tomorrow.",
-  "Show up for the version of you that asked for change.",
-  "Progress loves a repeatable system.",
-  "A steady day is still a strong day.",
-  "Your habits are votes for your future self.",
-  "Discipline gets lighter when it becomes familiar.",
-  "Do the next right rep. Momentum will catch up.",
-  "Tiny wins count because they compound.",
-  "Make today easy to be proud of.",
-  "The streak is useful, but the return is the skill.",
-  "You do not need perfect energy to keep a promise.",
-  "Protect the habit before you polish the outcome.",
-  "A good routine lowers the cost of beginning.",
-  "The best system is the one you actually repeat.",
-  "One completed habit can change the shape of the day.",
-  "Consistency is self-trust with a schedule.",
-  "Start smaller when life gets loud. Keep the thread.",
-  "Your future does not need drama. It needs reps.",
-  "Do it gently, do it clearly, do it today.",
-  "Attention becomes direction. Direction becomes progress.",
-  "A calm checkmark is still a win.",
-  "Leave proof that you cared today.",
-  "Build the day one useful action at a time.",
-  "Keep going long enough for effort to become evidence.",
-];
 
 const percent = (value: number, total: number) =>
   total <= 0 ? 0 : Math.round((value / total) * 100);
@@ -213,6 +187,7 @@ const HomeScreen = () => {
   return (
     <ApContainer>
       <ApScrollView
+        className="px-0"
         showsVerticalScrollIndicator={false}
         refreshing={refreshing}
         onRefresh={handleRefresh}
@@ -221,8 +196,9 @@ const HomeScreen = () => {
           style={{
             backgroundColor: colors.surfaceGlow,
             borderRadius: 20,
-            paddingLeft: 20,
-            paddingRight: 20,
+            marginHorizontal: 12,
+            paddingLeft: 12,
+            paddingRight: 12,
           }}
         >
           <UserGreeting
@@ -232,9 +208,9 @@ const HomeScreen = () => {
           />
         </View>
 
-        <View className="mt-5 px-5">
+        <View className="mt-5 px-3">
           <View
-            className="rounded-3xl border p-5"
+            className="rounded-3xl border p-4"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
@@ -272,12 +248,16 @@ const HomeScreen = () => {
                 { label: "Longest", value: `${analytics.longestStreak}d` },
                 { label: "Active", value: analytics.activeHabits.length },
                 { label: "Total", value: analytics.totalHabits },
-              ].map((item) => (
-                <View key={item.label} className="mr-2 flex-1 rounded-2xl p-3" style={{ backgroundColor: colors.background }}>
+              ].map((item, index) => (
+                <View
+                  key={item.label}
+                  className={`flex-1 rounded-2xl p-3 ${index < 3 ? "mr-2" : ""}`}
+                  style={{ backgroundColor: colors.background }}
+                >
                   <ApText size="lg" font="bold" color={colors.textPrimary}>
                     {item.value}
                   </ApText>
-                  <ApText size="xs" color={colors.textMuted}>
+                  <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
                     {item.label}
                   </ApText>
                 </View>
@@ -286,9 +266,9 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        <View className="mt-4 px-5">
+        <View className="mt-4 px-3">
           <View
-            className="rounded-3xl border p-5"
+            className="rounded-3xl border p-4"
             style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
           >
             <View className="flex-row items-start">
@@ -315,16 +295,18 @@ const HomeScreen = () => {
           onDateChange={setSelectedDate}
         />
 
-        <DailyGoalsCard
-          completed={
-            scheduledHabits.filter((h: any) =>
-              h.completions?.some((c: any) => c.date === dateStr && c.status),
-            ).length || 0
-          }
-          total={scheduledHabits.length}
-        />
+        <View className="px-3">
+          <DailyGoalsCard
+            completed={
+              scheduledHabits.filter((h: any) =>
+                h.completions?.some((c: any) => c.date === dateStr && c.status),
+              ).length || 0
+            }
+            total={scheduledHabits.length}
+          />
+        </View>
 
-        <View className="mt-6 mb-20">
+        <View className="mt-6 mb-20 px-3">
           <ApText
             size="xl"
             font="bold"
