@@ -127,6 +127,37 @@ rebuild.
 Rule of thumb: if you edited `package.json` (native dep) or `app.json`, assume a
 rebuild. If you only touched `.ts`/`.tsx` or assets, it's OTA.
 
+> ⚠️ **`pnpm-lock.yaml` counts too.** A change that only touches the lockfile can
+> still be a rebuild if it moves a **native** module's version (e.g. a
+> `pnpm install` or an "expo doctor" deps fix that bumps `react-native-svg`,
+> `@react-native-community/datetimepicker`, `react-native-worklets`, etc.). Those
+> shift the fingerprint even though `package.json` looks untouched. Pure JS-only
+> dep changes (types, lint, build tools) do not.
+
+### How to tell if a change needs a rebuild (check the fingerprint)
+
+The fingerprint IS the `runtimeVersion`. If it changed, installed apps built on the
+old fingerprint will silently ignore the OTA. To check whether the last publish
+changed it:
+
+```bash
+eas update:list --branch preview --limit 3
+```
+
+Compare the **Runtime Version** of the newest update against the previous one
+(per platform — iOS and Android have separate fingerprints):
+
+- **Same Runtime Version** → OTA reaches installed apps. ✅
+- **Different Runtime Version** → the installed APK won't receive it until you
+  **rebuild once** with the new fingerprint. 🔁 After that one rebuild, JS-only
+  changes flow OTA again.
+
+You can also compute the current fingerprint locally without publishing:
+
+```bash
+npx expo-updates fingerprint:generate
+```
+
 ### Ship a JS/asset change (OTA — no rebuild)
 
 Automatic — just push:
