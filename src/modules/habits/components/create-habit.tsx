@@ -214,6 +214,27 @@ const CreateHabitScreen = () => {
             onIntervalDaysChange={setIntervalDays}
           />
 
+          {/* Reminder Section */}
+          <View className="mt-8">
+            <ApText
+              size="xs"
+              font="bold"
+              color={colors.textMuted}
+              className="mb-4 uppercase"
+              style={{ letterSpacing: 1 }}
+            >
+              Reminder
+            </ApText>
+            <ReminderPicker
+              time={reminderTime}
+              days={reminderDays}
+              enabled={reminderEnabled}
+              onTimeChange={setReminderTime}
+              onDaysChange={setReminderDays}
+              onEnabledChange={setReminderEnabled}
+            />
+          </View>
+
           <ApText
             size="xs"
             font="bold"
@@ -291,27 +312,6 @@ const CreateHabitScreen = () => {
                 />
               </TouchableOpacity>
             ))}
-          </View>
-
-          {/* Reminder Section */}
-          <View className="mt-8">
-            <ApText
-              size="xs"
-              font="bold"
-              color={colors.textMuted}
-              className="mb-4 uppercase"
-              style={{ letterSpacing: 1 }}
-            >
-              Reminder
-            </ApText>
-            <ReminderPicker
-              time={reminderTime}
-              days={reminderDays}
-              enabled={reminderEnabled}
-              onTimeChange={setReminderTime}
-              onDaysChange={setReminderDays}
-              onEnabledChange={setReminderEnabled}
-            />
           </View>
         </View>
       </ScrollView>
