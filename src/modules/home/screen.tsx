@@ -28,19 +28,20 @@ import UserGreeting from "./components/UserGreeting";
 import HabitCard from "@/src/modules/habits/components/HabitCard";
 import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
 import { MOTIVATION_MESSAGES } from "@/src/constants";
+import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 
 const percent = (value: number, total: number) =>
   total <= 0 ? 0 : Math.round((value / total) * 100);
 
-const dateKey = (date: Date) => date.toISOString().split("T")[0];
-
 const getCompletionValue = (habit: any, date: string) =>
-  habit.completions?.find((completion: any) => completion.date === date);
+  habit.completions?.find((completion: any) =>
+    isSameDateKey(completion.date, date),
+  );
 
 const buildAnalytics = (habits: any[]) => {
   const activeHabits = habits.filter((habit) => !habit.isArchived);
-  const todayKey = dateKey(new Date());
+  const todayKey = toDateKey(new Date());
   const todayScheduled = activeHabits.filter((habit) =>
     isHabitScheduledForDate(habit, new Date()),
   );
@@ -53,7 +54,7 @@ const buildAnalytics = (habits: any[]) => {
     subDays(new Date(), 29 - index),
   );
   const daily = windowDays.map((date) => {
-    const key = dateKey(date);
+    const key = toDateKey(date);
     const scheduled = activeHabits.filter((habit) =>
       isHabitScheduledForDate(habit, date),
     );
@@ -134,7 +135,7 @@ const HomeScreen = () => {
     loadAll().finally(() => setRefreshing(false));
   }, [loadAll]);
 
-  const dateStr = selectedDate.toISOString().split("T")[0];
+  const dateStr = toDateKey(selectedDate);
   const analytics = useMemo(() => buildAnalytics(habits), [habits]);
   const motivation = useMemo(() => {
     const dayIndex = Math.floor(new Date().getTime() / 86400000);
@@ -143,7 +144,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (!user?.id || analytics.totalHabits === 0) return;
-    const today = dateKey(new Date());
+    const today = toDateKey(new Date());
     const alreadyCreated = notifications.some(
       (notification) =>
         notification.createdAt.startsWith(today) &&
@@ -308,7 +309,9 @@ const HomeScreen = () => {
         <DailyGoalsCard
           completed={
             scheduledHabits.filter((h: any) =>
-              h.completions?.some((c: any) => c.date === dateStr && c.status),
+              h.completions?.some(
+                (c: any) => isSameDateKey(c.date, dateStr) && c.status,
+              ),
             ).length || 0
           }
           total={scheduledHabits.length}
@@ -352,13 +355,15 @@ const HomeScreen = () => {
                   iconColor={habit.iconColor}
                   iconBg={habit.iconBg}
                   isCompleted={habit.completions?.some(
-                    (c: any) => c.date === dateStr && c.status,
+                    (c: any) => isSameDateKey(c.date, dateStr) && c.status,
                   )}
                   selectedDate={dateStr}
                   onRefresh={() => fetchHabits()}
                   goal={habit.goal}
                   value={
-                    habit.completions?.find((c: any) => c.date === dateStr)
+                    habit.completions?.find((c: any) =>
+                      isSameDateKey(c.date, dateStr),
+                    )
                       ?.value || 0
                   }
                 />

@@ -1,11 +1,12 @@
 import React from "react";
 import { Habit } from "@/src/types";
-import { subDays, format, isSameDay } from "date-fns";
+import { subDays, format } from "date-fns";
 import { View } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 import { ApText } from "@/src/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
+import { isSameDateKey } from "@/src/utils/date";
 
 interface CompletionChartProps {
   habits: Habit[];
@@ -27,7 +28,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
     if (activeHabits.length === 0) return 0;
 
     const completedCount = activeHabits.filter((h) =>
-      h.completions?.some((c) => c.date === dateStr && c.status),
+      h.completions?.some((c) => isSameDateKey(c.date, dateStr) && c.status),
     ).length;
 
     return (completedCount / activeHabits.length) * 100;

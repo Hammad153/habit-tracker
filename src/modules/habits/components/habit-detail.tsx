@@ -18,12 +18,13 @@ import { ReminderApiService } from "@/src/modules/reminders/api";
 import { IReminder } from "@/src/modules/reminders/model";
 import { IHabit } from "@/src/modules/habits/model";
 import HabitTimer from "./HabitTimer";
+import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 interface HabitDetailScreenProps {
   habitId: string;
 }
 
-const todayStr = () => new Date().toISOString().split("T")[0];
+const todayStr = () => toDateKey(new Date());
 
 const StatTile = ({
   icon,
@@ -99,7 +100,9 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   );
 
   const today = todayStr();
-  const todayCompletion = completions.find((c) => c.date === today);
+  const todayCompletion = completions.find((c) =>
+    isSameDateKey(c.date, today),
+  );
   const isCompletedToday = !!todayCompletion?.status;
 
   const handleMarkComplete = useCallback(() => {

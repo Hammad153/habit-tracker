@@ -12,10 +12,12 @@ import {
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import HabitCard from "./HabitCard";
+import { toDateKey } from "@/src/utils/date";
 
 const ManageHabitsScreen = () => {
   const { habits, loading, fetchHabits } = useHabitState();
   const colors = useTheme();
+  const today = toDateKey(new Date());
 
   useEffect(() => {
     fetchHabits();
@@ -62,7 +64,7 @@ const ManageHabitsScreen = () => {
                 icon={habit.icon}
                 iconColor={habit.iconColor}
                 iconBg={habit.iconBg}
-                selectedDate={new Date().toISOString().split("T")[0]}
+                selectedDate={today}
                 variant="edit"
               />
             ))}
@@ -117,7 +119,7 @@ const ManageHabitsScreen = () => {
                   icon={habit.icon}
                   iconColor={habit.iconColor}
                   iconBg={habit.iconBg}
-                  selectedDate={new Date().toISOString().split("T")[0]}
+                  selectedDate={today}
                   variant="restore"
                 />
               ))}

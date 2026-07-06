@@ -1,9 +1,10 @@
 import { getCurrentStreak } from "./schedule";
+import { toDateKey } from "./date";
 
 const dayKey = (offset: number) => {
   const d = new Date();
   d.setDate(d.getDate() + offset);
-  return d.toISOString().split("T")[0];
+  return toDateKey(d);
 };
 
 describe("getCurrentStreak", () => {

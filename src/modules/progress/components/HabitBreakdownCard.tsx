@@ -5,6 +5,7 @@ import Svg, { Circle } from "react-native-svg";
 import { ApText } from "@/src/components/Text";
 import { Completion } from "@/src/types";
 import { useTheme } from "@/src/modules/settings/context";
+import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 interface HabitBreakdownCardProps {
   title: string;
@@ -37,8 +38,8 @@ const HabitBreakdownCard: React.FC<HabitBreakdownCardProps> = ({
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date(today);
       date.setDate(today.getDate() - (6 - i));
-      const dateStr = date.toISOString().split("T")[0];
-      return completions.some((c) => c.date === dateStr && c.status);
+      const dateStr = toDateKey(date);
+      return completions.some((c) => isSameDateKey(c.date, dateStr) && c.status);
     });
   }, [completions]);
 

@@ -13,12 +13,13 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
+import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 const HabitPageScreen = () => {
   const { colors } = useSettingsState();
   const { loading, error, habits, fetchHabits } = useHabitState();
   const [refreshing, setRefreshing] = useState(false);
-  const today = new Date().toISOString().split("T")[0];
+  const today = toDateKey(new Date());
 
   useEffect(() => {
     fetchHabits();
@@ -79,7 +80,7 @@ const HabitPageScreen = () => {
                   iconColor={habit.iconColor}
                   iconBg={habit.iconBg}
                   isCompleted={habit.completions?.some(
-                    (c: any) => c.date === today,
+                    (c: any) => isSameDateKey(c.date, today) && c.status,
                   )}
                   selectedDate={today}
                   variant="toggle"

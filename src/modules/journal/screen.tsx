@@ -26,8 +26,9 @@ import {
   JOURNAL_TEMPLATES,
   JournalMood,
 } from "./model";
+import { toDateKey } from "@/src/utils/date";
 
-const today = () => new Date().toISOString().split("T")[0];
+const today = () => toDateKey(new Date());
 
 const safeDate = (value: string) => {
   const parsed = parseISO(value);

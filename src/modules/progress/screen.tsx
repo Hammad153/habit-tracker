@@ -19,6 +19,7 @@ import OverviewStats from "./components/OverviewStats";
 import CompletionChart from "./components/CompletionChart";
 import HabitBreakdownCard from "./components/HabitBreakdownCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
+import { normalizeDateKey, toDateKey } from "@/src/utils/date";
 
 const getCompletionPercentage = (habit: IHabit, periodDays: number): number => {
   const completions = habit.completions ?? [];
@@ -27,10 +28,10 @@ const getCompletionPercentage = (habit: IHabit, periodDays: number): number => {
   const today = new Date();
   const startDate = new Date(today);
   startDate.setDate(today.getDate() - periodDays + 1);
-  const startStr = startDate.toISOString().split("T")[0];
+  const startStr = toDateKey(startDate);
 
   const completedInPeriod = completions.filter(
-    (c) => c.date >= startStr && c.status,
+    (c) => normalizeDateKey(c.date) >= startStr && c.status,
   ).length;
 
   return Math.round((completedInPeriod / periodDays) * 100);

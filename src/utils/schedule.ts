@@ -1,16 +1,10 @@
 import { IHabit } from "@/src/modules/habits/model";
+import { normalizeDateKey, toDateKey } from "@/src/utils/date";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/**
- * Determines if a habit is scheduled for a given date.
- * Accounts for schedule type, specific days, times per week, interval, and rest days.
- */
-export const isHabitScheduledForDate = (
-  habit: IHabit,
-  date: Date,
-): boolean => {
-  const dateStr = date.toISOString().split("T")[0];
+export const isHabitScheduledForDate = (habit: IHabit, date: Date): boolean => {
+  const dateStr = toDateKey(date);
 
   // Check if it's a rest day
   if (habit.restDays?.includes(dateStr)) {
@@ -29,8 +23,6 @@ export const isHabitScheduledForDate = (
     }
 
     case "times_per_week":
-      // For times_per_week, show the habit every day — the user chooses which days
-      // But we could dim it once they've hit their weekly target
       return true;
 
     case "interval": {
@@ -46,32 +38,26 @@ export const isHabitScheduledForDate = (
   }
 };
 
-/**
- * Computes the current consecutive-day streak from a habit's completions.
- * A streak counts back from today (or yesterday, so a not-yet-done-today habit
- * keeps its streak) while each preceding day has a completed entry.
- */
 export const getCurrentStreak = (
   completions?: { date: string; status: boolean }[],
 ): number => {
   if (!completions || completions.length === 0) return 0;
 
   const doneDates = new Set(
-    completions.filter((c) => c.status).map((c) => c.date),
+    completions.filter((c) => c.status).map((c) => normalizeDateKey(c.date)),
   );
   if (doneDates.size === 0) return 0;
 
-  const toKey = (d: Date) => d.toISOString().split("T")[0];
   const cursor = new Date();
 
   // If today isn't completed yet, start counting from yesterday so an active
   // streak isn't shown as broken before the day is over.
-  if (!doneDates.has(toKey(cursor))) {
+  if (!doneDates.has(toDateKey(cursor))) {
     cursor.setDate(cursor.getDate() - 1);
   }
 
   let streak = 0;
-  while (doneDates.has(toKey(cursor))) {
+  while (doneDates.has(toDateKey(cursor))) {
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);
   }
