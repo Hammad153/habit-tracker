@@ -325,7 +325,7 @@ const HomeScreen = () => {
             color={colors.textPrimary}
             className="mb-2"
           >
-            Your Habits
+            Scheduled Habits
           </ApText>
           <View>
             {scheduledHabits.length === 0 ? (
