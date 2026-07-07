@@ -20,6 +20,7 @@ const CreateHabitScreen = () => {
   const colors = useTheme();
   const { user } = useAuthState();
   const [name, setName] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("water");
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
   const [loading, setLoading] = useState(false);
@@ -46,6 +47,7 @@ const CreateHabitScreen = () => {
     setLoading(true);
     createHabit({
       title: name,
+      subtitle: subtitle.trim() || undefined,
       icon: selectedIcon,
       iconColor: selectedColor,
       iconBg: `${selectedColor}20`,
@@ -136,32 +138,38 @@ const CreateHabitScreen = () => {
             colors={[selectedColor + "40", colors.surface]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="p-6 rounded-3xl border"
+            className="p-4 rounded-3xl border"
             style={{ borderColor: colors.surfaceBorder }}
           >
             <View className="flex-row items-center">
               <View
-                className="w-16 h-16 rounded-2xl items-center justify-center"
+                className="w-12 h-12 rounded-xl items-center justify-center"
                 style={{ backgroundColor: `${selectedColor}20` }}
               >
                 <Ionicons
                   name={selectedIcon as any}
-                  size={32}
+                  size={24}
                   color={selectedColor}
                 />
               </View>
               <View className="ml-4 flex-1">
                 <ApText
-                  size="lg"
+                  size="base"
                   font="bold"
                   color={colors.textPrimary}
                   numberOfLines={1}
                 >
                   {name || "Habit Name"}
                 </ApText>
-                <ApText size="xs" color={colors.textMuted}>
-                  Live Preview
-                </ApText>
+                {subtitle ? (
+                  <ApText size="xs" color={colors.textSecondary} numberOfLines={1} className="mt-0.5">
+                    {subtitle}
+                  </ApText>
+                ) : (
+                  <ApText size="xs" color={colors.textMuted}>
+                    Live Preview
+                  </ApText>
+                )}
               </View>
             </View>
           </LinearGradient>
@@ -178,18 +186,27 @@ const CreateHabitScreen = () => {
             Basic Information
           </ApText>
           <View
-            className="rounded-2xl p-4"
+            className="rounded-2xl p-3 space-y-2 border"
             style={{
               backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
             }}
           >
             <TextInput
-              className="text-lg p-0"
-              style={{ color: colors.textPrimary }}
+              className="text-base p-1 border-b"
+              style={{ color: colors.textPrimary, borderBottomColor: colors.surfaceBorder }}
               placeholder="e.g. Drink 2L Water"
               placeholderTextColor={colors.textMuted}
               value={name}
               onChangeText={setName}
+            />
+            <TextInput
+              className="text-sm p-1"
+              style={{ color: colors.textPrimary }}
+              placeholder="Description (optional)"
+              placeholderTextColor={colors.textMuted}
+              value={subtitle}
+              onChangeText={setSubtitle}
             />
           </View>
 

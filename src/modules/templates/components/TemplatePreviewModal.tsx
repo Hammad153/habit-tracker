@@ -42,6 +42,7 @@ const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
   const { triggerSelection, triggerSuccess } = useFeedback();
 
   const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
   const [selectedIcon, setSelectedIcon] = useState("water");
   const [submitting, setSubmitting] = useState(false);
@@ -58,6 +59,7 @@ const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
   useEffect(() => {
     if (visible && template) {
       setTitle(template.title);
+      setSubtitle(template.subtitle || "");
       setSelectedColor(template.iconColor || HABIT_COLORS[0]);
       setSelectedIcon(template.icon || "water");
       setReminderEnabled(false);
@@ -81,7 +83,7 @@ const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
 
     createHabit({
       title: title.trim(),
-      subtitle: template.subtitle,
+      subtitle: subtitle.trim() || undefined,
       icon: selectedIcon,
       iconColor: selectedColor,
       iconBg: `${selectedColor}20`,
@@ -172,18 +174,18 @@ const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               colors={[selectedColor + "40", colors.surface]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="p-5 rounded-3xl border"
+              className="p-4 rounded-3xl border"
               style={{ borderColor: colors.surfaceBorder }}
             >
               <View className="flex-row items-center">
                 <View
-                  className="w-14 h-14 rounded-2xl items-center justify-center"
+                  className="w-12 h-12 rounded-xl items-center justify-center"
                   style={{ backgroundColor: `${selectedColor}20` }}
                 >
-                  <Ionicons name={selectedIcon as any} size={28} color={selectedColor} />
+                  <Ionicons name={selectedIcon as any} size={24} color={selectedColor} />
                 </View>
                 <View className="ml-4 flex-1">
-                  <ApText size="lg" font="bold" color={colors.textPrimary} numberOfLines={1}>
+                  <ApText size="base" font="bold" color={colors.textPrimary} numberOfLines={1}>
                     {title || template.title}
                   </ApText>
                   <ApText size="xs" color={colors.textMuted} className="mt-0.5">
@@ -192,25 +194,39 @@ const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                   </ApText>
                 </View>
               </View>
-              {template.subtitle ? (
-                <ApText size="sm" color={colors.textSecondary} className="mt-3">
-                  {template.subtitle}
+              {subtitle ? (
+                <ApText size="sm" color={colors.textSecondary} className="mt-2" numberOfLines={2}>
+                  {subtitle}
                 </ApText>
               ) : null}
             </LinearGradient>
 
             {/* Name */}
             <ApText size="xs" font="bold" color={colors.textMuted} className="mt-6 mb-2 uppercase" style={{ letterSpacing: 1 }}>
-              Habit Name
+              Basic Information
             </ApText>
-            <View className="rounded-2xl p-4" style={{ backgroundColor: colors.surface }}>
+            <View
+              className="rounded-2xl p-3 space-y-2 border"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
               <TextInput
-                className="text-lg p-0"
-                style={{ color: colors.textPrimary }}
+                className="text-base p-1 border-b"
+                style={{ color: colors.textPrimary, borderBottomColor: colors.surfaceBorder }}
                 placeholder="Habit name"
                 placeholderTextColor={colors.textMuted}
                 value={title}
                 onChangeText={setTitle}
+              />
+              <TextInput
+                className="text-sm p-1"
+                style={{ color: colors.textPrimary }}
+                placeholder="Description (optional)"
+                placeholderTextColor={colors.textMuted}
+                value={subtitle}
+                onChangeText={setSubtitle}
               />
             </View>
 
