@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, Animated, StyleSheet, Easing } from "react-native";
+import { View, Animated, StyleSheet, Easing, Modal } from "react-native";
 import { ApText } from "./Text";
 import { useTheme } from "@/src/modules/settings/context";
 
@@ -55,24 +55,16 @@ const ApLoader: React.FC<IProps> = ({
     </View>
   );
 
-  if (overlay) {
-    return (
-      <View
-        style={[styles.overlay, { backgroundColor: colors.background + "DD" }]}
-      >
-        {inner}
-      </View>
-    );
-  }
-
   if (inline) {
     return inner;
   }
 
   return (
-    <View style={[styles.fullscreen, { backgroundColor: colors.background }]}>
-      {inner}
-    </View>
+    <Modal transparent visible animationType="fade" statusBarTranslucent>
+      <View style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.45)" }]}>
+        {inner}
+      </View>
+    </Modal>
   );
 };
 
@@ -415,6 +407,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 999,
+  },
+  modalOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
