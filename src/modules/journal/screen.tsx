@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { format, isValid, parseISO } from "date-fns";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ApContainer,
   ApEmptyState,
@@ -99,146 +100,174 @@ const EntryForm = ({
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <ApContainer>
-        <ApHeader
-          title={entry ? "Edit Entry" : "New Entry"}
-          hasBackButton
-          onBack={onClose}
-          right={
-            <TouchableOpacity onPress={save} hitSlop={10}>
-              <ApText size="sm" font="bold" color={colors.primary}>
-                Save
+      <SafeAreaView
+        edges={["top"]}
+        style={{ flex: 1, backgroundColor: colors.background }}
+      >
+        <ApContainer>
+          <ApHeader
+            title={entry ? "Edit Entry" : "New Entry"}
+            hasBackButton
+            onBack={onClose}
+            right={
+              <TouchableOpacity onPress={save} hitSlop={10}>
+                <ApText size="sm" font="bold" color={colors.primary}>
+                  Save
+                </ApText>
+              </TouchableOpacity>
+            }
+          />
+          <ApScrollView showsVerticalScrollIndicator={false}>
+            <View className="px-5 pt-5 pb-28">
+              <TextInput
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Entry title"
+                placeholderTextColor={colors.textMuted}
+                className="rounded-2xl border px-4 py-4 text-lg"
+                style={{
+                  color: colors.textPrimary,
+                  borderColor: colors.surfaceBorder,
+                  backgroundColor: colors.surface,
+                }}
+              />
+              <TextInput
+                value={date}
+                onChangeText={setDate}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor={colors.textMuted}
+                className="mt-3 rounded-2xl border px-4 py-4"
+                style={{
+                  color: colors.textPrimary,
+                  borderColor: colors.surfaceBorder,
+                  backgroundColor: colors.surface,
+                }}
+              />
+
+              <ApText
+                size="xs"
+                font="bold"
+                color={colors.textMuted}
+                className="mt-6 mb-3 uppercase"
+              >
+                Mood
               </ApText>
-            </TouchableOpacity>
-          }
-        />
-        <ApScrollView showsVerticalScrollIndicator={false}>
-          <View className="px-5 pt-5 pb-28">
-            <TextInput
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Entry title"
-              placeholderTextColor={colors.textMuted}
-              className="rounded-2xl border px-4 py-4 text-lg"
-              style={{
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-                backgroundColor: colors.surface,
-              }}
-            />
-            <TextInput
-              value={date}
-              onChangeText={setDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={colors.textMuted}
-              className="mt-3 rounded-2xl border px-4 py-4"
-              style={{
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-                backgroundColor: colors.surface,
-              }}
-            />
-
-            <ApText size="xs" font="bold" color={colors.textMuted} className="mt-6 mb-3 uppercase">
-              Mood
-            </ApText>
-            <View className="flex-row flex-wrap">
-              {JOURNAL_MOODS.map((item) => {
-                const selected = item.value === mood;
-                return (
-                  <TouchableOpacity
-                    key={item.value}
-                    onPress={() => setMood(item.value)}
-                    className="mr-2 mb-2 flex-row items-center rounded-full border px-3 py-2"
-                    style={{
-                      backgroundColor: selected ? colors.primary : colors.surface,
-                      borderColor: selected ? colors.primary : colors.surfaceBorder,
-                    }}
-                  >
-                    <Ionicons
-                      name={item.icon as any}
-                      size={15}
-                      color={selected ? colors.background : colors.primary}
-                    />
-                    <ApText
-                      size="xs"
-                      font="semibold"
-                      color={selected ? colors.background : colors.textSecondary}
-                      className="ml-1.5"
+              <View className="flex-row flex-wrap">
+                {JOURNAL_MOODS.map((item) => {
+                  const selected = item.value === mood;
+                  return (
+                    <TouchableOpacity
+                      key={item.value}
+                      onPress={() => setMood(item.value)}
+                      className="mr-2 mb-2 flex-row items-center rounded-full border px-3 py-2"
+                      style={{
+                        backgroundColor: selected
+                          ? colors.primary
+                          : colors.surface,
+                        borderColor: selected
+                          ? colors.primary
+                          : colors.surfaceBorder,
+                      }}
                     >
-                      {item.label}
-                    </ApText>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
+                      <Ionicons
+                        name={item.icon as any}
+                        size={15}
+                        color={selected ? colors.background : colors.primary}
+                      />
+                      <ApText
+                        size="xs"
+                        font="semibold"
+                        color={
+                          selected ? colors.background : colors.textSecondary
+                        }
+                        className="ml-1.5"
+                      >
+                        {item.label}
+                      </ApText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
 
-            <TextInput
-              value={content}
-              onChangeText={setContent}
-              placeholder="Write what is on your mind..."
-              placeholderTextColor={colors.textMuted}
-              multiline
-              textAlignVertical="top"
-              className="mt-4 min-h-[260px] rounded-2xl border px-4 py-4 text-base"
-              style={{
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-                backgroundColor: colors.surface,
-                lineHeight: 24,
-              }}
-            />
-            <TextInput
-              value={tags}
-              onChangeText={setTags}
-              placeholder="tags, separated, by commas"
-              placeholderTextColor={colors.textMuted}
-              className="mt-3 rounded-2xl border px-4 py-4"
-              style={{
-                color: colors.textPrimary,
-                borderColor: colors.surfaceBorder,
-                backgroundColor: colors.surface,
-              }}
-            />
-            <View className="mt-4 flex-row">
-              <TouchableOpacity
-                onPress={() => setIsFavorite((value) => !value)}
-                className="mr-3 flex-row items-center rounded-full border px-4 py-3"
+              <TextInput
+                value={content}
+                onChangeText={setContent}
+                placeholder="Write what is on your mind..."
+                placeholderTextColor={colors.textMuted}
+                multiline
+                textAlignVertical="top"
+                className="mt-4 min-h-[260px] rounded-2xl border px-4 py-4 text-base"
                 style={{
+                  color: colors.textPrimary,
                   borderColor: colors.surfaceBorder,
-                  backgroundColor: isFavorite ? colors.warning + "18" : colors.surface,
+                  backgroundColor: colors.surface,
+                  lineHeight: 24,
                 }}
-              >
-                <Ionicons
-                  name={isFavorite ? "heart" : "heart-outline"}
-                  size={18}
-                  color={isFavorite ? colors.warning : colors.textMuted}
-                />
-                <ApText size="sm" color={colors.textSecondary} className="ml-2">
-                  Favorite
-                </ApText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setIsPinned((value) => !value)}
-                className="flex-row items-center rounded-full border px-4 py-3"
+              />
+              <TextInput
+                value={tags}
+                onChangeText={setTags}
+                placeholder="tags, separated, by commas"
+                placeholderTextColor={colors.textMuted}
+                className="mt-3 rounded-2xl border px-4 py-4"
                 style={{
+                  color: colors.textPrimary,
                   borderColor: colors.surfaceBorder,
-                  backgroundColor: isPinned ? colors.primary + "18" : colors.surface,
+                  backgroundColor: colors.surface,
                 }}
-              >
-                <Ionicons
-                  name={isPinned ? "bookmark" : "bookmark-outline"}
-                  size={18}
-                  color={isPinned ? colors.primary : colors.textMuted}
-                />
-                <ApText size="sm" color={colors.textSecondary} className="ml-2">
-                  Pin
-                </ApText>
-              </TouchableOpacity>
+              />
+              <View className="mt-4 flex-row">
+                <TouchableOpacity
+                  onPress={() => setIsFavorite((value) => !value)}
+                  className="mr-3 flex-row items-center rounded-full border px-4 py-3"
+                  style={{
+                    borderColor: colors.surfaceBorder,
+                    backgroundColor: isFavorite
+                      ? colors.warning + "18"
+                      : colors.surface,
+                  }}
+                >
+                  <Ionicons
+                    name={isFavorite ? "heart" : "heart-outline"}
+                    size={18}
+                    color={isFavorite ? colors.warning : colors.textMuted}
+                  />
+                  <ApText
+                    size="sm"
+                    color={colors.textSecondary}
+                    className="ml-2"
+                  >
+                    Favorite
+                  </ApText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setIsPinned((value) => !value)}
+                  className="flex-row items-center rounded-full border px-4 py-3"
+                  style={{
+                    borderColor: colors.surfaceBorder,
+                    backgroundColor: isPinned
+                      ? colors.primary + "18"
+                      : colors.surface,
+                  }}
+                >
+                  <Ionicons
+                    name={isPinned ? "bookmark" : "bookmark-outline"}
+                    size={18}
+                    color={isPinned ? colors.primary : colors.textMuted}
+                  />
+                  <ApText
+                    size="sm"
+                    color={colors.textSecondary}
+                    className="ml-2"
+                  >
+                    Pin
+                  </ApText>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ApScrollView>
-      </ApContainer>
+          </ApScrollView>
+        </ApContainer>
+      </SafeAreaView>
     </Modal>
   );
 };
@@ -250,7 +279,8 @@ const JournalScreen = () => {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [editingEntry, setEditingEntry] = useState<IJournalEntry | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<IJournalTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<IJournalTemplate | null>(null);
   const [formVisible, setFormVisible] = useState(false);
 
   const availableDates = useMemo(
@@ -286,7 +316,11 @@ const JournalScreen = () => {
   const confirmDelete = (entry: IJournalEntry) => {
     Alert.alert("Delete entry?", "This journal entry will be removed.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => deleteEntry(entry.id) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteEntry(entry.id),
+      },
     ]);
   };
 
@@ -330,13 +364,19 @@ const JournalScreen = () => {
             </View>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mt-4"
+          >
             <TouchableOpacity
               onPress={() => setDateFilter("")}
               className="mr-2 rounded-full border px-4 py-2"
               style={{
                 backgroundColor: !dateFilter ? colors.primary : colors.surface,
-                borderColor: !dateFilter ? colors.primary : colors.surfaceBorder,
+                borderColor: !dateFilter
+                  ? colors.primary
+                  : colors.surfaceBorder,
               }}
             >
               <ApText
@@ -353,14 +393,20 @@ const JournalScreen = () => {
                 onPress={() => setDateFilter(date)}
                 className="mr-2 rounded-full border px-4 py-2"
                 style={{
-                  backgroundColor: dateFilter === date ? colors.primary : colors.surface,
-                  borderColor: dateFilter === date ? colors.primary : colors.surfaceBorder,
+                  backgroundColor:
+                    dateFilter === date ? colors.primary : colors.surface,
+                  borderColor:
+                    dateFilter === date ? colors.primary : colors.surfaceBorder,
                 }}
               >
                 <ApText
                   size="xs"
                   font="semibold"
-                  color={dateFilter === date ? colors.background : colors.textSecondary}
+                  color={
+                    dateFilter === date
+                      ? colors.background
+                      : colors.textSecondary
+                  }
                 >
                   {formatJournalDate(date, "MMM d")}
                 </ApText>
@@ -368,7 +414,12 @@ const JournalScreen = () => {
             ))}
           </ScrollView>
 
-          <ApText size="xs" font="bold" color={colors.textMuted} className="mt-7 mb-3 uppercase">
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="mt-7 mb-3 uppercase"
+          >
             Templates
           </ApText>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -404,7 +455,12 @@ const JournalScreen = () => {
 
           <View className="mt-7">
             <View className="mb-3 flex-row items-center justify-between">
-              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+              <ApText
+                size="xs"
+                font="bold"
+                color={colors.textMuted}
+                className="uppercase"
+              >
                 Entries
               </ApText>
               <ApText size="xs" color={colors.textMuted}>
@@ -422,7 +478,9 @@ const JournalScreen = () => {
               />
             ) : (
               filteredEntries.map((entry) => {
-                const mood = JOURNAL_MOODS.find((item) => item.value === entry.mood);
+                const mood = JOURNAL_MOODS.find(
+                  (item) => item.value === entry.mood,
+                );
                 return (
                   <TouchableOpacity
                     key={entry.id}
@@ -431,7 +489,9 @@ const JournalScreen = () => {
                     className="mb-3 rounded-2xl border p-4"
                     style={{
                       backgroundColor: colors.surface,
-                      borderColor: entry.isPinned ? colors.primary + "66" : colors.surfaceBorder,
+                      borderColor: entry.isPinned
+                        ? colors.primary + "66"
+                        : colors.surfaceBorder,
                     }}
                   >
                     <View className="flex-row items-start">
@@ -462,21 +522,42 @@ const JournalScreen = () => {
                             className="ml-2"
                           >
                             <Ionicons
-                              name={entry.isFavorite ? "heart" : "heart-outline"}
+                              name={
+                                entry.isFavorite ? "heart" : "heart-outline"
+                              }
                               size={19}
-                              color={entry.isFavorite ? colors.warning : colors.textMuted}
+                              color={
+                                entry.isFavorite
+                                  ? colors.warning
+                                  : colors.textMuted
+                              }
                             />
                           </TouchableOpacity>
-                          <TouchableOpacity onPress={() => togglePinned(entry.id)} hitSlop={8} className="ml-3">
+                          <TouchableOpacity
+                            onPress={() => togglePinned(entry.id)}
+                            hitSlop={8}
+                            className="ml-3"
+                          >
                             <Ionicons
-                              name={entry.isPinned ? "bookmark" : "bookmark-outline"}
+                              name={
+                                entry.isPinned ? "bookmark" : "bookmark-outline"
+                              }
                               size={18}
-                              color={entry.isPinned ? colors.primary : colors.textMuted}
+                              color={
+                                entry.isPinned
+                                  ? colors.primary
+                                  : colors.textMuted
+                              }
                             />
                           </TouchableOpacity>
                         </View>
-                        <ApText size="xs" color={colors.textMuted} className="mt-1">
-                          {formatJournalDate(entry.date, "EEEE, MMM d")} / {mood?.label || entry.mood}
+                        <ApText
+                          size="xs"
+                          color={colors.textMuted}
+                          className="mt-1"
+                        >
+                          {formatJournalDate(entry.date, "EEEE, MMM d")} /{" "}
+                          {mood?.label || entry.mood}
                         </ApText>
                         <ApText
                           size="sm"
@@ -504,8 +585,15 @@ const JournalScreen = () => {
                               </View>
                             ))}
                           </View>
-                          <TouchableOpacity onPress={() => confirmDelete(entry)} hitSlop={8}>
-                            <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                          <TouchableOpacity
+                            onPress={() => confirmDelete(entry)}
+                            hitSlop={8}
+                          >
+                            <Ionicons
+                              name="trash-outline"
+                              size={18}
+                              color={colors.danger}
+                            />
                           </TouchableOpacity>
                         </View>
                       </View>
