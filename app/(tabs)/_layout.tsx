@@ -102,17 +102,27 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="more"
         options={{
-          title: "Profile",
+          title: "More",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "person-sharp" : "person-outline"}
+              name={focused ? "grid" : "grid-outline"}
               size={24}
               color={color}
             />
           ),
         }}
+      />
+
+      {/* Hidden tabs — accessible via the More screen but not shown in the bar */}
+      <Tabs.Screen
+        name="profile"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{ href: null }}
       />
     </Tabs>
   );
