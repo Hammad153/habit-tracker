@@ -32,6 +32,18 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         route: "/journal",
         description: "Reflect on your day",
       },
+      {
+        label: "Daily Plan",
+        icon: "calendar",
+        route: "/(tabs)/daily-plan",
+        description: "Plan tasks, priorities & reflection",
+      },
+      {
+        label: "Budget",
+        icon: "wallet",
+        route: "/(tabs)/budget",
+        description: "Track spending and income",
+      },
     ],
   },
   {
@@ -42,6 +54,12 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         icon: "bar-chart",
         route: "/analytics",
         description: "Deep dive into your habit data",
+      },
+      {
+        label: "Progress",
+        icon: "stats-chart",
+        route: "/(tabs)/progress",
+        description: "Visualize consistency trends",
       },
       {
         label: "Timeline",

@@ -8,6 +8,8 @@ import { TimelineProvider } from "@/src/modules/timeline/context";
 import { SubscriptionProvider } from "@/src/modules/subscription/context";
 import { JournalProvider } from "@/src/modules/journal/context";
 import { NotificationsProvider } from "@/src/modules/notifications/context";
+import { BudgetProvider } from "@/src/modules/budget/context";
+import { DailyPlanProvider } from "@/src/modules/daily-plan/context";
 
 type ContextProvider = FC<{ children: React.ReactNode }>;
 
@@ -35,6 +37,8 @@ const providers: ContextProvider[] = [
   ProfileProvider,
   SubscriptionProvider,
   HabitProvider,
+  DailyPlanProvider,
+  BudgetProvider,
   JournalProvider,
   NotificationsProvider,
   AwardsProvider,

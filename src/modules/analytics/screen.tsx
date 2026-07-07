@@ -18,6 +18,10 @@ interface AnalyticsData {
   totalHabits: number;
   weeklyCompletionRate: number;
   monthlyCompletionRate: number;
+  dailyPlanCompletionRate: number;
+  monthlyExpenseTotal: number;
+  budgetUsagePercentage: number;
+  spendingByCategory: { category: string; total: number; color?: string; icon?: string }[];
   bestDay: string;
   dayDistribution: { day: string; count: number }[];
   habitStreaks: {
@@ -90,6 +94,12 @@ const AdvancedAnalyticsScreen = () => {
 
   const screenWidth = Dimensions.get("window").width - 40;
   const maxDayCount = Math.max(...data.dayDistribution.map((d) => d.count), 1);
+  const money = (value = 0) =>
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }).format(value);
 
   return (
     <ApContainer>
@@ -138,6 +148,51 @@ const AdvancedAnalyticsScreen = () => {
               </ApText>
               <ApText size="2xl" font="bold" color={colors.warning}>
                 {data.bestDay}
+              </ApText>
+            </View>
+          </View>
+
+          <View className="flex-row gap-3 mb-6">
+            <View
+              className="flex-1 p-4 rounded-2xl border"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <ApText size="xs" color={colors.textMuted}>
+                Plan Rate
+              </ApText>
+              <ApText size="2xl" font="bold" color={colors.primary}>
+                {data.dailyPlanCompletionRate}%
+              </ApText>
+            </View>
+            <View
+              className="flex-1 p-4 rounded-2xl border"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <ApText size="xs" color={colors.textMuted}>
+                Expenses
+              </ApText>
+              <ApText size="2xl" font="bold" color={colors.warning}>
+                {money(data.monthlyExpenseTotal)}
+              </ApText>
+            </View>
+            <View
+              className="flex-1 p-4 rounded-2xl border"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <ApText size="xs" color={colors.textMuted}>
+                Budget Used
+              </ApText>
+              <ApText size="2xl" font="bold" color={colors.accent}>
+                {data.budgetUsagePercentage}%
               </ApText>
             </View>
           </View>
@@ -225,6 +280,44 @@ const AdvancedAnalyticsScreen = () => {
                       {cat.completions}
                     </ApText>
                   </View>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {data.spendingByCategory.length > 0 && (
+            <View
+              className="p-4 rounded-2xl border mb-6"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <ApText
+                size="sm"
+                font="bold"
+                color={colors.textPrimary}
+                className="mb-3"
+              >
+                Spending by Category
+              </ApText>
+              {data.spendingByCategory.map((cat) => (
+                <View
+                  key={cat.category}
+                  className="flex-row justify-between items-center py-2"
+                >
+                  <View className="flex-row items-center flex-1">
+                    <View
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: cat.color || colors.warning }}
+                    />
+                    <ApText size="sm" color={colors.textPrimary} numberOfLines={1}>
+                      {cat.category}
+                    </ApText>
+                  </View>
+                  <ApText size="sm" font="bold" color={colors.textPrimary}>
+                    {money(cat.total)}
+                  </ApText>
                 </View>
               ))}
             </View>

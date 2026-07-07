@@ -3,8 +3,6 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/src/modules/settings/context";
 import "../../global.css";
-import { View } from "react-native";
-import { ApText } from "@/src/components";
 
 const TabLayout = () => {
   const colors = useTheme();
@@ -50,51 +48,25 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="progress"
+        name="daily-plan"
         options={{
-          title: "Progress",
+          title: "Daily Plan",
           tabBarIcon: ({ color, focused }) => (
-            <View className="absolute bottom-[-10px] items-center">
-              <View
-                className="rounded-full w-[60px] h-[60px] justify-center items-center"
-                style={{
-                  backgroundColor: colors.primary,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 4,
-                }}
-              >
-                <Ionicons
-                  name={focused ? "stats-chart-sharp" : "stats-chart-outline"}
-                  size={28}
-                  color={colors.background}
-                />
-              </View>
-              <ApText
-                numberOfLines={1}
-                style={{
-                  color: focused ? colors.primary : colors.textSecondary,
-                  fontSize: 12,
-                  fontWeight: focused ? "600" : "400",
-                  marginTop: 4,
-                }}
-              >
-                Progress
-              </ApText>
-            </View>
+            <Ionicons
+              name={focused ? "calendar" : "calendar-outline"}
+              size={24}
+              color={color}
+            />
           ),
-          tabBarLabel: "",
         }}
       />
       <Tabs.Screen
-        name="awards"
+        name="budget"
         options={{
-          title: "Awards",
+          title: "Budget",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "trophy-sharp" : "trophy-outline"}
+              name={focused ? "wallet" : "wallet-outline"}
               size={24}
               color={color}
             />
@@ -122,6 +94,14 @@ const TabLayout = () => {
       />
       <Tabs.Screen
         name="journal"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="awards"
         options={{ href: null }}
       />
     </Tabs>

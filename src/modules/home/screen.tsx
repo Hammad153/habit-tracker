@@ -21,6 +21,8 @@ import { useProfileState } from "@/src/modules/profile/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
+import { useBudgetState } from "@/src/modules/budget/context";
+import { useDailyPlanState } from "@/src/modules/daily-plan/context";
 import { isHabitScheduledForDate } from "@/src/utils/schedule";
 import HorizontalDatePicker from "./components/HorizontalDatePicker";
 import DailyGoalsCard from "./components/DailyGoalsCard";
@@ -123,10 +125,20 @@ const HomeScreen = () => {
   const { user } = useAuthState();
   const { unreadCount, addNotification, notifications } =
     useNotificationsState();
+  const { summary: budgetSummary, fetchSummary: fetchBudgetSummary } =
+    useBudgetState();
+  const { summary: planSummary, fetchSummary: fetchPlanSummary } =
+    useDailyPlanState();
 
   const loadAll = useCallback(() => {
     if (!user?.id) return Promise.resolve();
-    return Promise.all([fetchHabits(), fetchProfile(), fetchSubscription()]);
+    return Promise.all([
+      fetchHabits(),
+      fetchProfile(),
+      fetchSubscription(),
+      fetchBudgetSummary(),
+      fetchPlanSummary(toDateKey(new Date())),
+    ]);
   }, [user?.id]);
 
   useEffect(() => {
@@ -278,6 +290,74 @@ const HomeScreen = () => {
                   </ApText>
                 </View>
               ))}
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-4 px-2">
+          <View
+            className="rounded-3xl border p-4"
+            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+                  Today's Plan
+                </ApText>
+                <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
+                  {planSummary?.completionPercentage ?? 0}%
+                </ApText>
+                <ApText size="sm" color={colors.textSecondary}>
+                  {planSummary?.completedTasks ?? 0} done / {planSummary?.pendingTasks ?? 0} left
+                </ApText>
+              </View>
+              <TouchableOpacity
+                onPress={() => router.push("/(tabs)/daily-plan")}
+                className="h-11 w-11 rounded-2xl items-center justify-center"
+                style={{ backgroundColor: colors.primary + "18" }}
+              >
+                <Ionicons name="calendar-outline" size={22} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View className="mt-4 px-2">
+          <View
+            className="rounded-3xl border p-4"
+            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+                  Monthly Budget
+                </ApText>
+                <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
+                  {budgetSummary?.budgetUsagePercentage ?? 0}%
+                </ApText>
+                <ApText size="sm" color={budgetSummary?.warning ? colors.warning : colors.textSecondary}>
+                  {budgetSummary?.warning ?? `${budgetSummary?.remainingBudget ?? 0} budget remaining`}
+                </ApText>
+              </View>
+              <TouchableOpacity
+                onPress={() => router.push("/(tabs)/budget")}
+                className="h-11 w-11 rounded-2xl items-center justify-center"
+                style={{ backgroundColor: colors.warning + "18" }}
+              >
+                <Ionicons name="wallet-outline" size={22} color={colors.warning} />
+              </TouchableOpacity>
+            </View>
+            <View className="mt-3 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(budgetSummary?.budgetUsagePercentage ?? 0, 100)}%`,
+                  backgroundColor:
+                    (budgetSummary?.budgetUsagePercentage ?? 0) >= 100
+                      ? "#EF4444"
+                      : colors.primary,
+                }}
+              />
             </View>
           </View>
         </View>
