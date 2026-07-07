@@ -8,6 +8,7 @@ import React, {
 import { ToastService, NotificationService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
+import { isSameDateKey } from "@/src/utils/date";
 import { IHabit } from "./model";
 import { HabitService } from "./api";
 
@@ -21,7 +22,7 @@ type THabitContext = {
   habits: IHabit[];
   habit: IHabit;
   setHabit: React.Dispatch<SetStateAction<IHabit>>;
-  fetchHabits: () => Promise<void>;
+  fetchHabits: (options?: { silent?: boolean }) => Promise<void>;
   fetchOneHabit: (id: string) => Promise<void>;
   createHabit: (data: Partial<IHabit>) => Promise<IHabit | void>;
   updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
@@ -47,9 +48,93 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   const [habits, setHabits] = useState<IHabit[]>([]);
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
 
-  const fetchHabits = () => {
+  const getOptimisticCompletions = (
+    currentHabit: IHabit,
+    id: string,
+    date: string,
+    value?: number,
+  ) => {
+    if (currentHabit.id !== id) return currentHabit.completions;
+
+    const completions = currentHabit.completions ?? [];
+    const existing = completions.find((completion) =>
+      isSameDateKey(completion.date, date),
+    );
+
+    if (value === undefined) {
+      if (existing) {
+        return completions.filter(
+          (completion) => !isSameDateKey(completion.date, date),
+        );
+      }
+
+      return [
+        ...completions,
+        {
+          id: `optimistic-${id}-${date}`,
+          habitId: id,
+          date,
+          status: true,
+          value: currentHabit.goal,
+        },
+      ];
+    }
+
+    const status = value >= currentHabit.goal;
+    const nextCompletion = {
+      id: existing?.id ?? `optimistic-${id}-${date}`,
+      habitId: id,
+      date,
+      status,
+      value,
+    };
+
+    if (existing) {
+      return completions.map((completion) =>
+        isSameDateKey(completion.date, date) ? nextCompletion : completion,
+      );
+    }
+
+    return [...completions, nextCompletion];
+  };
+
+  const applyOptimisticToggle = (id: string, date: string, value?: number) => {
+    setHabits((currentHabits) =>
+      currentHabits.map((currentHabit) =>
+        currentHabit.id === id
+          ? {
+              ...currentHabit,
+              completions: getOptimisticCompletions(
+                currentHabit,
+                id,
+                date,
+                value,
+              ),
+            }
+          : currentHabit,
+      ),
+    );
+
+    setHabit((currentHabit) =>
+      currentHabit?.id === id
+        ? {
+            ...currentHabit,
+            completions: getOptimisticCompletions(
+              currentHabit,
+              id,
+              date,
+              value,
+            ),
+          }
+        : currentHabit,
+    );
+  };
+
+  const fetchHabits = (options?: { silent?: boolean }) => {
     if (!user?.id) return Promise.resolve();
-    setLoading(true);
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(false);
     return HabitService.getAll(user.id)
       .then((data) => {
@@ -62,7 +147,9 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
         ToastService.ApiError(err);
       })
       .finally(() => {
-        setLoading(false);
+        if (!options?.silent) {
+          setLoading(false);
+        }
       });
   };
 
@@ -142,11 +229,17 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   };
 
   const toggleHabit = (id: string, date: string, value?: number) => {
+    const previousHabits = habits;
+    const previousHabit = habit;
+    applyOptimisticToggle(id, date, value);
+
     return HabitService.toggle(id, date, value)
       .then(() => {
-        return fetchHabits();
+        return fetchHabits({ silent: true });
       })
       .catch((err) => {
+        setHabits(previousHabits);
+        setHabit(previousHabit);
         ToastService.ApiError(err);
       });
   };
