@@ -38,7 +38,7 @@ const HabitPageScreen = () => {
 
   return (
     <ApContainer>
-      <View className="h-screen">
+      <View className="flex-1">
         <ApHeader
           title="Habits"
           hasBackButton
