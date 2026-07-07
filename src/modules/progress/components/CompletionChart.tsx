@@ -6,7 +6,7 @@ import { useTheme } from "@/src/modules/settings/context";
 import { ApText } from "@/src/components/Text";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
-import { isSameDateKey } from "@/src/utils/date";
+import { isSameDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
 interface CompletionChartProps {
   habits: Habit[];
@@ -24,14 +24,14 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
     const date = subDays(today, 6 - i);
     const dateStr = format(date, "yyyy-MM-dd");
 
-    const activeHabits = habits.filter((h) => !h.isArchived);
-    if (activeHabits.length === 0) return 0;
+    const eligibleHabits = habits.filter((h) => !h.isArchived && isHabitEligibleForDate(h, date));
+    if (eligibleHabits.length === 0) return 0;
 
-    const completedCount = activeHabits.filter((h) =>
+    const completedCount = eligibleHabits.filter((h) =>
       h.completions?.some((c) => isSameDateKey(c.date, dateStr) && c.status),
     ).length;
 
-    return (completedCount / activeHabits.length) * 100;
+    return (completedCount / eligibleHabits.length) * 100;
   });
 
   const overallCompletion = Math.round(

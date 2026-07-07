@@ -19,3 +19,23 @@ export const normalizeDateKey = (date: string | Date) => {
 
 export const isSameDateKey = (date: string | Date, key: string) =>
   normalizeDateKey(date) === key;
+
+export const isHabitEligibleForDate = (
+  habit: { createdAt?: string | Date },
+  date: Date,
+): boolean => {
+  const todayKey = toDateKey(new Date());
+  const selectedKey = toDateKey(date);
+
+  // Ensure today's view (and future views) remains unchanged and shows all active habits.
+  if (selectedKey >= todayKey) {
+    return true;
+  }
+
+  if (!habit.createdAt) {
+    return true;
+  }
+
+  const createdKey = toDateKey(new Date(habit.createdAt));
+  return createdKey <= selectedKey;
+};

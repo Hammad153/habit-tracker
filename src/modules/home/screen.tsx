@@ -28,7 +28,7 @@ import UserGreeting from "./components/UserGreeting";
 import HabitCard from "@/src/modules/habits/components/HabitCard";
 import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
 import { MOTIVATION_MESSAGES } from "@/src/constants";
-import { isSameDateKey, toDateKey } from "@/src/utils/date";
+import { isSameDateKey, toDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
 
 const percent = (value: number, total: number) =>
@@ -55,7 +55,10 @@ const buildAnalytics = (habits: any[]) => {
   );
   const daily = windowDays.map((date) => {
     const key = toDateKey(date);
-    const scheduled = activeHabits.filter((habit) =>
+    const eligibleHabits = activeHabits.filter((habit) =>
+      isHabitEligibleForDate(habit, date),
+    );
+    const scheduled = eligibleHabits.filter((habit) =>
       isHabitScheduledForDate(habit, date),
     );
     const completed = scheduled.filter(
@@ -173,7 +176,10 @@ const HomeScreen = () => {
   const scheduledHabits = useMemo(() => {
     if (!habits) return [];
     return habits.filter(
-      (h) => !h.isArchived && isHabitScheduledForDate(h, selectedDate),
+      (h) =>
+        !h.isArchived &&
+        isHabitScheduledForDate(h, selectedDate) &&
+        isHabitEligibleForDate(h, selectedDate),
     );
   }, [habits, selectedDate]);
 

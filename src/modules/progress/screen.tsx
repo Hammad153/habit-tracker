@@ -34,7 +34,20 @@ const getCompletionPercentage = (habit: IHabit, periodDays: number): number => {
     (c) => normalizeDateKey(c.date) >= startStr && c.status,
   ).length;
 
-  return Math.round((completedInPeriod / periodDays) * 100);
+  let eligibleDaysInPeriod = periodDays;
+  if (habit.createdAt) {
+    const createdDate = new Date(habit.createdAt);
+    const createdMidnight = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
+    const startMidnight = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    if (createdMidnight > startMidnight) {
+      const diffTime = Math.abs(today.getTime() - createdMidnight.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+      eligibleDaysInPeriod = Math.min(periodDays, diffDays);
+    }
+  }
+
+  if (eligibleDaysInPeriod <= 0) return 0;
+  return Math.round((completedInPeriod / eligibleDaysInPeriod) * 100);
 };
 
 const ProgressScreen = () => {
