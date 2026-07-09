@@ -5,9 +5,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { addMonths, addYears, format, subMonths } from "date-fns";
 import {
   ApContainer,
-  ApDatePicker,
+  ApDateField,
   ApHeader,
   ApScrollView,
+  ApSubmitButton,
   ApText,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -83,52 +84,15 @@ const Field = ({
   );
 };
 
-const DateField = ({
-  label,
-  value,
-  onChange,
-  minDate,
-  error,
-  title,
-}: {
+/** Budget dates look ahead, so the picker is bounded by MAX_DATE rather than today. */
+const DateField = (props: {
   label: string;
   value: string;
   onChange: (key: string) => void;
   minDate?: Date;
   error?: string;
   title?: string;
-}) => {
-  const colors = useTheme();
-  const [open, setOpen] = useState(false);
-  return (
-    <View className="mb-4">
-      <Label>{label}</Label>
-      <TouchableOpacity
-        onPress={() => setOpen(true)}
-        className="flex-row items-center justify-between rounded-2xl border px-4 py-3"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: error ? DANGER : colors.surfaceBorder,
-        }}
-      >
-        <ApText size="sm" color={colors.textPrimary}>
-          {format(parseDateKey(value), "EEE, MMM d, yyyy")}
-        </ApText>
-        <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-      </TouchableOpacity>
-      <ErrorText message={error} />
-      <ApDatePicker
-        visible={open}
-        title={title ?? label}
-        onClose={() => setOpen(false)}
-        selectedDate={parseDateKey(value)}
-        onSelect={(date) => onChange(toDateKey(date))}
-        maxDate={MAX_DATE}
-        minDate={minDate}
-      />
-    </View>
-  );
-};
+}) => <ApDateField {...props} maxDate={MAX_DATE} />;
 
 const MonthField = ({
   label,
@@ -175,7 +139,7 @@ const BudgetFormScreen = () => {
     updateBudget,
     loading,
     fetchBudgets,
-    fetchCategories,
+    ensureCategories,
   } = useBudgetState();
 
   const editing = useMemo(() => budgets.find((item) => item.id === id), [budgets, id]);
@@ -195,9 +159,10 @@ const BudgetFormScreen = () => {
   );
   const [allocations, setAllocations] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    Promise.all([fetchBudgets(), fetchCategories()]);
+    Promise.all([fetchBudgets(), ensureCategories()]);
   }, []);
 
   const hydratedId = useRef<string | undefined>(undefined);
@@ -357,14 +322,18 @@ const BudgetFormScreen = () => {
 
   const submit = async () => {
     setSubmitted(true);
-    if (!canSave || loading) return;
+    if (!canSave || submitting) return;
     const payload = buildPayload();
-    if (editing) {
-      await updateBudget(editing.id, payload);
-    } else {
-      await createBudget(payload);
+    setSubmitting(true);
+    try {
+      const saved = editing
+        ? await updateBudget(editing.id, payload)
+        : await createBudget(payload);
+      // Stay on the screen if the request failed, so nothing typed is lost.
+      if (saved) router.back();
+    } finally {
+      setSubmitting(false);
     }
-    router.back();
   };
 
   return (
@@ -600,17 +569,13 @@ const BudgetFormScreen = () => {
             </View>
           ) : null}
 
-          <TouchableOpacity
-            disabled={loading}
+          <ApSubmitButton
+            label="Save Budget"
+            loadingLabel="Saving budget..."
             onPress={submit}
-            className="mt-2 flex-row items-center justify-center rounded-2xl py-4"
-            style={{ backgroundColor: canSave ? colors.primary : colors.surfaceBorder }}
-          >
-            <Ionicons name="save-outline" size={18} color={colors.background} />
-            <ApText size="base" font="bold" color={colors.background} className="ml-2">
-              Save Budget
-            </ApText>
-          </TouchableOpacity>
+            loading={submitting}
+            enabled={canSave}
+          />
         </View>
       </ApScrollView>
     </ApContainer>

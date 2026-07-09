@@ -16,20 +16,31 @@ export const ApScrollView: React.FC<IProps> = ({
   contentContainerClassName,
   refreshing = false,
   onRefresh,
+  refreshControl,
   ...props
 }) => {
   const colors = useTheme();
-  const refreshControl = onRefresh ? (
-    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-  ) : undefined;
+  // An explicitly passed refreshControl wins; otherwise build one from the
+  // refreshing/onRefresh shorthand. Previously this prop was swallowed by the
+  // spread, silently disabling pull-to-refresh for callers that passed it.
+  const control =
+    refreshControl ??
+    (onRefresh ? (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor={colors.textMuted}
+        colors={[colors.primary]}
+      />
+    ) : undefined);
 
   return (
     <ScrollView
       {...props}
-      className={`px-4 py-2 ${className}`}
+      className={`px-4 py-2 ${className ?? ""}`}
       style={{ backgroundColor: colors.background }}
       contentContainerClassName={contentContainerClassName}
-      refreshControl={refreshControl}>
+      refreshControl={control}>
       {children}
     </ScrollView>
   );

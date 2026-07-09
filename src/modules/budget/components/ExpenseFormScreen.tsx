@@ -2,7 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { TextInput, TouchableOpacity, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { ApContainer, ApHeader, ApScrollView, ApText } from "@/src/components";
+import {
+  ApContainer,
+  ApDateField,
+  ApHeader,
+  ApScrollView,
+  ApSubmitButton,
+  ApText,
+} from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { toDateKey } from "@/src/utils/date";
 import { useBudgetState } from "../context";
@@ -38,10 +45,13 @@ const ExpenseFormScreen = () => {
     updateExpense,
     loading,
     fetchBudgets,
-    fetchCategories,
+    ensureCategories,
     fetchExpenses,
   } = useBudgetState();
   const editing = useMemo(() => expenses.find((item) => item.id === id), [expenses, id]);
+  // The context's `loading` is shared by every budget request, so the button
+  // tracks this request on its own.
+  const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState(editing?.title ?? "");
   const [amount, setAmount] = useState(editing?.amount ? String(editing.amount) : "");
   const [expenseDate, setExpenseDate] = useState(editing?.expenseDate?.slice(0, 10) ?? toDateKey(new Date()));
@@ -50,7 +60,7 @@ const ExpenseFormScreen = () => {
   const [budgetId, setBudgetId] = useState(editing?.budgetId ?? "");
 
   useEffect(() => {
-    Promise.all([fetchCategories(), fetchBudgets(), fetchExpenses()]);
+    Promise.all([ensureCategories(), fetchBudgets(), fetchExpenses()]);
   }, []);
 
   useEffect(() => {
@@ -70,7 +80,7 @@ const ExpenseFormScreen = () => {
   const canSave = title.trim().length > 0 && Number(amount) > 0 && categoryId;
 
   const submit = async () => {
-    if (!canSave) return;
+    if (!canSave || submitting) return;
     const payload = {
       title: title.trim(),
       amount: Number(amount),
@@ -79,12 +89,16 @@ const ExpenseFormScreen = () => {
       categoryId,
       budgetId: budgetId || undefined,
     };
-    if (editing) {
-      await updateExpense(editing.id, payload);
-    } else {
-      await createExpense(payload);
+    setSubmitting(true);
+    try {
+      const saved = editing
+        ? await updateExpense(editing.id, payload)
+        : await createExpense(payload);
+      // Stay on the screen if the request failed, so nothing typed is lost.
+      if (saved) router.back();
+    } finally {
+      setSubmitting(false);
     }
-    router.back();
   };
 
   return (
@@ -129,14 +143,15 @@ const ExpenseFormScreen = () => {
               </TouchableOpacity>
             ))}
           </View>
-          <Field label="Date (YYYY-MM-DD)" value={expenseDate} onChangeText={setExpenseDate} />
+          <ApDateField label="Date" value={expenseDate} onChange={setExpenseDate} />
           <Field label="Note" value={note} onChangeText={setNote} multiline />
-          <TouchableOpacity disabled={!canSave || loading} onPress={submit} className="mt-2 flex-row items-center justify-center rounded-2xl py-4" style={{ backgroundColor: canSave ? colors.primary : colors.surfaceBorder }}>
-            <Ionicons name="save-outline" size={18} color={colors.background} />
-            <ApText size="base" font="bold" color={colors.background} className="ml-2">
-              Save Expense
-            </ApText>
-          </TouchableOpacity>
+          <ApSubmitButton
+            label="Save Expense"
+            loadingLabel="Saving expense..."
+            onPress={submit}
+            loading={submitting}
+            enabled={!!canSave}
+          />
         </View>
       </ApScrollView>
     </ApContainer>

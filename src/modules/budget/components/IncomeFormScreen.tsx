@@ -1,8 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { ApContainer, ApHeader, ApScrollView, ApText } from "@/src/components";
+import {
+  ApContainer,
+  ApDateField,
+  ApHeader,
+  ApScrollView,
+  ApSubmitButton,
+  ApText,
+} from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { toDateKey } from "@/src/utils/date";
 import { useBudgetState } from "../context";
@@ -29,8 +35,11 @@ const Field = ({ label, value, onChangeText, keyboardType = "default", multiline
 const IncomeFormScreen = () => {
   const colors = useTheme();
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const { incomes, createIncome, updateIncome, loading, fetchIncomes } = useBudgetState();
+  const { incomes, createIncome, updateIncome, fetchIncomes } = useBudgetState();
   const editing = useMemo(() => incomes.find((item) => item.id === id), [incomes, id]);
+  // The context's `loading` is shared by every budget request, so the button
+  // tracks this request on its own.
+  const [submitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState(editing?.title ?? "");
   const [amount, setAmount] = useState(editing?.amount ? String(editing.amount) : "");
   const [incomeDate, setIncomeDate] = useState(editing?.incomeDate?.slice(0, 10) ?? toDateKey(new Date()));
@@ -51,14 +60,18 @@ const IncomeFormScreen = () => {
   const canSave = title.trim().length > 0 && Number(amount) > 0;
 
   const submit = async () => {
-    if (!canSave) return;
+    if (!canSave || submitting) return;
     const payload = { title: title.trim(), amount: Number(amount), incomeDate, note: note.trim() || undefined };
-    if (editing) {
-      await updateIncome(editing.id, payload);
-    } else {
-      await createIncome(payload);
+    setSubmitting(true);
+    try {
+      const saved = editing
+        ? await updateIncome(editing.id, payload)
+        : await createIncome(payload);
+      // Stay on the screen if the request failed, so nothing typed is lost.
+      if (saved) router.back();
+    } finally {
+      setSubmitting(false);
     }
-    router.back();
   };
 
   return (
@@ -68,14 +81,15 @@ const IncomeFormScreen = () => {
         <View className="mt-4 px-1">
           <Field label="Title" value={title} onChangeText={setTitle} />
           <Field label="Amount" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
-          <Field label="Date (YYYY-MM-DD)" value={incomeDate} onChangeText={setIncomeDate} />
+          <ApDateField label="Date" value={incomeDate} onChange={setIncomeDate} />
           <Field label="Note" value={note} onChangeText={setNote} multiline />
-          <TouchableOpacity disabled={!canSave || loading} onPress={submit} className="mt-2 flex-row items-center justify-center rounded-2xl py-4" style={{ backgroundColor: canSave ? colors.primary : colors.surfaceBorder }}>
-            <Ionicons name="save-outline" size={18} color={colors.background} />
-            <ApText size="base" font="bold" color={colors.background} className="ml-2">
-              Save Income
-            </ApText>
-          </TouchableOpacity>
+          <ApSubmitButton
+            label="Save Income"
+            loadingLabel="Saving income..."
+            onPress={submit}
+            loading={submitting}
+            enabled={!!canSave}
+          />
         </View>
       </ApScrollView>
     </ApContainer>

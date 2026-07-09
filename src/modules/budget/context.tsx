@@ -22,20 +22,22 @@ type BudgetContextType = {
   incomes: IIncome[];
   categories: IExpenseCategory[];
   summary: IBudgetSummary | null;
-  fetchSummary: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchBudgets: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchExpenses: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchIncomes: (startDate?: string, endDate?: string) => Promise<void>;
-  fetchCategories: () => Promise<void>;
-  createBudget: (data: IBudgetPayload) => Promise<void>;
-  updateBudget: (id: string, data: Partial<IBudgetPayload>) => Promise<void>;
-  deleteBudget: (id: string) => Promise<void>;
-  createExpense: (data: Partial<IExpense>) => Promise<void>;
-  updateExpense: (id: string, data: Partial<IExpense>) => Promise<void>;
-  deleteExpense: (id: string) => Promise<void>;
-  createIncome: (data: Partial<IIncome>) => Promise<void>;
-  updateIncome: (id: string, data: Partial<IIncome>) => Promise<void>;
-  deleteIncome: (id: string) => Promise<void>;
+  fetchSummary: (startDate?: string, endDate?: string) => Promise<boolean>;
+  fetchBudgets: (startDate?: string, endDate?: string) => Promise<boolean>;
+  fetchExpenses: (startDate?: string, endDate?: string) => Promise<boolean>;
+  fetchIncomes: (startDate?: string, endDate?: string) => Promise<boolean>;
+  fetchCategories: () => Promise<boolean>;
+  /** Fetches categories only if they have not been loaded yet. */
+  ensureCategories: () => Promise<boolean>;
+  createBudget: (data: IBudgetPayload) => Promise<boolean>;
+  updateBudget: (id: string, data: Partial<IBudgetPayload>) => Promise<boolean>;
+  deleteBudget: (id: string) => Promise<boolean>;
+  createExpense: (data: Partial<IExpense>) => Promise<boolean>;
+  updateExpense: (id: string, data: Partial<IExpense>) => Promise<boolean>;
+  deleteExpense: (id: string) => Promise<boolean>;
+  createIncome: (data: Partial<IIncome>) => Promise<boolean>;
+  updateIncome: (id: string, data: Partial<IIncome>) => Promise<boolean>;
+  deleteIncome: (id: string) => Promise<boolean>;
 };
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -55,15 +57,21 @@ export const BudgetProvider: React.FC<IProps> = ({ children }) => {
   const [categories, setCategories] = useState<IExpenseCategory[]>([]);
   const [summary, setSummary] = useState<IBudgetSummary | null>(null);
 
+  /**
+   * Returns whether the work succeeded, so callers (forms) can avoid navigating
+   * away after a failed save. Errors are surfaced as a toast, never rethrown.
+   */
   const run = async (work: () => Promise<void>, success?: string) => {
     setLoading(true);
     setError(false);
     try {
       await work();
       if (success) ToastService.Success(success);
+      return true;
     } catch (err) {
       setError(true);
       ToastService.ApiError(err);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -84,20 +92,34 @@ export const BudgetProvider: React.FC<IProps> = ({ children }) => {
   const fetchCategories = () =>
     run(async () => setCategories(await BudgetService.categories()));
 
-  const refreshAll = async () => {
-    const [nextSummary, nextBudgets, nextExpenses, nextIncomes, nextCategories] =
-      await Promise.all([
-        BudgetService.summary(),
-        BudgetService.budgets(),
-        BudgetService.expenses(),
-        BudgetService.incomes(),
-        BudgetService.categories(),
-      ]);
-    setSummary(nextSummary);
-    setBudgets(nextBudgets);
-    setExpenses(nextExpenses);
-    setIncomes(nextIncomes);
-    setCategories(nextCategories);
+  /** Categories are effectively static; only pay for them once per session. */
+  const ensureCategories = async () => {
+    if (categories.length) return true;
+    return fetchCategories();
+  };
+
+  /**
+   * Refetch only the collections a mutation can actually invalidate, instead of
+   * reloading every budget resource. Categories never change here, and a budget
+   * write cannot affect income (or vice versa).
+   *
+   * Expenses are the exception: they roll up into both the budget they are
+   * linked to and the summary, so all three are refreshed.
+   */
+  const refreshAfter = async (kind: "budget" | "expense" | "income") => {
+    const requests: Promise<unknown>[] = [
+      BudgetService.summary().then(setSummary),
+    ];
+    if (kind === "budget" || kind === "expense") {
+      requests.push(BudgetService.budgets().then(setBudgets));
+    }
+    if (kind === "expense") {
+      requests.push(BudgetService.expenses().then(setExpenses));
+    }
+    if (kind === "income") {
+      requests.push(BudgetService.incomes().then(setIncomes));
+    }
+    await Promise.all(requests);
   };
 
   return (
@@ -115,50 +137,51 @@ export const BudgetProvider: React.FC<IProps> = ({ children }) => {
         fetchExpenses,
         fetchIncomes,
         fetchCategories,
+        ensureCategories,
         createBudget: (data) =>
           run(async () => {
             await BudgetService.createBudget(data);
-            await refreshAll();
+            await refreshAfter("budget");
           }, "Budget saved"),
         updateBudget: (id, data) =>
           run(async () => {
             await BudgetService.updateBudget(id, data);
-            await refreshAll();
+            await refreshAfter("budget");
           }, "Budget updated"),
         deleteBudget: (id) =>
           run(async () => {
             await BudgetService.deleteBudget(id);
-            await refreshAll();
+            await refreshAfter("budget");
           }, "Budget deleted"),
         createExpense: (data) =>
           run(async () => {
             await BudgetService.createExpense(data);
-            await refreshAll();
+            await refreshAfter("expense");
           }, "Expense saved"),
         updateExpense: (id, data) =>
           run(async () => {
             await BudgetService.updateExpense(id, data);
-            await refreshAll();
+            await refreshAfter("expense");
           }, "Expense updated"),
         deleteExpense: (id) =>
           run(async () => {
             await BudgetService.deleteExpense(id);
-            await refreshAll();
+            await refreshAfter("expense");
           }, "Expense deleted"),
         createIncome: (data) =>
           run(async () => {
             await BudgetService.createIncome(data);
-            await refreshAll();
+            await refreshAfter("income");
           }, "Income saved"),
         updateIncome: (id, data) =>
           run(async () => {
             await BudgetService.updateIncome(id, data);
-            await refreshAll();
+            await refreshAfter("income");
           }, "Income updated"),
         deleteIncome: (id) =>
           run(async () => {
             await BudgetService.deleteIncome(id);
-            await refreshAll();
+            await refreshAfter("income");
           }, "Income deleted"),
       }}
     >

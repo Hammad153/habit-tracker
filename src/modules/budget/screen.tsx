@@ -47,11 +47,11 @@ const StatCard = ({
 
 const BudgetScreen = () => {
   const colors = useTheme();
-  const { loading, error, summary, fetchSummary, fetchCategories } = useBudgetState();
+  const { loading, error, summary, fetchSummary, ensureCategories } = useBudgetState();
   const { addNotification, notifications } = useNotificationsState();
   const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(() => Promise.all([fetchSummary(), fetchCategories()]), []);
+  const load = useCallback(() => Promise.all([fetchSummary(), ensureCategories()]), []);
 
   useEffect(() => {
     load();
