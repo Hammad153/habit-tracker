@@ -33,7 +33,6 @@ const Field = ({ label, value, onChangeText, keyboardType = "default", multiline
 };
 
 const IncomeFormScreen = () => {
-  const colors = useTheme();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { incomes, createIncome, updateIncome, fetchIncomes } = useBudgetState();
   const editing = useMemo(() => incomes.find((item) => item.id === id), [incomes, id]);
