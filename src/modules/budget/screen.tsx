@@ -13,13 +13,7 @@ import {
 import { useTheme } from "@/src/modules/settings/context";
 import { useBudgetState } from "./context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
-
-const money = (value = 0) =>
-  new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+import helper from "@/src/helper";
 
 const StatCard = ({
   label,
@@ -120,12 +114,12 @@ const BudgetScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View className="flex-row gap-3">
-          <StatCard label="Income" value={money(summary?.totalIncome)} icon="trending-up-outline" color={colors.primary} />
-          <StatCard label="Expenses" value={money(summary?.totalExpenses)} icon="card-outline" color={colors.warning} />
+          <StatCard label="Income" value={helper.formatCurrency(summary?.totalIncome)} icon="trending-up-outline" color={colors.primary} />
+          <StatCard label="Expenses" value={helper.formatCurrency(summary?.totalExpenses)} icon="card-outline" color={colors.warning} />
         </View>
         <View className="mt-3 flex-row gap-3">
-          <StatCard label="Budget left" value={money(summary?.remainingBudget)} icon="wallet-outline" color={summary && summary.remainingBudget < 0 ? "#EF4444" : "#10B981"} />
-          <StatCard label="Balance" value={money(summary?.remainingBalance)} icon="scale-outline" color={colors.accent} />
+          <StatCard label="Budget left" value={helper.formatCurrency(summary?.remainingBudget)} icon="wallet-outline" color={summary && summary.remainingBudget < 0 ? "#EF4444" : "#10B981"} />
+          <StatCard label="Balance" value={helper.formatCurrency(summary?.remainingBalance)} icon="scale-outline" color={colors.accent} />
         </View>
 
         <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
@@ -205,7 +199,7 @@ const BudgetScreen = () => {
                       </ApText>
                     </View>
                     <ApText size="sm" font="bold" color={colors.textPrimary}>
-                      {money(item.total)}
+                      {helper.formatCurrency(item.total)}
                     </ApText>
                   </View>
                   <View className="mt-3 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>

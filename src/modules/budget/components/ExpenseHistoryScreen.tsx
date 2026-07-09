@@ -5,9 +5,7 @@ import { router } from "expo-router";
 import { ApContainer, ApEmptyState, ApHeader, ApScrollView, ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useBudgetState } from "../context";
-
-const money = (value = 0) =>
-  new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+import helper from "@/src/helper";
 
 const filters = [
   { label: "Day", days: 1 },
@@ -78,7 +76,7 @@ const ExpenseHistoryScreen = () => {
                   </ApText>
                 </View>
                 <ApText size="sm" font="bold" color={colors.warning}>
-                  {money(expense.amount)}
+                  {helper.formatCurrency(expense.amount)}
                 </ApText>
               </View>
               <View className="mt-3 flex-row justify-end gap-2">

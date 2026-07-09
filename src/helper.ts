@@ -62,6 +62,13 @@ const helper = {
   toSvg: (str: string) => {
     return `data:image/svg+xml;utf8,${encodeURIComponent(str)}`;
   },
+
+  formatCurrency: (value: number = 0) =>
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0,
+    }).format(value),
 };
 
 export default helper;

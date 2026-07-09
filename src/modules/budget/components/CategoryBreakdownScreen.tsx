@@ -4,9 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ApContainer, ApEmptyState, ApHeader, ApScrollView, ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useBudgetState } from "../context";
-
-const money = (value = 0) =>
-  new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+import helper from "@/src/helper";
 
 const CategoryBreakdownScreen = () => {
   const colors = useTheme();
@@ -43,7 +41,7 @@ const CategoryBreakdownScreen = () => {
                       </View>
                     </View>
                     <ApText size="base" font="bold" color={colors.textPrimary}>
-                      {money(item.total)}
+                      {helper.formatCurrency(item.total)}
                     </ApText>
                   </View>
                   <View className="mt-4 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
@@ -51,7 +49,7 @@ const CategoryBreakdownScreen = () => {
                   </View>
                 </View>
               );
-            })}
+            })} 
           </View>
         )}
       </ApScrollView>
