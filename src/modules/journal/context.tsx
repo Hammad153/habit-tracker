@@ -1,6 +1,16 @@
-import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ApStorageKeys, ApStorageService } from "@/src/services/storage";
+import { ToastService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
+import { JournalService } from "./api";
 import { IJournalEntry, JournalMood } from "./model";
 
 interface IProps {
@@ -31,17 +41,12 @@ type TJournalContext = {
 
 const JournalContext = createContext<TJournalContext | undefined>(undefined);
 
-const createId = () =>
-  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-
-const normalizeTags = (tags: string[]) =>
-  Array.from(
-    new Set(
-      tags
-        .map((tag) => tag.trim().replace(/^#/, "").toLowerCase())
-        .filter(Boolean),
-    ),
-  );
+/** Mirrors the server ordering so optimistic updates don't reshuffle the list. */
+const sortEntries = (entries: IJournalEntry[]) =>
+  [...entries].sort((a, b) => {
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    return b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt);
+  });
 
 export const useJournalState = () => {
   const context = useContext(JournalContext);
@@ -53,100 +58,129 @@ export const useJournalState = () => {
 
 export const JournalProvider: React.FC<IProps> = ({ children }) => {
   const { user } = useAuthState();
-  const [allEntries, setAllEntries] = useState<IJournalEntry[]>([]);
+  const [entries, setEntries] = useState<IJournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const migratedFor = useRef<string | undefined>(undefined);
 
-  const persist = async (nextEntries: IJournalEntry[]) => {
-    setAllEntries(nextEntries);
-    await ApStorageService.setItemAsync(ApStorageKeys.JournalEntries, nextEntries);
-  };
+  /**
+   * Journal entries used to live in on-device storage. Push whatever is still
+   * cached for this user up to the server once, then drop it locally. Entries
+   * belonging to other accounts on this device are left untouched.
+   */
+  const migrateLocalEntries = useCallback(async (userId: string) => {
+    let stored: unknown;
+    try {
+      stored = await ApStorageService.getItemAsync(ApStorageKeys.JournalEntries);
+    } catch {
+      return;
+    }
+    if (!Array.isArray(stored) || !stored.length) return;
 
-  const fetchEntries = async () => {
+    const mine = (stored as IJournalEntry[]).filter((e) => e.userId === userId);
+    const others = (stored as IJournalEntry[]).filter((e) => e.userId !== userId);
+    if (!mine.length) return;
+
+    try {
+      for (const entry of mine) {
+        await JournalService.createEntry({
+          title: entry.title,
+          date: entry.date,
+          mood: entry.mood,
+          content: entry.content,
+          tags: entry.tags ?? [],
+          isFavorite: entry.isFavorite,
+          isPinned: entry.isPinned,
+          templateId: entry.templateId,
+        });
+      }
+    } catch {
+      // Leave the cache intact so the upload can be retried next launch.
+      return;
+    }
+
+    if (others.length) {
+      await ApStorageService.setItemAsync(ApStorageKeys.JournalEntries, others);
+    } else {
+      await ApStorageService.removeItemAsync(ApStorageKeys.JournalEntries);
+    }
+    ToastService.Success(`${mine.length} journal ${mine.length === 1 ? "entry" : "entries"} synced`);
+  }, []);
+
+  const fetchEntries = useCallback(async () => {
+    if (!user?.id) {
+      setEntries([]);
+      return;
+    }
     setLoading(true);
     try {
-      const stored = await ApStorageService.getItemAsync(ApStorageKeys.JournalEntries);
-      setAllEntries(Array.isArray(stored) ? stored : []);
+      if (migratedFor.current !== user.id) {
+        migratedFor.current = user.id;
+        await migrateLocalEntries(user.id);
+      }
+      setEntries(await JournalService.entries());
+    } catch (err) {
+      ToastService.ApiError(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, migrateLocalEntries]);
 
   useEffect(() => {
     fetchEntries();
-  }, [user?.id]);
+  }, [fetchEntries]);
 
-  const entries = useMemo(
-    () =>
-      allEntries
-        .filter((entry) => entry.userId === user?.id)
-        .sort((a, b) => {
-          if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-          return b.date.localeCompare(a.date) || b.updatedAt.localeCompare(a.updatedAt);
-        }),
-    [allEntries, user?.id],
-  );
+  /** Applies a server response to local state without refetching the list. */
+  const upsert = (entry: IJournalEntry) =>
+    setEntries((current) =>
+      sortEntries(
+        current.some((item) => item.id === entry.id)
+          ? current.map((item) => (item.id === entry.id ? entry : item))
+          : [entry, ...current],
+      ),
+    );
 
   const createEntry = async (input: JournalInput) => {
     if (!user?.id) return;
-    const now = new Date().toISOString();
-    const entry: IJournalEntry = {
-      id: createId(),
-      userId: user.id,
-      title: input.title.trim() || "Untitled Entry",
-      date: input.date,
-      mood: input.mood,
-      content: input.content,
-      tags: normalizeTags(input.tags),
-      isFavorite: !!input.isFavorite,
-      isPinned: !!input.isPinned,
-      templateId: input.templateId,
-      attachments: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-    await persist([entry, ...allEntries]);
-    return entry;
+    try {
+      const entry = await JournalService.createEntry(input);
+      upsert(entry);
+      return entry;
+    } catch (err) {
+      ToastService.ApiError(err);
+    }
   };
 
   const updateEntry = async (id: string, input: Partial<JournalInput>) => {
-    const now = new Date().toISOString();
-    await persist(
-      allEntries.map((entry) =>
-        entry.id === id && entry.userId === user?.id
-          ? {
-              ...entry,
-              ...input,
-              title: input.title !== undefined ? input.title.trim() || "Untitled Entry" : entry.title,
-              tags: input.tags ? normalizeTags(input.tags) : entry.tags,
-              updatedAt: now,
-            }
-          : entry,
-      ),
-    );
+    try {
+      upsert(await JournalService.updateEntry(id, input));
+    } catch (err) {
+      ToastService.ApiError(err);
+    }
   };
 
   const deleteEntry = async (id: string) => {
-    await persist(allEntries.filter((entry) => entry.id !== id || entry.userId !== user?.id));
+    try {
+      await JournalService.deleteEntry(id);
+      setEntries((current) => current.filter((entry) => entry.id !== id));
+    } catch (err) {
+      ToastService.ApiError(err);
+    }
   };
 
   const toggleFavorite = async (id: string) => {
-    await persist(
-      allEntries.map((entry) =>
-        entry.id === id && entry.userId === user?.id
-          ? { ...entry, isFavorite: !entry.isFavorite, updatedAt: new Date().toISOString() }
-          : entry,
-      ),
-    );
+    try {
+      upsert(await JournalService.toggleFavorite(id));
+    } catch (err) {
+      ToastService.ApiError(err);
+    }
   };
 
   const togglePinned = async (id: string) => {
-    await persist(
-      allEntries.map((entry) =>
-        entry.id === id && entry.userId === user?.id
-          ? { ...entry, isPinned: !entry.isPinned, updatedAt: new Date().toISOString() }
-          : entry,
-      ),
-    );
+    try {
+      upsert(await JournalService.togglePinned(id));
+    } catch (err) {
+      ToastService.ApiError(err);
+    }
   };
 
   return (
