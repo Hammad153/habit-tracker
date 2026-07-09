@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 import {
   format,
@@ -12,6 +12,7 @@ import {
   isSameDay,
   isSameMonth,
   isAfter,
+  isBefore,
   startOfDay,
 } from "date-fns";
 import { ApText } from "./Text";
@@ -25,6 +26,8 @@ interface ApDatePickerProps {
   onSelect: (date: Date) => void;
   selectedDate?: Date;
   maxDate?: Date;
+  minDate?: Date;
+  title?: string;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -35,11 +38,19 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
   onSelect,
   selectedDate,
   maxDate = new Date(),
+  minDate,
+  title = "Select Date",
 }) => {
   const colors = useTheme();
   const today = startOfDay(new Date());
   const max = startOfDay(maxDate);
+  const min = minDate ? startOfDay(minDate) : undefined;
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
+
+  // Reopening the picker should land on the month of the selected day.
+  useEffect(() => {
+    if (visible && selectedDate) setCurrentMonth(selectedDate);
+  }, [visible]);
 
   const generateCalendarDays = () => {
     const monthStart = startOfMonth(currentMonth);
@@ -56,15 +67,21 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
     return days;
   };
 
+  // Navigation is bounded by the selectable range, not by "today", so a picker
+  // that allows future dates can actually reach those months.
+  const canGoNext = !isAfter(
+    startOfMonth(addMonths(currentMonth, 1)),
+    startOfMonth(max),
+  );
+  const canGoPrev =
+    !min || !isBefore(startOfMonth(subMonths(currentMonth, 1)), startOfMonth(min));
+
   const handlePrevMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
+    if (canGoPrev) setCurrentMonth(subMonths(currentMonth, 1));
   };
 
   const handleNextMonth = () => {
-    const next = addMonths(currentMonth, 1);
-    if (!isAfter(startOfMonth(next), today)) {
-      setCurrentMonth(next);
-    }
+    if (canGoNext) setCurrentMonth(addMonths(currentMonth, 1));
   };
 
   const handleSelectDate = (date: Date) => {
@@ -72,18 +89,22 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
     onClose();
   };
 
-  const canGoNext = !isAfter(startOfMonth(addMonths(currentMonth, 1)), today);
   const days = generateCalendarDays();
 
   return (
     <ApModal
       visible={visible}
       onClose={onClose}
-      title="Select Date"
+      title={title}
       showCloseButton
     >
       <View className="flex-row justify-between items-center mb-4">
-        <TouchableOpacity onPress={handlePrevMonth} className="p-2">
+        <TouchableOpacity
+          onPress={handlePrevMonth}
+          className="p-2"
+          disabled={!canGoPrev}
+          style={{ opacity: canGoPrev ? 1 : 0.3 }}
+        >
           <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
         </TouchableOpacity>
         <ApText size="lg" font="bold" color={colors.textPrimary}>
@@ -117,7 +138,9 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
         {days.map((day, index) => {
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isSelected = selectedDate && isSameDay(day, selectedDate);
-          const isDisabled = isAfter(startOfDay(day), max);
+          const isDisabled =
+            isAfter(startOfDay(day), max) ||
+            (!!min && isBefore(startOfDay(day), min));
           const isToday = isSameDay(day, today);
 
           return (

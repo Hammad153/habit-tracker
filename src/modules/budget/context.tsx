@@ -3,6 +3,7 @@ import { ToastService } from "@/src/services";
 import { BudgetService } from "./api";
 import {
   IBudget,
+  IBudgetPayload,
   IBudgetSummary,
   IExpense,
   IExpenseCategory,
@@ -26,8 +27,8 @@ type BudgetContextType = {
   fetchExpenses: (startDate?: string, endDate?: string) => Promise<void>;
   fetchIncomes: (startDate?: string, endDate?: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
-  createBudget: (data: Partial<IBudget>) => Promise<void>;
-  updateBudget: (id: string, data: Partial<IBudget>) => Promise<void>;
+  createBudget: (data: IBudgetPayload) => Promise<void>;
+  updateBudget: (id: string, data: Partial<IBudgetPayload>) => Promise<void>;
   deleteBudget: (id: string) => Promise<void>;
   createExpense: (data: Partial<IExpense>) => Promise<void>;
   updateExpense: (id: string, data: Partial<IExpense>) => Promise<void>;
