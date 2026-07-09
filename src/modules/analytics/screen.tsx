@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Dimensions } from "react-native";
+import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   ApText,
@@ -13,29 +13,8 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import axiosInstance from "@/src/libs/axios";
-
-interface AnalyticsData {
-  totalHabits: number;
-  weeklyCompletionRate: number;
-  monthlyCompletionRate: number;
-  dailyPlanCompletionRate: number;
-  monthlyExpenseTotal: number;
-  budgetUsagePercentage: number;
-  spendingByCategory: { category: string; total: number; color?: string; icon?: string }[];
-  bestDay: string;
-  dayDistribution: { day: string; count: number }[];
-  habitStreaks: {
-    habitId: string;
-    habitTitle: string;
-    icon: string;
-    iconColor: string;
-    longestStreak: number;
-    totalCompletions: number;
-    completionRate: number;
-  }[];
-  dailyCompletions: { date: string; count: number }[];
-  categoryBreakdown: { category: string; count: number; completions: number }[];
-}
+import { AnalyticsData } from "./model";
+import helper from "@/src/helper";
 
 const AdvancedAnalyticsScreen = () => {
   const { colors } = useSettingsState();
@@ -92,14 +71,7 @@ const AdvancedAnalyticsScreen = () => {
     );
   }
 
-  const screenWidth = Dimensions.get("window").width - 40;
   const maxDayCount = Math.max(...data.dayDistribution.map((d) => d.count), 1);
-  const money = (value = 0) =>
-    new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(value);
 
   return (
     <ApContainer>
@@ -118,7 +90,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Weekly Rate
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.primary}>
+              <ApText size="lg" font="bold" color={colors.primary}>
                 {data.weeklyCompletionRate}%
               </ApText>
             </View>
@@ -132,7 +104,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Monthly Rate
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.accent}>
+              <ApText size="lg" font="bold" color={colors.accent}>
                 {data.monthlyCompletionRate}%
               </ApText>
             </View>
@@ -146,7 +118,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Best Day
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.warning}>
+              <ApText size="lg" font="bold" color={colors.warning}>
                 {data.bestDay}
               </ApText>
             </View>
@@ -163,7 +135,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Plan Rate
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.primary}>
+              <ApText size="lg" font="bold" color={colors.primary}>
                 {data.dailyPlanCompletionRate}%
               </ApText>
             </View>
@@ -177,8 +149,8 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Expenses
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.warning}>
-                {money(data.monthlyExpenseTotal)}
+              <ApText size="lg" font="bold" color={colors.warning}>
+                {helper.formatCurrency(data.monthlyExpenseTotal)}
               </ApText>
             </View>
             <View
@@ -191,7 +163,7 @@ const AdvancedAnalyticsScreen = () => {
               <ApText size="xs" color={colors.textMuted}>
                 Budget Used
               </ApText>
-              <ApText size="2xl" font="bold" color={colors.accent}>
+              <ApText size="lg" font="bold" color={colors.accent}>
                 {data.budgetUsagePercentage}%
               </ApText>
             </View>
@@ -316,7 +288,7 @@ const AdvancedAnalyticsScreen = () => {
                     </ApText>
                   </View>
                   <ApText size="sm" font="bold" color={colors.textPrimary}>
-                    {money(cat.total)}
+                    {helper.formatCurrency(cat.total)}
                   </ApText>
                 </View>
               ))}
