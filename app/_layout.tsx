@@ -137,6 +137,20 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="budgets"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="budget-detail"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
                     name="expense-history"
                     options={{
                       headerShown: false,

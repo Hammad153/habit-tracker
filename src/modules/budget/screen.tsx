@@ -92,7 +92,7 @@ const BudgetScreen = () => {
   if (error && !summary) {
     return (
       <ApContainer>
-        <ApHeader title="Budget" />
+        <ApHeader title="Budget" hasBackButton/>
         <ApErrorState onRetry={onRefresh} />
       </ApContainer>
     );
@@ -102,6 +102,7 @@ const BudgetScreen = () => {
     <ApContainer>
       <ApHeader
         title="Budget"
+        hasBackButton
         right={
           <TouchableOpacity onPress={() => router.push("/add-expense")} className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.primary }}>
             <Ionicons name="add" size={22} color={colors.background} />
@@ -132,11 +133,18 @@ const BudgetScreen = () => {
                 {summary?.budgetUsagePercentage ?? 0}%
               </ApText>
             </View>
-            <TouchableOpacity onPress={() => router.push("/add-budget")} className="rounded-xl px-3 py-2" style={{ backgroundColor: colors.primary + "18" }}>
-              <ApText size="xs" font="bold" color={colors.primary}>
-                Add Budget
-              </ApText>
-            </TouchableOpacity>
+            <View className="flex-row gap-2">
+              <TouchableOpacity onPress={() => router.push("/budgets")} className="rounded-xl px-3 py-2" style={{ backgroundColor: colors.background }}>
+                <ApText size="xs" font="bold" color={colors.textSecondary}>
+                  View all
+                </ApText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push("/add-budget")} className="rounded-xl px-3 py-2" style={{ backgroundColor: colors.primary + "18" }}>
+                <ApText size="xs" font="bold" color={colors.primary}>
+                  Add Budget
+                </ApText>
+              </TouchableOpacity>
+            </View>
           </View>
           <View className="mt-3 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
             <View
