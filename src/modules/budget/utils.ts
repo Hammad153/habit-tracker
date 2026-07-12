@@ -113,6 +113,7 @@ export const sumAmounts = (values: string[]) =>
 
 /** Total already spent against a budget, from its linked expenses. */
 export const budgetSpent = (budget: IBudget) =>
+  budget.budgetedExpenseTotal ??
   (budget.expenses ?? []).reduce((total, expense) => total + expense.amount, 0);
 
 export const usagePercentage = (spent: number, total: number) =>
@@ -120,13 +121,23 @@ export const usagePercentage = (spent: number, total: number) =>
 
 /** Spend on a budget grouped by category id, for the allocation rows. */
 export const spentByCategory = (budget: IBudget) =>
-  (budget.expenses ?? []).reduce<Record<string, number>>((acc, expense) => {
+  budget.categoryBreakdown?.length
+    ? budget.categoryBreakdown.reduce<Record<string, number>>((acc, item) => {
+        if (item.categoryId) acc[item.categoryId] = item.total;
+        return acc;
+      }, {})
+    : (budget.expenses ?? []).reduce<Record<string, number>>((acc, expense) => {
     acc[expense.categoryId] = (acc[expense.categoryId] ?? 0) + expense.amount;
     return acc;
   }, {});
 
 /** Spend that falls inside a single week row's date range. */
 export const spentInRange = (budget: IBudget, startKey: string, endKey: string) => {
+  const authoritative = budget.weeklyBreakdown?.find(
+    (week) => week.startDate.slice(0, 10) === startKey && week.endDate.slice(0, 10) === endKey,
+  );
+  if (authoritative) return authoritative.spent;
+
   const start = parseDateKey(startKey);
   const end = parseDateKey(endKey);
   return (budget.expenses ?? [])

@@ -116,11 +116,15 @@ const BudgetScreen = () => {
       >
         <View className="flex-row gap-3">
           <StatCard label="Income" value={helper.formatCurrency(summary?.totalIncome)} icon="trending-up-outline" color={colors.primary} />
-          <StatCard label="Expenses" value={helper.formatCurrency(summary?.totalExpenses)} icon="card-outline" color={colors.warning} />
+          <StatCard label="Total expenses" value={helper.formatCurrency(summary?.totalExpenses)} icon="card-outline" color={colors.warning} />
         </View>
         <View className="mt-3 flex-row gap-3">
           <StatCard label="Budget left" value={helper.formatCurrency(summary?.remainingBudget)} icon="wallet-outline" color={summary && summary.remainingBudget < 0 ? "#EF4444" : "#10B981"} />
-          <StatCard label="Balance" value={helper.formatCurrency(summary?.remainingBalance)} icon="scale-outline" color={colors.accent} />
+          <StatCard label="Net cash flow" value={helper.formatCurrency(summary?.netCashFlow ?? summary?.remainingBalance)} icon="scale-outline" color={(summary?.netCashFlow ?? summary?.remainingBalance ?? 0) < 0 ? "#EF4444" : colors.accent} />
+        </View>
+        <View className="mt-3 flex-row gap-3">
+          <StatCard label="Budgeted" value={helper.formatCurrency(summary?.budgetedExpenseTotal ?? summary?.budgetedExpenses)} icon="checkmark-circle-outline" color={colors.primary} />
+          <StatCard label="Unbudgeted" value={helper.formatCurrency(summary?.unbudgetedExpenseTotal ?? summary?.unbudgetedExpenses)} icon="alert-circle-outline" color={colors.warning} />
         </View>
 
         <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
@@ -131,6 +135,9 @@ const BudgetScreen = () => {
               </ApText>
               <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
                 {summary?.budgetUsagePercentage ?? 0}%
+              </ApText>
+              <ApText size="xs" color={colors.textMuted} className="mt-1">
+                Scope: {summary?.scope === "AUTO" || !summary?.scope ? "Auto" : summary.scope.toLowerCase()}
               </ApText>
             </View>
             <View className="flex-row gap-2">

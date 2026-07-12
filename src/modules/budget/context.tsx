@@ -22,7 +22,7 @@ type BudgetContextType = {
   incomes: IIncome[];
   categories: IExpenseCategory[];
   summary: IBudgetSummary | null;
-  fetchSummary: (startDate?: string, endDate?: string) => Promise<boolean>;
+  fetchSummary: (startDate?: string, endDate?: string, scope?: string) => Promise<boolean>;
   fetchBudgets: (startDate?: string, endDate?: string) => Promise<boolean>;
   fetchExpenses: (startDate?: string, endDate?: string) => Promise<boolean>;
   fetchIncomes: (startDate?: string, endDate?: string) => Promise<boolean>;
@@ -77,8 +77,8 @@ export const BudgetProvider: React.FC<IProps> = ({ children }) => {
     }
   };
 
-  const fetchSummary = (startDate?: string, endDate?: string) =>
-    run(async () => setSummary(await BudgetService.summary(startDate, endDate)));
+  const fetchSummary = (startDate?: string, endDate?: string, scope?: string) =>
+    run(async () => setSummary(await BudgetService.summary(startDate, endDate, scope)));
 
   const fetchBudgets = (startDate?: string, endDate?: string) =>
     run(async () => setBudgets(await BudgetService.budgets(startDate, endDate)));

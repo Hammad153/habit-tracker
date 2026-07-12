@@ -13,6 +13,7 @@ import {
 import { useTheme } from "@/src/modules/settings/context";
 import { toDateKey } from "@/src/utils/date";
 import { useBudgetState } from "../context";
+import { formatBudgetRange, parseDateKey } from "../utils";
 
 const Field = ({ label, value, onChangeText, keyboardType = "default", multiline = false }: any) => {
   const colors = useTheme();
@@ -77,6 +78,35 @@ const ExpenseFormScreen = () => {
     setBudgetId(editing.budgetId ?? "");
   }, [editing?.id]);
 
+  const matchingBudgets = useMemo(() => {
+    const date = parseDateKey(expenseDate);
+    return budgets.filter((budget) => {
+      const start = parseDateKey(budget.startDate);
+      const end = parseDateKey(budget.endDate);
+      return date >= start && date <= end;
+    });
+  }, [budgets, expenseDate]);
+
+  useEffect(() => {
+    if (!matchingBudgets.length) {
+      setBudgetId("");
+      return;
+    }
+
+    const stillValid = matchingBudgets.some((budget) => budget.id === budgetId);
+    if (stillValid) return;
+
+    const sorted = [...matchingBudgets].sort((a, b) => {
+      const aDays =
+        parseDateKey(a.endDate).getTime() - parseDateKey(a.startDate).getTime();
+      const bDays =
+        parseDateKey(b.endDate).getTime() - parseDateKey(b.startDate).getTime();
+      if (aDays !== bDays) return aDays - bDays;
+      return a.createdAt.localeCompare(b.createdAt);
+    });
+    setBudgetId(sorted[0]?.id ?? "");
+  }, [matchingBudgets, budgetId]);
+
   const canSave = title.trim().length > 0 && Number(amount) > 0 && categoryId;
 
   const submit = async () => {
@@ -108,6 +138,7 @@ const ExpenseFormScreen = () => {
         <View className="mt-4 px-1">
           <Field label="Title" value={title} onChangeText={setTitle} />
           <Field label="Amount" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
+          <ApDateField label="Date" value={expenseDate} onChange={setExpenseDate} />
           <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase">
             Category
           </ApText>
@@ -132,18 +163,27 @@ const ExpenseFormScreen = () => {
           <View className="mb-4 flex-row flex-wrap gap-2">
             <TouchableOpacity onPress={() => setBudgetId("")} className="rounded-xl px-3 py-2" style={{ backgroundColor: !budgetId ? colors.primary : colors.surface }}>
               <ApText size="xs" font="bold" color={!budgetId ? colors.background : colors.textPrimary}>
-                None
+                Unbudgeted expense
               </ApText>
             </TouchableOpacity>
-            {budgets.map((budget) => (
+            {matchingBudgets.map((budget) => (
               <TouchableOpacity key={budget.id} onPress={() => setBudgetId(budget.id)} className="rounded-xl px-3 py-2" style={{ backgroundColor: budgetId === budget.id ? colors.primary : colors.surface }}>
                 <ApText size="xs" font="bold" color={budgetId === budget.id ? colors.background : colors.textPrimary}>
                   {budget.title}
                 </ApText>
+                <ApText size="xs" color={budgetId === budget.id ? colors.background : colors.textMuted}>
+                  {formatBudgetRange(budget.startDate, budget.endDate)}
+                </ApText>
               </TouchableOpacity>
             ))}
           </View>
-          <ApDateField label="Date" value={expenseDate} onChange={setExpenseDate} />
+          {!matchingBudgets.length ? (
+            <View className="mb-4 rounded-2xl border p-3" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+              <ApText size="sm" color={colors.textMuted}>
+                No budget covers this expense date.
+              </ApText>
+            </View>
+          ) : null}
           <Field label="Note" value={note} onChangeText={setNote} multiline />
           <ApSubmitButton
             label="Save Expense"

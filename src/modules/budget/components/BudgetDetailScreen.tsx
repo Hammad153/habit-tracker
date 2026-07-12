@@ -254,8 +254,8 @@ const BudgetDetailScreen = () => {
   }
 
   const spent = budgetSpent(budget);
-  const remaining = budget.amount - spent;
-  const percentage = usagePercentage(spent, budget.amount);
+  const remaining = budget.remainingAmount ?? budget.amount - spent;
+  const percentage = budget.utilisationPercentage ?? usagePercentage(spent, budget.amount);
   const barColor = usageColor(percentage, colors);
   const days = durationInDays(budget.startDate.slice(0, 10), budget.endDate.slice(0, 10));
 
@@ -323,12 +323,23 @@ const BudgetDetailScreen = () => {
           </ApText>
 
           <View className="mt-3">
-            <Row label="Total budget" value={helper.formatCurrency(budget.amount)} />
-            <Row label="Spent" value={helper.formatCurrency(spent)} color={colors.warning} />
+            <Row label="Planned budget" value={helper.formatCurrency(budget.plannedAmount ?? budget.amount)} />
+            <Row label="Budgeted expenses" value={helper.formatCurrency(spent)} color={colors.warning} />
             <Row
-              label={remaining < 0 ? "Over budget by" : "Remaining"}
+              label={remaining < 0 ? "Over budget by" : "Remaining budget"}
               value={helper.formatCurrency(Math.abs(remaining))}
               color={remaining < 0 ? DANGER : "#10B981"}
+            />
+            <Row label="Period income" value={helper.formatCurrency(budget.periodIncome ?? 0)} color={colors.primary} />
+            <Row
+              label="Period expenses"
+              value={helper.formatCurrency(budget.totalPeriodExpenses ?? spent)}
+              color={colors.warning}
+            />
+            <Row
+              label="Period net cash flow"
+              value={helper.formatCurrency(budget.netCashFlow ?? 0)}
+              color={(budget.netCashFlow ?? 0) < 0 ? DANGER : "#10B981"}
             />
           </View>
 

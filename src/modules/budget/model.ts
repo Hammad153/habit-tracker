@@ -29,6 +29,25 @@ export interface IBudgetAllocation extends IBaseModel {
   category?: IExpenseCategory;
 }
 
+export interface IBudgetCategoryBreakdown {
+  categoryId?: string;
+  category: string;
+  total: number;
+  color?: string;
+  icon?: string;
+}
+
+export interface IBudgetDailyBreakdown {
+  date: string;
+  total: number;
+}
+
+export interface IBudgetWeeklyBreakdown extends IBudgetBreakdown {
+  spent: number;
+  remainingAmount: number;
+  utilisationPercentage: number;
+}
+
 export interface IBudget extends IBaseModel {
   userId: string;
   title: string;
@@ -40,6 +59,17 @@ export interface IBudget extends IBaseModel {
   expenses?: IExpense[];
   breakdowns?: IBudgetBreakdown[];
   allocations?: IBudgetAllocation[];
+  plannedAmount?: number;
+  budgetedExpenseTotal?: number;
+  remainingAmount?: number;
+  utilisationPercentage?: number;
+  overspentAmount?: number;
+  periodIncome?: number;
+  totalPeriodExpenses?: number;
+  netCashFlow?: number;
+  categoryBreakdown?: IBudgetCategoryBreakdown[];
+  dailyBreakdown?: IBudgetDailyBreakdown[];
+  weeklyBreakdown?: IBudgetWeeklyBreakdown[];
 }
 
 /** Shape the create/update endpoints accept. */
@@ -83,15 +113,25 @@ export interface IIncome extends IBaseModel {
 export interface IBudgetSummary {
   startDate: string;
   endDate: string;
+  scope?: BudgetPeriodType | "AUTO";
   totalBudget: number;
+  plannedBudget?: number;
   totalIncome: number;
   totalExpenses: number;
+  budgetedExpenses?: number;
+  budgetedExpenseTotal?: number;
+  unbudgetedExpenses?: number;
+  unbudgetedExpenseTotal?: number;
   remainingBalance: number;
+  netCashFlow?: number;
   remainingBudget: number;
+  overspentAmount?: number;
   budgetUsagePercentage: number;
   warning?: string | null;
   budgets: IBudget[];
+  allBudgets?: IBudget[];
   categoryBreakdown: {
+    categoryId?: string;
     category: string;
     total: number;
     color?: string;

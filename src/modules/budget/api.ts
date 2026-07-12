@@ -10,9 +10,9 @@ const query = (params: Record<string, string | undefined>) => {
 };
 
 export class BudgetService {
-  static summary = (startDate?: string, endDate?: string) =>
+  static summary = (startDate?: string, endDate?: string, scope?: string) =>
     axiosInstance
-      .get(`/budget/summary${query({ startDate, endDate })}`)
+      .get(`/budget/summary${query({ startDate, endDate, scope })}`)
       .then((res) => res.data);
 
   static budgets = (startDate?: string, endDate?: string) =>

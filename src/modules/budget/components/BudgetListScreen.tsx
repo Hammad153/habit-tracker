@@ -30,9 +30,9 @@ const FILTERS: Filter[] = ["ALL", ...PERIOD_TYPES];
 const BudgetCard = ({ budget }: { budget: IBudget }) => {
   const colors = useTheme();
   const spent = budgetSpent(budget);
-  const percentage = usagePercentage(spent, budget.amount);
+  const percentage = budget.utilisationPercentage ?? usagePercentage(spent, budget.amount);
   const barColor = usageColor(percentage, colors);
-  const remaining = budget.amount - spent;
+  const remaining = budget.remainingAmount ?? budget.amount - spent;
 
   return (
     <TouchableOpacity
@@ -58,7 +58,7 @@ const BudgetCard = ({ budget }: { budget: IBudget }) => {
 
       <View className="mt-3 flex-row items-end justify-between">
         <ApText size="lg" font="bold" color={colors.textPrimary}>
-          {helper.formatCurrency(budget.amount)}
+          {helper.formatCurrency(budget.plannedAmount ?? budget.amount)}
         </ApText>
         <ApText size="xs" color={colors.textMuted}>
           {helper.formatCurrency(spent)} spent
@@ -110,7 +110,7 @@ const BudgetListScreen = () => {
   );
 
   const totals = useMemo(() => {
-    const planned = visible.reduce((sum, item) => sum + item.amount, 0);
+    const planned = visible.reduce((sum, item) => sum + (item.plannedAmount ?? item.amount), 0);
     const spent = visible.reduce((sum, item) => sum + budgetSpent(item), 0);
     return { planned, spent };
   }, [visible]);
