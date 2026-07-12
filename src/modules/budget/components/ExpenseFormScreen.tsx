@@ -44,7 +44,6 @@ const ExpenseFormScreen = () => {
     expenses,
     createExpense,
     updateExpense,
-    loading,
     fetchBudgets,
     ensureCategories,
     fetchExpenses,
