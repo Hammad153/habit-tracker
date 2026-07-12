@@ -42,6 +42,15 @@ export const HABIT_ICONS = [
   "language",
 ];
 
+export const HABIT_CATEGORIES = [
+  "Fitness",
+  "Mindfulness",
+  "Health",
+  "Productivity",
+  "Career",
+  "General",
+];
+
 export const MOTIVATION_MESSAGES = [
   "Consistency is built in quiet repetitions.",
   "Small promises kept today become identity tomorrow.",

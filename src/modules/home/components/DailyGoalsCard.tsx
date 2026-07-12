@@ -119,11 +119,14 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
       </View>
 
       <ConfettiCannon
-        count={200}
-        origin={{ x: Dimensions.get("window").width / 2, y: -20 }}
+        count={260}
+        origin={{ x: Dimensions.get("window").width / 2, y: 0 }}
         autoStart={false}
         ref={confettiRef}
-        fadeOut={true}
+        fadeOut
+        fallSpeed={1800}
+        explosionSpeed={420}
+        autoStartDelay={0}
       />
     </View>
   );

@@ -17,6 +17,15 @@ export const normalizeDateKey = (date: string | Date) => {
   return date.slice(0, 10);
 };
 
+/**
+ * Date keys are calendar days. Build them in local time so `YYYY-MM-DD` does
+ * not render as the previous day in timezones west of UTC.
+ */
+export const parseDateKey = (key: string) => {
+  const [year, month, day] = normalizeDateKey(key).split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export const isSameDateKey = (date: string | Date, key: string) =>
   normalizeDateKey(date) === key;
 

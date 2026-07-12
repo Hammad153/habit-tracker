@@ -89,7 +89,10 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const accent = habit?.iconColor || colors.primary;
 
   const completions = useMemo(() => habit?.completions ?? [], [habit]);
-  const streak = useMemo(() => getCurrentStreak(completions), [completions]);
+  const streak = useMemo(
+    () => getCurrentStreak(completions, habit ?? undefined),
+    [completions, habit],
+  );
   const totalDone = useMemo(
     () => completions.filter((c) => c.status).length,
     [completions],

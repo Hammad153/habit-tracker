@@ -5,27 +5,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "./Text";
 import { ApDatePicker } from "./DatePicker";
 import { useTheme } from "../modules/settings/context";
-import { toDateKey } from "../utils/date";
+import { parseDateKey, toDateKey } from "../utils/date";
 
 const DANGER = "#EF4444";
-
-/**
- * `new Date("2026-07-01")` parses as UTC midnight, which renders as the previous
- * day west of Greenwich. These are calendar days, so build them in local time.
- */
-const parseDateKey = (key: string) => {
-  const [year, month, day] = key.slice(0, 10).split("-").map(Number);
-  return new Date(year, month - 1, day);
-};
 
 interface IProps {
   label: string;
   /** A `YYYY-MM-DD` date key. */
-  value: string;
+  value?: string;
   onChange: (key: string) => void;
   minDate?: Date;
   maxDate?: Date;
   error?: string;
+  placeholder?: string;
   /** Title of the picker modal. Defaults to the field label. */
   title?: string;
 }
@@ -38,11 +30,12 @@ export const ApDateField: React.FC<IProps> = ({
   minDate,
   maxDate,
   error,
+  placeholder,
   title,
 }) => {
   const colors = useTheme();
   const [open, setOpen] = useState(false);
-  const selected = parseDateKey(value);
+  const selected = value ? parseDateKey(value) : new Date();
 
   return (
     <View className="mb-4">
@@ -57,8 +50,8 @@ export const ApDateField: React.FC<IProps> = ({
           borderColor: error ? DANGER : colors.surfaceBorder,
         }}
       >
-        <ApText size="sm" color={colors.textPrimary}>
-          {format(selected, "EEE, MMM d, yyyy")}
+        <ApText size="sm" color={value ? colors.textPrimary : colors.textMuted}>
+          {value ? format(selected, "EEE, MMM d, yyyy") : placeholder || "Select date"}
         </ApText>
         <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
       </TouchableOpacity>

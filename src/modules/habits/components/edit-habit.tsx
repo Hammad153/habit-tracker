@@ -9,7 +9,7 @@ import { useAuthState } from "@/src/modules/auth/context";
 import { ToastService, NotificationService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
-import { HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
+import { HABIT_CATEGORIES, HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
 import { DAYS_OF_WEEK, IReminder } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
@@ -34,6 +34,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   // Habit fields
   const [name, setName] = useState("");
   const [subtitle, setSubtitle] = useState("");
+  const [category, setCategory] = useState("General");
   const [selectedIcon, setSelectedIcon] = useState("water");
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
 
@@ -59,6 +60,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
       if (habit) {
         setName(habit.title || "");
         setSubtitle(habit.subtitle || "");
+        setCategory(habit.category || "General");
         setSelectedIcon(habit.icon || "water");
         setSelectedColor(habit.iconColor || HABIT_COLORS[0]);
         setScheduleType(habit.scheduleType || "daily");
@@ -107,6 +109,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
         icon: selectedIcon,
         iconColor: selectedColor,
         iconBg: `${selectedColor}20`,
+        category,
         scheduleType,
         scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
         timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
@@ -283,6 +286,43 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
               value={subtitle}
               onChangeText={setSubtitle}
             />
+          </View>
+
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="mt-8 mb-4 uppercase"
+            style={{ letterSpacing: 1 }}
+          >
+            Category
+          </ApText>
+          <View className="flex-row flex-wrap">
+            {HABIT_CATEGORIES.map((item) => {
+              const selected = category === item;
+              return (
+                <TouchableOpacity
+                  key={item}
+                  onPress={() => {
+                    setCategory(item);
+                    triggerSelection();
+                  }}
+                  className="mr-2 mb-2 rounded-full border px-4 py-2"
+                  style={{
+                    backgroundColor: selected ? colors.primary : colors.surface,
+                    borderColor: selected ? colors.primary : colors.surfaceBorder,
+                  }}
+                >
+                  <ApText
+                    size="xs"
+                    font="semibold"
+                    color={selected ? colors.background : colors.textSecondary}
+                  >
+                    {item}
+                  </ApText>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Schedule Section */}

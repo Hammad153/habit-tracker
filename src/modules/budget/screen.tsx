@@ -104,7 +104,7 @@ const BudgetScreen = () => {
         title="Budget"
         hasBackButton
         right={
-          <TouchableOpacity onPress={() => router.push("/add-expense")} className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.primary }}>
+          <TouchableOpacity onPress={() => router.push("/add-budget")} className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.primary }}>
             <Ionicons name="add" size={22} color={colors.background} />
           </TouchableOpacity>
         }
@@ -166,6 +166,12 @@ const BudgetScreen = () => {
         </View>
 
         <View className="mt-5 flex-row gap-3">
+          <TouchableOpacity onPress={() => router.push("/add-expense")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.warning + "16" }}>
+            <Ionicons name="remove-circle-outline" size={22} color={colors.warning} />
+            <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">
+              Add Expense
+            </ApText>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/add-income")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.primary + "16" }}>
             <Ionicons name="cash-outline" size={22} color={colors.primary} />
             <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">

@@ -13,6 +13,7 @@ import { format, isValid, parseISO } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ApContainer,
+  ApDateField,
   ApEmptyState,
   ApHeader,
   ApScrollView,
@@ -131,18 +132,9 @@ const EntryForm = ({
                   backgroundColor: colors.surface,
                 }}
               />
-              <TextInput
-                value={date}
-                onChangeText={setDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.textMuted}
-                className="mt-3 rounded-2xl border px-4 py-4"
-                style={{
-                  color: colors.textPrimary,
-                  borderColor: colors.surfaceBorder,
-                  backgroundColor: colors.surface,
-                }}
-              />
+              <View className="mt-3">
+                <ApDateField label="Date" value={date} onChange={setDate} />
+              </View>
 
               <ApText
                 size="xs"
@@ -413,6 +405,16 @@ const JournalScreen = () => {
               </TouchableOpacity>
             ))}
           </ScrollView>
+
+          <View className="mt-4">
+            <ApDateField
+              label="Filter by date"
+              value={dateFilter}
+              onChange={setDateFilter}
+              placeholder="All dates"
+              title="Filter Entries"
+            />
+          </View>
 
           <ApText
             size="xs"
