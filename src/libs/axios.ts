@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig, create } from "axios";
+import { AxiosError, InternalAxiosRequestConfig, create } from "axios";
 import { ApStorageService, ApStorageKeys } from "@/src/services/storage";
 import { environment } from "@/src/environment";
 import {

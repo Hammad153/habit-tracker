@@ -25,7 +25,7 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
     } else if (user && inAuthGroup) {
       router.replace("/(tabs)");
     }
-  }, [user, segments, isLoading, authStatus]);
+  }, [user, segments, isLoading, authStatus, router]);
 
   // Re-arm local reminder notifications from the backend once per session,
   // so they survive reinstalls and new devices.
