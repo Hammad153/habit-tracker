@@ -2,17 +2,44 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApContainer, ApEmptyState, ApErrorState, ApHeader, ApLoader, ApText } from "@/src/components";
+import { ApConfirmModal, ApContainer, ApEmptyState, ApErrorState, ApHeader, ApLoader, ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
-import { toDateKey } from "@/src/utils/date";
+import { normalizeDateKey, parseDateKey, toDateKey } from "@/src/utils/date";
 import { useDailyPlanState } from "./context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
+import { IDailyPlanTask } from "./model";
 
-const priorityColor = (priority: string) => {
-  if (priority === "HIGH") return "#EF4444";
-  if (priority === "MEDIUM") return "#F59E0B";
-  return "#10B981";
+const formatTime = (value?: string) => {
+  if (!value) return "";
+  const [hours, minutes] = value.split(":").map(Number);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return value;
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 };
+
+const formatDuration = (minutes?: number) => {
+  if (!minutes) return "";
+  if (minutes < 60) return `${minutes} minutes`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${hours}h ${rest}m` : `${hours} hours`;
+};
+
+const planTitle = (dateKey: string) =>
+  parseDateKey(dateKey).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+const sortActivities = (items: IDailyPlanTask[]) =>
+  [...items].sort((a, b) => {
+    const orderA = a.order ?? a.sortOrder ?? 0;
+    const orderB = b.order ?? b.sortOrder ?? 0;
+    if (orderA !== orderB) return orderA - orderB;
+    return (a.startTime ?? "").localeCompare(b.startTime ?? "");
+  });
 
 const DailyPlanScreen = () => {
   const colors = useTheme();
@@ -20,6 +47,7 @@ const DailyPlanScreen = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [note, setNote] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteActivity, setDeleteActivity] = useState<IDailyPlanTask | null>(null);
   const {
     loading,
     error,
@@ -58,7 +86,7 @@ const DailyPlanScreen = () => {
     if (alreadyCreated) return;
     addNotification({
       title: "Plan your day",
-      body: "A quick plan can make today's habits easier to protect.",
+      body: "A quick roadmap can make today's habits easier to protect.",
       type: "system",
       route: "/(tabs)/daily-plan",
     });
@@ -73,9 +101,21 @@ const DailyPlanScreen = () => {
     });
   }, []);
 
+  const activities = sortActivities(selectedPlan?.items ?? selectedPlan?.tasks ?? []);
+  const total = selectedPlan?.totalItems ?? activities.length;
+  const completed = selectedPlan?.completedItems ?? activities.filter((item) => item.status === "COMPLETED").length;
+  const progress = selectedPlan?.progressPercentage ?? (total ? Math.round((completed / total) * 100) : 0);
+  const nextActivity = selectedPlan?.nextItem ?? activities.find((item) => item.status === "PENDING");
+  const statusLabel = selectedPlan?.status === "COMPLETED" ? "Completed" : selectedPlan?.status === "IN_PROGRESS" ? "In progress" : "Not started";
+
   const ensurePlan = async () => {
     if (selectedPlan) return selectedPlan;
-    return createPlan({ planDate: selectedDate, title: selectedDate === today ? "Today's Plan" : "Daily Plan" });
+    return createPlan({ planDate: selectedDate, title: selectedDate === today ? "Today's Plan" : "Daily Plan", items: [] } as any);
+  };
+
+  const openEditor = async () => {
+    const plan = await ensurePlan();
+    router.push({ pathname: "/add-plan-task", params: { planId: plan?.id, date: selectedDate } });
   };
 
   const saveReflection = async () => {
@@ -99,18 +139,13 @@ const DailyPlanScreen = () => {
     );
   }
 
-  const tasks = selectedPlan?.tasks ?? [];
-
   return (
     <ApContainer>
       <ApHeader
         title="Daily Plan"
         right={
           <TouchableOpacity
-            onPress={async () => {
-              const plan = await ensurePlan();
-              if (plan?.id) router.push({ pathname: "/add-plan-task", params: { planId: plan.id, date: selectedDate } });
-            }}
+            onPress={openEditor}
             className="h-10 w-10 items-center justify-center rounded-full"
             style={{ backgroundColor: colors.primary }}
           >
@@ -145,98 +180,137 @@ const DailyPlanScreen = () => {
           })}
         </View>
 
-        <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-          <View className="flex-row items-center justify-between">
-            <View>
-              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                Completion
-              </ApText>
-              <ApText size="3xl" font="bold" color={colors.textPrimary}>
-                {summary?.completionPercentage ?? 0}%
-              </ApText>
-            </View>
-            <View className="items-end">
-              <ApText size="sm" color={colors.textSecondary}>
-                {summary?.completedTasks ?? 0} done / {summary?.pendingTasks ?? 0} left
-              </ApText>
-              <ApText size="xs" color={summary?.highPriorityOpen ? "#EF4444" : colors.textMuted}>
-                {summary?.highPriorityOpen ?? 0} high priority open
-              </ApText>
-            </View>
-          </View>
-          <View className="mt-3 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-            <View className="h-full rounded-full" style={{ width: `${summary?.completionPercentage ?? 0}%`, backgroundColor: colors.primary }} />
-          </View>
-        </View>
-
-        <View className="mt-6 flex-row items-center justify-between">
-          <ApText size="lg" font="bold" color={colors.textPrimary}>
-            Priority Tasks
-          </ApText>
-          <TouchableOpacity onPress={() => router.push("/planner-calendar")}>
-            <ApText size="sm" font="bold" color={colors.primary}>
-              Calendar
-            </ApText>
-          </TouchableOpacity>
-        </View>
-
-        {!tasks.length ? (
+        {!selectedPlan ? (
           <ApEmptyState
-            icon="calendar-outline"
-            title="No tasks planned"
-            subtitle="Add a task, time block, or habit-linked action for this day."
-            actionLabel="Add Task"
-            onAction={async () => {
-              const plan = await ensurePlan();
-              if (plan?.id) router.push({ pathname: "/add-plan-task", params: { planId: plan.id, date: selectedDate } });
-            }}
+            icon="map-outline"
+            title="You have not planned this day yet."
+            subtitle="Create a roadmap for your activities so you always know what comes next."
+            actionLabel="Plan My Day"
+            onAction={openEditor}
           />
         ) : (
-          tasks.map((task) => {
-            const done = task.status === "COMPLETED";
-            return (
-              <View key={task.id} className="mt-3 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-                <View className="flex-row items-start">
-                  <TouchableOpacity
-                    onPress={() => updateTask(task.id, { status: done ? "PENDING" : "COMPLETED" })}
-                    className="h-9 w-9 items-center justify-center rounded-full"
-                    style={{ backgroundColor: done ? colors.primary : colors.background }}
-                  >
-                    <Ionicons name={done ? "checkmark" : "ellipse-outline"} size={18} color={done ? colors.background : colors.textMuted} />
-                  </TouchableOpacity>
-                  <View className="ml-3 flex-1">
-                    <View className="flex-row items-center">
-                      <View className="mr-2 h-2 w-2 rounded-full" style={{ backgroundColor: priorityColor(task.priority) }} />
-                      <ApText size="xs" font="bold" color={priorityColor(task.priority)}>
-                        {task.priority}
-                      </ApText>
-                    </View>
-                    <ApText size="base" font="bold" color={done ? colors.textMuted : colors.textPrimary} className="mt-1">
-                      {task.title}
-                    </ApText>
-                    {task.startTime || task.endTime ? (
-                      <ApText size="xs" color={colors.textMuted} className="mt-1">
-                        {task.startTime || "--"} - {task.endTime || "--"}
-                      </ApText>
-                    ) : null}
-                    {task.habit ? (
-                      <ApText size="xs" color={colors.primary} className="mt-1">
-                        Linked habit: {task.habit.title}
-                      </ApText>
-                    ) : null}
-                  </View>
-                  <View className="flex-row gap-2">
-                    <TouchableOpacity onPress={() => router.push({ pathname: "/add-plan-task", params: { id: task.id, planId: task.dailyPlanId, date: selectedDate } })} className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: colors.background }}>
-                      <Ionicons name="create-outline" size={16} color={colors.primary} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => deleteTask(task.id)} className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: "#EF444418" }}>
-                      <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
+          <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+            <View className="flex-row items-start justify-between">
+              <View className="flex-1 pr-3">
+                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+                  {statusLabel}
+                </ApText>
+                <ApText size="xl" font="bold" color={colors.textPrimary} className="mt-1">
+                  {selectedPlan.title || "Daily Plan"}
+                </ApText>
+                <ApText size="sm" color={colors.textSecondary} className="mt-1">
+                  {planTitle(normalizeDateKey(selectedPlan.planDate))}
+                </ApText>
               </View>
-            );
-          })
+              <TouchableOpacity onPress={openEditor} className="h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: colors.background }}>
+                <Ionicons name="create-outline" size={18} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+
+            <View className="mt-4 flex-row items-center justify-between">
+              <ApText size="sm" color={colors.textSecondary}>
+                {completed} of {total} activities completed
+              </ApText>
+              <ApText size="sm" font="bold" color={colors.primary}>
+                {progress}%
+              </ApText>
+            </View>
+            <View className="mt-2 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
+              <View className="h-full rounded-full" style={{ width: `${progress}%`, backgroundColor: colors.primary }} />
+            </View>
+
+            <View className="mt-4 rounded-2xl p-3" style={{ backgroundColor: colors.background }}>
+              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+                Next activity
+              </ApText>
+              <ApText size="sm" font="bold" color={nextActivity ? colors.textPrimary : colors.textMuted} className="mt-1">
+                {nextActivity ? `${nextActivity.title}${nextActivity.startTime ? ` at ${formatTime(nextActivity.startTime)}` : ""}` : "All activities are complete"}
+              </ApText>
+              {selectedPlan.dayStartTime || selectedPlan.dayEndTime ? (
+                <ApText size="xs" color={colors.textMuted} className="mt-1">
+                  Day schedule: {formatTime(selectedPlan.dayStartTime)} - {formatTime(selectedPlan.dayEndTime)}
+                </ApText>
+              ) : null}
+            </View>
+
+            {!activities.length ? (
+              <ApEmptyState
+                icon="list-outline"
+                title="No activities have been added to this plan."
+                actionLabel="Add First Activity"
+                onAction={openEditor}
+              />
+            ) : (
+              <View className="mt-5">
+                {activities.map((activity, index) => {
+                  const done = activity.status === "COMPLETED";
+                  const skipped = activity.status === "SKIPPED";
+                  const isNext = nextActivity?.id === activity.id;
+                  return (
+                    <View key={activity.id} className="flex-row">
+                      <View className="w-10 items-center">
+                        <TouchableOpacity
+                          onPress={() => updateTask(activity.id, { status: done ? "PENDING" : "COMPLETED" })}
+                          className="h-8 w-8 items-center justify-center rounded-full"
+                          style={{ backgroundColor: done ? colors.primary : isNext ? colors.primary + "22" : colors.background, borderWidth: 1, borderColor: done || isNext ? colors.primary : colors.surfaceBorder }}
+                        >
+                          <Ionicons name={done ? "checkmark" : isNext ? "ellipse" : "ellipse-outline"} size={16} color={done ? colors.background : colors.primary} />
+                        </TouchableOpacity>
+                        {index < activities.length - 1 ? (
+                          <View className="w-0.5 flex-1" style={{ minHeight: 56, backgroundColor: done ? colors.primary : colors.surfaceBorder }} />
+                        ) : null}
+                      </View>
+
+                      <View className="mb-4 flex-1 rounded-2xl border p-3" style={{ backgroundColor: isNext ? colors.primary + "10" : colors.background, borderColor: isNext ? colors.primary : colors.surfaceBorder }}>
+                        <View className="flex-row items-start justify-between">
+                          <View className="flex-1 pr-2">
+                            <ApText size="xs" color={colors.textMuted}>
+                              {formatTime(activity.startTime) || "Any time"}
+                              {activity.endTime ? ` - ${formatTime(activity.endTime)}` : ""}
+                            </ApText>
+                            <ApText size="base" font="bold" color={done || skipped ? colors.textMuted : colors.textPrimary} className={done ? "line-through" : ""}>
+                              {activity.title}
+                            </ApText>
+                            {activity.description ? (
+                              <ApText size="xs" color={colors.textSecondary} className="mt-1">
+                                {activity.description}
+                              </ApText>
+                            ) : null}
+                            {activity.durationMinutes ? (
+                              <ApText size="xs" color={colors.textMuted} className="mt-1">
+                                {formatDuration(activity.durationMinutes)}
+                              </ApText>
+                            ) : null}
+                            {activity.linkedHabit || activity.habit ? (
+                              <View className="mt-2 flex-row items-center">
+                                <Ionicons name="repeat-outline" size={13} color={colors.primary} />
+                                <ApText size="xs" color={colors.primary} className="ml-1">
+                                  Linked habit: {activity.linkedHabit?.name ?? activity.habit?.title}
+                                </ApText>
+                              </View>
+                            ) : null}
+                            {activity.completedAt ? (
+                              <ApText size="xs" color={colors.textMuted} className="mt-1">
+                                Completed {new Date(activity.completedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                              </ApText>
+                            ) : null}
+                          </View>
+                          <View className="flex-row gap-2">
+                            <TouchableOpacity onPress={openEditor} className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: colors.surface }}>
+                              <Ionicons name="create-outline" size={16} color={colors.primary} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setDeleteActivity(activity)} className="h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: "#EF444418" }}>
+                              <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
         )}
 
         <View className="mt-6 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
@@ -259,6 +333,19 @@ const DailyPlanScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <ApConfirmModal
+        visible={!!deleteActivity}
+        title="Delete activity?"
+        subTitle="This removes only this activity from the Daily Plan."
+        destructive
+        confirmText="Delete"
+        onClose={() => setDeleteActivity(null)}
+        onConfirm={async () => {
+          if (deleteActivity) await deleteTask(deleteActivity.id);
+          setDeleteActivity(null);
+        }}
+      />
     </ApContainer>
   );
 };
