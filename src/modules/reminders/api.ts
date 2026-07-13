@@ -1,10 +1,8 @@
 import axiosInstance from "@/src/libs/axios";
 
 export class ReminderApiService {
-  static getAll = (userId: string) => {
-    return axiosInstance
-      .get(`/reminder?userId=${userId}`)
-      .then((res) => res.data);
+  static getAll = (_userId?: string) => {
+    return axiosInstance.get("/reminder").then((res) => res.data);
   };
 
   static getByHabit = (habitId: string) => {
@@ -14,7 +12,7 @@ export class ReminderApiService {
   };
 
   static create = (data: {
-    userId: string;
+    userId?: string;
     habitId: string;
     time: string;
     days: string[];
@@ -30,9 +28,9 @@ export class ReminderApiService {
     return axiosInstance.delete(`/reminder/${id}`).then((res) => res.data);
   };
 
-  static registerPushToken = (userId: string, pushToken: string) => {
+  static registerPushToken = (_userId: string, pushToken: string) => {
     return axiosInstance
-      .post("/reminder/push-token", { userId, pushToken })
+      .post("/reminder/push-token", { pushToken })
       .then((res) => res.data);
   };
 }

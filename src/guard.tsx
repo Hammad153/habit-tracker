@@ -10,13 +10,13 @@ interface IProps {
 }
 
 const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
-  const { user, isLoading } = useAuthState();
+  const { user, isLoading, authStatus } = useAuthState();
   const segments = useSegments();
   const router = useRouter();
   const syncedUserRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || authStatus === "INITIALIZING") return;
 
     const inAuthGroup = segments[0] === "login" || segments[0] === "signup";
 
@@ -25,7 +25,7 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
     } else if (user && inAuthGroup) {
       router.replace("/(tabs)");
     }
-  }, [user, segments, isLoading]);
+  }, [user, segments, isLoading, authStatus]);
 
   // Re-arm local reminder notifications from the backend once per session,
   // so they survive reinstalls and new devices.
@@ -41,7 +41,7 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
       });
   }, [user?.id]);
 
-  if (isLoading) {
+  if (isLoading || authStatus === "INITIALIZING") {
     return <ApLoader />;
   }
 
