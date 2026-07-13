@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, TextInput, ScrollView } from "react-native";
+import { View, TouchableOpacity, TextInput, ScrollView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
@@ -16,6 +16,7 @@ import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
 import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
 import { HabitService } from "@/src/modules/habits/api";
 import { useNotificationsState } from "@/src/modules/notifications/context";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface EditHabitScreenProps {
   habitId: string;
@@ -50,6 +51,46 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   const [reminderDays, setReminderDays] = useState<string[]>([...DAYS_OF_WEEK]);
   const [existingReminder, setExistingReminder] = useState<IReminder | null>(null);
 
+  // Date range state for temporary habits
+  const [hasDateRange, setHasDateRange] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'start' | 'end'>('start');
+
+  const formatDate = (date: Date | undefined): string => {
+    if (!date) return 'Select date';
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowStartPicker(false);
+      setShowEndPicker(false);
+    }
+    if (selectedDate) {
+      if (pickerMode === 'start') {
+        setStartDate(selectedDate);
+      } else {
+        setEndDate(selectedDate);
+      }
+    }
+  };
+
+  const openDatePicker = (mode: 'start' | 'end') => {
+    setPickerMode(mode);
+    if (mode === 'start') {
+      setShowStartPicker(true);
+    } else {
+      setShowEndPicker(true);
+    }
+  };
+
   // Load existing habit and reminder data
   const loadData = useCallback(async () => {
     try {
@@ -67,6 +108,13 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
         setScheduleDays(habit.scheduleDays || []);
         setTimesPerWeek(habit.timesPerWeek || 3);
         setIntervalDays(habit.intervalDays || 2);
+        
+        // Load date range if present
+        if (habit.startDate || habit.endDate) {
+          setHasDateRange(true);
+          setStartDate(habit.startDate ? new Date(habit.startDate) : undefined);
+          setEndDate(habit.endDate ? new Date(habit.endDate) : undefined);
+        }
       }
 
       // Fetch existing reminder for this habit
@@ -100,6 +148,20 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
       return;
     }
 
+    // Validate date range if enabled
+    if (hasDateRange) {
+      if (!startDate || !endDate) {
+        ToastService.Error("Please select both start and end dates");
+        setSaving(false);
+        return;
+      }
+      if (endDate <= startDate) {
+        ToastService.Error("End date must be after start date");
+        setSaving(false);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       // Update the habit
@@ -114,6 +176,8 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
         scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
         timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
         intervalDays: scheduleType === "interval" ? intervalDays : undefined,
+        startDate: hasDateRange && startDate ? startDate.toISOString() : undefined,
+        endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
       });
 
       // Handle reminder changes
@@ -345,6 +409,136 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             onTimesPerWeekChange={setTimesPerWeek}
             onIntervalDaysChange={setIntervalDays}
           />
+
+          {/* Duration Section - Date Range for Temporary Habits */}
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="mt-8 mb-4 uppercase"
+            style={{ letterSpacing: 1 }}
+          >
+            Duration (Optional)
+          </ApText>
+          <View
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setHasDateRange(!hasDateRange)}
+              className="flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={hasDateRange ? colors.primary : colors.textMuted}
+                />
+                <ApText
+                  size="sm"
+                  color={colors.textPrimary}
+                  className="ml-3"
+                >
+                  Set a time period
+                </ApText>
+              </View>
+              <View
+                className="w-12 h-7 rounded-full p-1 justify-center"
+                style={{
+                  backgroundColor: hasDateRange
+                    ? colors.primary
+                    : colors.surfaceBorder,
+                }}
+              >
+                <View
+                  className="w-5 h-5 rounded-full bg-white"
+                  style={{
+                    alignSelf: hasDateRange ? "flex-end" : "flex-start",
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {hasDateRange && (
+              <View className="mt-4 space-y-3">
+                <ApText size="xs" color={colors.textSecondary}>
+                  The habit will automatically delete when the end date is reached.
+                </ApText>
+                
+                {/* Start Date */}
+                <TouchableOpacity
+                  onPress={() => openDatePicker('start')}
+                  className="flex-row items-center justify-between py-3 border-b"
+                  style={{ borderBottomColor: colors.surfaceBorder }}
+                >
+                  <ApText size="sm" color={colors.textPrimary}>
+                    Start Date
+                  </ApText>
+                  <View className="flex-row items-center">
+                    <ApText
+                      size="sm"
+                      color={startDate ? colors.primary : colors.textMuted}
+                    >
+                      {formatDate(startDate)}
+                    </ApText>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textMuted}
+                      className="ml-2"
+                    />
+                  </View>
+                </TouchableOpacity>
+
+                {/* End Date */}
+                <TouchableOpacity
+                  onPress={() => openDatePicker('end')}
+                  className="flex-row items-center justify-between py-3"
+                >
+                  <ApText size="sm" color={colors.textPrimary}>
+                    End Date
+                  </ApText>
+                  <View className="flex-row items-center">
+                    <ApText
+                      size="sm"
+                      color={endDate ? colors.primary : colors.textMuted}
+                    >
+                      {formatDate(endDate)}
+                    </ApText>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={16}
+                      color={colors.textMuted}
+                      className="ml-2"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Date Pickers */}
+          {showStartPicker && (
+            <DateTimePicker
+              value={startDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDateChange}
+              minimumDate={new Date()}
+            />
+          )}
+          {showEndPicker && (
+            <DateTimePicker
+              value={endDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDateChange}
+              minimumDate={startDate || new Date()}
+            />
+          )}
 
           {/* Color Picker */}
           <ApText

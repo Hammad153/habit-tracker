@@ -20,6 +20,8 @@ export interface IHabit extends IBaseModel {
   restDays?: string[];
   tags?: string[];
   completions?: ICompletion[];
+  startDate?: string; // ISO date string for temporary habits
+  endDate?: string; // ISO date string - habit auto-deletes after this date
 }
 
 export interface ICompletion {
