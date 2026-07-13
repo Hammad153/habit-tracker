@@ -9,7 +9,7 @@ import { useHabitState } from "@/src/modules/habits/context";
 import { IDailyPlanTask } from "../model";
 import { toDateKey } from "@/src/utils/date";
 
-type DraftActivity = Partial<IDailyPlanTask> & { localId: string; durationText?: string };
+type DraftActivity = Partial<IDailyPlanTask> & { localId: string; durationText?: string; showHabitPicker?: boolean };
 
 const timeToMinutes = (value?: string) => {
   if (!value) return undefined;
@@ -252,20 +252,51 @@ const TaskFormScreen = () => {
                 <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase">
                   Link Habit
                 </ApText>
-                <View className="flex-row flex-wrap gap-2">
-                  <TouchableOpacity onPress={() => updateItem(item.localId, { linkedHabitId: "", habitId: "" })} className="rounded-xl px-3 py-2" style={{ backgroundColor: !computed.linkedHabitId ? colors.primary : colors.background }}>
-                    <ApText size="xs" font="bold" color={!computed.linkedHabitId ? colors.background : colors.textPrimary}>
-                      None
+                <TouchableOpacity
+                  onPress={() => updateItem(item.localId, { showHabitPicker: true } as any)}
+                  className="flex-row items-center justify-between rounded-2xl border px-4 py-3"
+                  style={{ backgroundColor: colors.background, borderColor: colors.surfaceBorder }}
+                >
+                  <View className="flex-row items-center flex-1">
+                    <Ionicons name="link-outline" size={16} color={computed.linkedHabitId ? colors.primary : colors.textMuted} />
+                    <ApText size="sm" color={computed.linkedHabitId ? colors.textPrimary : colors.textMuted} className="ml-2 flex-1">
+                      {computed.linkedHabitId ? habits.find((h) => h.id === computed.linkedHabitId)?.title : "Select a habit to link"}
                     </ApText>
-                  </TouchableOpacity>
-                  {habits.filter((habit) => !habit.isArchived).map((habit) => (
-                    <TouchableOpacity key={habit.id} onPress={() => updateItem(item.localId, { linkedHabitId: habit.id, habitId: habit.id })} className="rounded-xl px-3 py-2" style={{ backgroundColor: computed.linkedHabitId === habit.id ? colors.primary : colors.background }}>
-                      <ApText size="xs" font="bold" color={computed.linkedHabitId === habit.id ? colors.background : colors.textPrimary}>
-                        {habit.title}
+                  </View>
+                  <Ionicons name="chevron-down" size={16} color={colors.textMuted} />
+                </TouchableOpacity>
+
+                {item.showHabitPicker ? (
+                  <View className="mt-2 rounded-2xl border p-2" style={{ backgroundColor: colors.background, borderColor: colors.surfaceBorder }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        updateItem(item.localId, { linkedHabitId: "", habitId: "", showHabitPicker: false } as any);
+                      }}
+                      className="flex-row items-center justify-between rounded-xl px-3 py-2"
+                      style={{ backgroundColor: !computed.linkedHabitId ? colors.primary + "15" : "transparent" }}
+                    >
+                      <ApText size="sm" color={!computed.linkedHabitId ? colors.primary : colors.textSecondary}>
+                        None
                       </ApText>
+                      {!computed.linkedHabitId && <Ionicons name="checkmark" size={16} color={colors.primary} />}
                     </TouchableOpacity>
-                  ))}
-                </View>
+                    {habits.filter((habit) => !habit.isArchived).map((habit) => (
+                      <TouchableOpacity
+                        key={habit.id}
+                        onPress={() => {
+                          updateItem(item.localId, { linkedHabitId: habit.id, habitId: habit.id, showHabitPicker: false } as any);
+                        }}
+                        className="flex-row items-center justify-between rounded-xl px-3 py-2"
+                        style={{ backgroundColor: computed.linkedHabitId === habit.id ? colors.primary + "15" : "transparent" }}
+                      >
+                        <ApText size="sm" color={computed.linkedHabitId === habit.id ? colors.primary : colors.textSecondary}>
+                          {habit.title}
+                        </ApText>
+                        {computed.linkedHabitId === habit.id && <Ionicons name="checkmark" size={16} color={colors.primary} />}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ) : null}
               </View>
             );
           })}
