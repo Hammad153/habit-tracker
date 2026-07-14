@@ -13,6 +13,7 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
+import HabitMetrics from "./components/HabitMetrics";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 const HabitPageScreen = () => {
@@ -66,6 +67,9 @@ const HabitPageScreen = () => {
           refreshing={refreshing}
           onRefresh={handleRefresh}
         >
+          {/* Metrics Section */}
+          <HabitMetrics habits={habits} />
+          
           <View>
             {error && habits.length === 0 ? (
               <ApErrorState onRetry={handleRefresh} />
