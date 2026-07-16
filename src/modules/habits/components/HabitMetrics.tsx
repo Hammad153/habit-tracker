@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import Svg, { Path, Circle, Line, Text as SvgText } from "react-native-svg";
+import Svg, { Path, Circle, Line, Text as SvgText, Rect } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -153,17 +153,23 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
             return (
               <React.Fragment key={stat.date}>
                 {/* Bar background */}
-                <Path
-                  d={`M ${x} ${chartHeight} L ${x} ${y} L ${x + barWidth} ${y} L ${x + barWidth} ${chartHeight} Z`}
-                  fill={isToday ? colors.primary + "30" : colors.surfaceBorder + "40"}
+                <Rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barHeight}
                   rx={4}
+                  fill={isToday ? colors.primary + "30" : colors.surfaceBorder + "40"}
                 />
                 {/* Bar fill */}
                 {stat.completed > 0 && (
-                  <Path
-                    d={`M ${x + 2} ${chartHeight} L ${x + 2} ${y + 2} L ${x + barWidth - 2} ${y + 2} L ${x + barWidth - 2} ${chartHeight} Z`}
-                    fill={isToday ? colors.primary : colors.primary + "80"}
+                  <Rect
+                    x={x + 2}
+                    y={y + 2}
+                    width={barWidth - 4}
+                    height={barHeight - 2}
                     rx={3}
+                    fill={isToday ? colors.primary : colors.primary + "80"}
                   />
                 )}
               </React.Fragment>
@@ -249,7 +255,7 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
           icon="list"
           label="Active"
           value={weeklyStats.totalHabits.toString()}
-          color={colors.info}
+          color={colors.surface}
           colors={colors}
         />
       </View>
