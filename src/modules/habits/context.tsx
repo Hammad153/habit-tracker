@@ -5,7 +5,11 @@ import React, {
   useContext,
   useState,
 } from "react";
-import { ToastService, NotificationService } from "@/src/services";
+import {
+  isOfflineQueuedPayload,
+  ToastService,
+  NotificationService,
+} from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { isSameDateKey } from "@/src/utils/date";
@@ -234,7 +238,11 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
     applyOptimisticToggle(id, date, value);
 
     return HabitService.toggle(id, date, value)
-      .then(() => {
+      .then((result) => {
+        if (isOfflineQueuedPayload(result)) {
+          ToastService.Success("Habit update saved offline");
+          return;
+        }
         return fetchHabits({ silent: true });
       })
       .catch((err) => {

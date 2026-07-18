@@ -7,10 +7,19 @@ import {
   replaceAuthTokens,
 } from "@/src/modules/auth/session";
 import { IAuthTokens } from "@/src/modules/auth/model";
+import {
+  cacheGetResponse,
+  enqueueOfflineMutation,
+  flushOfflineMutations,
+  getCachedResponse,
+  isLikelyOfflineError,
+  makeQueuedResponse,
+} from "@/src/services/offline";
 
 type RetriableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
   _authRequest?: boolean;
+  __skipOfflineQueue?: boolean;
 };
 
 const AUTH_ENDPOINTS = [
@@ -141,9 +150,27 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    void cacheGetResponse(response);
+    if (!(response.config as RetriableRequestConfig).__skipOfflineQueue) {
+      void flushOfflineMutations(axiosInstance);
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as RetriableRequestConfig | undefined;
+    if (originalRequest && isLikelyOfflineError(error)) {
+      const cachedResponse = await getCachedResponse(originalRequest);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      const queuedMutation = await enqueueOfflineMutation(originalRequest);
+      if (queuedMutation) {
+        return makeQueuedResponse(originalRequest, queuedMutation);
+      }
+    }
+
     if (!originalRequest || !shouldAttemptRefresh(error, originalRequest)) {
       return Promise.reject(error);
     }

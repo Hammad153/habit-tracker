@@ -10,6 +10,7 @@ import { JournalProvider } from "@/src/modules/journal/context";
 import { NotificationsProvider } from "@/src/modules/notifications/context";
 import { BudgetProvider } from "@/src/modules/budget/context";
 import { DailyPlanProvider } from "@/src/modules/daily-plan/context";
+import { OfflineSyncProvider } from "@/src/services";
 
 type ContextProvider = FC<{ children: React.ReactNode }>;
 
@@ -32,6 +33,7 @@ export const combineContext = (
 };
 
 const providers: ContextProvider[] = [
+  OfflineSyncProvider,
   SettingsProvider,
   AuthProvider,
   ProfileProvider,

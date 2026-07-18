@@ -10,6 +10,8 @@ export enum ApStorageKeys {
   ThemeMode = "settings_theme_mode",
   JournalEntries = "journal_entries",
   AppNotifications = "app_notifications",
+  OfflineRequestCache = "offline_request_cache",
+  OfflineMutationQueue = "offline_mutation_queue",
 }
 
 const isWeb = Platform.OS === "web";
