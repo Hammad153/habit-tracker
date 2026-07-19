@@ -84,6 +84,14 @@ const SigninScreen = () => {
         autoCapitalize="none"
       />
 
+      <Link href="/forgot-password" asChild>
+        <TouchableOpacity className="self-end mb-3">
+          <Text className="text-sm" style={{ color: colors.primary }}>
+            Forgot Password?
+          </Text>
+        </TouchableOpacity>
+      </Link>
+
       <TouchableOpacity
         onPress={handleLogin}
         disabled={loading}

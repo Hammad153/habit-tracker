@@ -22,4 +22,10 @@ export class AuthService {
   static deleteAccount = () => {
     return axiosInstance.delete("/users/me").then((res) => res.data);
   };
+
+  static forgotPassword = (email: string) => {
+    return axiosInstance
+      .post("/auth/forgot-password", { email })
+      .then((res) => res.data);
+  };
 }
