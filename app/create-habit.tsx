@@ -1,8 +1,8 @@
 import React from "react";
-import CreateHabitScreen from "@/src/modules/habits/components/create-habit";
+import HabitForm from "@/src/modules/habits/components/habit-form";
 
 const CreateHabitRoute = () => {
-  return <CreateHabitScreen />;
+  return <HabitForm />;
 };
 
 export default CreateHabitRoute;

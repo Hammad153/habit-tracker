@@ -1,10 +1,10 @@
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
-import EditHabitScreen from "@/src/modules/habits/components/edit-habit";
+import HabitForm from "@/src/modules/habits/components/habit-form";
 
 const EditHabitRoute = () => {
   const { habitId } = useLocalSearchParams<{ habitId: string }>();
-  return <EditHabitScreen habitId={habitId!} />;
+  return <HabitForm habitId={habitId} />;
 };
 
 export default EditHabitRoute;

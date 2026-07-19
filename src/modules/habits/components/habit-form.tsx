@@ -18,18 +18,19 @@ import { HabitService } from "@/src/modules/habits/api";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-interface EditHabitScreenProps {
-  habitId: string;
+export interface HabitFormProps {
+  habitId?: string;
 }
 
-const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
+const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
+  const isEditMode = Boolean(habitId);
   const colors = useTheme();
   const { user } = useAuthState();
-  const { updateHabit } = useHabitState();
+  const { createHabit, updateHabit } = useHabitState();
   const { addNotification } = useNotificationsState();
   const { triggerSelection, triggerSuccess } = useFeedback();
 
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
 
   // Habit fields
@@ -91,8 +92,10 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
     }
   };
 
-  // Load existing habit and reminder data
+  // Load existing habit and reminder data (only in edit mode)
   const loadData = useCallback(async () => {
+    if (!habitId) return;
+    
     try {
       setInitialLoading(true);
 
@@ -142,7 +145,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
     loadData();
   }, [loadData]);
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     if (!name.trim()) {
       ToastService.Error("Please enter a habit name");
       return;
@@ -152,42 +155,77 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
     if (hasDateRange) {
       if (!startDate || !endDate) {
         ToastService.Error("Please select both start and end dates");
-        setSaving(false);
         return;
       }
       if (endDate <= startDate) {
         ToastService.Error("End date must be after start date");
-        setSaving(false);
         return;
       }
     }
 
     setSaving(true);
-    try {
-      // Update the habit
-      await updateHabit(habitId, {
-        title: name,
-        subtitle: subtitle.trim() || undefined,
-        icon: selectedIcon,
-        iconColor: selectedColor,
-        iconBg: `${selectedColor}20`,
-        category,
-        scheduleType,
-        scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
-        timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
-        intervalDays: scheduleType === "interval" ? intervalDays : undefined,
-        startDate: hasDateRange && startDate ? startDate.toISOString() : undefined,
-        endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
-      });
+    
+    const habitData = {
+      title: name,
+      subtitle: subtitle.trim() || undefined,
+      icon: selectedIcon,
+      iconColor: selectedColor,
+      iconBg: `${selectedColor}20`,
+      category,
+      scheduleType,
+      scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
+      timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
+      intervalDays: scheduleType === "interval" ? intervalDays : undefined,
+      startDate: hasDateRange && startDate ? startDate.toISOString() : undefined,
+      endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
+    };
 
-      // Handle reminder changes
-      if (existingReminder) {
-        if (reminderEnabled) {
-          // Update existing reminder
-          await ReminderApiService.update(existingReminder.id, {
+    try {
+      if (isEditMode && habitId) {
+        // Update existing habit
+        await updateHabit(habitId, habitData);
+
+        // Handle reminder changes
+        if (existingReminder) {
+          if (reminderEnabled) {
+            // Update existing reminder
+            await ReminderApiService.update(existingReminder.id, {
+              time: reminderTime,
+              days: reminderDays,
+              enabled: true,
+            });
+            await NotificationService.scheduleHabitReminder(
+              habitId,
+              name,
+              reminderTime,
+              reminderDays,
+            );
+            await addNotification({
+              title: "Reminder updated",
+              body: `${name} will remind you at ${reminderTime}.`,
+              type: "habit",
+              route: "/(tabs)/habits",
+            });
+          } else {
+            // Disable reminder
+            await ReminderApiService.update(existingReminder.id, {
+              enabled: false,
+            });
+            await NotificationService.cancelHabitReminder(habitId);
+            await addNotification({
+              title: "Reminder disabled",
+              body: `${name} reminders are turned off.`,
+              type: "habit",
+              route: "/(tabs)/habits",
+            });
+          }
+        } else if (reminderEnabled && user?.id) {
+          // Create new reminder
+          await ReminderApiService.create({
+            userId: user.id,
+            habitId,
             time: reminderTime,
             days: reminderDays,
-            enabled: true,
           });
           await NotificationService.scheduleHabitReminder(
             habitId,
@@ -196,50 +234,58 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             reminderDays,
           );
           await addNotification({
-            title: "Reminder updated",
+            title: "Reminder scheduled",
             body: `${name} will remind you at ${reminderTime}.`,
             type: "habit",
             route: "/(tabs)/habits",
           });
-        } else {
-          // Disable reminder
-          await ReminderApiService.update(existingReminder.id, {
-            enabled: false,
-          });
-          await NotificationService.cancelHabitReminder(habitId);
+        }
+
+        await addNotification({
+          title: "Habit updated",
+          body: `${name} has been updated.`,
+          type: "habit",
+          route: "/(tabs)/habits",
+        });
+      } else {
+        // Create new habit
+        const result: any = await createHabit(habitData);
+        
+        if (result?.id) {
+          // Create reminder if enabled and habit was created
+          if (reminderEnabled && user?.id) {
+            await ReminderApiService.create({
+              userId: user.id,
+              habitId: result.id,
+              time: reminderTime,
+              days: reminderDays,
+            });
+            await NotificationService.scheduleHabitReminder(
+              result.id,
+              name,
+              reminderTime,
+              reminderDays,
+            );
+            await addNotification({
+              title: "Reminder scheduled",
+              body: `${name} will remind you at ${reminderTime}.`,
+              type: "habit",
+              route: "/(tabs)/habits",
+            });
+          }
           await addNotification({
-            title: "Reminder disabled",
-            body: `${name} reminders are turned off.`,
+            title: "Habit created",
+            body: `${name} is ready to track.`,
             type: "habit",
             route: "/(tabs)/habits",
           });
         }
-      } else if (reminderEnabled && user?.id) {
-        // Create new reminder
-        await ReminderApiService.create({
-          userId: user.id,
-          habitId,
-          time: reminderTime,
-          days: reminderDays,
-        });
-        await NotificationService.scheduleHabitReminder(
-          habitId,
-          name,
-          reminderTime,
-          reminderDays,
-        );
-        await addNotification({
-          title: "Reminder scheduled",
-          body: `${name} will remind you at ${reminderTime}.`,
-          type: "habit",
-          route: "/(tabs)/habits",
-        });
       }
 
       triggerSuccess();
       router.back();
     } catch {
-      ToastService.Error("Failed to save changes");
+      ToastService.Error(isEditMode ? "Failed to save changes" : "Failed to create habit");
     } finally {
       setSaving(false);
     }
@@ -258,7 +304,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   if (initialLoading) {
     return (
       <ApContainer>
-        <ApHeader title="Edit Habit" hasBackButton />
+        <ApHeader title={isEditMode ? "Edit Habit" : "New Habit"} hasBackButton />
         <ApLoader label="Loading habit..." />
       </ApContainer>
     );
@@ -266,7 +312,27 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
 
   return (
     <ApContainer>
-      <ApHeader title="Edit Habit" hasBackButton />
+      <ApHeader title={isEditMode ? "Edit Habit" : "New Habit"} hasBackButton />
+
+      {/* Browse Templates Banner - Only in create mode */}
+      {!isEditMode && (
+        <TouchableOpacity
+          onPress={() => router.push("/templates")}
+          className="mx-5 mb-4 flex-row items-center justify-between px-4 py-3 rounded-2xl border"
+          style={{
+            backgroundColor: colors.primary + "10",
+            borderColor: colors.primary + "30",
+          }}
+        >
+          <View className="flex-row items-center">
+            <Ionicons name="grid" size={18} color={colors.primary} />
+            <ApText size="sm" font="semibold" color={colors.primary} className="ml-2">
+              Browse Templates
+            </ApText>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.primary} />
+        </TouchableOpacity>
+      )}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -317,7 +383,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
         </View>
 
         <View className="px-5 mt-8">
-          {/* Name Input */}
+          {/* Basic Information */}
           <ApText
             size="xs"
             font="bold"
@@ -352,6 +418,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             />
           </View>
 
+          {/* Category */}
           <ApText
             size="xs"
             font="bold"
@@ -660,7 +727,7 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={handleSave}
+          onPress={handleSubmit}
           disabled={saving}
           className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
             saving ? "bg-gray-200" : ""
@@ -674,7 +741,9 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
             font="bold"
             color={saving ? colors.textMuted : colors.background}
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving 
+              ? (isEditMode ? "Saving..." : "Creating...") 
+              : (isEditMode ? "Save Changes" : "Create")}
           </ApText>
         </TouchableOpacity>
       </View>
@@ -682,4 +751,4 @@ const EditHabitScreen: React.FC<EditHabitScreenProps> = ({ habitId }) => {
   );
 };
 
-export default EditHabitScreen;
+export default HabitForm;
