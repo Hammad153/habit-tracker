@@ -7,15 +7,12 @@ import { useTheme } from "@/src/modules/settings/context";
 interface IProps {
   label: string;
   onPress: () => void;
-  /** Shows a spinner and blocks repeat taps while the request is in flight. */
   loading?: boolean;
-  /** Dims the button. It stays pressable so validation errors can be surfaced on tap. */
   enabled?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
   loadingLabel?: string;
 }
 
-/** Primary form action with a built-in in-flight state. */
 export const ApSubmitButton: React.FC<IProps> = ({
   label,
   onPress,

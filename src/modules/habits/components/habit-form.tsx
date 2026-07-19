@@ -3,6 +3,7 @@ import { View, TouchableOpacity, TextInput, ScrollView, Platform } from "react-n
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
+import { Dropdown } from "@/src/components/Dropdown";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -428,33 +429,15 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
           >
             Category
           </ApText>
-          <View className="flex-row flex-wrap">
-            {HABIT_CATEGORIES.map((item) => {
-              const selected = category === item;
-              return (
-                <TouchableOpacity
-                  key={item}
-                  onPress={() => {
-                    setCategory(item);
-                    triggerSelection();
-                  }}
-                  className="mr-2 mb-2 rounded-full border px-4 py-2"
-                  style={{
-                    backgroundColor: selected ? colors.primary : colors.surface,
-                    borderColor: selected ? colors.primary : colors.surfaceBorder,
-                  }}
-                >
-                  <ApText
-                    size="xs"
-                    font="semibold"
-                    color={selected ? colors.background : colors.textSecondary}
-                  >
-                    {item}
-                  </ApText>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          <Dropdown
+            options={HABIT_CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
+            value={category}
+            onChange={(value) => {
+              setCategory(value);
+              triggerSelection();
+            }}
+            placeholder="Select category"
+          />
 
           {/* Schedule Section */}
           <ApText
@@ -476,6 +459,27 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
             onTimesPerWeekChange={setTimesPerWeek}
             onIntervalDaysChange={setIntervalDays}
           />
+
+          {/* Reminder Section */}
+          <View className="mt-8">
+            <ApText
+              size="xs"
+              font="bold"
+              color={colors.textMuted}
+              className="mb-4 uppercase"
+              style={{ letterSpacing: 1 }}
+            >
+              Reminder
+            </ApText>
+            <ReminderPicker
+              time={reminderTime}
+              days={reminderDays}
+              enabled={reminderEnabled}
+              onTimeChange={setReminderTime}
+              onDaysChange={setReminderDays}
+              onEnabledChange={setReminderEnabled}
+            />
+          </View>
 
           {/* Duration Section - Date Range for Temporary Habits */}
           <ApText
@@ -686,27 +690,6 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
                 />
               </TouchableOpacity>
             ))}
-          </View>
-
-          {/* Reminder Section */}
-          <View className="mt-8">
-            <ApText
-              size="xs"
-              font="bold"
-              color={colors.textMuted}
-              className="mb-4 uppercase"
-              style={{ letterSpacing: 1 }}
-            >
-              Reminder
-            </ApText>
-            <ReminderPicker
-              time={reminderTime}
-              days={reminderDays}
-              enabled={reminderEnabled}
-              onTimeChange={setReminderTime}
-              onDaysChange={setReminderDays}
-              onEnabledChange={setReminderEnabled}
-            />
           </View>
         </View>
       </ScrollView>
