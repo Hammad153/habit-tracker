@@ -84,13 +84,14 @@ const SigninScreen = () => {
         autoCapitalize="none"
       />
 
-      <Link href="/forgot-password" asChild>
-        <TouchableOpacity className="self-end mb-3">
-          <Text className="text-sm" style={{ color: colors.primary }}>
-            Forgot Password?
-          </Text>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity
+        className="self-end mb-3"
+        onPress={() => router.push("/forgot-password")}
+      >
+        <Text className="text-sm" style={{ color: colors.primary }}>
+          Forgot Password?
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         onPress={handleLogin}
