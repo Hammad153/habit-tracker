@@ -28,4 +28,10 @@ export class AuthService {
       .post("/auth/forgot-password", { email })
       .then((res) => res.data);
   };
+
+  static resetPassword = (data: { token: string; newPassword: string }) => {
+    return axiosInstance
+      .post("/auth/reset-password", data)
+      .then((res) => res.data);
+  };
 }

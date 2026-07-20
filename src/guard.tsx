@@ -18,7 +18,13 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
   useEffect(() => {
     if (isLoading || authStatus === "INITIALIZING") return;
 
-    const inAuthGroup = segments[0] === "login" || segments[0] === "signup";
+    const publicRoutes = [
+      "login",
+      "signup",
+      "forgot-password",
+      "reset-password",
+    ];
+    const inAuthGroup = publicRoutes.includes(segments[0] ?? "");
 
     if (!user && !inAuthGroup) {
       router.replace("/login");
@@ -34,7 +40,9 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
     syncedUserRef.current = user.id;
 
     ReminderApiService.getAll(user.id)
-      .then((reminders) => NotificationService.syncAllReminders(reminders || []))
+      .then((reminders) =>
+        NotificationService.syncAllReminders(reminders || []),
+      )
       .catch(() => {
         // Non-critical: reminders still fire once re-saved on this device.
         syncedUserRef.current = null;

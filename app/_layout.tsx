@@ -26,6 +26,14 @@ const RootLayout = () => {
                     name="signup"
                     options={{ headerShown: false }}
                   />
+                  <Stack.Screen
+                    name="forgot-password"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="reset-password"
+                    options={{ headerShown: false }}
+                  />
                   <Stack.Screen name="+not-found" />
                   <Stack.Screen
                     name="timeline"

@@ -68,7 +68,7 @@ const ForgotPasswordScreen = () => {
             style={{ color: colors.textSecondary }}
           >
             We've sent password reset instructions to{" "}
-            <Text className="font-bold" style={{ color: colors.text }}>
+            <Text className="font-bold" style={{ color: colors.textPrimary }}>
               {email}
             </Text>
           </Text>
@@ -86,7 +86,10 @@ const ForgotPasswordScreen = () => {
           className="py-4 rounded-xl mt-4 items-center"
           style={{ backgroundColor: colors.primary }}
         >
-          <Text className="font-bold text-lg" style={{ color: colors.background }}>
+          <Text
+            className="font-bold text-lg"
+            style={{ color: colors.background }}
+          >
             Resend Email
           </Text>
         </TouchableOpacity>
@@ -131,7 +134,10 @@ const ForgotPasswordScreen = () => {
         className={`py-4 rounded-xl mt-3 items-center ${loading ? "opacity-70" : ""}`}
         style={{ backgroundColor: colors.primary }}
       >
-        <Text className="font-bold text-lg" style={{ color: colors.background }}>
+        <Text
+          className="font-bold text-lg"
+          style={{ color: colors.background }}
+        >
           {loading ? "Sending..." : "Send Reset Link"}
         </Text>
       </TouchableOpacity>
