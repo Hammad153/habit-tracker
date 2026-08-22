@@ -23,6 +23,7 @@ import { useAuthState } from "@/src/modules/auth/context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import { useBudgetState } from "@/src/modules/budget/context";
 import { useDailyPlanState } from "@/src/modules/daily-plan/context";
+import { useIdentitiesState } from "@/src/modules/identities/context";
 import { isHabitScheduledForDate } from "@/src/utils/schedule";
 import HorizontalDatePicker from "./components/HorizontalDatePicker";
 import DailyGoalsCard from "./components/DailyGoalsCard";
@@ -129,6 +130,7 @@ const HomeScreen = () => {
     useBudgetState();
   const { summary: planSummary, fetchSummary: fetchPlanSummary } =
     useDailyPlanState();
+  const { activeIdentities, fetchIdentities } = useIdentitiesState();
 
   const loadAll = useCallback(() => {
     if (!user?.id) return Promise.resolve();
@@ -138,6 +140,7 @@ const HomeScreen = () => {
       fetchSubscription(),
       fetchBudgetSummary(),
       fetchPlanSummary(toDateKey(new Date())),
+      fetchIdentities({ silent: true }),
     ]);
   }, [user?.id]);
 
@@ -302,7 +305,7 @@ const HomeScreen = () => {
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
                 <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                  Today's Plan
+                  Today&apos;s Plan
                 </ApText>
                 <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
                   {planSummary?.completionPercentage ?? 0}%
@@ -386,6 +389,101 @@ const HomeScreen = () => {
           </View>
         </View>
 
+        {/* Identity strip — who you are becoming */}
+        {activeIdentities.length > 0 && (
+          <View className="mt-4 px-2">
+            <View
+              className="rounded-3xl border p-4"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <View className="flex-row items-center justify-between">
+                <ApText
+                  size="xs"
+                  font="bold"
+                  color={colors.textMuted}
+                  className="uppercase"
+                >
+                  Becoming
+                </ApText>
+                <TouchableOpacity onPress={() => router.push("/identities")}>
+                  <ApText size="xs" font="semibold" color={colors.primary}>
+                    Manage →
+                  </ApText>
+                </TouchableOpacity>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="flex-row mt-3"
+              >
+                {activeIdentities.map((identity) => {
+                  const accent = identity.color || colors.primary;
+                  const pct = identity.progressToNextLevel;
+                  return (
+                    <TouchableOpacity
+                      key={identity.id}
+                      onPress={() => router.push("/identities")}
+                      className="mr-2.5 p-3 rounded-2xl border"
+                      style={{
+                        width: 148,
+                        backgroundColor: accent + "0F",
+                        borderColor: accent + "33",
+                      }}
+                    >
+                      <View className="flex-row items-center">
+                        <Ionicons
+                          name={(identity.icon || "flag") as any}
+                          size={16}
+                          color={accent}
+                        />
+                        <ApText
+                          size="xs"
+                          font="bold"
+                          color={accent}
+                          className="ml-1.5 flex-1"
+                          numberOfLines={1}
+                        >
+                          L{identity.level ?? 1} · {identity.levelTitle}
+                        </ApText>
+                      </View>
+                      <ApText
+                        size="sm"
+                        font="semibold"
+                        color={colors.textPrimary}
+                        className="mt-1.5"
+                        numberOfLines={1}
+                      >
+                        {identity.title}
+                      </ApText>
+                      <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                        {identity.evidencePoints ?? 0} pts ·{" "}
+                        {identity.completedOnDate ?? 0} today
+                      </ApText>
+                      <View
+                        className="mt-2 h-1.5 rounded-full overflow-hidden"
+                        style={{ backgroundColor: colors.surfaceBorder }}
+                      >
+                        {pct != null && (
+                          <View
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${Math.max(pct, 3)}%`,
+                              backgroundColor: accent,
+                            }}
+                          />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        )}
+
         <HorizontalDatePicker
           selectedDate={selectedDate}
           onDateChange={setSelectedDate}
@@ -451,6 +549,15 @@ const HomeScreen = () => {
                       isSameDateKey(c.date, dateStr),
                     )
                       ?.value || 0
+                  }
+                  fullBehavior={habit.fullBehavior}
+                  minimumBehavior={habit.minimumBehavior}
+                  emergencyMinimum={habit.emergencyMinimum}
+                  stackAfterTitle={
+                    habit.stackAfterHabitId
+                      ? habits.find((h: any) => h.id === habit.stackAfterHabitId)
+                          ?.title
+                      : undefined
                   }
                 />
               ))

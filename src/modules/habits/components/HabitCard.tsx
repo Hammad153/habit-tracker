@@ -10,6 +10,7 @@ import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import LogValueModal from "./LogValueModal";
 import { useHabitState } from "@/src/modules/habits/context";
+import { CompletionKind } from "@/src/modules/identities/model";
 
 interface HabitCardProps {
   id: string;
@@ -27,6 +28,12 @@ interface HabitCardProps {
   goal?: number;
   value?: number;
   unit?: string;
+  // ---- Behavioral layer ----
+  fullBehavior?: string | null;
+  minimumBehavior?: string | null;
+  emergencyMinimum?: string | null;
+  /** Title of the habit this one is stacked after ("After X, I will..."). */
+  stackAfterTitle?: string | null;
 }
 
 const HabitCard: React.FC<HabitCardProps> = ({
@@ -45,6 +52,10 @@ const HabitCard: React.FC<HabitCardProps> = ({
   goal = 1,
   value = 0,
   unit,
+  fullBehavior,
+  minimumBehavior,
+  emergencyMinimum,
+  stackAfterTitle,
 }) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -82,8 +93,8 @@ const HabitCard: React.FC<HabitCardProps> = ({
     setModalVisible(true);
   };
 
-  const handleSaveValue = (newValue: number) => {
-    toggleHabit(id, selectedDate, newValue);
+  const handleSaveValue = (newValue: number, kind: CompletionKind) => {
+    toggleHabit(id, selectedDate, newValue, kind);
   };
 
   const handleRestore = () => {
@@ -202,6 +213,16 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 {subText}
               </ApText>
             )}
+            {!subText && stackAfterTitle && (
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                numberOfLines={1}
+              >
+                After {stackAfterTitle}
+              </ApText>
+            )}
           </View>
 
           <View className="ml-2">
@@ -252,6 +273,9 @@ const HabitCard: React.FC<HabitCardProps> = ({
         goal={goal}
         unit={unit}
         title={title}
+        fullBehavior={fullBehavior}
+        minimumBehavior={minimumBehavior}
+        emergencyMinimum={emergencyMinimum}
       />
 
       <ApConfirmModal

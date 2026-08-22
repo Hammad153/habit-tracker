@@ -12,4 +12,6 @@ export interface IProfile extends IBaseModel {
   currentStreak: number;
   neededXp: number;
   perfectDays: number;
+  /** Virtual currency earned by completing habits; spendable on rewards. */
+  coins: number;
 }

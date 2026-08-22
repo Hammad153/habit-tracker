@@ -27,6 +27,13 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         description: "Account info, stats & settings",
       },
       {
+        label: "Identity",
+        icon: "flag",
+        route: "/identities",
+        description: "Define who you want to become",
+        color: "#8B5CF6",
+      },
+      {
         label: "Journal",
         icon: "journal",
         route: "/journal",
@@ -168,6 +175,12 @@ const MoreScreen = () => {
                 <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
                 <ApText size="xs" color={colors.textSecondary} className="ml-1">
                   {profile?.totalHabits ?? 0} habits
+                </ApText>
+              </View>
+              <View className="flex-row items-center ml-3">
+                <Ionicons name="diamond" size={13} color="#F59E0B" />
+                <ApText size="xs" color={colors.textSecondary} className="ml-1">
+                  {profile?.coins ?? 0} coins
                 </ApText>
               </View>
             </View>

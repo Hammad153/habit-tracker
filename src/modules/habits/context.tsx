@@ -13,7 +13,8 @@ import {
 import { useAuthState } from "@/src/modules/auth/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { isSameDateKey } from "@/src/utils/date";
-import { IHabit } from "./model";
+import { CompletionKind } from "@/src/modules/identities/model";
+import { IHabit, ICompletion } from "./model";
 import { HabitService } from "./api";
 
 interface IProps {
@@ -31,7 +32,12 @@ type THabitContext = {
   createHabit: (data: Partial<IHabit>) => Promise<IHabit | void>;
   updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
-  toggleHabit: (id: string, date: string, value?: number) => Promise<void>;
+  toggleHabit: (
+    id: string,
+    date: string,
+    value?: number,
+    kind?: CompletionKind,
+  ) => Promise<void>;
 };
 
 export const HabitContext = createContext<THabitContext | undefined>(undefined);
@@ -80,6 +86,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
           date,
           status: true,
           value: currentHabit.goal,
+          kind: "FULL" as const,
         },
       ];
     }
@@ -91,6 +98,7 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
       date,
       status,
       value,
+      kind: (existing?.kind ?? "FULL") as ICompletion["kind"],
     };
 
     if (existing) {
@@ -232,12 +240,12 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
       });
   };
 
-  const toggleHabit = (id: string, date: string, value?: number) => {
+  const toggleHabit = (id: string, date: string, value?: number, kind?: CompletionKind) => {
     const previousHabits = habits;
     const previousHabit = habit;
     applyOptimisticToggle(id, date, value);
 
-    return HabitService.toggle(id, date, value)
+    return HabitService.toggle(id, date, value, kind)
       .then((result) => {
         if (isOfflineQueuedPayload(result)) {
           ToastService.Success("Habit update saved offline");

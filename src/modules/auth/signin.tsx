@@ -51,7 +51,7 @@ const SigninScreen = () => {
       footer={
         <>
           <Text style={{ color: colors.textSecondary }}>
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
           </Text>
           <Link href="/signup" asChild>
             <TouchableOpacity>

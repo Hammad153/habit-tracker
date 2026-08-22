@@ -149,7 +149,7 @@ const UpgradeModal = () => {
               color={colors.textMuted}
             />
             <ApText size="xs" color={colors.textMuted} className="ml-2">
-              You're using {subscription.currentHabitCount} of{" "}
+              You&apos;re using {subscription.currentHabitCount} of{" "}
               {subscription.habitLimit === -1
                 ? "unlimited"
                 : subscription.habitLimit}{" "}

@@ -7,6 +7,7 @@ import { Dropdown } from "@/src/components/Dropdown";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
+import { useIdentitiesState } from "@/src/modules/identities/context";
 import { ToastService, NotificationService } from "@/src/services";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
@@ -27,7 +28,8 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
   const isEditMode = Boolean(habitId);
   const colors = useTheme();
   const { user } = useAuthState();
-  const { createHabit, updateHabit } = useHabitState();
+  const { createHabit, updateHabit, habits } = useHabitState();
+  const { activeIdentities } = useIdentitiesState();
   const { addNotification } = useNotificationsState();
   const { triggerSelection, triggerSuccess } = useFeedback();
 
@@ -60,6 +62,16 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<'start' | 'end'>('start');
+
+  // Behavioral layer (implementation intention, versions, stacking, identity)
+  const [showBehavioral, setShowBehavioral] = useState(false);
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [fullBehavior, setFullBehavior] = useState("");
+  const [minimumBehavior, setMinimumBehavior] = useState("");
+  const [emergencyMinimum, setEmergencyMinimum] = useState("");
+  const [stackAfterHabitId, setStackAfterHabitId] = useState<string | null>(null);
+  const [identityIds, setIdentityIds] = useState<string[]>([]);
 
   const formatDate = (date: Date | undefined): string => {
     if (!date) return 'Select date';
@@ -119,6 +131,29 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
           setStartDate(habit.startDate ? new Date(habit.startDate) : undefined);
           setEndDate(habit.endDate ? new Date(habit.endDate) : undefined);
         }
+
+        // Behavioral layer
+        const hasBehavioral =
+          Boolean(
+            habit.scheduledTime ||
+              habit.location ||
+              habit.fullBehavior ||
+              habit.minimumBehavior ||
+              habit.emergencyMinimum ||
+              habit.stackAfterHabitId,
+          ) || (habit.identityLinks?.length ?? 0) > 0;
+        setShowBehavioral(hasBehavioral);
+        setScheduledTime(habit.scheduledTime ?? "");
+        setLocation(habit.location ?? "");
+        setFullBehavior(habit.fullBehavior ?? "");
+        setMinimumBehavior(habit.minimumBehavior ?? "");
+        setEmergencyMinimum(habit.emergencyMinimum ?? "");
+        setStackAfterHabitId(habit.stackAfterHabitId ?? null);
+        setIdentityIds(
+          (habit.identityLinks ?? []).map(
+            (link: { identityId: string }) => link.identityId,
+          ),
+        );
       }
 
       // Fetch existing reminder for this habit
@@ -179,6 +214,15 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
       intervalDays: scheduleType === "interval" ? intervalDays : undefined,
       startDate: hasDateRange && startDate ? startDate.toISOString() : undefined,
       endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
+      // Behavioral layer — empty strings are normalized to null so clearing a
+      // field on the client actually clears it server-side.
+      scheduledTime: showBehavioral && scheduledTime.trim() ? scheduledTime.trim() : null,
+      location: showBehavioral && location.trim() ? location.trim() : null,
+      fullBehavior: showBehavioral && fullBehavior.trim() ? fullBehavior.trim() : null,
+      minimumBehavior: showBehavioral && minimumBehavior.trim() ? minimumBehavior.trim() : null,
+      emergencyMinimum: showBehavioral && emergencyMinimum.trim() ? emergencyMinimum.trim() : null,
+      stackAfterHabitId: showBehavioral ? stackAfterHabitId : null,
+      identityIds: showBehavioral ? identityIds : [],
     };
 
     try {
@@ -479,6 +523,325 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
               onDaysChange={setReminderDays}
               onEnabledChange={setReminderEnabled}
             />
+          </View>
+
+          {/* Behavioral Section - implementation intention, versions, stack, identity */}
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="mt-8 mb-4 uppercase"
+            style={{ letterSpacing: 1 }}
+          >
+            Make It Automatic (Optional)
+          </ApText>
+          <View
+            className="rounded-2xl p-4 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setShowBehavioral(!showBehavioral)}
+              className="flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center flex-1 mr-3">
+                <Ionicons
+                  name="sparkles-outline"
+                  size={20}
+                  color={showBehavioral ? colors.primary : colors.textMuted}
+                />
+                <View className="ml-3 flex-1">
+                  <ApText size="sm" color={colors.textPrimary}>
+                    Anchor it to a cue
+                  </ApText>
+                  <ApText size="xs" color={colors.textMuted}>
+                    Time, place, fallbacks & identity
+                  </ApText>
+                </View>
+              </View>
+              <View
+                className="w-12 h-7 rounded-full p-1 justify-center"
+                style={{
+                  backgroundColor: showBehavioral
+                    ? colors.primary
+                    : colors.surfaceBorder,
+                }}
+              >
+                <View
+                  className="w-5 h-5 rounded-full bg-white"
+                  style={{
+                    alignSelf: showBehavioral ? "flex-end" : "flex-start",
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+
+            {showBehavioral && (
+              <View className="mt-4">
+                {/* Live implementation-intention sentence */}
+                {(scheduledTime.trim() || location.trim()) && (
+                  <View
+                    className="mb-4 p-3 rounded-xl"
+                    style={{ backgroundColor: colors.primary + "12" }}
+                  >
+                    <ApText size="xs" font="semibold" color={colors.primary}>
+                      I will {fullBehavior.trim() || name || "..."} at{" "}
+                      {scheduledTime.trim() || "…"}
+                      {location.trim() ? ` in ${location.trim()}` : ""}.
+                    </ApText>
+                  </View>
+                )}
+
+                <TextInput
+                  className="text-sm p-3 rounded-xl border-b mb-2"
+                  style={{
+                    color: colors.textPrimary,
+                    borderBottomColor: colors.surfaceBorder,
+                  }}
+                  placeholder="When? e.g. 07:30 after coffee"
+                  placeholderTextColor={colors.textMuted}
+                  value={scheduledTime}
+                  onChangeText={setScheduledTime}
+                />
+                <TextInput
+                  className="text-sm p-3 rounded-xl border-b mb-4"
+                  style={{
+                    color: colors.textPrimary,
+                    borderBottomColor: colors.surfaceBorder,
+                  }}
+                  placeholder="Where? e.g. in the kitchen"
+                  placeholderTextColor={colors.textMuted}
+                  value={location}
+                  onChangeText={setLocation}
+                />
+
+                {/* Habit stacking */}
+                <ApText size="xs" font="semibold" color={colors.textSecondary}>
+                  AFTER THIS HABIT (STACKING)
+                </ApText>
+                <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-2">
+                  Do this one right after another habit.
+                </ApText>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row"
+                >
+                  <TouchableOpacity
+                    onPress={() => {
+                      setStackAfterHabitId(null);
+                      triggerSelection();
+                    }}
+                    className="mr-2 px-3 py-2 rounded-full border"
+                    style={{
+                      borderColor:
+                        stackAfterHabitId === null
+                          ? colors.primary
+                          : colors.surfaceBorder,
+                      backgroundColor:
+                        stackAfterHabitId === null
+                          ? colors.primary + "18"
+                          : "transparent",
+                    }}
+                  >
+                    <ApText
+                      size="xs"
+                      color={
+                        stackAfterHabitId === null
+                          ? colors.primary
+                          : colors.textMuted
+                      }
+                    >
+                      No anchor
+                    </ApText>
+                  </TouchableOpacity>
+                  {habits
+                    .filter(
+                      (option) =>
+                        !option.isArchived && option.id !== habitId,
+                    )
+                    .map((option) => (
+                      <TouchableOpacity
+                        key={option.id}
+                        onPress={() => {
+                          setStackAfterHabitId(option.id);
+                          triggerSelection();
+                        }}
+                        className="mr-2 px-3 py-2 rounded-full border flex-row items-center"
+                        style={{
+                          borderColor:
+                            stackAfterHabitId === option.id
+                              ? colors.primary
+                              : colors.surfaceBorder,
+                          backgroundColor:
+                            stackAfterHabitId === option.id
+                              ? colors.primary + "18"
+                              : "transparent",
+                        }}
+                      >
+                        <Ionicons
+                          name={option.icon as any}
+                          size={12}
+                          color={option.iconColor || colors.primary}
+                        />
+                        <ApText
+                          size="xs"
+                          color={
+                            stackAfterHabitId === option.id
+                              ? colors.primary
+                              : colors.textSecondary
+                          }
+                          className="ml-1.5"
+                          numberOfLines={1}
+                        >
+                          {option.title}
+                        </ApText>
+                      </TouchableOpacity>
+                    ))}
+                </ScrollView>
+
+                {/* Versions */}
+                <ApText
+                  size="xs"
+                  font="semibold"
+                  color={colors.textSecondary}
+                  className="mt-4"
+                >
+                  FULL VERSION
+                </ApText>
+                <TextInput
+                  className="text-sm p-3 rounded-xl mt-1"
+                  style={{
+                    color: colors.textPrimary,
+                    backgroundColor: colors.surfaceBorder + "50",
+                  }}
+                  placeholder={`e.g. ${name.trim() || "The complete workout"} — 30 min`}
+                  placeholderTextColor={colors.textMuted}
+                  multiline
+                  value={fullBehavior}
+                  onChangeText={setFullBehavior}
+                />
+
+                <ApText
+                  size="xs"
+                  font="semibold"
+                  color={colors.textSecondary}
+                  className="mt-3"
+                >
+                  MINIMUM VERSION (BUSY DAYS)
+                </ApText>
+                <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                  Two minutes or less — keeps the streak alive.
+                </ApText>
+                <TextInput
+                  className="text-sm p-3 rounded-xl mt-1"
+                  style={{
+                    color: colors.textPrimary,
+                    backgroundColor: colors.surfaceBorder + "50",
+                  }}
+                  placeholder="e.g. Put on running shoes and step outside"
+                  placeholderTextColor={colors.textMuted}
+                  multiline
+                  value={minimumBehavior}
+                  onChangeText={setMinimumBehavior}
+                />
+
+                <ApText
+                  size="xs"
+                  font="semibold"
+                  color={colors.textSecondary}
+                  className="mt-3"
+                >
+                  EMERGENCY MINIMUM (CRISIS DAYS)
+                </ApText>
+                <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                  For sick, travelling or overwhelmed days.
+                </ApText>
+                <TextInput
+                  className="text-sm p-3 rounded-xl mt-1"
+                  style={{
+                    color: colors.textPrimary,
+                    backgroundColor: colors.surfaceBorder + "50",
+                  }}
+                  placeholder="e.g. One deep breath at the door"
+                  placeholderTextColor={colors.textMuted}
+                  multiline
+                  value={emergencyMinimum}
+                  onChangeText={setEmergencyMinimum}
+                />
+
+                {/* Identity links */}
+                <ApText
+                  size="xs"
+                  font="semibold"
+                  color={colors.textSecondary}
+                  className="mt-4"
+                >
+                  VOTES FOR IDENTITY
+                </ApText>
+                <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-2">
+                  Completions count as evidence for these identities.
+                </ApText>
+                <View className="flex-row flex-wrap">
+                  {activeIdentities.map((identity) => {
+                    const checked = identityIds.includes(identity.id);
+                    return (
+                      <TouchableOpacity
+                        key={identity.id}
+                        onPress={() => {
+                          setIdentityIds((current) =>
+                            current.includes(identity.id)
+                              ? current.filter((id) => id !== identity.id)
+                              : [...current, identity.id],
+                          );
+                          triggerSelection();
+                        }}
+                        className="flex-row items-center px-3 py-2 rounded-full mr-1.5 mb-1.5"
+                        style={{
+                          backgroundColor: checked
+                            ? (identity.color || colors.primary) + "1E"
+                            : colors.surfaceBorder + "50",
+                          borderWidth: 1.5,
+                          borderColor: checked
+                            ? identity.color || colors.primary
+                            : "transparent",
+                        }}
+                      >
+                        <Ionicons
+                          name={(identity.icon || "flag") as any}
+                          size={13}
+                          color={
+                            checked
+                              ? identity.color || colors.primary
+                              : colors.textMuted
+                          }
+                        />
+                        <ApText
+                          size="xs"
+                          font={checked ? "semibold" : "normal"}
+                          color={checked ? colors.textPrimary : colors.textSecondary}
+                          className="ml-1.5"
+                          numberOfLines={1}
+                        >
+                          {identity.title}
+                        </ApText>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {activeIdentities.length === 0 && (
+                    <TouchableOpacity
+                      onPress={() => router.push("/identities")}
+                    >
+                      <ApText size="xs" color={colors.primary}>
+                        Create your first identity →
+                      </ApText>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Duration Section - Date Range for Temporary Habits */}

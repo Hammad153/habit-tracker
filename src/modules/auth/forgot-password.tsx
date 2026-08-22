@@ -67,7 +67,7 @@ const ForgotPasswordScreen = () => {
             className="text-center mt-4"
             style={{ color: colors.textSecondary }}
           >
-            We've sent password reset instructions to{" "}
+            We&apos;ve sent password reset instructions to{" "}
             <Text className="font-bold" style={{ color: colors.textPrimary }}>
               {email}
             </Text>
@@ -76,7 +76,7 @@ const ForgotPasswordScreen = () => {
             className="text-center mt-4"
             style={{ color: colors.textSecondary }}
           >
-            If you don't see the email, check your spam folder.
+            If you don&apos;t see the email, check your spam folder.
           </Text>
         </View>
 
