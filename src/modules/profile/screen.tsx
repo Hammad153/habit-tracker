@@ -35,8 +35,6 @@ const ProfileScreen = () => {
 
   const confirmLogout = () => {
     setShowLogoutModal(false);
-    // signOut() invalidates the server-side refresh token before clearing
-    // local session (see auth context), so no separate logout call is needed.
     signOut();
   };
 
