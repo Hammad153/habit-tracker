@@ -4,6 +4,7 @@ import { AuthProvider } from "@/src/modules/auth/context";
 import { ProfileProvider } from "@/src/modules/profile/context";
 import { HabitProvider } from "@/src/modules/habits/context";
 import { AwardsProvider } from "@/src/modules/awards/context";
+import { RewardsProvider } from "@/src/modules/rewards/context";
 import { TimelineProvider } from "@/src/modules/timeline/context";
 import { SubscriptionProvider } from "@/src/modules/subscription/context";
 import { JournalProvider } from "@/src/modules/journal/context";
@@ -47,6 +48,7 @@ const providers: ContextProvider[] = [
   NotificationsProvider,
   AwardsProvider,
   TimelineProvider,
+  RewardsProvider,
 ];
 
 export const AppContextProvider = combineContext(...providers);

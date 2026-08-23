@@ -17,6 +17,9 @@ import { HabitService } from "@/src/modules/habits/api";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import { IReminder } from "@/src/modules/reminders/model";
 import { IHabit } from "@/src/modules/habits/model";
+import { useRewardsState } from "@/src/modules/rewards/context";
+import { RewardsService } from "@/src/modules/rewards/api";
+import { BundleStatus, IRewardBreakdownLine, ITemptationBundle } from "@/src/modules/rewards/model";
 import HabitTimer from "./HabitTimer";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
@@ -58,8 +61,12 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const colors = useTheme();
   const { toggleHabit } = useHabitState();
 
+  const { freezeDay } = useRewardsState();
   const [habit, setHabit] = useState<IHabit | null>(null);
   const [reminder, setReminder] = useState<IReminder | null>(null);
+  const [bundles, setBundles] = useState<ITemptationBundle[]>([]);
+  const [freezingDate, setFreezingDate] = useState<string | null>(null);
+  const [usingBundleId, setUsingBundleId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
@@ -74,6 +81,11 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
       })
       .then((rem) => {
         setReminder(rem && rem.id ? rem : null);
+        // Bundles are best-effort; a habit without them is valid.
+        return RewardsService.listBundles(habitId).catch(() => []);
+      })
+      .then((bnd) => {
+        setBundles(Array.isArray(bnd) ? bnd : []);
       })
       .catch((err) => {
         setError(true);
@@ -112,9 +124,48 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
     if (!habit) return;
     // Reuse the existing toggle flow so completion logic stays in one place.
     if (!isCompletedToday) {
-      toggleHabit(habit.id, today).then(() => load());
+      toggleHabit(habit.id, today)
+        .then((rewards) => {
+          if (rewards && typeof rewards.coinsAwarded === "number") {
+            const milestones = (rewards.newStreakMilestones ?? []) as number[];
+            const extras = milestones.length
+              ? ` incl. ${milestones.join("-")}-day streak bonus${milestones.length > 1 ? "es" : ""}`
+              : "";
+            ToastService.Success(
+              `+${rewards.coinsAwarded} coins earned${extras}!`,
+            );
+          }
+          load();
+        });
     }
   }, [habit, isCompletedToday, load, toggleHabit, today]);
+
+  const handleFreeze = useCallback(
+    (date: string) => {
+      if (!habit || freezingDate) return;
+      setFreezingDate(date);
+      freezeDay(habit.id, date).finally(() => {
+        setFreezingDate(null);
+        load();
+      });
+    },
+    [habit, freezingDate, freezeDay, load],
+  );
+
+  const handleUseBundle = useCallback(
+    (bundle: ITemptationBundle) => {
+      if (usingBundleId) return;
+      setUsingBundleId(bundle.id);
+      RewardsService.consumeBundle(bundle.id)
+        .then(() => ToastService.Success(`"${bundle.title}" enjoyed!`))
+        .catch((err) => ToastService.ApiError(err))
+        .finally(() => {
+          setUsingBundleId(null);
+          load();
+        });
+    },
+    [usingBundleId, load],
+  );
 
   if (loading) return <ApLoader />;
 
@@ -255,6 +306,56 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
           </View>
         </View>
 
+        {/* Temptation bundles */}
+        {bundles.length > 0 && (
+          <View className="px-5 mt-6">
+            <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
+              Reward Bundles
+            </ApText>
+            {bundles.map((bundle) => {
+              const unlocked = bundle.status === BundleStatus.UNLOCKED;
+              const used = bundle.status === BundleStatus.USED;
+              return (
+                <View
+                  key={bundle.id}
+                  className="flex-row items-center rounded-2xl p-4 mb-3"
+                  style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
+                >
+                  <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: accent + "20" }}>
+                    <Ionicons
+                      name={used ? "checkmark-done" : unlocked ? "gift" : "lock-closed"}
+                      size={18}
+                      color={unlocked ? accent : colors.textMuted}
+                    />
+                  </View>
+                  <View className="ml-3 flex-1">
+                    <ApText size="base" font="semibold" color={colors.textPrimary}>
+                      {bundle.title}
+                    </ApText>
+                    <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                      {used ? "Enjoyed" : unlocked ? "Unlocked — treat yourself" : "Locked · complete this habit fully to unlock"}
+                    </ApText>
+                  </View>
+                  {unlocked && (
+                    <Pressable
+                      onPress={() => handleUseBundle(bundle)}
+                      disabled={usingBundleId !== null}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Use reward bundle ${bundle.title}`}
+                      className="px-4 h-9 rounded-full items-center justify-center"
+                      style={{ backgroundColor: accent }}
+                    >
+                      <ApText size="xs" font="bold" color={colors.background}>
+                        Use
+                      </ApText>
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        )}
+
         {/* Completion history */}
         <View className="px-5 mt-6">
           <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
@@ -290,15 +391,33 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
                       {c.date}
                     </ApText>
                   </View>
-                  {habit.unit ? (
-                    <ApText size="xs" color={colors.textMuted}>
-                      {c.value ?? 0} {habit.unit}
-                    </ApText>
-                  ) : (
-                    <ApText size="xs" font="semibold" color={c.status ? colors.success : colors.textMuted}>
-                      {c.status ? "Done" : "Missed"}
-                    </ApText>
-                  )}
+                  <View className="flex-row items-center">
+                    {habit.unit ? (
+                      <ApText size="xs" color={colors.textMuted}>
+                        {c.value ?? 0} {habit.unit}
+                      </ApText>
+                    ) : (
+                      <ApText size="xs" font="semibold" color={c.status ? colors.success : colors.textMuted}>
+                        {c.status ? "Done" : "Missed"}
+                      </ApText>
+                    )}
+                    {!c.status && (
+                      <Pressable
+                        onPress={() => handleFreeze(c.date)}
+                        disabled={freezingDate !== null}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Protect ${c.date} with a streak freeze`}
+                        hitSlop={8}
+                        className="ml-2"
+                      >
+                        <Ionicons
+                          name="snow"
+                          size={16}
+                          color={freezingDate === c.date ? accent : colors.primary}
+                        />
+                      </Pressable>
+                    )}
+                  </View>
                 </View>
               ))
             )}

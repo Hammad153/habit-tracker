@@ -37,7 +37,10 @@ type THabitContext = {
     date: string,
     value?: number,
     kind?: CompletionKind,
-  ) => Promise<void>;
+  ) => Promise<{
+    coinsAwarded: number;
+    newStreakMilestones?: number[];
+  } | null>;
 };
 
 export const HabitContext = createContext<THabitContext | undefined>(undefined);
@@ -249,9 +252,11 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
       .then((result) => {
         if (isOfflineQueuedPayload(result)) {
           ToastService.Success("Habit update saved offline");
-          return;
+          return null;
         }
-        return fetchHabits({ silent: true });
+        // Surface the reward breakdown so callers can celebrate wins.
+        const rewards = result?.rewards ?? null;
+        return fetchHabits({ silent: true }).then(() => rewards);
       })
       .catch((err) => {
         setHabits(previousHabits);
