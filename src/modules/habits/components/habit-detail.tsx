@@ -20,7 +20,13 @@ import { IHabit } from "@/src/modules/habits/model";
 import { useRewardsState } from "@/src/modules/rewards/context";
 import { RewardsService } from "@/src/modules/rewards/api";
 import { BundleStatus, IRewardBreakdownLine, ITemptationBundle } from "@/src/modules/rewards/model";
-import { InterventionApiService, IIntervention, InterventionActionType } from "@/src/modules/habits/intervention";
+import {
+  CoachApiService,
+  ICoach,
+  InterventionApiService,
+  IIntervention,
+  InterventionActionType,
+} from "@/src/modules/habits/intervention";
 import InsightCard from "./InsightCard";
 import { router } from "expo-router";
 import HabitTimer from "./HabitTimer";
@@ -74,6 +80,7 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const [error, setError] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
   const [insight, setInsight] = useState<IIntervention | null>(null);
+  const [coach, setCoach] = useState<ICoach | null>(null);
   const [dismissedFingerprints, setDismissedFingerprints] = useState<string[]>([]);
   const [insightBusy, setInsightBusy] = useState(false);
 
@@ -97,6 +104,14 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
       })
       .then((res) => {
         setInsight(res?.intervention ?? null);
+        setCoach(null);
+        // AI enhancement is independent and must never block or fail loudly:
+        // deterministic card stays if the coach layer is unavailable.
+        return res?.intervention
+          ? CoachApiService.getForHabit(habitId)
+              .then((c) => setCoach(c.coach))
+              .catch(() => setCoach(null))
+          : null;
       })
       .catch((err) => {
         setError(true);
@@ -312,6 +327,7 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
           <View className="px-5 mt-5">
             <InsightCard
               intervention={insight}
+              coach={coach}
               busy={insightBusy}
               onAction={handleInsightAction}
               onDismiss={handleDismissInsight}

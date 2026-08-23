@@ -4,12 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import {
+  ICoach,
   IIntervention,
   InterventionActionType,
 } from "@/src/modules/habits/intervention";
 
 interface InsightCardProps {
   intervention: IIntervention;
+  /** AI-coached wording; absent/failing keeps the deterministic copy. */
+  coach?: ICoach | null;
   /** True while a completion triggered by this card is in flight. */
   busy?: boolean;
   onAction: (action: InterventionActionType) => void;
@@ -31,14 +34,19 @@ const ACTION_LABELS: Record<InterventionActionType, string> = {
  */
 const InsightCard: React.FC<InsightCardProps> = ({
   intervention,
+  coach,
   busy,
   onAction,
   onDismiss,
 }) => {
   const colors = useTheme();
-  const action = ACTION_LABELS[intervention.suggestedAction.type];
+  const action =
+    (coach?.actionLabel && coach.actionLabel.trim()) ||
+    ACTION_LABELS[intervention.suggestedAction.type];
   const actionable =
-    intervention.category === "USER_ACTION_REQUIRED" && action !== "";
+    intervention.category === "USER_ACTION_REQUIRED" &&
+    intervention.suggestedAction.type !== "NONE" &&
+    action !== "";
 
   return (
     <View
@@ -57,11 +65,21 @@ const InsightCard: React.FC<InsightCardProps> = ({
           <Ionicons name="bulb-outline" size={18} color={colors.primary} />
         </View>
         <View className="ml-3 flex-1">
-          <ApText size="base" font="semibold" color={colors.textPrimary}>
-            {intervention.title}
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="uppercase"
+            style={{ letterSpacing: 1 }}
+          >
+            Your Coach
+          </ApText>
+          {/* AI headline when available, deterministic title otherwise. */}
+          <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-0.5">
+            {coach?.headline || intervention.title}
           </ApText>
           <ApText size="xs" color={colors.textSecondary} className="mt-1">
-            {intervention.reason}
+            {coach?.message || intervention.reason}
           </ApText>
         </View>
         <Pressable

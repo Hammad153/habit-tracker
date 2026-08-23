@@ -50,3 +50,42 @@ export class InterventionApiService {
       .then((res) => res.data as { intervention: IIntervention | null });
   };
 }
+
+export type CoachTone = "supportive" | "direct" | "celebratory" | "cautionary";
+
+/** Language layer produced by the backend AI coach (or its fallback). */
+export interface ICoach {
+  headline: string;
+  message: string;
+  tone: CoachTone;
+  actionLabel?: string;
+  /** Always mirrors the deterministic intervention's authorized action. */
+  actionType: string;
+}
+
+export interface ICoachResponse {
+  coach: ICoach | null;
+  intervention: {
+    type: InterventionType;
+    priority: number;
+    confidence: string;
+    fingerprint: string;
+    sourceSignals: string[];
+    suggestedAction: { type: InterventionActionType };
+  } | null;
+  ai: { provider: string; generated: boolean; model?: string };
+}
+
+export class CoachApiService {
+  /**
+   * AI-coached wording for the deterministic insight. Best-effort by
+   * design: callers must keep the deterministic card visible on failure.
+   */
+  static getForHabit = (habitId: string, date?: string) => {
+    return axiosInstance
+      .get(`/analytics/habits/${habitId}/coach`, {
+        params: date ? { date } : undefined,
+      })
+      .then((res) => res.data as ICoachResponse);
+  };
+}
