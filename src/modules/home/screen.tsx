@@ -325,6 +325,30 @@ const HomeScreen = () => {
           </View>
         </View>
 
+        {/* Phase 3.4 — weekly review entry point */}
+        <View className="mt-4 px-2">
+          <TouchableOpacity onPress={() => router.push("/weekly-review")} accessibilityRole="button" accessibilityLabel="Open weekly review">
+            <View
+              className="rounded-3xl border p-4"
+              style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+            >
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1">
+                  <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+                    Weekly Review
+                  </ApText>
+                  <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-1">
+                    See what your habits are telling you
+                  </ApText>
+                </View>
+                <View className="h-11 w-11 rounded-2xl items-center justify-center" style={{ backgroundColor: colors.primary + "18" }}>
+                  <Ionicons name="sparkles-outline" size={22} color={colors.primary} />
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
         <View className="mt-4 px-2">
           <View
             className="rounded-3xl border p-4"

@@ -103,7 +103,7 @@ const OptionRow = ({
       }}
     >
       <View className="flex-1">
-        <ApText size="base" font={selected ? "bold" : "regular"} color={colors.textPrimary}>
+        <ApText size="base" font={selected ? "bold" : "normal"} color={colors.textPrimary}>
           {label}
         </ApText>
         <ApText size="xs" color={colors.textMuted} className="mt-0.5">

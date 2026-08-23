@@ -141,6 +141,11 @@ const ProfileScreen = () => {
               onPress={() => router.push("/settings/sounds")}
             />
             <SettingsItem
+              label="AI Coach"
+              icon="sparkles"
+              onPress={() => router.push("/settings/coach")}
+            />
+            <SettingsItem
               label="Appearance"
               icon="color-palette"
               value={appearanceValue}
