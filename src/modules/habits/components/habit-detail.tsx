@@ -20,6 +20,9 @@ import { IHabit } from "@/src/modules/habits/model";
 import { useRewardsState } from "@/src/modules/rewards/context";
 import { RewardsService } from "@/src/modules/rewards/api";
 import { BundleStatus, IRewardBreakdownLine, ITemptationBundle } from "@/src/modules/rewards/model";
+import { InterventionApiService, IIntervention, InterventionActionType } from "@/src/modules/habits/intervention";
+import InsightCard from "./InsightCard";
+import { router } from "expo-router";
 import HabitTimer from "./HabitTimer";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
@@ -70,6 +73,9 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
+  const [insight, setInsight] = useState<IIntervention | null>(null);
+  const [dismissedFingerprints, setDismissedFingerprints] = useState<string[]>([]);
+  const [insightBusy, setInsightBusy] = useState(false);
 
   const load = useCallback(() => {
     setError(false);
@@ -86,6 +92,11 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
       })
       .then((bnd) => {
         setBundles(Array.isArray(bnd) ? bnd : []);
+        // Insight is best-effort and must never block the screen.
+        return InterventionApiService.getForHabit(habitId).catch(() => null);
+      })
+      .then((res) => {
+        setInsight(res?.intervention ?? null);
       })
       .catch((err) => {
         setError(true);
@@ -139,6 +150,50 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
         });
     }
   }, [habit, isCompletedToday, load, toggleHabit, today]);
+
+  const handleInsightAction = useCallback(
+    (action: InterventionActionType) => {
+      if (!habit || !insight) return;
+      if (action === "USE_MINIMUM_VERSION" || action === "USE_EMERGENCY_VERSION") {
+        // Reuse the existing completion flow with the recommended kind.
+        const kind =
+          action === "USE_MINIMUM_VERSION" ? "MINIMUM" : "EMERGENCY";
+        setInsightBusy(true);
+        toggleHabit(habit.id, today, habit.goal ?? undefined, kind)
+          .then((rewards) => {
+            ToastService.Success(
+              rewards && typeof rewards.coinsAwarded === "number"
+                ? `+${rewards.coinsAwarded} coins earned!`
+                : "Completed — nice work!",
+            );
+            setInsight(null);
+            load();
+          })
+          .catch((err) => ToastService.ApiError(err))
+          .finally(() => setInsightBusy(false));
+        return;
+      }
+      if (action === "OPEN_HABIT_EDIT" || action === "CONFIGURE_HABIT_STACK") {
+        router.push(`/edit-habit?habitId=${habit.id}`);
+        return;
+      }
+      if (action === "REVIEW_ACTIVE_HABITS") {
+        router.push("/manage-habits");
+      }
+    },
+    [habit, insight, toggleHabit, today, load],
+  );
+
+  const handleDismissInsight = useCallback(() => {
+    setInsight((current) => {
+      if (current?.fingerprint) {
+        setDismissedFingerprints((prev) =>
+          prev.includes(current.fingerprint) ? prev : [...prev, current.fingerprint],
+        );
+      }
+      return null;
+    });
+  }, []);
 
   const handleFreeze = useCallback(
     (date: string) => {
@@ -249,6 +304,20 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
             color={accent}
           />
         </View>
+
+        {/* Habit insight (deterministic intervention) */}
+        {insight &&
+        !dismissedFingerprints.includes(insight.fingerprint) &&
+        !(insight.category === "USER_ACTION_REQUIRED" && isCompletedToday) ? (
+          <View className="px-5 mt-5">
+            <InsightCard
+              intervention={insight}
+              busy={insightBusy}
+              onAction={handleInsightAction}
+              onDismiss={handleDismissInsight}
+            />
+          </View>
+        ) : null}
 
         {/* Schedule */}
         <View className="px-5 mt-6">
