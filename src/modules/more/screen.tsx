@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import { View, Image, TouchableOpacity, ScrollView } from "react-native";
+import { View, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText, ApContainer, ApScrollView } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useProfileState } from "@/src/modules/profile/context";
+import { ApHeader } from "@/src/components";
 
 interface MoreMenuItem {
   label: string;
@@ -124,15 +125,7 @@ const MoreScreen = () => {
   return (
     <ApContainer>
       <ApScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="px-5 pt-6 pb-4">
-          <ApText size="2xl" font="bold" color={colors.textPrimary}>
-            More
-          </ApText>
-          <ApText size="sm" color={colors.textMuted} className="mt-1">
-            Access all features & settings
-          </ApText>
-        </View>
+        <ApHeader title="More" subheader="Access all features & settings" hasBackButton/>
 
         {/* User Banner */}
         <TouchableOpacity

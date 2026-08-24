@@ -228,7 +228,7 @@ const IdentityScreen = () => {
               <Pressable
                 key={identity.id}
                 onPress={() => openEdit(identity)}
-                className="rounded-3xl p-4 mb-4"
+                className="rounded-3xl p-4 mb-4 mt-4"
                 style={{
                   backgroundColor: colors.surface,
                   borderWidth: 1,

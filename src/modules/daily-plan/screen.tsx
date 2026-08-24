@@ -133,7 +133,7 @@ const DailyPlanScreen = () => {
   if (error && !summary) {
     return (
       <ApContainer>
-        <ApHeader title="Daily Plan" />
+        <ApHeader title="Daily Plan" hasBackButton/>
         <ApErrorState onRetry={onRefresh} />
       </ApContainer>
     );
@@ -142,7 +142,8 @@ const DailyPlanScreen = () => {
   return (
     <ApContainer>
       <ApHeader
-        title="Daily Plan"
+        title="Daily Plan" 
+        hasBackButton
         right={
           <TouchableOpacity
             onPress={openEditor}
