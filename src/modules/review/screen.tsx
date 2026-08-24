@@ -8,12 +8,12 @@ import {
   ApLoader,
   ApText,
 } from "@/src/components";
-import { useTheme } from "@/src/modules/settings/context";
-import { ToastService } from "@/src/services";
 import {
   IWeeklyReviewResponse,
   WeeklyReviewApiService,
 } from "./api";
+import { useTheme } from "@/src/modules/settings/context";
+import { ToastService } from "@/src/services";
 
 const SectionCard = ({
   icon,
