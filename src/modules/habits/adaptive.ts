@@ -36,6 +36,25 @@ export const describeProposal = (
   return "";
 };
 
+export interface IAdaptationOutcomeEntry {
+  type: string;
+  outcome: string;
+  baselineCompletionRate: number | null;
+  postCompletionRate: number | null;
+}
+
+export interface IAdaptationOutcomes {
+  accepted: number;
+  rejected: number;
+  completedEvaluations: number;
+  improved: number;
+  unchanged: number;
+  worsened: number;
+  averageCompletionDelta: number | null;
+  latestOutcome: string | null;
+  recent?: IAdaptationOutcomeEntry[];
+}
+
 export class AdaptiveApiService {
   static getSuggestion = (habitId: string) => {
     return axiosInstance
@@ -47,6 +66,12 @@ export class AdaptiveApiService {
     return axiosInstance
       .post(`/habit/${habitId}/adaptive-suggestion/${proposalId}/accept`)
       .then((res) => res.data as IAdaptiveResponse);
+  };
+
+  static getOutcomes = (habitId: string) => {
+    return axiosInstance
+      .get(`/analytics/habits/${habitId}/adaptation-outcomes`)
+      .then((res) => res.data as IAdaptationOutcomes);
   };
 
   static reject = (habitId: string, proposalId: string) => {

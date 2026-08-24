@@ -31,8 +31,10 @@ import InsightCard from "./InsightCard";
 import AdaptiveSuggestionCard from "./AdaptiveSuggestionCard";
 import {
   AdaptiveApiService,
+  IAdaptationOutcomeEntry,
   IAdaptiveSuggestion,
 } from "@/src/modules/habits/adaptive";
+import OutcomeCard from "./OutcomeCard";
 import { router } from "expo-router";
 import HabitTimer from "./HabitTimer";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
@@ -91,6 +93,9 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const [adaptiveMessage, setAdaptiveMessage] = useState("");
   const [adaptiveActionLabel, setAdaptiveActionLabel] = useState<string | undefined>();
   const [adaptiveBusy, setAdaptiveBusy] = useState(false);
+  const [lastOutcome, setLastOutcome] = useState<IAdaptationOutcomeEntry | null>(
+    null,
+  );
   const [dismissedFingerprints, setDismissedFingerprints] = useState<string[]>([]);
   const [insightBusy, setInsightBusy] = useState(false);
 
@@ -135,7 +140,14 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
             }
           })
           .catch(() => setAdaptive(null));
-        return Promise.all([enhance, adapt]);
+        // Measured adjustment results (Phase 3.6) — best-effort.
+        const outcomes = AdaptiveApiService.getOutcomes(habitId)
+          .then((o) => {
+            const recent = o.recent?.[0];
+            setLastOutcome(recent ?? null);
+          })
+          .catch(() => setLastOutcome(null));
+        return Promise.all([enhance, adapt, outcomes]);
       })
       .catch((err) => {
         setError(true);
@@ -394,6 +406,13 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
                   .finally(() => setAdaptiveBusy(false));
               }}
             />
+          </View>
+        ) : null}
+
+        {/* Adjustment result — deterministic backend numbers only */}
+        {lastOutcome ? (
+          <View className="px-5 mt-5">
+            <OutcomeCard entry={lastOutcome} />
           </View>
         ) : null}
 

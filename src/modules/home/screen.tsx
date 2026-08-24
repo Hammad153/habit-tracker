@@ -1,3 +1,4 @@
+import { OverloadApiService, IOverloadReport } from "@/src/modules/analytics/overload";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import {
   View,
@@ -131,6 +132,14 @@ const HomeScreen = () => {
   const { summary: planSummary, fetchSummary: fetchPlanSummary } =
     useDailyPlanState();
   const { activeIdentities, fetchIdentities } = useIdentitiesState();
+  // Phase 3.6 — portfolio overload insight (best-effort, never blocking).
+  const [overload, setOverload] = useState<IOverloadReport | null>(null);
+
+  useEffect(() => {
+    OverloadApiService.get()
+      .then(setOverload)
+      .catch(() => setOverload(null));
+  }, []);
 
   const loadAll = useCallback(() => {
     if (!user?.id) return Promise.resolve();
@@ -324,6 +333,47 @@ const HomeScreen = () => {
             </View>
           </View>
         </View>
+
+        {/* Phase 3.6 — portfolio overload insight (only when overloaded) */}
+        {overload?.overloaded ? (
+          <View className="mt-4 px-2">
+            <TouchableOpacity
+              onPress={() => router.push("/manage-habits")}
+              accessibilityRole="button"
+              accessibilityLabel="Review habit load"
+            >
+              <View
+                className="rounded-3xl border p-4"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.warning + "55",
+                }}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 pr-3">
+                    <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase" style={{ letterSpacing: 1 }}>
+                      Your Habits
+                    </ApText>
+                    <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-1">
+                      {overload.insight.headline}
+                    </ApText>
+                    <ApText size="xs" color={colors.textSecondary} className="mt-1">
+                      {overload.insight.message}
+                    </ApText>
+                  </View>
+                  <View className="h-11 w-11 rounded-2xl items-center justify-center" style={{ backgroundColor: colors.warning + "18" }}>
+                    <Ionicons name="layers-outline" size={22} color={colors.warning} />
+                  </View>
+                </View>
+                <View className="self-start mt-3 px-4 h-9 rounded-full items-center justify-center" style={{ backgroundColor: colors.primary + "18" }}>
+                  <ApText size="xs" font="bold" color={colors.primary}>
+                    {overload.insight.ctaLabel}
+                  </ApText>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
         {/* Phase 3.4 — weekly review entry point */}
         <View className="mt-4 px-2">
