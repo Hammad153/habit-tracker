@@ -124,6 +124,20 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="weekly-review"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="settings/coach"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
                     name="add-budget"
                     options={{
                       headerShown: false,
