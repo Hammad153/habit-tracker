@@ -28,6 +28,11 @@ import {
   InterventionActionType,
 } from "@/src/modules/habits/intervention";
 import InsightCard from "./InsightCard";
+import AdaptiveSuggestionCard from "./AdaptiveSuggestionCard";
+import {
+  AdaptiveApiService,
+  IAdaptiveSuggestion,
+} from "@/src/modules/habits/adaptive";
 import { router } from "expo-router";
 import HabitTimer from "./HabitTimer";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
@@ -81,6 +86,11 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const [showTimer, setShowTimer] = useState(false);
   const [insight, setInsight] = useState<IIntervention | null>(null);
   const [coach, setCoach] = useState<ICoach | null>(null);
+  const [adaptive, setAdaptive] = useState<IAdaptiveSuggestion | null>(null);
+  const [adaptiveHeadline, setAdaptiveHeadline] = useState("");
+  const [adaptiveMessage, setAdaptiveMessage] = useState("");
+  const [adaptiveActionLabel, setAdaptiveActionLabel] = useState<string | undefined>();
+  const [adaptiveBusy, setAdaptiveBusy] = useState(false);
   const [dismissedFingerprints, setDismissedFingerprints] = useState<string[]>([]);
   const [insightBusy, setInsightBusy] = useState(false);
 
@@ -107,11 +117,25 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
         setCoach(null);
         // AI enhancement is independent and must never block or fail loudly:
         // deterministic card stays if the coach layer is unavailable.
-        return res?.intervention
+        const enhance = res?.intervention
           ? CoachApiService.getForHabit(habitId)
               .then((c) => setCoach(c.coach))
               .catch(() => setCoach(null))
-          : null;
+          : Promise.resolve();
+        // Adaptive suggestion is independent and best-effort too.
+        const adapt = AdaptiveApiService.getSuggestion(habitId)
+          .then((res) => {
+            if (res.suggestion && res.coach) {
+              setAdaptive(res.suggestion);
+              setAdaptiveHeadline(res.coach.headline);
+              setAdaptiveMessage(res.coach.message);
+              setAdaptiveActionLabel(res.coach.actionLabel);
+            } else {
+              setAdaptive(null);
+            }
+          })
+          .catch(() => setAdaptive(null));
+        return Promise.all([enhance, adapt]);
       })
       .catch((err) => {
         setError(true);
@@ -331,6 +355,44 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
               busy={insightBusy}
               onAction={handleInsightAction}
               onDismiss={handleDismissInsight}
+            />
+          </View>
+        ) : null}
+
+        {/* Adaptive insight — user-approved adjustments only (Phase 3.5) */}
+        {adaptive &&
+        !dismissedFingerprints.includes(adaptive.fingerprint) &&
+        !isCompletedToday ? (
+          <View className="px-5 mt-5">
+            <AdaptiveSuggestionCard
+              suggestion={adaptive}
+              headline={adaptiveHeadline}
+              message={adaptiveMessage}
+              actionLabel={adaptiveActionLabel}
+              unit={habit.unit}
+              busy={adaptiveBusy}
+              onAccept={() => {
+                if (adaptiveBusy) return;
+                setAdaptiveBusy(true);
+                AdaptiveApiService.accept(habit.id, adaptive.id)
+                  .then(() => {
+                    ToastService.Success(
+                      "Your habit has been adjusted. Let's see how this version performs.",
+                    );
+                    setAdaptive(null);
+                    load();
+                  })
+                  .catch((err) => ToastService.ApiError(err))
+                  .finally(() => setAdaptiveBusy(false));
+              }}
+              onReject={() => {
+                if (adaptiveBusy) return;
+                setAdaptiveBusy(true);
+                AdaptiveApiService.reject(habit.id, adaptive.id)
+                  .then(() => setAdaptive(null))
+                  .catch((err) => ToastService.ApiError(err))
+                  .finally(() => setAdaptiveBusy(false));
+              }}
             />
           </View>
         ) : null}
