@@ -424,41 +424,39 @@ const HomeScreen = () => {
         </View>
 
         {/* ── INSIGHTS (slim rows, not cards) ────────────────────── */}
-        {(overload?.overloaded || true) && (
-          <View className="mt-5 px-2">
-            <ApText
-              size="xs"
-              font="bold"
-              color={colors.textMuted}
-              className="uppercase mb-2"
-              style={{ letterSpacing: 1 }}
-            >
-              Insights
-            </ApText>
-            <View
-              className="rounded-2xl overflow-hidden"
-              style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-            >
-              {overload?.overloaded && (
-                <InsightRow
-                  icon="layers-outline"
-                  accent={colors.warning}
-                  title="Habit load is heavy"
-                  subtitle={`${overload.insight.message}`}
-                  onPress={() => router.push("/manage-habits")}
-                  withBorder
-                />
-              )}
+        <View className="mt-5 px-2">
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="uppercase mb-2"
+            style={{ letterSpacing: 1 }}
+          >
+            Insights
+          </ApText>
+          <View
+            className="rounded-2xl overflow-hidden"
+            style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
+          >
+            {overload?.overloaded && (
               <InsightRow
-                icon="document-text-outline"
-                accent={colors.primary}
-                title="Your week is ready"
-                subtitle="See what your habits are telling you."
-                onPress={() => router.push("/weekly-review")}
+                icon="layers-outline"
+                accent={colors.warning}
+                title="Habit load is heavy"
+                subtitle={overload.insight.message}
+                onPress={() => router.push("/manage-habits")}
+                withBorder
               />
-            </View>
+            )}
+            <InsightRow
+              icon="document-text-outline"
+              accent={colors.primary}
+              title="Your week is ready"
+              subtitle="See what your habits are telling you."
+              onPress={() => router.push("/weekly-review")}
+            />
           </View>
-        )}
+        </View>
 
         {/* ── IDENTITY strip ─────────────────────────────────────── */}
         {activeIdentities.length > 0 && (
