@@ -6,13 +6,13 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import {
   ApText,
   ApContainer,
   ApScrollView,
   ApModal,
   ApConfirmModal,
+  ApHeader,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -163,28 +163,7 @@ const IdentityScreen = () => {
   return (
     <ApContainer>
       <ApScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="px-5 pt-6 pb-2 flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mr-3"
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Ionicons
-              name="chevron-back"
-              size={24}
-              color={colors.textPrimary}
-            />
-          </TouchableOpacity>
-          <View className="flex-1">
-            <ApText size="2xl" font="bold" color={colors.textPrimary}>
-              Identity
-            </ApText>
-            <ApText size="sm" color={colors.textMuted} className="mt-0.5">
-              Every action is a vote for the person you want to become
-            </ApText>
-          </View>
-        </View>
+        <ApHeader title="Identity" subheader="Every action is a vote for the person you want to become" hasBackButton />
 
         {/* Active identities */}
         <View className="px-5 mt-4">

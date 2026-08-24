@@ -138,6 +138,20 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="identities"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="reward-shop"
+                    options={{
+                      headerShown: false,
+                      presentation: "modal",
+                    }}
+                  />
+                  <Stack.Screen
                     name="add-budget"
                     options={{
                       headerShown: false,
