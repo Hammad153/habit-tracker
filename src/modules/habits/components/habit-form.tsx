@@ -24,6 +24,26 @@ export interface HabitFormProps {
   habitId?: string;
 }
 
+/**
+ * The cue field accepts human input ("7:30", "8pm", "07:30 after coffee").
+ * Normalize to strict HH:mm for the API; unparseable text means "no time".
+ */
+const normalizeCueTime = (raw: string): string | null => {
+  const t = raw.trim();
+  if (!t) return null;
+  const m =
+    t.match(/(\d{1,2})\s*[:.h]\s*(\d{2})?\s*(am|pm)?/i) ??
+    t.match(/^(\d{1,2})(am|pm)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const min = m[2] ? parseInt(m[2], 10) : 0;
+  const ap = m[3]?.toLowerCase();
+  if (ap === "pm" && h < 12) h += 12;
+  if (ap === "am" && h === 12) h = 0;
+  if (h > 23 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+};
+
 const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
   const isEditMode = Boolean(habitId);
   const colors = useTheme();
@@ -216,7 +236,9 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
       endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
       // Behavioral layer — empty strings are normalized to null so clearing a
       // field on the client actually clears it server-side.
-      scheduledTime: showBehavioral && scheduledTime.trim() ? scheduledTime.trim() : null,
+      scheduledTime: showBehavioral
+          ? normalizeCueTime(scheduledTime)
+          : null,
       location: showBehavioral && location.trim() ? location.trim() : null,
       fullBehavior: showBehavioral && fullBehavior.trim() ? fullBehavior.trim() : null,
       minimumBehavior: showBehavioral && minimumBehavior.trim() ? minimumBehavior.trim() : null,
