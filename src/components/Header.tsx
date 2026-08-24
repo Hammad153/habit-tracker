@@ -128,22 +128,6 @@ export const ApHeader: React.FC<IProps> = ({
               title
             )}
 
-            {subheader && (
-              <View className="mt-1">
-                {typeof subheader === "string" ? (
-                  <ApText
-                    size="sm"
-                    color={colors.primary}
-                    font="bold"
-                    style={{ letterSpacing: 0.5 }}
-                  >
-                    {subheader.toUpperCase()}
-                  </ApText>
-                ) : (
-                  subheader
-                )}
-              </View>
-            )}
           </View>
 
           <View
@@ -154,6 +138,23 @@ export const ApHeader: React.FC<IProps> = ({
             {right}
           </View>
         </View>
+        {subheader && (
+          <View className="mt-1 mx-auto text-center">
+            {typeof subheader === "string" ? (
+              <ApText
+                size="xs"
+                color={colors.primary}
+                font="bold"
+                numberOfLines={2}
+                style={{ letterSpacing: 0.5 }}
+              >
+                {subheader.toUpperCase()}
+              </ApText>
+            ) : (
+              subheader
+            )}
+          </View>
+        )}
       </View>
     </View>
   );

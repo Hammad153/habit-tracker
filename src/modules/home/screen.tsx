@@ -234,13 +234,14 @@ const HomeScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
-        {/* Greeting */}
+        {/* Greeting — full-bleed to the top and side edges */}
         <View
+          className="-mx-1.5 mt-[-10]"
           style={{
             backgroundColor: colors.surfaceGlow,
-            borderRadius: 10,
-            paddingLeft: 12,
-            paddingRight: 12,
+            paddingTop: 8,
+            paddingBottom: 8,
+            paddingHorizontal: 16,
           }}
         >
           <UserGreeting
