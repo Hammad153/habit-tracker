@@ -232,6 +232,7 @@ const HomeScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
+        {/* Greeting */}
         <View
           style={{
             backgroundColor: colors.surfaceGlow,
@@ -248,53 +249,129 @@ const HomeScreen = () => {
           />
         </View>
 
-        <View className="mt-5 px-2">
+        <HorizontalDatePicker
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />
+
+        {/* ── TODAY (primary focus) ─────────────────────────────── */}
+        <View className="mt-4 px-2">
+          <DailyGoalsCard
+            completed={
+              scheduledHabits.filter((h: any) =>
+                h.completions?.some(
+                  (c: any) => isSameDateKey(c.date, dateStr) && c.status,
+                ),
+              ).length || 0
+            }
+            total={scheduledHabits.length}
+          />
+        </View>
+
+        <View className="mt-4 mb-1 px-2">
+          <ApText size="sm" font="bold" color={colors.textPrimary}>
+            Today’s habits
+          </ApText>
+        </View>
+
+        <View className="px-2">
+          {scheduledHabits.length === 0 ? (
+            <ApEmptyState
+              icon="calendar-outline"
+              title="Nothing scheduled"
+              subtitle={
+                habits.length === 0
+                  ? "Add a habit to start your day."
+                  : "No habits are scheduled for this day."
+              }
+              actionLabel={habits.length === 0 ? "Create Habit" : undefined}
+              onAction={
+                habits.length === 0 ? () => router.push("/create-habit") : undefined
+              }
+            />
+          ) : (
+            scheduledHabits.map((habit) => (
+              <HabitCard
+                key={habit.id}
+                id={habit.id}
+                title={habit.title}
+                subtitle={habit.subtitle}
+                icon={habit.icon}
+                iconColor={habit.iconColor}
+                iconBg={habit.iconBg}
+                isCompleted={habit.completions?.some(
+                  (c: any) => isSameDateKey(c.date, dateStr) && c.status,
+                )}
+                selectedDate={dateStr}
+                onRefresh={() => fetchHabits()}
+                goal={habit.goal}
+                value={
+                  habit.completions?.find((c: any) =>
+                    isSameDateKey(c.date, dateStr),
+                  )?.value || 0
+                }
+                fullBehavior={habit.fullBehavior}
+                minimumBehavior={habit.minimumBehavior}
+                emergencyMinimum={habit.emergencyMinimum}
+                stackAfterTitle={
+                  habit.stackAfterHabitId
+                    ? habits.find((h: any) => h.id === habit.stackAfterHabitId)?.title
+                    : undefined
+                }
+              />
+            ))
+          )}
+        </View>
+
+        {/* ── OVERVIEW (secondary metrics, compact grid) ──────────── */}
+        <View className="mt-6 px-2">
+          <ApText
+            size="xs"
+            font="bold"
+            color={colors.textMuted}
+            className="uppercase mb-2"
+            style={{ letterSpacing: 1 }}
+          >
+            Overview
+          </ApText>
+
+          {/* Hero: overall progress (single source of the %, plus streaks) */}
           <View
             className="rounded-3xl border p-4"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
+            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
           >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
+            <View className="flex-row items-center">
+              <View className="flex-1 pr-3">
                 <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                  Overall Progress
+                  Last 30 days
                 </ApText>
-                <ApText size="3xl" font="extrabold" color={colors.textPrimary} className="mt-1">
+                <ApText size="2xl" font="extrabold" color={colors.textPrimary}>
                   {analytics.overallRate}%
                 </ApText>
-                <ApText size="sm" color={colors.textSecondary}>
-                  {analytics.habitsCompletedToday} done / {analytics.habitsMissedToday} left today
+                <ApText size="xs" color={colors.textSecondary}>
+                  {analytics.habitsCompletedToday} done · {analytics.habitsMissedToday} left today
                 </ApText>
               </View>
               <View
-                className="h-20 w-20 rounded-full items-center justify-center"
-                style={{ backgroundColor: colors.primary + "16" }}
+                className="h-14 w-14 rounded-full items-center justify-center"
+                style={{ backgroundColor: colors.primary }}
               >
-                <View
-                  className="h-14 w-14 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  <ApText size="lg" font="bold" color={colors.background}>
-                    {analytics.overallRate}%
-                  </ApText>
-                </View>
+                <Ionicons name="trending-up" size={22} color={colors.background} />
               </View>
             </View>
-            <View className="mt-5 flex-row">
+
+            <View className="mt-3 flex-row">
               {[
-                { label: "Current", value: `${analytics.currentStreak}d` },
-                { label: "Longest", value: `${analytics.longestStreak}d` },
-                { label: "Active", value: analytics.activeHabits.length },
-                { label: "Total", value: analytics.totalHabits },
+                { label: "Streak", value: `${analytics.currentStreak}d` },
+                { label: "Best", value: `${analytics.longestStreak}d` },
+                { label: "Habits", value: analytics.activeHabits.length },
               ].map((item, index) => (
                 <View
                   key={item.label}
-                  className={`flex-1 rounded-2xl p-3 ${index < 3 ? "mr-2" : ""}`}
+                  className={`flex-1 rounded-2xl p-2.5 ${index < 2 ? "mr-2" : ""}`}
                   style={{ backgroundColor: colors.background }}
                 >
-                  <ApText size="lg" font="bold" color={colors.textPrimary}>
+                  <ApText size="base" font="bold" color={colors.textPrimary}>
                     {item.value}
                   </ApText>
                   <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
@@ -304,340 +381,144 @@ const HomeScreen = () => {
               ))}
             </View>
           </View>
-        </View>
 
-        <View className="mt-4 px-2">
-          <View
-            className="rounded-3xl border p-4"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                  Today&apos;s Plan
-                </ApText>
-                <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
-                  {planSummary?.completionPercentage ?? 0}%
-                </ApText>
-                <ApText size="sm" color={colors.textSecondary}>
-                  {planSummary?.completedTasks ?? 0} done / {planSummary?.pendingTasks ?? 0} left
-                </ApText>
-              </View>
-              <TouchableOpacity
-                onPress={() => router.push("/(tabs)/daily-plan")}
-                className="h-11 w-11 rounded-2xl items-center justify-center"
-                style={{ backgroundColor: colors.primary + "18" }}
-              >
-                <Ionicons name="calendar-outline" size={22} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Phase 3.6 — portfolio overload insight (only when overloaded) */}
-        {overload?.overloaded ? (
-          <View className="mt-4 px-2">
+          {/* Two-up compact metrics */}
+          <View className="flex-row mt-3">
             <TouchableOpacity
-              onPress={() => router.push("/manage-habits")}
+              onPress={() => router.push("/(tabs)/daily-plan")}
+              className="flex-1 mr-2 rounded-2xl border p-3"
+              style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
               accessibilityRole="button"
-              accessibilityLabel="Review habit load"
+              accessibilityLabel="Open daily plan"
             >
-              <View
-                className="rounded-3xl border p-4"
-                style={{
-                  backgroundColor: colors.surface,
-                  borderColor: colors.warning + "55",
-                }}
+              <ApText size="xs" font="bold" color={colors.textMuted}>PLAN</ApText>
+              <ApText size="xl" font="bold" color={colors.textPrimary} className="mt-0.5">
+                {planSummary?.completionPercentage ?? 0}%
+              </ApText>
+              <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
+                {planSummary?.completedTasks ?? 0}/{(planSummary?.completedTasks ?? 0) + (planSummary?.pendingTasks ?? 0)} tasks
+              </ApText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/budget")}
+              className="flex-1 rounded-2xl border p-3"
+              style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+              accessibilityRole="button"
+              accessibilityLabel="Open budget"
+            >
+              <ApText size="xs" font="bold" color={colors.textMuted}>BUDGET</ApText>
+              <ApText
+                size="xl"
+                font="bold"
+                color={budgetSummary?.warning ? colors.warning : colors.textPrimary}
+                className="mt-0.5"
               >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1 pr-3">
-                    <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase" style={{ letterSpacing: 1 }}>
-                      Your Habits
-                    </ApText>
-                    <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-1">
-                      {overload.insight.headline}
-                    </ApText>
-                    <ApText size="xs" color={colors.textSecondary} className="mt-1">
-                      {overload.insight.message}
-                    </ApText>
-                  </View>
-                  <View className="h-11 w-11 rounded-2xl items-center justify-center" style={{ backgroundColor: colors.warning + "18" }}>
-                    <Ionicons name="layers-outline" size={22} color={colors.warning} />
-                  </View>
-                </View>
-                <View className="self-start mt-3 px-4 h-9 rounded-full items-center justify-center" style={{ backgroundColor: colors.primary + "18" }}>
-                  <ApText size="xs" font="bold" color={colors.primary}>
-                    {overload.insight.ctaLabel}
-                  </ApText>
-                </View>
-              </View>
+                {budgetSummary?.budgetUsagePercentage ?? 0}%
+              </ApText>
+              <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
+                used this month
+              </ApText>
             </TouchableOpacity>
           </View>
-        ) : null}
-
-        {/* Phase 3.4 — weekly review entry point */}
-        <View className="mt-4 px-2">
-          <TouchableOpacity onPress={() => router.push("/weekly-review")} accessibilityRole="button" accessibilityLabel="Open weekly review">
-            <View
-              className="rounded-3xl border p-4"
-              style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-            >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                    Weekly Review
-                  </ApText>
-                  <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-1">
-                    See what your habits are telling you
-                  </ApText>
-                </View>
-                <View className="h-11 w-11 rounded-2xl items-center justify-center" style={{ backgroundColor: colors.primary + "18" }}>
-                  <Ionicons name="sparkles-outline" size={22} color={colors.primary} />
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
         </View>
 
-        <View className="mt-4 px-2">
-          <View
-            className="rounded-3xl border p-4"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                  Monthly Budget
-                </ApText>
-                <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
-                  {budgetSummary?.budgetUsagePercentage ?? 0}%
-                </ApText>
-                <ApText size="sm" color={budgetSummary?.warning ? colors.warning : colors.textSecondary}>
-                  {budgetSummary?.warning ?? `${budgetSummary?.remainingBudget ?? 0} budget remaining`}
-                </ApText>
-              </View>
-              <TouchableOpacity
-                onPress={() => router.push("/(tabs)/budget")}
-                className="h-11 w-11 rounded-2xl items-center justify-center"
-                style={{ backgroundColor: colors.warning + "18" }}
-              >
-                <Ionicons name="wallet-outline" size={22} color={colors.warning} />
-              </TouchableOpacity>
-            </View>
-            <View className="mt-3 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-              <View
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.min(budgetSummary?.budgetUsagePercentage ?? 0, 100)}%`,
-                  backgroundColor:
-                    (budgetSummary?.budgetUsagePercentage ?? 0) >= 100
-                      ? "#EF4444"
-                      : colors.primary,
-                }}
+        {/* ── INSIGHTS (slim rows, not cards) ────────────────────── */}
+        {(overload?.overloaded || true) && (
+          <View className="mt-5 px-2">
+            <ApText
+              size="xs"
+              font="bold"
+              color={colors.textMuted}
+              className="uppercase mb-2"
+              style={{ letterSpacing: 1 }}
+            >
+              Insights
+            </ApText>
+            <View
+              className="rounded-2xl overflow-hidden"
+              style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
+            >
+              {overload?.overloaded && (
+                <InsightRow
+                  icon="layers-outline"
+                  accent={colors.warning}
+                  title="Habit load is heavy"
+                  subtitle={`${overload.insight.message}`}
+                  onPress={() => router.push("/manage-habits")}
+                  withBorder
+                />
+              )}
+              <InsightRow
+                icon="document-text-outline"
+                accent={colors.primary}
+                title="Your week is ready"
+                subtitle="See what your habits are telling you."
+                onPress={() => router.push("/weekly-review")}
               />
-            </View>
-          </View>
-        </View>
-
-        <View className="mt-4 px-2">
-          <View
-            className="rounded-3xl border p-4"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-start">
-              <View
-                className="h-11 w-11 rounded-2xl items-center justify-center"
-                style={{ backgroundColor: colors.warning + "18" }}
-              >
-                <Ionicons name="sparkles-outline" size={22} color={colors.warning} />
-              </View>
-              <View className="ml-3 flex-1">
-                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                  Daily Motivation
-                </ApText>
-                <ApText size="base" font="semibold" color={colors.textPrimary} className="mt-1">
-                  {motivation}
-                </ApText>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Identity strip — who you are becoming */}
-        {activeIdentities.length > 0 && (
-          <View className="mt-4 px-2">
-            <View
-              className="rounded-3xl border p-4"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <View className="flex-row items-center justify-between">
-                <ApText
-                  size="xs"
-                  font="bold"
-                  color={colors.textMuted}
-                  className="uppercase"
-                >
-                  Becoming
-                </ApText>
-                <TouchableOpacity onPress={() => router.push("/identities")}>
-                  <ApText size="xs" font="semibold" color={colors.primary}>
-                    Manage →
-                  </ApText>
-                </TouchableOpacity>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="flex-row mt-3"
-              >
-                {activeIdentities.map((identity) => {
-                  const accent = identity.color || colors.primary;
-                  const pct = identity.progressToNextLevel;
-                  return (
-                    <TouchableOpacity
-                      key={identity.id}
-                      onPress={() => router.push("/identities")}
-                      className="mr-2.5 p-3 rounded-2xl border"
-                      style={{
-                        width: 148,
-                        backgroundColor: accent + "0F",
-                        borderColor: accent + "33",
-                      }}
-                    >
-                      <View className="flex-row items-center">
-                        <Ionicons
-                          name={(identity.icon || "flag") as any}
-                          size={16}
-                          color={accent}
-                        />
-                        <ApText
-                          size="xs"
-                          font="bold"
-                          color={accent}
-                          className="ml-1.5 flex-1"
-                          numberOfLines={1}
-                        >
-                          L{identity.level ?? 1} · {identity.levelTitle}
-                        </ApText>
-                      </View>
-                      <ApText
-                        size="sm"
-                        font="semibold"
-                        color={colors.textPrimary}
-                        className="mt-1.5"
-                        numberOfLines={1}
-                      >
-                        {identity.title}
-                      </ApText>
-                      <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                        {identity.evidencePoints ?? 0} pts ·{" "}
-                        {identity.completedOnDate ?? 0} today
-                      </ApText>
-                      <View
-                        className="mt-2 h-1.5 rounded-full overflow-hidden"
-                        style={{ backgroundColor: colors.surfaceBorder }}
-                      >
-                        {pct != null && (
-                          <View
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${Math.max(pct, 3)}%`,
-                              backgroundColor: accent,
-                            }}
-                          />
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
             </View>
           </View>
         )}
 
-        <HorizontalDatePicker
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-
-       <View className="mt-4 px-2">
-        <DailyGoalsCard
-          completed={
-            scheduledHabits.filter((h: any) =>
-              h.completions?.some(
-                (c: any) => isSameDateKey(c.date, dateStr) && c.status,
-              ),
-            ).length || 0
-          }
-          total={scheduledHabits.length}
-        />
-        </View>
-        
-        <View className="mt-6 mb-20 px-2">
-          <ApText
-            size="xl"
-            font="bold"
-            color={colors.textPrimary}
-            className="mb-2"
-          >
-            Scheduled Habits
-          </ApText>
-          <View>
-            {scheduledHabits.length === 0 ? (
-              <ApEmptyState
-                icon="calendar-outline"
-                title="Nothing scheduled"
-                subtitle={
-                  habits.length === 0
-                    ? "Add a habit to start your day."
-                    : "No habits are scheduled for this day."
-                }
-                actionLabel={habits.length === 0 ? "Create Habit" : undefined}
-                onAction={
-                  habits.length === 0
-                    ? () => router.push("/create-habit")
-                    : undefined
-                }
-              />
-            ) : (
-              scheduledHabits.map((habit) => (
-                <HabitCard
-                  key={habit.id}
-                  id={habit.id}
-                  title={habit.title}
-                  subtitle={habit.subtitle}
-                  icon={habit.icon}
-                  iconColor={habit.iconColor}
-                  iconBg={habit.iconBg}
-                  isCompleted={habit.completions?.some(
-                    (c: any) => isSameDateKey(c.date, dateStr) && c.status,
-                  )}
-                  selectedDate={dateStr}
-                  onRefresh={() => fetchHabits()}
-                  goal={habit.goal}
-                  value={
-                    habit.completions?.find((c: any) =>
-                      isSameDateKey(c.date, dateStr),
-                    )
-                      ?.value || 0
-                  }
-                  fullBehavior={habit.fullBehavior}
-                  minimumBehavior={habit.minimumBehavior}
-                  emergencyMinimum={habit.emergencyMinimum}
-                  stackAfterTitle={
-                    habit.stackAfterHabitId
-                      ? habits.find((h: any) => h.id === habit.stackAfterHabitId)
-                          ?.title
-                      : undefined
-                  }
-                />
-              ))
-            )}
+        {/* ── IDENTITY strip ─────────────────────────────────────── */}
+        {activeIdentities.length > 0 && (
+          <View className="mt-5 px-2">
+            <View className="flex-row items-center justify-between mb-2">
+              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase" style={{ letterSpacing: 1 }}>
+                Becoming
+              </ApText>
+              <TouchableOpacity onPress={() => router.push("/identities")}>
+                <ApText size="xs" font="semibold" color={colors.primary}>
+                  Manage →
+                </ApText>
+              </TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {activeIdentities.map((identity) => {
+                const accent = identity.color || colors.primary;
+                const pct = identity.progressToNextLevel;
+                return (
+                  <TouchableOpacity
+                    key={identity.id}
+                    onPress={() => router.push("/identities")}
+                    className="mr-2.5 p-3 rounded-2xl border"
+                    style={{
+                      width: 148,
+                      backgroundColor: accent + "0F",
+                      borderColor: accent + "33",
+                    }}
+                  >
+                    <View className="flex-row items-center">
+                      <Ionicons name={(identity.icon || "flag") as any} size={16} color={accent} />
+                      <ApText size="xs" font="bold" color={accent} className="ml-1.5 flex-1" numberOfLines={1}>
+                        L{identity.level ?? 1} · {identity.levelTitle}
+                      </ApText>
+                    </View>
+                    <ApText size="sm" font="semibold" color={colors.textPrimary} className="mt-1.5" numberOfLines={1}>
+                      {identity.title}
+                    </ApText>
+                    <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                      {identity.evidencePoints ?? 0} pts
+                    </ApText>
+                    <View className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: colors.surfaceBorder }}>
+                      {pct != null && (
+                        <View
+                          className="h-full rounded-full"
+                          style={{ width: `${Math.max(pct, 3)}%`, backgroundColor: accent }}
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
-        </View>
+        )}
+
+        {/* Quiet motivation line — decorative, no card */}
+        <ApText size="xs" color={colors.textMuted} className="text-center mt-5 px-8">
+          {motivation}
+        </ApText>
       </ScrollView>
 
       <TouchableOpacity
@@ -657,6 +538,37 @@ const HomeScreen = () => {
 
       <UpgradeModal />
     </ApContainer>
+  );
+};
+
+/* Slim insight row — replaces the old stacked full-width cards. */
+const InsightRow: React.FC<{
+  icon: keyof typeof Ionicons.glyphMap;
+  accent: string;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+  withBorder?: boolean;
+}> = ({ icon, accent, title, subtitle, onPress, withBorder }) => {
+  const colors = useTheme();
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityRole="button"
+      className={`flex-row items-center px-4 py-3 ${withBorder ? "border-b" : ""}`}
+      style={{ borderBottomColor: colors.surfaceBorder }}
+    >
+      <Ionicons name={icon} size={18} color={accent} />
+      <View className="ml-3 flex-1">
+        <ApText size="sm" font="semibold" color={colors.textPrimary}>
+          {title}
+        </ApText>
+        <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
+          {subtitle}
+        </ApText>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+    </TouchableOpacity>
   );
 };
 
