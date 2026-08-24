@@ -3,11 +3,11 @@ import {
   View,
   Modal,
   ModalProps,
+  Pressable,
+  StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
-  Keyboard,
 } from "react-native";
 import { ApText } from "./Text";
 import { useTheme } from "../modules/settings/context";
@@ -53,15 +53,24 @@ export const ApModal: React.FC<IProps> = ({
       onRequestClose={onClose}
       {...modalProps}
     >
-      <TouchableWithoutFeedback onPress={handleBackdropPress}>
-        <View
-          className={`flex-1 justify-center items-center bg-black/60 px-6 ${wrapperClassName || ""}`}
+      <View
+        className={`flex-1 justify-center items-center bg-black/60 px-6 ${wrapperClassName || ""}`}
+      >
+        {/* Backdrop layer sits BEHIND the card: outside taps dismiss, while
+            inputs inside the card receive their own touches (typing works). */}
+        {dismissOnBackdrop && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Close modal"
+            onPress={handleBackdropPress}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          className={`w-full ${modalClassName || ""}`}
+          pointerEvents="box-none"
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              className={`w-full ${modalClassName || ""}`}
-            >
               <View
                 className={`rounded-3xl p-6 border ${className || ""}`}
                 style={[
@@ -107,10 +116,8 @@ export const ApModal: React.FC<IProps> = ({
                 )}
                 {children}
               </View>
-            </KeyboardAvoidingView>
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
