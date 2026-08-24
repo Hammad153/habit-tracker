@@ -148,7 +148,7 @@ const RootLayout = () => {
                     name="reward-shop"
                     options={{
                       headerShown: false,
-                      presentation: "modal",
+                      presentation: "card",
                     }}
                   />
                   <Stack.Screen
