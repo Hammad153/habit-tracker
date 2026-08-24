@@ -35,6 +35,8 @@ import { MOTIVATION_MESSAGES } from "@/src/constants";
 import { isSameDateKey, toDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
 
+const RECENT_HABIT_LIMIT = 3;
+
 const percent = (value: number, total: number) =>
   total <= 0 ? 0 : Math.round((value / total) * 100);
 
@@ -268,10 +270,17 @@ const HomeScreen = () => {
           />
         </View>
 
-        <View className="mt-4 mb-1 px-2">
+        <View className="mt-4 mb-1 px-2 flex-row items-center justify-between">
           <ApText size="sm" font="bold" color={colors.textPrimary}>
-            Today’s habits
+            Recently scheduled
           </ApText>
+          {scheduledHabits.length > RECENT_HABIT_LIMIT && (
+            <TouchableOpacity onPress={() => router.push("/(tabs)/habits")}>
+              <ApText size="xs" font="semibold" color={colors.primary}>
+                View all ({scheduledHabits.length}) →
+              </ApText>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View className="px-2">
@@ -290,7 +299,7 @@ const HomeScreen = () => {
               }
             />
           ) : (
-            scheduledHabits.map((habit) => (
+            scheduledHabits.slice(0, RECENT_HABIT_LIMIT).map((habit) => (
               <HabitCard
                 key={habit.id}
                 id={habit.id}
