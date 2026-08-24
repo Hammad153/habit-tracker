@@ -48,7 +48,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
             <TouchableOpacity
               key={index}
               onPress={() => onDateChange(date)}
-              className={`items-center justify-center w-14 h-16 mr-2 rounded-2xl ${
+              className={`items-center justify-center w-14 h-14 mr-2 rounded-2xl ${
                 isSelected ? "" : "bg-surface"
               }`}
               style={
@@ -92,7 +92,7 @@ const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
 
         <TouchableOpacity
           onPress={() => setShowPicker(true)}
-          className="items-center justify-center w-14 h-16 rounded-2xl"
+          className="items-center justify-center w-14 h-14 rounded-2xl"
           style={{
             backgroundColor: colors.surface,
             borderWidth: 1,
