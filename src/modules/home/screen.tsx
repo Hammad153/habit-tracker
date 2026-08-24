@@ -346,7 +346,7 @@ const HomeScreen = () => {
 
           {/* Hero: overall progress (single source of the %, plus streaks) */}
           <View
-            className="rounded-3xl border p-4"
+            className="rounded-3xl border p-3"
             style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
           >
             <View className="flex-row items-center">
