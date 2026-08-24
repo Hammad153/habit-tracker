@@ -14,6 +14,7 @@ import {
   ApConfirmModal,
   ApHeader,
 } from "@/src/components";
+import { router } from "expo-router";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useIdentitiesState } from "./context";
@@ -62,18 +63,6 @@ const IdentityScreen = () => {
     );
   }, [editing]);
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm({
-      title: "",
-      description: "",
-      icon: "fitness",
-      color: "#3B82F6",
-    });
-    setSelectedHabitIds([]);
-    setEditorVisible(true);
-  };
-
   const openEdit = (identity: IIdentity) => {
     setEditing(identity);
     setForm({
@@ -120,20 +109,6 @@ const IdentityScreen = () => {
         for (const habitId of previous) {
           if (!selectedHabitIds.includes(habitId)) {
             await unlinkHabit(editing.id, habitId);
-          }
-        }
-      } else {
-        const created = await createIdentity({
-          title: form.title.trim(),
-          description: form.description.trim() || undefined,
-          icon: form.icon,
-          color: form.color,
-        });
-        // Fresh identities have no id yet client-side until refetch; the
-        // created object is returned so links can be attached immediately.
-        if (created && selectedHabitIds.length > 0) {
-          for (const habitId of selectedHabitIds) {
-            await linkHabit(created.id, habitId);
           }
         }
       }
@@ -326,7 +301,7 @@ const IdentityScreen = () => {
           })}
 
           <TouchableOpacity
-            onPress={openCreate}
+            onPress={() => router.push("/create-identity")}
             className="mb-6 h-12 items-center justify-center rounded-full"
             style={{ backgroundColor: colors.primary }}
           >

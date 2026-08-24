@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, TextInput, ScrollView, Platform } from "react-native";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Platform,
+  Switch,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
@@ -19,6 +26,8 @@ import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
 import { HabitService } from "@/src/modules/habits/api";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useLocalSearchParams } from "expo-router";
+import type { IHabitTemplate } from "@/src/modules/templates/model";
 
 export interface HabitFormProps {
   habitId?: string;
@@ -44,6 +53,47 @@ const normalizeCueTime = (raw: string): string | null => {
   return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 };
 
+const CollapsibleSection: React.FC<{
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}> = ({ title, icon, defaultOpen = false, children }) => {
+  const colors = useTheme();
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <View
+      className="rounded-2xl border mb-3 overflow-hidden"
+      style={{ borderColor: colors.surfaceBorder }}
+    >
+      <TouchableOpacity
+        onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        className="flex-row items-center px-4 py-3"
+        style={{ backgroundColor: colors.background }}
+      >
+        <Ionicons name={icon} size={16} color={colors.primary} />
+        <ApText
+          size="xs"
+          font="bold"
+          color={colors.textSecondary}
+          className="uppercase ml-2 flex-1"
+          style={{ letterSpacing: 1 }}
+        >
+          {title}
+        </ApText>
+        <Ionicons
+          name={open ? "chevron-up" : "chevron-down"}
+          size={16}
+          color={colors.textMuted}
+        />
+      </TouchableOpacity>
+      {open ? <View className="px-4 pb-4 pt-1">{children}</View> : null}
+    </View>
+  );
+};
+
 const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
   const isEditMode = Boolean(habitId);
   const colors = useTheme();
@@ -55,11 +105,36 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
 
   const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
+  // Template prefill (Phase: align template flow with the full create page)
+  const params = useLocalSearchParams<{ template?: string }>();
+  const template = useMemo<IHabitTemplate | null>(() => {
+    if (isEditMode || !params.template) return null;
+    try {
+      return JSON.parse(params.template) as IHabitTemplate;
+    } catch {
+      return null;
+    }
+  }, [isEditMode, params.template]);
+  // Seed from a selected habit template (create mode only).
+  useEffect(() => {
+    if (!template) return;
+    setName(template.title ?? "");
+    setSubtitle(template.subtitle ?? "");
+    if (template.icon) setSelectedIcon(template.icon);
+    if (template.iconColor) {
+      setSelectedColor(template.iconColor);
+    }
+    if (template.category) setCategory(template.category);
+    setGoal(String(template.goal ?? 1));
+    setUnit(template.unit ?? "times");
+  }, [template]);
 
   // Habit fields
   const [name, setName] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [category, setCategory] = useState("General");
+  const [goal, setGoal] = useState("1");
+  const [unit, setUnit] = useState("times");
   const [selectedIcon, setSelectedIcon] = useState("water");
   const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
 
@@ -228,6 +303,8 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
       iconColor: selectedColor,
       iconBg: `${selectedColor}20`,
       category,
+      goal: Math.max(1, Number(goal) || 1),
+      unit: unit.trim() || "times",
       scheduleType,
       scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
       timesPerWeek: scheduleType === "times_per_week" ? timesPerWeek : undefined,
@@ -358,6 +435,9 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
     }
   };
 
+  const accentColor = colors.primary;
+  const handleSavePress = handleSubmit;
+
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
     triggerSelection();
@@ -381,7 +461,7 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
     <ApContainer>
       <ApHeader title={isEditMode ? "Edit Habit" : "New Habit"} hasBackButton />
 
-      {/* Browse Templates Banner - Only in create mode */}
+      {/* Browse templates — create mode only */}
       {!isEditMode && (
         <TouchableOpacity
           onPress={() => router.push("/templates")}
@@ -401,582 +481,294 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
         </TouchableOpacity>
       )}
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 112 }}
-      >
-        {/* Live Preview */}
-        <View className="px-5 mt-4 rounded-3xl">
-          <LinearGradient
-            colors={[selectedColor + "40", colors.surface]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="p-4 rounded-3xl border"
-            style={{ borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-center">
-              <View
-                className="w-12 h-12 rounded-xl items-center justify-center"
-                style={{ backgroundColor: `${selectedColor}20` }}
-              >
-                <Ionicons
-                  name={selectedIcon as any}
-                  size={24}
-                  color={selectedColor}
-                />
-              </View>
-              <View className="ml-4 flex-1">
-                <ApText
-                  size="base"
-                  font="bold"
-                  color={colors.textPrimary}
-                  numberOfLines={1}
-                >
-                  {name || "Habit Name"}
-                </ApText>
-                {subtitle ? (
-                  <ApText size="xs" color={colors.textSecondary} numberOfLines={1} className="mt-0.5">
-                    {subtitle}
-                  </ApText>
-                ) : (
-                  <ApText size="xs" color={colors.textMuted}>
-                    Live Preview
-                  </ApText>
-                )}
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
-        <View className="px-5 mt-8">
-          {/* Basic Information */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mb-2 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Basic Information
-          </ApText>
-          <View
-            className="rounded-2xl p-3 space-y-2 border"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
-            <TextInput
-              className="text-base p-1 border-b"
-              style={{ color: colors.textPrimary, borderBottomColor: colors.surfaceBorder }}
-              placeholder="e.g. Drink 2L Water"
-              placeholderTextColor={colors.textMuted}
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              className="text-sm p-1"
-              style={{ color: colors.textPrimary }}
-              placeholder="Description (optional)"
-              placeholderTextColor={colors.textMuted}
-              value={subtitle}
-              onChangeText={setSubtitle}
-            />
-          </View>
-
-          {/* Category */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Category
-          </ApText>
-          <Dropdown
-            options={HABIT_CATEGORIES.map((cat) => ({ label: cat, value: cat }))}
-            value={category}
-            onChange={(value) => {
-              setCategory(value);
-              triggerSelection();
-            }}
-            placeholder="Select category"
-          />
-
-          {/* Schedule Section */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Schedule
-          </ApText>
-          <SchedulePicker
-            scheduleType={scheduleType}
-            scheduleDays={scheduleDays}
-            timesPerWeek={timesPerWeek}
-            intervalDays={intervalDays}
-            onScheduleTypeChange={setScheduleType}
-            onScheduleDaysChange={setScheduleDays}
-            onTimesPerWeekChange={setTimesPerWeek}
-            onIntervalDaysChange={setIntervalDays}
-          />
-
-          {/* Reminder Section */}
-          <View className="mt-8">
-            <ApText
-              size="xs"
-              font="bold"
-              color={colors.textMuted}
-              className="mb-4 uppercase"
-              style={{ letterSpacing: 1 }}
-            >
-              Reminder
-            </ApText>
-            <ReminderPicker
-              time={reminderTime}
-              days={reminderDays}
-              enabled={reminderEnabled}
-              onTimeChange={setReminderTime}
-              onDaysChange={setReminderDays}
-              onEnabledChange={setReminderEnabled}
-            />
-          </View>
-
-          {/* Behavioral Section - implementation intention, versions, stack, identity */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Make It Automatic (Optional)
-          </ApText>
-          <View
-            className="rounded-2xl p-4 border"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => setShowBehavioral(!showBehavioral)}
-              className="flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center flex-1 mr-3">
-                <Ionicons
-                  name="sparkles-outline"
-                  size={20}
-                  color={showBehavioral ? colors.primary : colors.textMuted}
-                />
-                <View className="ml-3 flex-1">
-                  <ApText size="sm" color={colors.textPrimary}>
-                    Anchor it to a cue
-                  </ApText>
-                  <ApText size="xs" color={colors.textMuted}>
-                    Time, place, fallbacks & identity
-                  </ApText>
-                </View>
-              </View>
-              <View
-                className="w-12 h-7 rounded-full p-1 justify-center"
-                style={{
-                  backgroundColor: showBehavioral
-                    ? colors.primary
-                    : colors.surfaceBorder,
-                }}
-              >
-                <View
-                  className="w-5 h-5 rounded-full bg-white"
-                  style={{
-                    alignSelf: showBehavioral ? "flex-end" : "flex-start",
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-
-            {showBehavioral && (
-              <View className="mt-4">
-                {/* Live implementation-intention sentence */}
-                {(scheduledTime.trim() || location.trim()) && (
-                  <View
-                    className="mb-4 p-3 rounded-xl"
-                    style={{ backgroundColor: colors.primary + "12" }}
-                  >
-                    <ApText size="xs" font="semibold" color={colors.primary}>
-                      I will {fullBehavior.trim() || name || "..."} at{" "}
-                      {scheduledTime.trim() || "…"}
-                      {location.trim() ? ` in ${location.trim()}` : ""}.
-                    </ApText>
-                  </View>
-                )}
-
-                <TextInput
-                  className="text-sm p-3 rounded-xl border-b mb-2"
-                  style={{
-                    color: colors.textPrimary,
-                    borderBottomColor: colors.surfaceBorder,
-                  }}
-                  placeholder="When? e.g. 07:30 after coffee"
-                  placeholderTextColor={colors.textMuted}
-                  value={scheduledTime}
-                  onChangeText={setScheduledTime}
-                />
-                <TextInput
-                  className="text-sm p-3 rounded-xl border-b mb-4"
-                  style={{
-                    color: colors.textPrimary,
-                    borderBottomColor: colors.surfaceBorder,
-                  }}
-                  placeholder="Where? e.g. in the kitchen"
-                  placeholderTextColor={colors.textMuted}
-                  value={location}
-                  onChangeText={setLocation}
-                />
-
-                {/* Habit stacking */}
-                <ApText size="xs" font="semibold" color={colors.textSecondary}>
-                  AFTER THIS HABIT (STACKING)
-                </ApText>
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-2">
-                  Do this one right after another habit.
-                </ApText>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  className="flex-row"
-                >
-                  <TouchableOpacity
-                    onPress={() => {
-                      setStackAfterHabitId(null);
-                      triggerSelection();
-                    }}
-                    className="mr-2 px-3 py-2 rounded-full border"
-                    style={{
-                      borderColor:
-                        stackAfterHabitId === null
-                          ? colors.primary
-                          : colors.surfaceBorder,
-                      backgroundColor:
-                        stackAfterHabitId === null
-                          ? colors.primary + "18"
-                          : "transparent",
-                    }}
-                  >
-                    <ApText
-                      size="xs"
-                      color={
-                        stackAfterHabitId === null
-                          ? colors.primary
-                          : colors.textMuted
-                      }
-                    >
-                      No anchor
-                    </ApText>
-                  </TouchableOpacity>
-                  {habits
-                    .filter(
-                      (option) =>
-                        !option.isArchived && option.id !== habitId,
-                    )
-                    .map((option) => (
-                      <TouchableOpacity
-                        key={option.id}
-                        onPress={() => {
-                          setStackAfterHabitId(option.id);
-                          triggerSelection();
-                        }}
-                        className="mr-2 px-3 py-2 rounded-full border flex-row items-center"
-                        style={{
-                          borderColor:
-                            stackAfterHabitId === option.id
-                              ? colors.primary
-                              : colors.surfaceBorder,
-                          backgroundColor:
-                            stackAfterHabitId === option.id
-                              ? colors.primary + "18"
-                              : "transparent",
-                        }}
-                      >
-                        <Ionicons
-                          name={option.icon as any}
-                          size={12}
-                          color={option.iconColor || colors.primary}
-                        />
-                        <ApText
-                          size="xs"
-                          color={
-                            stackAfterHabitId === option.id
-                              ? colors.primary
-                              : colors.textSecondary
-                          }
-                          className="ml-1.5"
-                          numberOfLines={1}
-                        >
-                          {option.title}
-                        </ApText>
-                      </TouchableOpacity>
-                    ))}
-                </ScrollView>
-
-                {/* Versions */}
-                <ApText
-                  size="xs"
-                  font="semibold"
-                  color={colors.textSecondary}
-                  className="mt-4"
-                >
-                  FULL VERSION
-                </ApText>
-                <TextInput
-                  className="text-sm p-3 rounded-xl mt-1"
-                  style={{
-                    color: colors.textPrimary,
-                    backgroundColor: colors.surfaceBorder + "50",
-                  }}
-                  placeholder={`e.g. ${name.trim() || "The complete workout"} — 30 min`}
-                  placeholderTextColor={colors.textMuted}
-                  multiline
-                  value={fullBehavior}
-                  onChangeText={setFullBehavior}
-                />
-
-                <ApText
-                  size="xs"
-                  font="semibold"
-                  color={colors.textSecondary}
-                  className="mt-3"
-                >
-                  MINIMUM VERSION (BUSY DAYS)
-                </ApText>
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                  Two minutes or less — keeps the streak alive.
-                </ApText>
-                <TextInput
-                  className="text-sm p-3 rounded-xl mt-1"
-                  style={{
-                    color: colors.textPrimary,
-                    backgroundColor: colors.surfaceBorder + "50",
-                  }}
-                  placeholder="e.g. Put on running shoes and step outside"
-                  placeholderTextColor={colors.textMuted}
-                  multiline
-                  value={minimumBehavior}
-                  onChangeText={setMinimumBehavior}
-                />
-
-                <ApText
-                  size="xs"
-                  font="semibold"
-                  color={colors.textSecondary}
-                  className="mt-3"
-                >
-                  EMERGENCY MINIMUM (CRISIS DAYS)
-                </ApText>
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                  For sick, travelling or overwhelmed days.
-                </ApText>
-                <TextInput
-                  className="text-sm p-3 rounded-xl mt-1"
-                  style={{
-                    color: colors.textPrimary,
-                    backgroundColor: colors.surfaceBorder + "50",
-                  }}
-                  placeholder="e.g. One deep breath at the door"
-                  placeholderTextColor={colors.textMuted}
-                  multiline
-                  value={emergencyMinimum}
-                  onChangeText={setEmergencyMinimum}
-                />
-
-                {/* Identity links */}
-                <ApText
-                  size="xs"
-                  font="semibold"
-                  color={colors.textSecondary}
-                  className="mt-4"
-                >
-                  VOTES FOR IDENTITY
-                </ApText>
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-2">
-                  Completions count as evidence for these identities.
-                </ApText>
-                <View className="flex-row flex-wrap">
-                  {activeIdentities.map((identity) => {
-                    const checked = identityIds.includes(identity.id);
-                    return (
-                      <TouchableOpacity
-                        key={identity.id}
-                        onPress={() => {
-                          setIdentityIds((current) =>
-                            current.includes(identity.id)
-                              ? current.filter((id) => id !== identity.id)
-                              : [...current, identity.id],
-                          );
-                          triggerSelection();
-                        }}
-                        className="flex-row items-center px-3 py-2 rounded-full mr-1.5 mb-1.5"
-                        style={{
-                          backgroundColor: checked
-                            ? (identity.color || colors.primary) + "1E"
-                            : colors.surfaceBorder + "50",
-                          borderWidth: 1.5,
-                          borderColor: checked
-                            ? identity.color || colors.primary
-                            : "transparent",
-                        }}
-                      >
-                        <Ionicons
-                          name={(identity.icon || "flag") as any}
-                          size={13}
-                          color={
-                            checked
-                              ? identity.color || colors.primary
-                              : colors.textMuted
-                          }
-                        />
-                        <ApText
-                          size="xs"
-                          font={checked ? "semibold" : "normal"}
-                          color={checked ? colors.textPrimary : colors.textSecondary}
-                          className="ml-1.5"
-                          numberOfLines={1}
-                        >
-                          {identity.title}
-                        </ApText>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {activeIdentities.length === 0 && (
-                    <TouchableOpacity
-                      onPress={() => router.push("/identities")}
-                    >
-                      <ApText size="xs" color={colors.primary}>
-                        Create your first identity →
-                      </ApText>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            )}
-          </View>
-
-          {/* Duration Section - Date Range for Temporary Habits */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Duration (Optional)
-          </ApText>
-          <View
-            className="rounded-2xl p-4 border"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => setHasDateRange(!hasDateRange)}
-              className="flex-row items-center justify-between"
+      {initialLoading ? (
+        <ApLoader label="Loading habit..." />
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+          {/* ── Live preview ── */}
+          <View className="px-5 mt-1">
+            <LinearGradient
+              colors={[selectedColor + "40", colors.surface]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="p-4 rounded-3xl border"
+              style={{ borderColor: colors.surfaceBorder }}
             >
               <View className="flex-row items-center">
-                <Ionicons
-                  name="calendar-outline"
-                  size={20}
-                  color={hasDateRange ? colors.primary : colors.textMuted}
-                />
-                <ApText
-                  size="sm"
-                  color={colors.textPrimary}
-                  className="ml-3"
-                >
-                  Set a time period
-                </ApText>
-              </View>
-              <View
-                className="w-12 h-7 rounded-full p-1 justify-center"
-                style={{
-                  backgroundColor: hasDateRange
-                    ? colors.primary
-                    : colors.surfaceBorder,
-                }}
-              >
                 <View
-                  className="w-5 h-5 rounded-full bg-white"
-                  style={{
-                    alignSelf: hasDateRange ? "flex-end" : "flex-start",
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-
-            {hasDateRange && (
-              <View className="mt-4 space-y-3">
-                <ApText size="xs" color={colors.textSecondary}>
-                  The habit will automatically delete when the end date is reached.
-                </ApText>
-                
-                {/* Start Date */}
-                <TouchableOpacity
-                  onPress={() => openDatePicker('start')}
-                  className="flex-row items-center justify-between py-3 border-b"
-                  style={{ borderBottomColor: colors.surfaceBorder }}
+                  className="w-12 h-12 rounded-xl items-center justify-center"
+                  style={{ backgroundColor: `${selectedColor}20` }}
                 >
-                  <ApText size="sm" color={colors.textPrimary}>
-                    Start Date
+                  <Ionicons name={selectedIcon as any} size={24} color={selectedColor} />
+                </View>
+                <View className="ml-4 flex-1">
+                  <ApText size="base" font="bold" color={colors.textPrimary} numberOfLines={1}>
+                    {name || "Habit Name"}
                   </ApText>
-                  <View className="flex-row items-center">
-                    <ApText
-                      size="sm"
-                      color={startDate ? colors.primary : colors.textMuted}
-                    >
-                      {formatDate(startDate)}
+                  {subtitle ? (
+                    <ApText size="xs" color={colors.textSecondary} numberOfLines={1} className="mt-0.5">
+                      {subtitle}
                     </ApText>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={16}
-                      color={colors.textMuted}
-                      className="ml-2"
-                    />
-                  </View>
-                </TouchableOpacity>
-
-                {/* End Date */}
-                <TouchableOpacity
-                  onPress={() => openDatePicker('end')}
-                  className="flex-row items-center justify-between py-3"
-                >
-                  <ApText size="sm" color={colors.textPrimary}>
-                    End Date
-                  </ApText>
-                  <View className="flex-row items-center">
-                    <ApText
-                      size="sm"
-                      color={endDate ? colors.primary : colors.textMuted}
-                    >
-                      {formatDate(endDate)}
-                    </ApText>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={16}
-                      color={colors.textMuted}
-                      className="ml-2"
-                    />
-                  </View>
-                </TouchableOpacity>
+                  ) : null}
+                </View>
               </View>
-            )}
+            </LinearGradient>
           </View>
 
-          {/* Date Pickers */}
+          {/* ── Basics ── */}
+          <View className="px-5 mt-5">
+            <ApText size="xs" font="semibold" color={colors.textSecondary}>
+              HABIT NAME
+            </ApText>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="e.g. Read before bed"
+              placeholderTextColor={colors.textMuted}
+              className="mt-1.5 px-4 py-3 rounded-2xl"
+              style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+            />
+
+            <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
+              WHY (OPTIONAL)
+            </ApText>
+            <TextInput
+              value={subtitle}
+              onChangeText={setSubtitle}
+              placeholder="What does this habit give you?"
+              placeholderTextColor={colors.textMuted}
+              className="mt-1.5 px-4 py-3 rounded-2xl"
+              style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+            />
+
+            <View className="flex-row mt-4">
+              <View className="flex-1 mr-2">
+                <ApText size="xs" font="semibold" color={colors.textSecondary}>
+                  DAILY TARGET
+                </ApText>
+                <TextInput
+                  value={goal}
+                  onChangeText={setGoal}
+                  keyboardType="decimal-pad"
+                  className="mt-1.5 px-4 py-3 rounded-2xl"
+                  style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                />
+              </View>
+              <View className="flex-1">
+                <ApText size="xs" font="semibold" color={colors.textSecondary}>
+                  UNIT
+                </ApText>
+                <TextInput
+                  value={unit}
+                  onChangeText={setUnit}
+                  placeholder="times, km…"
+                  className="mt-1.5 px-4 py-3 rounded-2xl"
+                  style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                />
+              </View>
+            </View>
+
+            <Dropdown
+              label="Category"
+              options={HABIT_CATEGORIES.map((c: string) => ({ label: c, value: c }))}
+              value={category}
+              onChange={(v: string) => {
+                setCategory(v);
+                triggerSelection();
+              }}
+            />
+          </View>
+
+          {/* ── Collapsed detail sections ── */}
+          <View className="px-5 mt-4">
+            <CollapsibleSection title="Schedule & reminders" icon="time-outline" defaultOpen>
+              <SchedulePicker
+                scheduleType={scheduleType}
+                scheduleDays={scheduleDays}
+                timesPerWeek={timesPerWeek}
+                intervalDays={intervalDays}
+                onScheduleTypeChange={(t: string) => {
+                  setScheduleType(t);
+                  triggerSelection();
+                }}
+                onScheduleDaysChange={setScheduleDays}
+                onTimesPerWeekChange={setTimesPerWeek}
+                onIntervalDaysChange={setIntervalDays}
+              />
+
+              <View className="flex-row items-center justify-between mt-4 pt-3 border-t" style={{ borderTopColor: colors.surfaceBorder }}>
+                <ApText size="sm" font="semibold" color={colors.textPrimary}>
+                  Daily reminder
+                </ApText>
+                <Switch
+                  value={reminderEnabled}
+                  onValueChange={(v: boolean) => setReminderEnabled(v)}
+                  trackColor={{ false: colors.surfaceBorder, true: colors.primary + "80" }}
+                  thumbColor={reminderEnabled ? colors.primary : colors.textMuted}
+                />
+              </View>
+              {reminderEnabled && (
+                <ReminderPicker
+                  time={reminderTime}
+                  days={reminderDays}
+                  enabled
+                  onTimeChange={setReminderTime}
+                  onDaysChange={setReminderDays}
+                  onEnabledChange={() => undefined}
+                />
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Behavioral setup" icon="sparkles-outline">
+              <View className="flex-row items-center justify-between pb-3 border-b" style={{ borderTopColor: colors.surfaceBorder }}>
+                <ApText size="xs" color={colors.textSecondary} className="flex-1 pr-3">
+                  Add cue time, smaller versions and habit stacking.
+                </ApText>
+                <Switch
+                  value={showBehavioral}
+                  onValueChange={(v: boolean) => setShowBehavioral(v)}
+                  trackColor={{ false: colors.surfaceBorder, true: colors.primary + "80" }}
+                  thumbColor={showBehavioral ? colors.primary : colors.textMuted}
+                />
+              </View>
+              {showBehavioral && (
+                <>
+                  <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-3">
+                    CUE TIME
+                  </ApText>
+                  <TextInput
+                    value={scheduledTime}
+                    onChangeText={setScheduledTime}
+                    placeholder="e.g. 07:30"
+                    className="mt-1.5 px-4 py-3 rounded-2xl"
+                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                  />
+                  <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
+                    FULL VERSION
+                  </ApText>
+                  <TextInput
+                    value={fullBehavior}
+                    onChangeText={setFullBehavior}
+                    placeholder={`e.g. Read ${goal} ${unit}`}
+                    className="mt-1.5 px-4 py-3 rounded-2xl"
+                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                  />
+                  <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
+                    MINIMUM VERSION
+                  </ApText>
+                  <TextInput
+                    value={minimumBehavior}
+                    onChangeText={setMinimumBehavior}
+                    placeholder="e.g. Read one page"
+                    className="mt-1.5 px-4 py-3 rounded-2xl"
+                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                  />
+                  <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
+                    EMERGENCY VERSION (CRISIS DAYS)
+                  </ApText>
+                  <TextInput
+                    value={emergencyMinimum}
+                    onChangeText={setEmergencyMinimum}
+                    placeholder="The bare minimum for very hard days"
+                    className="mt-1.5 px-4 py-3 rounded-2xl"
+                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                  />
+                </>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Duration (optional)" icon="calendar-clear-outline">
+              <View className="flex-row items-center justify-between">
+                <ApText size="sm" color={colors.textPrimary}>
+                  Temporary habit (auto-deletes)
+                </ApText>
+                <Switch
+                  value={hasDateRange}
+                  onValueChange={(v: boolean) => setHasDateRange(v)}
+                  trackColor={{ false: colors.surfaceBorder, true: colors.primary + "80" }}
+                  thumbColor={hasDateRange ? colors.primary : colors.textMuted}
+                />
+              </View>
+              {hasDateRange && (
+                <>
+                  <TouchableOpacity
+                    onPress={() => openDatePicker('start')}
+                    className="flex-row items-center justify-between py-3 mt-2 border-b"
+                    style={{ borderBottomColor: colors.surfaceBorder }}
+                  >
+                    <ApText size="sm" color={colors.textPrimary}>Start Date</ApText>
+                    <ApText size="sm" color={startDate ? colors.primary : colors.textMuted}>
+                      {formatDate(startDate)}
+                    </ApText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => openDatePicker('end')}
+                    className="flex-row items-center justify-between py-3"
+                  >
+                    <ApText size="sm" color={colors.textPrimary}>End Date</ApText>
+                    <ApText size="sm" color={endDate ? colors.primary : colors.textMuted}>
+                      {formatDate(endDate)}
+                    </ApText>
+                  </TouchableOpacity>
+                </>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Appearance" icon="color-palette-outline">
+              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2">
+                Color
+              </ApText>
+              <View className="flex-row flex-wrap">
+                {HABIT_COLORS.map((c: string) => (
+                  <TouchableOpacity
+                    key={c}
+                    onPress={() => {
+                      setSelectedColor(c);
+                      triggerSelection();
+                    }}
+                    className="w-9 h-9 rounded-full mr-2 mb-2"
+                    style={{
+                      backgroundColor: c,
+                      borderWidth: selectedColor === c ? 3 : 0,
+                      borderColor: colors.textPrimary,
+                    }}
+                  />
+                ))}
+              </View>
+              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mt-2 mb-2">
+                Icon
+              </ApText>
+              <View className="flex-row flex-wrap">
+                {HABIT_ICONS.map((iconName: string) => (
+                  <TouchableOpacity
+                    key={iconName}
+                    onPress={() => {
+                      setSelectedIcon(iconName);
+                      triggerSelection();
+                    }}
+                    className="w-11 h-11 rounded-xl items-center justify-center mr-2 mb-2"
+                    style={{
+                      backgroundColor:
+                        selectedIcon === iconName
+                          ? colors.primary + "26"
+                          : colors.background,
+                      borderWidth: selectedIcon === iconName ? 2 : 1,
+                      borderColor:
+                        selectedIcon === iconName ? colors.primary : colors.surfaceBorder,
+                    }}
+                  >
+                    <Ionicons
+                      name={iconName as any}
+                      size={20}
+                      color={selectedIcon === iconName ? colors.primary : colors.textMuted}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </CollapsibleSection>
+          </View>
+
+          {/* Hidden date pickers */}
           {showStartPicker && (
             <DateTimePicker
               value={startDate || new Date()}
@@ -988,7 +780,7 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
           )}
           {showEndPicker && (
             <DateTimePicker
-              value={endDate || new Date()}
+              value={endDate || startDate || new Date()}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={handleDateChange}
@@ -996,126 +788,29 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
             />
           )}
 
-          {/* Color Picker */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Appearance - Color
-          </ApText>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-row"
-          >
-            {HABIT_COLORS.map((color) => (
-              <TouchableOpacity
-                key={color}
-                onPress={() => handleColorSelect(color)}
-                className="mr-3 items-center justify-center"
-              >
-                <View
-                  className="w-12 h-12 rounded-full items-center justify-center border-2"
-                  style={{
-                    backgroundColor: color,
-                    borderColor:
-                      selectedColor === color
-                        ? colors.textPrimary
-                        : "transparent",
-                  }}
-                >
-                  {selectedColor === color && (
-                    <Ionicons
-                      name="checkmark"
-                      size={24}
-                      color={colors.background}
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          {/* Icon Picker */}
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-8 mb-4 uppercase"
-            style={{ letterSpacing: 1 }}
-          >
-            Appearance - Icon
-          </ApText>
-          <View className="flex-row flex-wrap justify-between">
-            {HABIT_ICONS.map((icon) => (
-              <TouchableOpacity
-                key={icon}
-                onPress={() => handleIconSelect(icon)}
-                className="w-[22%] aspect-square mb-4 rounded-2xl items-center justify-center border"
-                style={{
-                  backgroundColor:
-                    selectedIcon === icon
-                      ? colors.primary + "20"
-                      : colors.surface,
-                  borderColor:
-                    selectedIcon === icon
-                      ? colors.primary
-                      : colors.surfaceBorder,
-                }}
-              >
-                <Ionicons
-                  name={icon as any}
-                  size={24}
-                  color={
-                    selectedIcon === icon ? selectedColor : colors.textMuted
-                  }
-                />
-              </TouchableOpacity>
-            ))}
+          {/* Save */}
+          <View className="px-5 mt-6">
+            <TouchableOpacity
+              onPress={handleSavePress}
+              disabled={saving}
+              accessibilityRole="button"
+              accessibilityLabel={isEditMode ? 'Save habit changes' : 'Create habit'}
+              className="h-14 rounded-full items-center justify-center flex-row"
+              style={{
+                backgroundColor: accentColor,
+                opacity: saving ? 0.6 : 1,
+              }}
+            >
+              <Ionicons name="checkmark-circle" size={22} color={colors.background} />
+              <ApText size="base" font="bold" color={colors.background} className="ml-2">
+                {saving ? 'Saving…' : isEditMode ? 'Save Changes' : 'Create Habit'}
+              </ApText>
+            </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
 
-      {/* Action Buttons */}
-      <View
-        className="flex-row items-center gap-2 justify-between px-4 py-4 border-t"
-        style={{ backgroundColor: colors.background, borderColor: colors.surfaceBorder }}
-      >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-3/6 h-12 border flex items-center justify-center rounded-full px-5 py-2"
-          style={{ borderColor: colors.surfaceBorder }}
-        >
-          <ApText size="base" color={colors.textMuted}>
-            Cancel
-          </ApText>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={saving}
-          className={`w-3/6 h-12 flex items-center justify-center rounded-full ${
-            saving ? "bg-gray-200" : ""
-          }`}
-          style={{
-            backgroundColor: saving ? colors.surfaceInactive : colors.primary,
-          }}
-        >
-          <ApText
-            size="sm"
-            font="bold"
-            color={saving ? colors.textMuted : colors.background}
-          >
-            {saving 
-              ? (isEditMode ? "Saving..." : "Creating...") 
-              : (isEditMode ? "Save Changes" : "Create")}
-          </ApText>
-        </TouchableOpacity>
-      </View>
-    </ApContainer>
+      </ApContainer>
   );
 };
 

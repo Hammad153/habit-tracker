@@ -238,7 +238,7 @@ const HomeScreen = () => {
         <View
           style={{
             backgroundColor: colors.surfaceGlow,
-            borderRadius: 20,
+            borderRadius: 10,
             paddingLeft: 12,
             paddingRight: 12,
           }}

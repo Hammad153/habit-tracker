@@ -138,6 +138,13 @@ const RootLayout = () => {
                     }}
                   />
                   <Stack.Screen
+                    name="create-identity"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                    }}
+                  />
+                  <Stack.Screen
                     name="identities"
                     options={{
                       headerShown: false,
