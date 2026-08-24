@@ -40,10 +40,10 @@ const UserGreeting: React.FC<Props> = ({
   const greeting = getGreeting();
 
   return (
-    <View className="flex-row items-center justify-between w-full py-4">
+    <View className="flex-row items-center justify-between w-full py-3">
       <View className="flex-row items-center">
         <View
-          className="w-12 h-12 rounded-2xl items-center justify-center overflow-hidden"
+          className="w-10 h-10 rounded-2xl items-center justify-center overflow-hidden"
           style={{
             backgroundColor: colors.primary,
             shadowColor: colors.primary,
