@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { BehavioralNotificationApiService } from "@/src/modules/notifications/candidates";
 import { useRouter, useSegments } from "expo-router";
 import { ApLoader } from "@/src/components";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -47,6 +48,14 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
         // Non-critical: reminders still fire once re-saved on this device.
         syncedUserRef.current = null;
       });
+
+    // Phase 3.7 — behavioral insight candidates (deterministic, server-gated
+    // by cadence/cooldown; local scheduling via existing notification service).
+    BehavioralNotificationApiService.getCandidates()
+      .then((candidates) =>
+        NotificationService.scheduleBehavioralCandidates(candidates || []),
+      )
+      .catch(() => undefined); // best-effort by design
   }, [user?.id]);
 
   if (isLoading || authStatus === "INITIALIZING") {

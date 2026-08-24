@@ -1,4 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import * as Notifications from "expo-notifications";
+import { router } from "expo-router";
 import { ApStorageKeys, ApStorageService } from "@/src/services/storage";
 import { useAuthState } from "@/src/modules/auth/context";
 import { IAppNotification } from "./model";
@@ -34,6 +36,17 @@ export const useNotificationsState = () => {
 export const NotificationsProvider: React.FC<IProps> = ({ children }) => {
   const { user } = useAuthState();
   const [allNotifications, setAllNotifications] = useState<IAppNotification[]>([]);
+
+  // Phase 3.7 — deep-link behavioral notifications into existing screens.
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const route = response.notification.request.content.data?.route;
+      if (typeof route === "string" && route.startsWith("/")) {
+        router.push(route as never);
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   const persist = async (nextNotifications: IAppNotification[]) => {
     setAllNotifications(nextNotifications);

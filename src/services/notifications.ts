@@ -1,4 +1,8 @@
 import * as Notifications from "expo-notifications";
+import {
+  BehavioralNotificationApiService,
+  INotificationCandidate,
+} from "@/src/modules/notifications/candidates";
 import { Platform } from "react-native";
 import { ApStorageService, ApStorageKeys } from "@/src/services/storage";
 
@@ -88,6 +92,52 @@ export class NotificationService {
         },
       });
     }
+  };
+
+  /**
+   * Phase 3.7 — schedules backend-decided behavioral candidates as LOCAL
+   * notifications (short delay, quiet hours already enforced server-side).
+   * Delivery fingerprints are confirmed back so the server cooldown ledger
+   * prevents repeat surfacing.
+   */
+  static scheduleBehavioralCandidates = async (
+    candidates: Array<{
+      fingerprint: string;
+      type: INotificationCandidate["type"];
+      priority: INotificationCandidate["priority"];
+      title: string;
+      body: string;
+      action: { route: string };
+    }>,
+  ): Promise<void> => {
+    if (Platform.OS === "web") return;
+    if (!candidates?.length) return;
+
+    const granted = await NotificationService.ensurePermissions();
+    if (!granted) return;
+
+    for (const c of candidates) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: c.title,
+          body: c.body,
+          data: { behavioral: true, route: c.action.route, type: c.type },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: c.priority === "URGENT" ? 5 : 30,
+        },
+      });
+    }
+
+    // Fire-and-forget confirmation; server ledger is the correctness source.
+    BehavioralNotificationApiService.markDelivered(
+      candidates.map((c) => ({
+        fingerprint: c.fingerprint,
+        type: c.type,
+        priority: c.priority,
+      })),
+    ).catch(() => undefined);
   };
 
   /**
