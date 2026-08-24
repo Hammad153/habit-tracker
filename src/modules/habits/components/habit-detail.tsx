@@ -34,6 +34,7 @@ import {
   IAdaptationOutcomeEntry,
   IAdaptiveSuggestion,
 } from "@/src/modules/habits/adaptive";
+import { BehavioralEventApiService } from "@/src/modules/notifications/candidates";
 import OutcomeCard from "./OutcomeCard";
 import { router } from "expo-router";
 import HabitTimer from "./HabitTimer";
@@ -135,6 +136,8 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
               setAdaptiveHeadline(res.coach.headline);
               setAdaptiveMessage(res.coach.message);
               setAdaptiveActionLabel(res.coach.actionLabel);
+              // Phase 4.1 — ADAPTIVE_PROPOSAL_VIEWED (server validates id).
+              BehavioralEventApiService.proposalViewed(res.suggestion.id);
             } else {
               setAdaptive(null);
             }
@@ -365,6 +368,13 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
               intervention={insight}
               coach={coach}
               busy={insightBusy}
+              onViewed={(fp) => BehavioralEventApiService.interventionViewed(fp)}
+              onDismissed={(fp) =>
+                BehavioralEventApiService.interventionDismissed(fp)
+              }
+              onActionStarted={(fp) =>
+                BehavioralEventApiService.interventionActionStarted(fp)
+              }
               onAction={handleInsightAction}
               onDismiss={handleDismissInsight}
             />

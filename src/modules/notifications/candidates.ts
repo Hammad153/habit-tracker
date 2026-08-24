@@ -42,6 +42,44 @@ export class BehavioralNotificationApiService {
   ) => {
     return axiosInstance
       .post("/notifications/delivered", { items })
-      .then((res) => res.data as { stored: number });
+      .then(
+        (res) =>
+          res.data as {
+            stored: number;
+            deliveries: Array<{ fingerprint: string; id: string }>;
+          },
+      );
   };
+}
+
+/**
+ * Phase 4.1 — behavioral event ledger client.
+ * Narrow typed endpoints only; the server validates every correlation
+ * object and enforces funnel semantics (no invented observations).
+ */
+export class BehavioralEventApiService {
+  static interventionViewed = (fingerprint: string) =>
+    axiosInstance
+      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/viewed`)
+      .catch(() => undefined);
+
+  static interventionDismissed = (fingerprint: string) =>
+    axiosInstance
+      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/dismissed`)
+      .catch(() => undefined);
+
+  static interventionActionStarted = (fingerprint: string) =>
+    axiosInstance
+      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/action-started`)
+      .catch(() => undefined);
+
+  static proposalViewed = (proposalId: string) =>
+    axiosInstance
+      .post(`/analytics/events/proposal/${proposalId}/viewed`)
+      .catch(() => undefined);
+
+  static notificationOpened = (deliveryId: string) =>
+    axiosInstance
+      .post(`/analytics/events/notification/${deliveryId}/opened`)
+      .catch(() => undefined);
 }

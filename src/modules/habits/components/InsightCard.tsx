@@ -13,6 +13,10 @@ interface InsightCardProps {
   intervention: IIntervention;
   /** AI-coached wording; absent/failing keeps the deterministic copy. */
   coach?: ICoach | null;
+  /** Phase 4.1 ledger callbacks (fire-and-forget inside the parent). */
+  onViewed?: (fingerprint: string) => void;
+  onDismissed?: (fingerprint: string) => void;
+  onActionStarted?: (fingerprint: string) => void;
   /** True while a completion triggered by this card is in flight. */
   busy?: boolean;
   onAction: (action: InterventionActionType) => void;
@@ -35,11 +39,24 @@ const ACTION_LABELS: Record<InterventionActionType, string> = {
 const InsightCard: React.FC<InsightCardProps> = ({
   intervention,
   coach,
+  onViewed,
+  onDismissed,
+  onActionStarted,
   busy,
   onAction,
   onDismiss,
 }) => {
   const colors = useTheme();
+
+  // Phase 4.1 — INTERVENTION_VIEWED fires once per fingerprint on render.
+  const viewedFingerprintRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    const fp = intervention.fingerprint;
+    if (!fp || viewedFingerprintRef.current === fp) return;
+    viewedFingerprintRef.current = fp;
+    onViewed?.(fp);
+  }, [intervention.fingerprint, onViewed]);
+
   const action =
     (coach?.actionLabel && coach.actionLabel.trim()) ||
     ACTION_LABELS[intervention.suggestedAction.type];
@@ -83,7 +100,10 @@ const InsightCard: React.FC<InsightCardProps> = ({
           </ApText>
         </View>
         <Pressable
-          onPress={onDismiss}
+          onPress={() => {
+            onDismissed?.(intervention.fingerprint);
+            onDismiss();
+          }}
           accessibilityRole="button"
           accessibilityLabel="Dismiss insight"
           hitSlop={10}
@@ -95,7 +115,12 @@ const InsightCard: React.FC<InsightCardProps> = ({
 
       {actionable ? (
         <Pressable
-          onPress={() => onAction(intervention.suggestedAction.type)}
+          onPress={() => {
+            // INTERVENTION_ACTION_STARTED precedes the real flow; only the
+            // server can later record ACTION_COMPLETED after verification.
+            onActionStarted?.(intervention.fingerprint);
+            onAction(intervention.suggestedAction.type);
+          }}
           disabled={busy}
           accessibilityRole="button"
           accessibilityLabel={action}
