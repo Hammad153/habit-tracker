@@ -47,10 +47,23 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         description: "Plan tasks, priorities & reflection",
       },
       {
+        label: "Planner Calendar",
+        icon: "calendar-outline",
+        route: "/planner-calendar",
+        description: "Browse plans by date",
+      },
+      {
         label: "Budget",
         icon: "wallet",
         route: "/(tabs)/budget",
         description: "Track spending and income",
+      },
+      {
+        label: "Reward Shop",
+        icon: "cart",
+        route: "/reward-shop",
+        description: "Spend coins on themes & extras",
+        color: "#F59E0B",
       },
     ],
   },
