@@ -1,4 +1,4 @@
-# Habit Tracker
+# Habita
 
 A full-stack habit tracking, daily planning, budgeting, and personal development mobile app built with React Native and Expo. It combines behavioral science interventions, AI coaching, a virtual reward economy, identity-based habit formation, journaling, and budget tracking.
 

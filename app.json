@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Habit Tracker",
+    "name": "Habita",
     "slug": "habit-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -47,7 +47,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow habit-tracker to access your photos"
+          "photosPermission": "Allow Habita to access your photos"
         }
       ],
       [

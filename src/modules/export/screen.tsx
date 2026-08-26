@@ -227,7 +227,7 @@ const ExportScreen = () => {
 
       downloadBase64(
         base64,
-        "habit-tracker-export.xlsx",
+        "habita-export.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
       ToastService.Success("Excel file downloaded!");
@@ -249,12 +249,12 @@ const ExportScreen = () => {
       });
 
       if (IS_WEB) {
-        downloadText(response.data, "habit-tracker-export.csv", "text/csv");
+        downloadText(response.data, "habita-export.csv", "text/csv");
         ToastService.Success("CSV file downloaded!");
       } else {
         await Share.share({
           message: response.data,
-          title: "Habit Tracker Export (CSV)",
+          title: "Habita Export (CSV)",
         });
         ToastService.Success("CSV exported successfully!");
       }
@@ -278,7 +278,7 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           response.data,
-          "habit-tracker-report.html",
+          "habita-report.html",
           "text/html",
         );
         ToastService.Success("PDF report downloaded as HTML!");
@@ -293,7 +293,7 @@ const ExportScreen = () => {
         });
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
-          dialogTitle: "Habit Tracker Report",
+          dialogTitle: "Habita Report",
         });
         ToastService.Success("PDF report ready!");
       }
@@ -316,14 +316,14 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           jsonStr,
-          "habit-tracker-backup.json",
+          "habita-backup.json",
           "application/json",
         );
         ToastService.Success("JSON backup downloaded!");
       } else {
         await Share.share({
           message: jsonStr,
-          title: "Habit Tracker Backup (JSON)",
+          title: "Habita Backup (JSON)",
         });
         ToastService.Success("JSON backup exported!");
       }
