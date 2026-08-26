@@ -1,209 +1,211 @@
-# habit-tracker - Full App Development Guide
+# Habit Tracker
 
-This document outlines a step-by-step guide to developing **habit-tracker**, a wellness-focused mobile app aimed at helping users sleep better, relax, and feel emotionally supported. It includes all phases from setup to deployment.
+A full-stack habit tracking, daily planning, budgeting, and personal development mobile app built with React Native and Expo. It combines behavioral science interventions, AI coaching, a virtual reward economy, identity-based habit formation, journaling, and budget tracking.
 
----
+## Features
 
-## 🗓️ Project Schedule Summary
+### Habit Management
+- Create habits with icons, colors, categories, and flexible schedules (daily, specific days, X times/week, every N days)
+- Numeric goals with units (e.g. "30 reps", "10 pages")
+- Three behavioral tiers: full behavior, minimum (2-minute version), emergency minimum (crisis days)
+- Habit stacking and implementation intentions (scheduled time + location)
+- Temporary habits with auto-deletion on end date
+- Tags, archive/restore, and reorder support
 
-- **Week 1–2**: Project setup, UI, navigation
-- **Week 3–4**: Sleep sounds & journaling
-- **Week 5**: Breathing, scan, comfort notes
-- **Week 6**: Notifications, personalization
-- **Week 7**: Gamification, mood tracker
-- **Week 8**: AI storytelling, polish
-- **Week 9**: Backend integration, deployment
+### Behavioral Science Engine
+- Adaptive suggestions to reduce targets, frequency, or change timing
+- Intervention system with recovery options, difficulty reduction, identity reinforcement, and momentum protection
+- AI Coach generating supportive, direct, celebratory, or cautionary messages (NVIDIA LLM with deterministic fallback)
+- Weekly behavior reviews with AI-generated summaries covering wins, patterns, and next-week focus
+- Portfolio overload detection
 
----
+### Gamification & Rewards
+- XP and leveling system
+- Virtual coin economy earned through completions and streak milestones
+- Reward shop for themes, avatars, journal themes, and celebrations
+- Streak freezes purchasable with coins
+- Badge system (streak and milestone types)
+- Leaderboard per habit
 
-## 📆 Weekly Development Plan
+### Identity System
+- Create identities ("who I want to become") with title, description, icon, and color
+- Link habits to identities
+- Evidence points computed from completion history
+- Leveling system with progress bars
 
-### Week 1–2: Project Setup & UI Foundation
+### Daily Planner
+- Task creation with priorities (high, medium, low) and statuses (pending, completed, skipped)
+- Time slots with start/end and duration
+- Task-to-habit linking
+- Calendar view integration
 
-- Install Expo CLI and create the app using `npx create-expo-app habit-tracker`
-- Install NativeWind and React Navigation packages
-- Setup folder structure and Tailwind CSS
-- Create navigation flow between screens
+### Budget & Finance
+- Budgets with daily, weekly, monthly, or custom periods
+- Per-category allocations
+- Expense and income tracking
+- Budget summary with remaining balance, net cash flow, overspend warnings
+- Category and daily breakdown visualizations
+- Currency: Nigerian Naira (NGN)
 
-### Week 3–4: Core Features (Sleep Sounds & Journal)
+### Journaling
+- Entries with mood, tags, favorites, and pins
+- 9 built-in templates (daily reflection, morning, evening, gratitude, goal planning, free writing, weekly review, monthly reflection, blank)
 
-- Integrate Expo Audio API for sound playback
-- Create mix & match sound UI
-- Build daily journal UI with prompts
-- Connect sentiment analysis via OpenAI API
+### Analytics
+- Weekly and monthly completion rates
+- Day-of-week completion distribution
+- Category breakdown and leaderboard
+- 30-day overview with streak stats
 
-### Week 5: Breathing, Body Scan & Comfort Notes
+### Data Export
+- CSV export (Excel, Google Sheets compatible)
+- JSON backup export
+- Share sheet integration
 
-- Add breathing exercise visuals
-- Develop body scan audio with timer
-- Create developer comfort notes with scheduling
+### Notifications
+- Push notifications for habit reminders
+- Behavioral insight notifications
+- In-app notification feed
 
-### Week 6: Notifications & Personalization
+### Offline Support
+- GET response caching
+- Mutation queue for offline writes with automatic flush on reconnection
+- Optimistic UI updates for habit toggles
 
-- Implement Expo Notifications for bedtime reminders
-- Add customizable themes using AsyncStorage
+### Authentication & Settings
+- Email/password auth with JWT (access + refresh tokens), automatic token refresh
+- Forgot/reset password via email
+- Light/dark/system theme modes
+- Sound and haptic toggles
+- AI Coach preferences (tone, frequency)
 
-### Week 7: Gamification & Mood Tracking
+### Subscription Tiers
+| Tier | Price | Features |
+|------|-------|----------|
+| Free | - | Up to 5 habits, basic analytics, badges & XP |
+| Basic | $3.99/mo | Unlimited habits, smart reminders, data export |
+| Premium | $7.99/mo | Custom themes, AI Habit Coach, advanced analytics |
 
-- Track completed sessions and reward points
-- Build mood tracker and charting with `react-native-chart-kit`
+## Tech Stack
 
-### Week 8: AI Stories & Final Touches
+### Frontend
+- React Native 0.81.5 with Expo SDK 54
+- Expo Router v6 (file-based routing, typed routes)
+- TypeScript 5.3+
+- NativeWind v4 (Tailwind CSS for React Native)
+- React Native Paper
+- TanStack Query v5
+- Axios (with auth interceptors, offline support)
+- Expo Notifications, SecureStore, Image Picker, Audio, Haptics
+- React Native SVG, Confetti Cannon, View Shot
 
-- Use OpenAI API to generate stories
-- Add Text-to-Speech using `expo-speech`
-- Polish UI and animations
+### Backend
+- NestJS 11 with Prisma 7.8 ORM
+- PostgreSQL
+- NVIDIA API (LLM for AI coach, with deterministic fallback)
+- Cloudinary (file uploads)
+- Puppeteer (PDF generation)
+- Nodemailer + Handlebars (transactional emails)
+- JWT auth, Helmet, rate limiting, Sentry monitoring
+- Deployed on Vercel as serverless functions
 
-### Week 9: Authentication, Backend & Deployment
+## Getting Started
 
-- Integrate Firebase Auth, Firestore, and Cloud Functions
-- Build and test for Android/iOS with `npx expo build`
-- Publish to app stores
+### Prerequisites
+- Node.js 22+
+- pnpm 9+
+- PostgreSQL (for backend)
 
----
-
-## 🛠️ Tools & Dependencies Overview
-
-- **Frontend**: React Native, Expo, NativeWind
-- **Backend**: Firebase / Supabase
-- **AI/NLP**: OpenAI / HuggingFace API, Expo Speech
-- **Audio**: Expo Audio API / `react-native-sound`
-- **Storage**: Firestore, AsyncStorage, Secure Store
-- **State Mgmt**: Context API, Zustand / Redux
-- **Charts**: `react-native-chart-kit`
-- **Notifications**: Expo Notifications
-
----
-
-## 🔐 Suggested Firebase Firestore Structure
-
-```
-users/
-  {userId}/
-    journal/
-      {entryId}
-    comfortNotes/
-      {noteId}
-    sleepMixes/
-      {mixId}
-    moods/
-      {date}
-    goals/
-      {goalId}
-```
-
----
-
-## 🚀 Builds & OTA Updates — Cheat Sheet
-
-We use **EAS Update** (`expo-updates`) to push changes to already-installed apps
-without rebuilding. The single most important thing to know is **when you can ship
-over-the-air (OTA) vs. when you must rebuild the APK.**
-
-### The one rule
-
-> **JS/assets → OTA. Native → rebuild.**
-
-The `runtimeVersion` is set to the `fingerprint` policy, which computes a hash of
-your native dependencies and config. If that hash changes, the update simply won't
-be delivered to an incompatible build — so you can't accidentally brick installed
-apps. When in doubt, it's safe: worst case an update just doesn't appear until you
-rebuild.
-
-### What ships which way
-
-| Change | How it ships |
-|--------|--------------|
-| Screen / component / logic edits (`src/`, `app/`) | ✅ OTA |
-| Styling, copy, Tailwind classes | ✅ OTA |
-| Bundled images / fonts / JSON | ✅ OTA |
-| Bug fixes in TypeScript | ✅ OTA |
-| **Adding/removing a native module** (e.g. `expo-notifications`) | 🔁 Rebuild |
-| **Any `app.json` native config** (permissions, plugins, icon, splash, package) | 🔁 Rebuild |
-| **New app permission** | 🔁 Rebuild |
-| **Expo SDK upgrade** (54 → 55) | 🔁 Rebuild |
-| Dependency change that pulls in native code | 🔁 Rebuild |
-
-Rule of thumb: if you edited `package.json` (native dep) or `app.json`, assume a
-rebuild. If you only touched `.ts`/`.tsx` or assets, it's OTA.
-
-> ⚠️ **`pnpm-lock.yaml` counts too.** A change that only touches the lockfile can
-> still be a rebuild if it moves a **native** module's version (e.g. a
-> `pnpm install` or an "expo doctor" deps fix that bumps `react-native-svg`,
-> `@react-native-community/datetimepicker`, `react-native-worklets`, etc.). Those
-> shift the fingerprint even though `package.json` looks untouched. Pure JS-only
-> dep changes (types, lint, build tools) do not.
-
-### How to tell if a change needs a rebuild (check the fingerprint)
-
-The fingerprint IS the `runtimeVersion`. If it changed, installed apps built on the
-old fingerprint will silently ignore the OTA. To check whether the last publish
-changed it:
+### Frontend Setup
 
 ```bash
-eas update:list --branch preview --limit 3
+cd hbt-app
+cp .env.example .env        # Set EXPO_PUBLIC_API_URL (defaults to localhost:3000)
+pnpm install
+pnpm start                   # Starts Expo dev server
+pnpm android                 # Run on Android
+pnpm ios                     # Run on iOS
+pnpm web                     # Run on web
 ```
 
-Compare the **Runtime Version** of the newest update against the previous one
-(per platform — iOS and Android have separate fingerprints):
+### Backend Setup
 
-- **Same Runtime Version** → OTA reaches installed apps. ✅
-- **Different Runtime Version** → the installed APK won't receive it until you
-  **rebuild once** with the new fingerprint. 🔁 After that one rebuild, JS-only
-  changes flow OTA again.
+```bash
+cd hbt-be
+cp .env.example .env         # Set DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, MAIL_*, NVIDIA_* (optional)
+pnpm install
+pnpm db:migrate              # Run Prisma migrations
+pnpm db:seed                 # Seed database (optional: set ADMIN_EMAIL/ADMIN_PASSWORD for admin user)
+pnpm start:dev               # Start in watch mode (port 3000)
+```
 
-You can also compute the current fingerprint locally without publishing:
+### Environment Variables
+
+**Frontend** (`.env`):
+- `EXPO_PUBLIC_API_URL` -- Backend API URL (default: `http://localhost:3000/api/v1/`)
+
+**Backend** (`.env`):
+- `DATABASE_URL` -- PostgreSQL connection string
+- `JWT_SECRET` / `JWT_REFRESH_SECRET` -- Token signing secrets
+- `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS` -- SMTP config
+- `NVIDIA_API_KEY` / `NVIDIA_MODEL` -- Optional AI coach config
+- `CLOUDINARY_*` -- File upload config
+- `SENTRY_DSN` -- Error monitoring (optional)
+
+## Building & Deploying
+
+### EAS Build Profiles
+
+| Profile | Channel | Distribution | Build Type |
+|---------|---------|--------------|------------|
+| `development` | development | internal | APK |
+| `preview` | preview | internal | APK |
+| `production` | production | store | App Bundle (.aab) |
+
+```bash
+eas build -p android --profile preview     # Preview APK
+eas build -p android --profile production  # Play Store AAB
+```
+
+### OTA Updates
+
+JS/component/styling/logic changes ship over-the-air without rebuilding. The GitHub Action (`.github/workflows/eas-update.yml`) runs `eas update` on push to `development` or `main`, publishing to the `preview` channel.
+
+```bash
+eas update --branch preview --message "description"
+```
+
+Native changes (new modules, `app.json` config, SDK upgrades) require a rebuild. Check the fingerprint with:
 
 ```bash
 npx expo-updates fingerprint:generate
+eas update:list --branch preview --limit 3
 ```
 
-### Ship a JS/asset change (OTA — no rebuild)
+### Backend Deployment
 
-Automatic — just push:
+Deployed to Vercel via `vercel.json` serverless config. All routes go through `api/index.ts`.
 
-```bash
-git push origin main
+## Project Structure
+
 ```
+hbt-app/
+  app/                  # Expo Router screens (file-based routing)
+    (tabs)/             # Tab navigator (Home, Plan, Habits, Budget, More)
+    settings/           # Settings screens
+    modals/             # Modal screens (create/edit habit, budgets, etc.)
+  src/
+    modules/            # Feature modules (habits, budget, journal, etc.)
+    components/         # Shared components
+    services/           # API, offline, notifications, storage
+    context/            # Combined context providers
+    libs/               # Axios, utilities
+    constants/          # Colors, icons, categories, motivation messages
+  assets/               # Images, fonts
 
-The [`.github/workflows/eas-update.yml`](.github/workflows/eas-update.yml) workflow
-runs `eas update` and publishes to the `preview` channel. Installed apps download it
-silently and apply it **on next launch**.
-
-To publish manually instead:
-
-```bash
-eas update --branch preview --message "your change description"
+hbt-be/
+  src/
+    modules/            # 19 NestJS feature modules
+    core/               # Auth, AI, mailer, notifications
+  prisma/               # Database schema and migrations
 ```
-
-### Ship a native change (rebuild required)
-
-```bash
-eas build -p android --profile preview     # installable APK
-```
-
-Install the new APK. From then on, JS changes flow OTA again against the new
-fingerprint. (Use `--profile production` for a Play Store `.aab`.)
-
-### Channels & branches
-
-The channel of the installed build **must match** the branch you publish updates to:
-
-| Build profile | Channel | Publish updates to branch |
-|---------------|---------|---------------------------|
-| `preview` (APK you distribute today) | `preview` | `preview` |
-| `production` (Play Store `.aab`) | `production` | `production` |
-
-The GitHub Action publishes to `preview` by default (see `UPDATE_BRANCH` in the
-workflow). If you switch to distributing the production build, change that value to
-`production`.
-
-### One-time setup (already done, for reference)
-
-1. `EXPO_TOKEN` secret added to the GitHub repo (Settings → Secrets → Actions).
-2. First APK built **with** `expo-updates` installed — OTA only works on a build
-   that already contains the updates runtime.
-
-> ⚠️ The OTA bundle bakes in `EXPO_PUBLIC_API_URL` at publish time. It's set in the
-> workflow `env` and in `eas.json` build profiles. If you change the backend URL,
-> update it in **both** places.
