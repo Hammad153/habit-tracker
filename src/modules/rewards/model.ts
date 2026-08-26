@@ -20,7 +20,9 @@ export interface IRewardBreakdown {
 }
 
 export interface IRewardBalance {
-  coins: number;
+  balance: number;
+  cachedBalance: number;
+  consistent: boolean;
 }
 
 export interface IRewardTransaction {

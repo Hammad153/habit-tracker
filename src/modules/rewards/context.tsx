@@ -46,7 +46,7 @@ export const RewardsProvider: React.FC<IProps> = ({ children }) => {
   const fetchBalance = useCallback(() => {
     return RewardsService.getBalance()
       .then((data) => {
-        if (data && typeof data.coins === "number") setBalance(data.coins);
+        if (data && typeof data.balance === "number") setBalance(data.balance);
         return data;
       })
       .catch((err) => {

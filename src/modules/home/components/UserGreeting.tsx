@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -37,11 +38,16 @@ const UserGreeting: React.FC<Props> = ({
 }) => {
   const { user } = useAuthState();
   const colors = useTheme();
+  const router = useRouter();
   const greeting = getGreeting();
 
   return (
     <View className="flex-row items-center justify-between w-full py-3">
-      <View className="flex-row items-center">
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => router.push("/profile")}
+        className="flex-row items-center"
+      >
         <View
           className="w-10 h-10 rounded-2xl items-center justify-center overflow-hidden"
           style={{
@@ -86,7 +92,7 @@ const UserGreeting: React.FC<Props> = ({
             {user?.name || "Habit Tracker"}
           </ApText>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View className="flex-row items-center">
         <TouchableOpacity
