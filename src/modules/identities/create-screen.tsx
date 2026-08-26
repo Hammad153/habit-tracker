@@ -149,7 +149,7 @@ const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
           IDENTITY
         </ApText>
         <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-1.5">
-          Phrase it as "I am someone who…"
+          Phrase it as &quot;I am someone who...&quot;
         </ApText>
         <TextInput
           value={title}
