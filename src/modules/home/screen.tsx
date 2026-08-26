@@ -37,6 +37,20 @@ import { isSameDateKey, toDateKey, isHabitEligibleForDate } from "@/src/utils/da
 
 const RECENT_HABIT_LIMIT = 3;
 
+/** Check if a weekly review is available: at least7 days since account creation and the current user-week has completed. */
+const isWeeklyReviewAvailable = (createdAt?: string): boolean => {
+  if (!createdAt) return true; // default to showing the card if no date
+  const created = new Date(createdAt);
+  const now = new Date();
+  const daysSince = Math.floor((now.getTime() - created.getTime()) / 86_400_000);
+  if (daysSince < 7) return false;
+  // Rolling7-day week: check if today falls after the current week boundary
+  const weekIndex = Math.floor(daysSince / 7);
+  const weekStartMs = created.getTime() + weekIndex * 7 * 86_400_000;
+  const weekEndMs = weekStartMs + 6 * 86_400_000;
+  return now.getTime() > weekEndMs;
+};
+
 const percent = (value: number, total: number) =>
   total <= 0 ? 0 : Math.round((value / total) * 100);
 
@@ -458,13 +472,15 @@ const HomeScreen = () => {
                 withBorder
               />
             )}
-            <InsightRow
-              icon="document-text-outline"
-              accent={colors.primary}
-              title="Your week is ready"
-              subtitle="See what your habits are telling you."
-              onPress={() => router.push("/weekly-review")}
-            />
+            {isWeeklyReviewAvailable(profile?.createdAt) && (
+              <InsightRow
+                icon="document-text-outline"
+                accent={colors.primary}
+                title="Your week is ready"
+                subtitle="See what your habits are telling you."
+                onPress={() => router.push("/weekly-review")}
+              />
+            )}
           </View>
         </View>
 
