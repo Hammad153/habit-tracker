@@ -1,132 +1,22 @@
-import React, { useMemo, useState } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import React from "react";
+import { View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   ApText,
   ApContainer,
   ApScrollView,
-  ApModal,
-  ApConfirmModal,
   ApHeader,
 } from "@/src/components";
 import { router } from "expo-router";
 import { useSettingsState } from "@/src/modules/settings/context";
-import { useHabitState } from "@/src/modules/habits/context";
 import { useIdentitiesState } from "./context";
-import {
-  IIdentity,
-  IDENTITY_COLORS,
-  IDENTITY_ICONS,
-} from "./model";
+import { IIdentity } from "./model";
 
 const LEVEL_BAR_HEIGHT = 8;
 
 const IdentityScreen = () => {
   const { colors } = useSettingsState();
-  const { habits } = useHabitState();
-  const {
-    loading,
-    activeIdentities,
-    createIdentity,
-    updateIdentity,
-    deleteIdentity,
-    linkHabit,
-    unlinkHabit,
-  } = useIdentitiesState();
-
-  const [editorVisible, setEditorVisible] = useState(false);
-  const [editing, setEditing] = useState<IIdentity | null>(null);
-  const [form, setForm] = useState<{
-    title: string;
-    description: string;
-    icon: string;
-    color: string;
-  }>({ title: "", description: "", icon: "fitness", color: "#3B82F6" });
-  const [selectedHabitIds, setSelectedHabitIds] = useState<string[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<IIdentity | null>(null);
-
-  const linkableHabits = useMemo(
-    () => habits.filter((habit) => !habit.isArchived),
-    [habits],
-  );
-
-  const linkedHabitIds = useMemo(() => {
-    if (!editing) return new Set<string>();
-    return new Set(
-      (editing.habitLinks ?? []).map((link) => link.habit?.id ?? link.habitId),
-    );
-  }, [editing]);
-
-  const openEdit = (identity: IIdentity) => {
-    setEditing(identity);
-    setForm({
-      title: identity.title,
-      description: identity.description ?? "",
-      icon: identity.icon || "fitness",
-      color: identity.color || "#3B82F6",
-    });
-    // Read links from the tapped identity directly; the memo still points at
-    // the previous editor until React re-renders.
-    setSelectedHabitIds(
-      (identity.habitLinks ?? []).map((link) => link.habit?.id ?? link.habitId),
-    );
-    setEditorVisible(true);
-  };
-
-  const toggleHabitSelection = (habitId: string) => {
-    setSelectedHabitIds((current) =>
-      current.includes(habitId)
-        ? current.filter((id) => id !== habitId)
-        : [...current, habitId],
-    );
-  };
-
-  const handleSave = async () => {
-    if (!form.title.trim()) return;
-    setSaving(true);
-    try {
-      if (editing) {
-        await updateIdentity(editing.id, {
-          title: form.title.trim(),
-          description: form.description.trim() || undefined,
-          icon: form.icon,
-          color: form.color,
-        });
-
-        // Reconcile links to match the selection.
-        const previous = linkedHabitIds;
-        for (const habitId of selectedHabitIds) {
-          if (!previous.has(habitId)) {
-            await linkHabit(editing.id, habitId);
-          }
-        }
-        for (const habitId of previous) {
-          if (!selectedHabitIds.includes(habitId)) {
-            await unlinkHabit(editing.id, habitId);
-          }
-        }
-      }
-      setEditorVisible(false);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirmDelete) return;
-    const result = await deleteIdentity(confirmDelete.id);
-    if (result?.archived) {
-      // Identities with evidence are kept as history; surface that clearly.
-      // The list refresh already moved it out of the active section.
-    }
-    setConfirmDelete(null);
-  };
+  const { loading, activeIdentities } = useIdentitiesState();
 
   const progressFor = (identity: IIdentity) => {
     const points = identity.evidencePoints ?? 0;
@@ -138,7 +28,11 @@ const IdentityScreen = () => {
   return (
     <ApContainer>
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <ApHeader title="Identity" subheader="Every action is a vote for the person you want to become" hasBackButton />
+        <ApHeader
+          title="Identity"
+          subheader="Every action is a vote for the person you want to become"
+          hasBackButton
+        />
 
         {/* Active identities */}
         <View className="px-5 mt-4">
@@ -181,7 +75,9 @@ const IdentityScreen = () => {
             return (
               <Pressable
                 key={identity.id}
-                onPress={() => openEdit(identity)}
+                onPress={() =>
+                  router.push(`/edit-identity?id=${identity.id}`)
+                }
                 className="rounded-3xl p-4 mb-4 mt-4"
                 style={{
                   backgroundColor: colors.surface,
@@ -300,7 +196,7 @@ const IdentityScreen = () => {
             );
           })}
 
-          <TouchableOpacity
+          <Pressable
             onPress={() => router.push("/create-identity")}
             className="mb-6 h-12 items-center justify-center rounded-full"
             style={{ backgroundColor: colors.primary }}
@@ -308,233 +204,9 @@ const IdentityScreen = () => {
             <ApText size="sm" font="bold" color={colors.background}>
               New Identity
             </ApText>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </ApScrollView>
-
-      {/* Create / edit editor */}
-      <ApModal
-        visible={editorVisible}
-        onClose={() => setEditorVisible(false)}
-        title={editing ? "Edit Identity" : "New Identity"}
-        subTitle='Phrase it as &quot;I am someone who...&quot;'
-      >
-        <ApScrollView showsVerticalScrollIndicator={false}>
-          <ApText size="xs" font="semibold" color={colors.textSecondary}>
-            IDENTITY
-          </ApText>
-          <TextInput
-            value={form.title}
-            onChangeText={(title) => setForm((f) => ({ ...f, title }))}
-            placeholder="e.g. A runner"
-            placeholderTextColor={colors.textMuted}
-            className="mt-1.5 px-4 py-3 rounded-2xl"
-            style={{
-              backgroundColor: colors.surfaceBorder + "60",
-              color: colors.textPrimary,
-            }}
-          />
-
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textSecondary}
-            className="mt-4"
-          >
-            WHY IT MATTERS (OPTIONAL)
-          </ApText>
-          <TextInput
-            value={form.description}
-            onChangeText={(description) =>
-              setForm((f) => ({ ...f, description }))
-            }
-            placeholder="What does this identity mean to you?"
-            placeholderTextColor={colors.textMuted}
-            multiline
-            className="mt-1.5 px-4 py-3 rounded-2xl"
-            style={{
-              backgroundColor: colors.surfaceBorder + "60",
-              color: colors.textPrimary,
-              minHeight: 70,
-              textAlignVertical: "top",
-            }}
-          />
-
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textSecondary}
-            className="mt-4"
-          >
-            ICON
-          </ApText>
-          <View className="flex-row flex-wrap mt-2">
-            {IDENTITY_ICONS.map((option) => (
-              <TouchableOpacity
-                key={option.name}
-                onPress={() => setForm((f) => ({ ...f, icon: option.name }))}
-                className="w-[18%] aspect-square items-center justify-center rounded-2xl mr-1.5 mb-1.5"
-                style={{
-                  backgroundColor:
-                    form.icon === option.name
-                      ? form.color + "26"
-                      : colors.surfaceBorder + "50",
-                  borderWidth: 1.5,
-                  borderColor: form.icon === option.name ? form.color : "transparent",
-                }}
-              >
-                <Ionicons
-                  name={option.name as any}
-                  size={20}
-                  color={
-                    form.icon === option.name ? form.color : colors.textMuted
-                  }
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textSecondary}
-            className="mt-3"
-          >
-            COLOR
-          </ApText>
-          <View className="flex-row flex-wrap mt-2 mb-1">
-            {IDENTITY_COLORS.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                onPress={() => setForm((f) => ({ ...f, color: option.value }))}
-                className="w-9 h-9 rounded-full mr-2.5 mb-2 items-center justify-center"
-                style={{
-                  backgroundColor: option.value,
-                  borderWidth: 2.5,
-                  borderColor:
-                    form.color === option.value
-                      ? colors.textPrimary
-                      : "transparent",
-                }}
-              >
-                {form.color === option.value && (
-                  <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textSecondary}
-            className="mt-3"
-          >
-            PROVING HABITS
-          </ApText>
-          <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-            Completions of these habits count as evidence.
-          </ApText>
-          <View className="flex-row flex-wrap mt-2 mb-3">
-            {linkableHabits.map((habit) => {
-              // openEdit pre-seeds the selection from existing links, so the
-              // chip state can rely on the selection alone.
-              const checked = selectedHabitIds.includes(habit.id);
-              return (
-                <TouchableOpacity
-                  key={habit.id}
-                  onPress={() => toggleHabitSelection(habit.id)}
-                  className="flex-row items-center px-3 py-2 rounded-full mr-1.5 mb-1.5"
-                  style={{
-                    backgroundColor: checked
-                      ? (form.color || colors.primary) + "1E"
-                      : colors.surfaceBorder + "50",
-                    borderWidth: 1.5,
-                    borderColor: checked
-                      ? form.color || colors.primary
-                      : "transparent",
-                  }}
-                >
-                  <Ionicons
-                    name={habit.icon as any}
-                    size={13}
-                    color={checked ? form.color : colors.textMuted}
-                  />
-                  <ApText
-                    size="xs"
-                    font={checked ? "semibold" : "normal"}
-                    color={checked ? colors.textPrimary : colors.textSecondary}
-                    className="ml-1.5"
-                    numberOfLines={1}
-                  >
-                    {habit.title}
-                  </ApText>
-                </TouchableOpacity>
-              );
-            })}
-            {linkableHabits.length === 0 && (
-              <ApText size="xs" color={colors.textMuted}>
-                No habits yet — create one first.
-              </ApText>
-            )}
-          </View>
-
-          <TouchableOpacity
-            onPress={handleSave}
-            disabled={saving || !form.title.trim()}
-            className="h-12 items-center justify-center rounded-full"
-            style={{
-              backgroundColor:
-                saving || !form.title.trim()
-                  ? colors.surfaceInactive
-                  : colors.primary,
-            }}
-          >
-            <ApText
-              size="sm"
-              font="bold"
-              color={
-                saving || !form.title.trim()
-                  ? colors.textMuted
-                  : colors.background
-              }
-            >
-              {saving
-                ? "Saving..."
-                : editing
-                  ? "Save changes"
-                  : "Create identity"}
-            </ApText>
-          </TouchableOpacity>
-
-          {editing && (
-            <TouchableOpacity
-              onPress={() => {
-                setEditorVisible(false);
-                setConfirmDelete(editing);
-              }}
-              className="mt-2 h-12 items-center justify-center rounded-full border mb-2"
-              style={{ borderColor: colors.danger }}
-            >
-              <ApText size="sm" font="semibold" color={colors.danger}>
-                Delete identity
-              </ApText>
-            </TouchableOpacity>
-          )}
-        </ApScrollView>
-      </ApModal>
-
-      <ApConfirmModal
-        visible={!!confirmDelete}
-        title="Delete identity?"
-        subTitle={`${
-          confirmDelete?.title ?? "This identity"
-        } will be removed. If it has history, it is archived instead of deleted.`}
-        confirmText="Delete"
-        destructive
-        onConfirm={handleDelete}
-        onClose={() => setConfirmDelete(null)}
-      />
     </ApContainer>
   );
 };
