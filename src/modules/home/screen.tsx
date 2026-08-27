@@ -289,10 +289,10 @@ const HomeScreen = () => {
           <ApText size="sm" font="bold" color={colors.textPrimary}>
             Recently scheduled
           </ApText>
-          {scheduledHabits.length > RECENT_HABIT_LIMIT && (
+          {scheduledHabits.length > 0 && (
             <TouchableOpacity onPress={() => router.push("/(tabs)/habits")}>
               <ApText size="xs" font="semibold" color={colors.primary}>
-                View all ({scheduledHabits.length}) →
+                View all
               </ApText>
             </TouchableOpacity>
           )}
