@@ -6,6 +6,7 @@ import {
   ApContainer,
   ApScrollView,
   ApHeader,
+  ApEmptyState,
 } from "@/src/components";
 import { router } from "expo-router";
 import { useSettingsState } from "@/src/modules/settings/context";
@@ -37,36 +38,11 @@ const IdentityScreen = () => {
         {/* Active identities */}
         <View className="px-5 mt-4">
           {activeIdentities.length === 0 && !loading && (
-            <View
-              className="rounded-3xl p-6 items-center"
-              style={{
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <Ionicons
-                name="flag-outline"
-                size={40}
-                color={colors.textMuted}
-              />
-              <ApText
-                size="base"
-                font="semibold"
-                color={colors.textPrimary}
-                className="mt-3"
-              >
-                Who do you want to become?
-              </ApText>
-              <ApText
-                size="xs"
-                color={colors.textMuted}
-                className="mt-1 text-center"
-              >
-                Create an identity like &quot;I am a runner&quot;, then link
-                habits that prove it.
-              </ApText>
-            </View>
+            <ApEmptyState
+              icon="flag-outline"
+              title="Who do you want to become?"
+              subtitle='Create an identity like "I am a runner", then link habits that prove it.'
+            />
           )}
 
           {activeIdentities.map((identity) => {

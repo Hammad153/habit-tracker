@@ -4,6 +4,18 @@ export const PERIOD_DAYS: Record<string, number> = {
   Year: 365,
 };
 
+/**
+ * Feature flags — controls which user-facing features are currently active.
+ *
+ * Budget is deliberately HIDDEN from the active navigation (flagged OFF) while
+ * its routes, modules, API, backend services and database tables all remain
+ * intact. To reactivate later, flip `BUDGET_ENABLED` to `true` and re-add the
+ * Budget entry to the tab/carousel/Menu navigation. Do not delete Budget code.
+ */
+export const FEATURE_FLAGS = {
+  BUDGET_ENABLED: false,
+} as const;
+
 export const HABIT_COLORS = [
   "#13ec5b",
   "#10b981",

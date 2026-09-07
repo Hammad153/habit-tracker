@@ -7,6 +7,7 @@ import {
   ApHeader,
   ApScrollView,
   ApText,
+  ApEmptyState,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useRewardsState } from "./context";
@@ -120,12 +121,11 @@ const RewardShopScreen = () => {
 
         <View className="px-5 mt-5 mb-10">
           {shopItems.length === 0 ? (
-            <View className="items-center py-10">
-              <Ionicons name="storefront-outline" size={28} color={colors.textMuted} />
-              <ApText size="sm" color={colors.textMuted} className="mt-2">
-                The shop is empty for now — earn coins and check back soon.
-              </ApText>
-            </View>
+            <ApEmptyState
+              icon="storefront-outline"
+              title="The shop is empty"
+              subtitle="Earn coins from your habits and check back soon."
+            />
           ) : (
             shopItems.map((item) => (
               <ShopCard

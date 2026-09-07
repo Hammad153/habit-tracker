@@ -143,7 +143,6 @@ const DailyPlanScreen = () => {
     <ApContainer>
       <ApHeader
         title="Daily Plan" 
-        hasBackButton
         right={
           <TouchableOpacity
             onPress={openEditor}

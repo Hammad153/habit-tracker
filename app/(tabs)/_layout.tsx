@@ -93,12 +93,12 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="budget"
+        name="progress"
         options={{
-          title: "Budget",
+          title: "Progress",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "wallet" : "wallet-outline"}
+              name={focused ? "trending-up" : "trending-up-outline"}
               size={24}
               color={color}
             />
@@ -119,10 +119,12 @@ const TabLayout = () => {
         }}
       />
 
-      {/* Hidden tabs — accessible via the More screen but not shown in the bar */}
+      {/* Hidden tabs — accessible via the More screen but not shown in the bar.
+          Budget is intentionally hidden from the active navigation (feature-gated
+          offline); Budget routes/modules remain intact for future reactivation. */}
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
-      <Tabs.Screen name="progress" options={{ href: null }} />
+      <Tabs.Screen name="budget" options={{ href: null }} />
       <Tabs.Screen name="awards" options={{ href: null }} />
     </Tabs>
   );

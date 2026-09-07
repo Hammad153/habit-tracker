@@ -13,7 +13,6 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
-import HabitMetrics from "./components/HabitMetrics";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 const HabitPageScreen = () => {
@@ -42,7 +41,6 @@ const HabitPageScreen = () => {
       <View className="flex-1">
         <ApHeader
           title="Habits"
-          hasBackButton
           right={
             <View className="flex-row items-center gap-3">
               <TouchableOpacity onPress={() => router.push("/create-habit")}>
@@ -67,10 +65,8 @@ const HabitPageScreen = () => {
           refreshing={refreshing}
           onRefresh={handleRefresh}
         >
-          {/* Metrics Section */}
-          <HabitMetrics habits={habits} />
-          
-          <View>
+          {/* Habits checklist — the core daily action */}
+          <View className="px-2">
             {error && habits.length === 0 ? (
               <ApErrorState onRetry={handleRefresh} />
             ) : habits.length > 0 ? (

@@ -6,6 +6,7 @@ import { ApContainer, ApHeader, ApScrollView, ApText, ApEmptyState } from "@/src
 import { useTheme } from "@/src/modules/settings/context";
 import { useNotificationsState } from "./context";
 import { IAppNotification } from "./model";
+import { resolveNavigationRoute } from "@/src/utils/navigation";
 
 const iconByType: Record<IAppNotification["type"], keyof typeof Ionicons.glyphMap> = {
   habit: "checkbox-outline",
@@ -30,7 +31,7 @@ const NotificationsScreen = () => {
   const handlePress = async (notification: IAppNotification) => {
     await markAsRead(notification.id);
     if (notification.route) {
-      router.push(notification.route as any);
+      router.push(resolveNavigationRoute(notification.route) as any);
     }
   };
 

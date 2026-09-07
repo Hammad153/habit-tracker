@@ -14,7 +14,6 @@ import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import axiosInstance from "@/src/libs/axios";
 import { AnalyticsData } from "./model";
-import helper from "@/src/helper";
 
 const AdvancedAnalyticsScreen = () => {
   const { colors } = useSettingsState();
@@ -72,6 +71,10 @@ const AdvancedAnalyticsScreen = () => {
   }
 
   const maxDayCount = Math.max(...data.dayDistribution.map((d) => d.count), 1);
+  const totalCompletions = data.habitStreaks.reduce(
+    (sum, habit) => sum + habit.totalCompletions,
+    0,
+  );
 
   return (
     <ApContainer>
@@ -147,10 +150,10 @@ const AdvancedAnalyticsScreen = () => {
               }}
             >
               <ApText size="xs" color={colors.textMuted}>
-                Expenses
+                Active Habits
               </ApText>
               <ApText size="lg" font="bold" color={colors.warning}>
-                {helper.formatCurrency(data.monthlyExpenseTotal)}
+                {data.totalHabits}
               </ApText>
             </View>
             <View
@@ -161,10 +164,10 @@ const AdvancedAnalyticsScreen = () => {
               }}
             >
               <ApText size="xs" color={colors.textMuted}>
-                Budget Used
+                Total Done
               </ApText>
               <ApText size="lg" font="bold" color={colors.accent}>
-                {data.budgetUsagePercentage}%
+                {totalCompletions}
               </ApText>
             </View>
           </View>
@@ -252,44 +255,6 @@ const AdvancedAnalyticsScreen = () => {
                       {cat.completions}
                     </ApText>
                   </View>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {data.spendingByCategory.length > 0 && (
-            <View
-              className="p-4 rounded-2xl border mb-6"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText
-                size="sm"
-                font="bold"
-                color={colors.textPrimary}
-                className="mb-3"
-              >
-                Spending by Category
-              </ApText>
-              {data.spendingByCategory.map((cat) => (
-                <View
-                  key={cat.category}
-                  className="flex-row justify-between items-center py-2"
-                >
-                  <View className="flex-row items-center flex-1">
-                    <View
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: cat.color || colors.warning }}
-                    />
-                    <ApText size="sm" color={colors.textPrimary} numberOfLines={1}>
-                      {cat.category}
-                    </ApText>
-                  </View>
-                  <ApText size="sm" font="bold" color={colors.textPrimary}>
-                    {helper.formatCurrency(cat.total)}
-                  </ApText>
                 </View>
               ))}
             </View>

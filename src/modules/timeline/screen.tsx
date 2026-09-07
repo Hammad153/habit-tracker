@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { format } from "date-fns";
 import {
   ApLoader,
@@ -9,6 +8,7 @@ import {
   ApContainer,
   ApHeader,
   ApScrollView,
+  ApEmptyState,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useProfileState } from "@/src/modules/profile/context";
@@ -104,11 +104,11 @@ const TimelineScreen = () => {
 
         <View className="px-5">
           {!timeline || timeline.length === 0 ? (
-            <View className="py-10 items-center">
-              <ApText color={colors.textMuted}>
-                No activities logged yet.
-              </ApText>
-            </View>
+            <ApEmptyState
+              icon="time-outline"
+              title="No activity yet"
+              subtitle="When you complete habits, your journey will appear here."
+            />
           ) : (
             timeline.map((item, index) => {
               const isLast = index === timeline.length - 1;
@@ -171,32 +171,6 @@ const TimelineScreen = () => {
           )}
         </View>
       </ApScrollView>
-
-      <TouchableOpacity
-        className="absolute bottom-8 right-5 w-14 h-14 rounded-full items-center justify-center"
-        style={{
-          backgroundColor: colors.primary,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 5,
-        }}
-        onPress={() => router.push("/")}
-      >
-        <Ionicons name="home" size={24} color={colors.background} />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        className="absolute bottom-8 left-5 w-12 h-12 rounded-full items-center justify-center border"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
-        }}
-        onPress={() => router.back()}
-      >
-        <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-      </TouchableOpacity>
     </ApContainer>
   );
 };

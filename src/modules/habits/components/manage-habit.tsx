@@ -8,6 +8,7 @@ import {
   ApContainer,
   ApHeader,
   ApScrollView,
+  ApEmptyState,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -69,26 +70,11 @@ const ManageHabitsScreen = () => {
               />
             ))}
             {activeHabits.length === 0 && (
-              <View
-                className="rounded-2xl p-8 items-center border"
-                style={{
-                  backgroundColor: colors.surface,
-                  borderColor: colors.surfaceBorder,
-                }}
-              >
-                <Ionicons
-                  name="leaf-outline"
-                  size={48}
-                  color={colors.textMuted}
-                />
-                <ApText
-                  size="base"
-                  color={colors.textMuted}
-                  className="mt-4 text-center"
-                >
-                  No active habits yet. Start by adding one!
-                </ApText>
-              </View>
+              <ApEmptyState
+                icon="leaf-outline"
+                title="No active habits"
+                subtitle="Start by adding one to begin your routine."
+              />
             )}
           </View>
         </View>

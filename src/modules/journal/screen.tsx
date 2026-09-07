@@ -407,23 +407,15 @@ const JournalScreen = () => {
           </ScrollView>
 
           <View className="mt-4">
-            <ApDateField
-              label="Filter by date"
-              value={dateFilter}
-              onChange={setDateFilter}
-              placeholder="All dates"
-              title="Filter Entries"
-            />
+            <ApText
+              size="xs"
+              font="bold"
+              color={colors.textMuted}
+              className="uppercase"
+            >
+              Templates
+            </ApText>
           </View>
-
-          <ApText
-            size="xs"
-            font="bold"
-            color={colors.textMuted}
-            className="mt-7 mb-3 uppercase"
-          >
-            Templates
-          </ApText>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {JOURNAL_TEMPLATES.map((template) => (
               <TouchableOpacity

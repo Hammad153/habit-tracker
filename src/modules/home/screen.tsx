@@ -22,7 +22,6 @@ import { useProfileState } from "@/src/modules/profile/context";
 import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
-import { useBudgetState } from "@/src/modules/budget/context";
 import { useDailyPlanState } from "@/src/modules/daily-plan/context";
 import { useIdentitiesState } from "@/src/modules/identities/context";
 import { isHabitScheduledForDate } from "@/src/utils/schedule";
@@ -143,8 +142,6 @@ const HomeScreen = () => {
   const { user } = useAuthState();
   const { unreadCount, addNotification, notifications } =
     useNotificationsState();
-  const { summary: budgetSummary, fetchSummary: fetchBudgetSummary } =
-    useBudgetState();
   const { summary: planSummary, fetchSummary: fetchPlanSummary } =
     useDailyPlanState();
   const { activeIdentities, fetchIdentities } = useIdentitiesState();
@@ -163,7 +160,6 @@ const HomeScreen = () => {
       fetchHabits(),
       fetchProfile(),
       fetchSubscription(),
-      fetchBudgetSummary(),
       fetchPlanSummary(toDateKey(new Date())),
       fetchIdentities({ silent: true }),
     ]);
@@ -425,23 +421,23 @@ const HomeScreen = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push("/(tabs)/budget")}
+              onPress={() => router.push("/(tabs)/progress")}
               className="flex-1 rounded-2xl border p-3"
               style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
               accessibilityRole="button"
-              accessibilityLabel="Open budget"
+              accessibilityLabel="Open progress"
             >
-              <ApText size="xs" font="bold" color={colors.textMuted}>BUDGET</ApText>
+              <ApText size="xs" font="bold" color={colors.textMuted}>PROGRESS</ApText>
               <ApText
                 size="xl"
                 font="bold"
-                color={budgetSummary?.warning ? colors.warning : colors.textPrimary}
+                color={colors.primary}
                 className="mt-0.5"
               >
-                {budgetSummary?.budgetUsagePercentage ?? 0}%
+                {analytics.overallRate}%
               </ApText>
               <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
-                used this month
+                {analytics.currentStreak}d streak · last 30 days
               </ApText>
             </TouchableOpacity>
           </View>

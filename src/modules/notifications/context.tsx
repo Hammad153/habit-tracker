@@ -9,6 +9,7 @@ import {
 import { ApStorageKeys, ApStorageService } from "@/src/services/storage";
 import { useAuthState } from "@/src/modules/auth/context";
 import { IAppNotification } from "./model";
+import { resolveNavigationRoute } from "@/src/utils/navigation";
 
 interface IProps {
   children: ReactNode;
@@ -68,7 +69,7 @@ export const NotificationsProvider: React.FC<IProps> = ({ children }) => {
             .catch(() => undefined);
         }
         if (typeof data.route === "string" && data.route.startsWith("/")) {
-          router.push(data.route as never);
+          router.push(resolveNavigationRoute(data.route) as never);
         }
       },
     );

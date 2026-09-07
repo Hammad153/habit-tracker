@@ -8,6 +8,7 @@ import {
   ApContainer,
   ApScrollView,
   ApText,
+  ApEmptyState,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -95,7 +96,6 @@ const ProgressScreen = () => {
     <ApContainer>
       <ApHeader
         title="Progress"
-        hasBackButton
         right={
           <Pressable
             onPress={() => router.push("/timeline")}
@@ -120,7 +120,7 @@ const ProgressScreen = () => {
             periodDays={PERIOD_DAYS[selectedTab]}
           />
 
-          <View className="mt-4 mb-6">
+          <View>
             <ApText
               size="xl"
               font="bold"
@@ -132,13 +132,13 @@ const ProgressScreen = () => {
             {isLoading ? (
               <ApLoader size="small" inline />
             ) : habitBreakdown.length === 0 ? (
-              <ApText
-                size="sm"
-                color={colors.textMuted}
-                className="text-center my-4"
-              >
-                No habits yet. Create one to see your breakdown!
-              </ApText>
+              <ApEmptyState
+                icon="stats-chart-outline"
+                title="No progress yet"
+                subtitle="Create a habit and start tracking — your consistency will show up here."
+                actionLabel="Create Habit"
+                onAction={() => router.push("/create-habit")}
+              />
             ) : (
               habitBreakdown.map((habit) => (
                 <HabitBreakdownCard
