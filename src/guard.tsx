@@ -3,6 +3,7 @@ import { BehavioralNotificationApiService } from "@/src/modules/notifications/ca
 import { useRouter, useSegments } from "expo-router";
 import { ApLoader } from "@/src/components";
 import { useAuthState } from "@/src/modules/auth/context";
+import { useSubscriptionState } from "@/src/modules/subscription/context";
 import { NotificationService } from "@/src/services";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 
@@ -12,6 +13,7 @@ interface IProps {
 
 const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
   const { user, isLoading, authStatus } = useAuthState();
+  const { subscriptionLoaded, accessGranted } = useSubscriptionState();
   const segments = useSegments();
   const router = useRouter();
   const syncedUserRef = useRef<string | null>(null);
@@ -25,14 +27,29 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
       "forgot-password",
       "reset-password",
     ];
-    const inAuthGroup = publicRoutes.includes(segments[0] ?? "");
+    const route = segments[0] ?? "";
+    const inAuthGroup = publicRoutes.includes(route);
 
-    if (!user && !inAuthGroup) {
-      router.replace("/login");
-    } else if (user && inAuthGroup) {
-      router.replace("/(tabs)");
+    if (!user) {
+      if (!inAuthGroup) router.replace("/login");
+      return;
     }
-  }, [user, segments, isLoading, authStatus, router]);
+
+    if (inAuthGroup) {
+      router.replace("/(tabs)");
+      return;
+    }
+
+    // Subscription paywall (backend-authoritative). The subscription/pricing
+    // surface is intentionally exempt so an expired member can pay.
+    if (
+      subscriptionLoaded &&
+      !accessGranted &&
+      route !== "subscription"
+    ) {
+      router.replace("/subscription");
+    }
+  }, [user, segments, isLoading, authStatus, router, subscriptionLoaded, accessGranted]);
 
   // Re-arm local reminder notifications from the backend once per session,
   // so they survive reinstalls and new devices.
