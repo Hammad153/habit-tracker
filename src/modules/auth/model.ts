@@ -3,6 +3,7 @@ export interface IAuthUser {
   email: string;
   name: string;
   avatar?: string;
+  role?: 'USER' | 'ADMIN';
 }
 
 export interface IAuthTokens {

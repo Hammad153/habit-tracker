@@ -42,7 +42,10 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
 
     // Subscription paywall (backend-authoritative). The subscription/pricing
     // surface is intentionally exempt so an expired member can pay.
+    // Admin users always bypass the paywall.
+    const isAdmin = user?.role === 'ADMIN';
     if (
+      !isAdmin &&
       subscriptionLoaded &&
       !accessGranted &&
       route !== "subscription"
