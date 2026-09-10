@@ -13,21 +13,21 @@ const StatCard: React.FC<StatCardProps> = ({ label, value }) => {
 
   return (
     <View
-      className="flex-1 m-1 p-3 rounded-2xl items-center justify-center"
+      className="flex-1 m-1.5 p-4 rounded-2xl items-center justify-center"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.surfaceBorder,
         borderWidth: 1,
-        minHeight: 80,
+        minHeight: 88,
       }}>
       <ApText
-        size="xl"
-        font="bold"
-        color={colors.textPrimary}
-        className="mb-0.5">
+        size="2xl"
+        font="extrabold"
+        color={colors.primary}
+        className="mb-1">
         {value}
       </ApText>
-      <ApText size="xs" color={colors.textMuted} textAlign="center">
+      <ApText size="xs" color={colors.textMuted} textAlign="center" font="medium">
         {label}
       </ApText>
     </View>

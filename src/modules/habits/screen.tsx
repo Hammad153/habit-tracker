@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -9,6 +9,7 @@ import {
   ApHeader,
   ApEmptyState,
   ApErrorState,
+  ApText,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
@@ -34,11 +35,11 @@ const HabitPageScreen = () => {
   }, []);
 
   const activeHabits = useMemo(() => {
-    return habits.filter((h) => !h.isArchived);
+    return habits.filter((h: any) => !h.isArchived);
   }, [habits]);
 
   const filteredHabits = useMemo(() => {
-    return activeHabits.filter((h) => {
+    return activeHabits.filter((h: any) => {
       const isDone = h.completions?.some(
         (c: any) => isSameDateKey(c.date, today) && c.status,
       );
@@ -92,7 +93,7 @@ const HabitPageScreen = () => {
                 id: "todo",
                 label: `To Do (${
                   activeHabits.filter(
-                    (h) =>
+                    (h: any) =>
                       !h.completions?.some(
                         (c: any) => isSameDateKey(c.date, today) && c.status,
                       ),
@@ -102,7 +103,7 @@ const HabitPageScreen = () => {
               {
                 id: "done",
                 label: `Done (${
-                  activeHabits.filter((h) =>
+                  activeHabits.filter((h: any) =>
                     h.completions?.some(
                       (c: any) => isSameDateKey(c.date, today) && c.status,
                     ),
@@ -143,7 +144,7 @@ const HabitPageScreen = () => {
             {error && habits.length === 0 ? (
               <ApErrorState onRetry={handleRefresh} />
             ) : filteredHabits.length > 0 ? (
-              filteredHabits.map((habit) => (
+              filteredHabits.map((habit: any) => (
                 <HabitCard
                   key={habit.id}
                   id={habit.id}

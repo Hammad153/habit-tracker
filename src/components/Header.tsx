@@ -66,35 +66,16 @@ export const ApHeader: React.FC<IProps> = ({
       className={`w-full ${containerClassName}`}
     >
       {!transparent && hasBackGround && (
-        <>
-          <BlurView
-            intensity={80}
-            tint={colors.isDark ? "dark" : "light"}
-            style={[
-              {
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              },
-            ]}
-          />
-          <LinearGradient
-            colors={
-              colors.isDark
-                ? ["rgba(16, 34, 22, 0.8)", "rgba(16, 34, 22, 0.6)"]
-                : ["rgba(255, 255, 255, 0.8)", "rgba(255, 255, 255, 0.6)"]
-            }
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-            }}
-          />
-        </>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.surface,
+          }}
+        />
       )}
 
       <View className={`px-5 pt-4 pb-4 ${headerClassName}`}>
@@ -103,11 +84,11 @@ export const ApHeader: React.FC<IProps> = ({
             {hasBackButton && (
               <Pressable
                 onPress={handleBack}
-                className={`w-10 h-10 items-center justify-center rounded-full border border-white/10 ${backContainerClassName}`}
-                style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+                className={`w-10 h-10 items-center justify-center rounded-2xl ${backContainerClassName}`}
+                style={{ backgroundColor: colors.surfaceBorder }}
                 hitSlop={10}
               >
-                <Ionicons name="arrow-back" size={20} color={colors.primary} />
+                <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
               </Pressable>
             )}
             {left}
@@ -117,7 +98,7 @@ export const ApHeader: React.FC<IProps> = ({
             {typeof title === "string" ? (
               <ApText
                 font="bold"
-                size="2xl"
+                size="xl"
                 numberOfLines={1}
                 className={titleClassName}
                 color={colors.textPrimary}
@@ -127,7 +108,6 @@ export const ApHeader: React.FC<IProps> = ({
             ) : (
               title
             )}
-
           </View>
 
           <View
@@ -143,7 +123,7 @@ export const ApHeader: React.FC<IProps> = ({
             {typeof subheader === "string" ? (
               <ApText
                 size="xs"
-                color={colors.primary}
+                color={colors.textMuted}
                 font="bold"
                 numberOfLines={2}
                 style={{ letterSpacing: 0.5 }}
@@ -159,3 +139,4 @@ export const ApHeader: React.FC<IProps> = ({
     </View>
   );
 };
+

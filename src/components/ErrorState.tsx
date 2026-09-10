@@ -47,8 +47,15 @@ export const ApErrorState: React.FC<IProps> = ({
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel={retryLabel}
-          className="mt-6 px-6 py-3 rounded-2xl flex-row items-center"
-          style={{ backgroundColor: colors.primary }}
+          className="mt-6 px-8 py-3.5 rounded-full flex-row items-center"
+          style={{
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
         >
           <Ionicons name="refresh" size={18} color={colors.background} />
           <ApText font="bold" color={colors.background} style={{ marginLeft: 8 }}>

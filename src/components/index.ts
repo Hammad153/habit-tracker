@@ -1,4 +1,5 @@
 export { ApText } from "./Text";
+export { ApTextInput } from "./Input";
 export { ApHeader } from "./Header";
 export { ApModal } from "./Modal";
 export { ApConfirmModal } from "./ConfirmModal";

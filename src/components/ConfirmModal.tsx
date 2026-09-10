@@ -37,7 +37,7 @@ export const ApConfirmModal: React.FC<IProps> = ({
       <View className="flex-row gap-x-2 mt-2">
         <TouchableOpacity
           onPress={onClose}
-          className="flex-1 py-4 rounded-2xl border items-center"
+          className="flex-1 py-4 rounded-full border items-center"
           style={{
             backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
@@ -49,8 +49,15 @@ export const ApConfirmModal: React.FC<IProps> = ({
         </TouchableOpacity>
         <TouchableOpacity
           onPress={onConfirm}
-          className="flex-1 py-4 rounded-2xl items-center"
-          style={{ backgroundColor: destructive ? colors.danger : colors.primary }}
+          className="flex-1 py-4 rounded-full items-center"
+          style={{
+            backgroundColor: destructive ? colors.danger : colors.primary,
+            shadowColor: destructive ? colors.danger : colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
         >
           <ApText font="bold" color={colors.white}>
             {confirmText}

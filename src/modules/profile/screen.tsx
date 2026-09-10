@@ -67,10 +67,15 @@ const ProfileScreen = () => {
         <View className="items-center mt-6 mb-8">
           <View className="relative">
             <View
-              className="w-24 h-24 rounded-full items-center justify-center overflow-hidden border-2"
+              className="w-28 h-28 rounded-full items-center justify-center overflow-hidden border-2"
               style={{
                 backgroundColor: colors.surface,
                 borderColor: colors.primary,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.35,
+                shadowRadius: 14,
+                elevation: 8,
               }}
             >
               {user?.avatar || profile?.avatar ? (
@@ -211,7 +216,7 @@ const ProfileScreen = () => {
         <View className="flex-row gap-x-2 mt-2">
           <TouchableOpacity
             onPress={() => setShowLogoutModal(false)}
-            className="flex-1 py-4 rounded-2xl border items-center"
+            className="flex-1 py-4 rounded-full border items-center"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
@@ -223,8 +228,15 @@ const ProfileScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={confirmLogout}
-            className="flex-1 py-4 rounded-2xl items-center"
-            style={{ backgroundColor: colors.danger }}
+            className="flex-1 py-4 rounded-full items-center"
+            style={{
+              backgroundColor: colors.danger,
+              shadowColor: colors.danger,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
           >
             <ApText font="bold" color={colors.white}>
               Log Out
@@ -243,7 +255,7 @@ const ProfileScreen = () => {
           <TouchableOpacity
             onPress={() => setShowDeleteModal(false)}
             disabled={deleting}
-            className="flex-1 py-4 rounded-2xl border items-center"
+            className="flex-1 py-4 rounded-full border items-center"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
@@ -256,8 +268,16 @@ const ProfileScreen = () => {
           <TouchableOpacity
             onPress={confirmDeleteAccount}
             disabled={deleting}
-            className="flex-1 py-4 rounded-2xl items-center"
-            style={{ backgroundColor: colors.danger, opacity: deleting ? 0.6 : 1 }}
+            className="flex-1 py-4 rounded-full items-center"
+            style={{
+              backgroundColor: colors.danger,
+              opacity: deleting ? 0.6 : 1,
+              shadowColor: colors.danger,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
           >
             <ApText font="bold" color={colors.white}>
               {deleting ? "Deleting..." : "Delete"}

@@ -29,10 +29,15 @@ export const ApSubmitButton: React.FC<IProps> = ({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ disabled: loading, busy: loading }}
-      className="mt-2 flex-row items-center justify-center rounded-2xl py-4"
+      className="mt-2 flex-row items-center justify-center rounded-full py-4 px-6"
       style={{
         backgroundColor: enabled ? colors.primary : colors.surfaceBorder,
-        opacity: loading ? 0.75 : 1,
+        opacity: loading || !enabled ? 0.75 : 1,
+        shadowColor: enabled ? colors.primary : "transparent",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: enabled ? 0.3 : 0,
+        shadowRadius: 10,
+        elevation: enabled ? 6 : 0,
       }}
     >
       {loading ? (

@@ -59,19 +59,32 @@ const AuthLayout: React.FC<IProps> = ({
             >
               <View className="px-6 pb-10">
                 <View
-                  className="w-14 h-14 rounded-2xl items-center justify-center mb-4"
-                  style={{ backgroundColor: colors.primary }}
+                  className="w-16 h-16 rounded-2xl items-center justify-center mb-4"
+                  style={{
+                    backgroundColor: colors.primary,
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 16,
+                    elevation: 8,
+                  }}
                 >
                   <Ionicons
                     name="checkmark-done"
-                    size={30}
+                    size={32}
                     color={colors.background}
                   />
                 </View>
-                <Text className="text-green-500 text-2xl font-bold">
+                <Text
+                  className="text-2xl font-bold"
+                  style={{ color: "#FFFFFF" }}
+                >
                   Build habits that stick
                 </Text>
-                <Text className="text-green-500/80 text-base mt-1">
+                <Text
+                  className="text-base mt-1"
+                  style={{ color: "rgba(255,255,255,0.7)" }}
+                >
                   Small steps, every single day.
                 </Text>
               </View>
@@ -81,7 +94,14 @@ const AuthLayout: React.FC<IProps> = ({
           {/* Form sheet */}
           <View
             className="flex-1 -mt-6 rounded-t-3xl px-6 pt-8 pb-10"
-            style={{ backgroundColor: colors.background }}
+            style={{
+              backgroundColor: colors.background,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 12,
+              elevation: 10,
+            }}
           >
             <View className="mb-8">
               <Text

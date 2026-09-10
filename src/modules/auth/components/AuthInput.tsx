@@ -23,16 +23,21 @@ const AuthInput: React.FC<IProps> = ({ label, icon, secure, ...rest }) => {
   return (
     <View className="mb-5">
       <Text
-        className="mb-2 font-medium text-sm"
-        style={{ color: colors.textPrimary }}
+        className="mb-1.5 font-semibold text-xs uppercase"
+        style={{ color: colors.textSecondary, letterSpacing: 1 }}
       >
         {label}
       </Text>
       <View
-        className="flex-row items-center px-4 rounded-xl border"
+        className="flex-row items-center px-4 rounded-2xl border"
         style={{
           backgroundColor: colors.surface,
           borderColor: focused ? colors.primary : colors.surfaceBorder,
+          shadowColor: focused ? colors.primary : "transparent",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: focused ? 0.1 : 0,
+          shadowRadius: 8,
+          elevation: focused ? 3 : 0,
         }}
       >
         <Ionicons

@@ -329,7 +329,7 @@ const DailyPlanScreen = () => {
             className="mt-3 rounded-2xl border px-4 py-3"
             style={{ minHeight: 110, color: colors.textPrimary, borderColor: colors.surfaceBorder, backgroundColor: colors.background }}
           />
-          <TouchableOpacity onPress={saveReflection} className="mt-3 rounded-2xl py-3" style={{ backgroundColor: colors.primary }}>
+          <TouchableOpacity onPress={saveReflection} className="mt-3 rounded-full py-4 items-center" style={{ backgroundColor: colors.primary }}>
             <ApText size="sm" font="bold" textAlign="center" color={colors.background}>
               Save Reflection
             </ApText>

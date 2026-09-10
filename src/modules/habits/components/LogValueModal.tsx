@@ -188,7 +188,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       <View className="flex-row space-x-3 gap-x-2">
         <TouchableOpacity
           onPress={onClose}
-          className="flex-1 py-4 rounded-2xl border items-center"
+          className="flex-1 py-4 rounded-full border items-center"
           style={{
             backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
@@ -200,8 +200,15 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSave}
-          className="flex-1 py-4 rounded-2xl items-center"
-          style={{ backgroundColor: colors.primary }}
+          className="flex-1 py-4 rounded-full items-center"
+          style={{
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
         >
           <ApText font="bold" color={colors.background}>
             {kind === "FULL" ? "Save Progress" : `Done · ${selectedVersion?.hint ?? ""}`}

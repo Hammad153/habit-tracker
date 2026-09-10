@@ -18,39 +18,40 @@ module.exports = {
         // with the `useTheme()` colors, not these classes.
 
         // Primary accent color
-        primary: "#13ec5b",
+        primary: "#10B981",
 
         // Background colors
-        background: "#102216",
-        backgroundLight: "#f6f8f6",
+        background: "#0B130E",
+        backgroundLight: "#111F17",
 
         // Surface colors (cards, containers)
-        surface: "#1A2C20",
-        surfaceLight: "#ffffff",
-        surfaceBorder: "#23482f",
-        surfaceInactive: "#232423",
+        surface: "#14251B",
+        surfaceLight: "#1D3527",
+        surfaceBorder: "#1F3A2B",
+        surfaceInactive: "#19271E",
 
         // Text colors
-        textPrimary: "#FFFFFF",
+        textPrimary: "#F8FAFC",
         textSecondary: "#94A3B8",
         textMuted: "#64748B",
 
         // Status colors
-        success: "#13ec5b",
-        progress: "#13ec5b",
+        success: "#10B981",
+        progress: "#10B981",
         progressBg: "#112217",
         warning: "#F59E0B",
         danger: "#EF4444",
+        accent: "#A78BFA",
 
         // Toggle inactive
-        toggleInactive: "#343a36",
+        toggleInactive: "#2A3E31",
 
         // Legacy compatibility
         black: "#020617",
         white: "#FFFFFF",
         muted: "#64748B",
-        border: "#23482f",
-        input: "#1A2C20",
+        border: "#1F3A2B",
+        input: "#14251B",
       },
       fontFamily: {
         display: ["Inter"],

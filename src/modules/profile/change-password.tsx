@@ -22,16 +22,23 @@ const PasswordField: React.FC<FieldProps> = ({
   error,
   colors,
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
   const [show, setShow] = useState(false);
   return (
     <View className="mb-5">
-      <ApText size="sm" font="semibold" color={colors.textMuted} className="mb-2">
+      <ApText size="xs" font="semibold" color={colors.textSecondary} className="mb-1.5 uppercase" style={{ letterSpacing: 1 }}>
         {label}
       </ApText>
       <View
-        className="flex-row items-center rounded-2xl px-4"
+        className="flex-row items-center rounded-2xl px-4 border"
         style={{
           backgroundColor: colors.surface,
+          borderColor: isFocused ? colors.primary : colors.surfaceBorder,
+          shadowColor: isFocused ? colors.primary : "transparent",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: isFocused ? 0.1 : 0,
+          shadowRadius: 8,
+          elevation: isFocused ? 3 : 0,
         }}
       >
         <TextInput
@@ -41,8 +48,10 @@ const PasswordField: React.FC<FieldProps> = ({
           placeholder="••••••••"
           placeholderTextColor={colors.textMuted}
           className="flex-1 py-4"
-          style={{ color: colors.textPrimary }}
+          style={{ color: colors.textPrimary, fontSize: 16, fontFamily: "Inter-Medium" }}
           autoCapitalize="none"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         <TouchableOpacity onPress={() => setShow((s) => !s)} hitSlop={10}>
           <Ionicons

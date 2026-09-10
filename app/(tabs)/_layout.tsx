@@ -1,37 +1,37 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 import "../../global.css";
 
 /**
- * Center "Habits" tab — deliberately louder than the rest: raised accent
- * pill + glow so the product's core action reads first.
+ * Center "Habits" tab — deliberately elevated action button with primary accent
+ * fill and glow effect.
  */
-const HabitsTabIcon = ({ focused, color }: { focused: boolean; color: string }) => {
+const HabitsTabIcon = ({ focused }: { focused: boolean }) => {
   const colors = useTheme();
   return (
     <View
       className="items-center justify-center"
       style={{
-        width: 52,
-        height: 52,
-        marginTop: -18,
-        borderRadius: 26,
+        width: 54,
+        height: 54,
+        marginTop: -20,
+        borderRadius: 27,
         backgroundColor: colors.primary,
         shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: focused ? 0.45 : 0.25,
-        shadowRadius: 8,
-        elevation: focused ? 8 : 5,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: focused ? 0.5 : 0.3,
+        shadowRadius: 10,
+        elevation: focused ? 10 : 6,
         borderWidth: 3,
-        borderColor: colors.surface,
+        borderColor: colors.background,
       }}
     >
       <Ionicons
-        name={focused ? "checkbox" : "checkbox-outline"}
-        size={26}
+        name={focused ? "checkmark-done-circle" : "checkmark-done-circle-outline"}
+        size={28}
         color={colors.background}
       />
     </View>
@@ -47,22 +47,33 @@ const TabLayout = () => {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.surfaceBorder,
-          height: 74,
-          paddingBottom: 10,
+          borderTopWidth: 1,
+          height: Platform.OS === "ios" ? 82 : 72,
+          paddingBottom: Platform.OS === "ios" ? 22 : 12,
           paddingTop: 8,
+          elevation: 12,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
         },
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 2,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Today",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "home-sharp" : "home-outline"}
-              size={24}
+              name={focused ? "today" : "today-outline"}
+              size={22}
               color={color}
             />
           ),
@@ -75,20 +86,20 @@ const TabLayout = () => {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
         }}
       />
-      {/* CENTER — core action */}
+      {/* CENTER — primary action tab */}
       <Tabs.Screen
         name="habits"
         options={{
           title: "Habits",
-          tabBarLabelStyle: { fontWeight: "700", marginTop: -2 },
+          tabBarLabelStyle: { fontWeight: "700", marginTop: -2, fontSize: 11 },
           tabBarIcon: ({ focused }: { focused: boolean }) => (
-            <HabitsTabIcon focused={focused} color={colors.primary} />
+            <HabitsTabIcon focused={focused} />
           ),
         }}
       />
@@ -98,8 +109,8 @@ const TabLayout = () => {
           title: "Progress",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "trending-up" : "trending-up-outline"}
-              size={24}
+              name={focused ? "stats-chart" : "stats-chart-outline"}
+              size={22}
               color={color}
             />
           ),
@@ -112,16 +123,14 @@ const TabLayout = () => {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
         }}
       />
 
-      {/* Hidden tabs — accessible via the More screen but not shown in the bar.
-          Budget is intentionally hidden from the active navigation (feature-gated
-          offline); Budget routes/modules remain intact for future reactivation. */}
+      {/* Hidden tabs */}
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="budget" options={{ href: null }} />
@@ -131,3 +140,4 @@ const TabLayout = () => {
 };
 
 export default TabLayout;
+

@@ -101,10 +101,16 @@ const ResetPasswordScreen = () => {
         onPress={handleResetPassword}
         disabled={loading || !token}
         activeOpacity={0.85}
-        className={`py-4 rounded-xl mt-3 items-center ${
-          loading || !token ? "opacity-70" : ""
-        }`}
-        style={{ backgroundColor: colors.primary }}
+        className="py-4 rounded-full mt-5 items-center"
+        style={{
+          backgroundColor: colors.primary,
+          opacity: loading || !token ? 0.75 : 1,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.3,
+          shadowRadius: 10,
+          elevation: 6,
+        }}
       >
         <Text
           className="font-bold text-lg"

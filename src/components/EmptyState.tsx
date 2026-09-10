@@ -25,9 +25,11 @@ export const ApEmptyState: React.FC<IProps> = ({
     <View className="items-center justify-center py-16 px-8">
       <View
         className="w-20 h-20 rounded-full items-center justify-center mb-4"
-        style={{ backgroundColor: colors.surface }}
+        style={{
+          backgroundColor: colors.primary + "12",
+        }}
       >
-        <Ionicons name={icon} size={36} color={colors.textMuted} />
+        <Ionicons name={icon} size={36} color={colors.primary} />
       </View>
       <ApText
         size="lg"
@@ -51,8 +53,15 @@ export const ApEmptyState: React.FC<IProps> = ({
           onPress={onAction}
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
-          className="mt-6 px-6 py-3 rounded-2xl"
-          style={{ backgroundColor: colors.primary }}
+          className="mt-6 px-8 py-3.5 rounded-full"
+          style={{
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 4,
+          }}
         >
           <ApText font="bold" color={colors.background}>
             {actionLabel}

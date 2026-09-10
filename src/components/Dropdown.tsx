@@ -53,9 +53,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
       )}
       <TouchableOpacity
         onPress={() => setIsOpen(true)}
-        className="flex-row items-center justify-between px-4 py-3 rounded-xl border"
+        className="flex-row items-center justify-between px-4 py-4 rounded-2xl border"
         style={{
-          backgroundColor: colors.background,
+          backgroundColor: colors.surface,
           borderColor: colors.surfaceBorder,
         }}
       >

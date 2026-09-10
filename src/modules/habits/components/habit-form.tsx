@@ -2,14 +2,13 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Platform,
   Switch,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { ApText, ApContainer, ApHeader, ApLoader } from "@/src/components";
+import { ApText, ApContainer, ApHeader, ApLoader, ApTextInput } from "@/src/components";
 import { Dropdown } from "@/src/components/Dropdown";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -606,28 +605,20 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
                 </TouchableOpacity>
               )}
 
-              <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-5">
-                HABIT NAME
-              </ApText>
-              <TextInput
+              <ApTextInput
+                label="HABIT NAME"
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g. Read before bed"
-                placeholderTextColor={colors.textMuted}
-                className="mt-1.5 px-4 py-3 rounded-2xl"
-                style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                containerClassName="mt-5"
               />
 
-              <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
-                WHY (OPTIONAL)
-              </ApText>
-              <TextInput
+              <ApTextInput
+                label="WHY (OPTIONAL)"
                 value={subtitle}
                 onChangeText={setSubtitle}
                 placeholder="What does this habit give you?"
-                placeholderTextColor={colors.textMuted}
-                className="mt-1.5 px-4 py-3 rounded-2xl"
-                style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                containerClassName="mt-4"
               />
 
               <CollapsibleSection title="Appearance" icon="color-palette-outline">
@@ -720,27 +711,19 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
               </ApText>
               <View className="flex-row mt-3">
                 <View className="flex-1 mr-2">
-                  <ApText size="xs" font="semibold" color={colors.textSecondary}>
-                    AMOUNT
-                  </ApText>
-                  <TextInput
+                  <ApTextInput
+                    label="AMOUNT"
                     value={goal}
                     onChangeText={setGoal}
                     keyboardType="decimal-pad"
-                    className="mt-1.5 px-4 py-3 rounded-2xl"
-                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
                   />
                 </View>
                 <View className="flex-1">
-                  <ApText size="xs" font="semibold" color={colors.textSecondary}>
-                    UNIT
-                  </ApText>
-                  <TextInput
+                  <ApTextInput
+                    label="UNIT"
                     value={unit}
                     onChangeText={setUnit}
                     placeholder="times, km…"
-                    className="mt-1.5 px-4 py-3 rounded-2xl"
-                    style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
                   />
                 </View>
               </View>
@@ -776,55 +759,40 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
                 </View>
                 {showBehavioral && (
                   <>
-                    <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-3">
-                      CUE TIME
-                    </ApText>
-                    <TextInput
+                    <ApTextInput
+                      label="CUE TIME"
                       value={scheduledTime}
                       onChangeText={setScheduledTime}
                       placeholder="e.g. 07:30"
-                      className="mt-1.5 px-4 py-3 rounded-2xl"
-                      style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                      containerClassName="mt-3"
                     />
-                    <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
-                      LOCATION (OPTIONAL)
-                    </ApText>
-                    <TextInput
+                    <ApTextInput
+                      label="LOCATION (OPTIONAL)"
                       value={location}
                       onChangeText={setLocation}
                       placeholder="e.g. at my desk"
-                      className="mt-1.5 px-4 py-3 rounded-2xl"
-                      style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                      containerClassName="mt-4"
                     />
-                    <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
-                      FULL VERSION
-                    </ApText>
-                    <TextInput
+                    <ApTextInput
+                      label="FULL VERSION"
                       value={fullBehavior}
                       onChangeText={setFullBehavior}
                       placeholder={`e.g. Read ${goal} ${unit}`}
-                      className="mt-1.5 px-4 py-3 rounded-2xl"
-                      style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                      containerClassName="mt-4"
                     />
-                    <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
-                      MINIMUM VERSION
-                    </ApText>
-                    <TextInput
+                    <ApTextInput
+                      label="MINIMUM VERSION"
                       value={minimumBehavior}
                       onChangeText={setMinimumBehavior}
                       placeholder="e.g. Read one page"
-                      className="mt-1.5 px-4 py-3 rounded-2xl"
-                      style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                      containerClassName="mt-4"
                     />
-                    <ApText size="xs" font="semibold" color={colors.textSecondary} className="mt-4">
-                      EMERGENCY VERSION (CRISIS DAYS)
-                    </ApText>
-                    <TextInput
+                    <ApTextInput
+                      label="EMERGENCY MINIMUM"
                       value={emergencyMinimum}
                       onChangeText={setEmergencyMinimum}
                       placeholder="The bare minimum for very hard days"
-                      className="mt-1.5 px-4 py-3 rounded-2xl"
-                      style={{ backgroundColor: colors.surfaceBorder + "60", color: colors.textPrimary }}
+                      containerClassName="mt-4"
                     />
                   </>
                 )}
