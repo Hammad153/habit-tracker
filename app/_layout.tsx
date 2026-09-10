@@ -1,5 +1,6 @@
 import React from "react";
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
@@ -7,6 +8,16 @@ import "../global.css";
 import { ApSafeAreaView, ToastProvider } from "@/src/components";
 import ApProvider from "@/src/provider";
 import ApRouteAuthGuard from "@/src/guard";
+
+function registerWebServiceWorker() {
+  if (Platform.OS === "web" && process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      void navigator.serviceWorker.register("/sw.js");
+    });
+  }
+}
+
+registerWebServiceWorker();
 
 const RootLayout = () => {
   return (
