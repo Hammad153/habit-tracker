@@ -158,7 +158,7 @@ const DailyPlanScreen = () => {
         contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View className="flex-row gap-2">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
           {days.map((date) => {
             const key = toDateKey(date);
             const selected = key === selectedDate;
@@ -166,10 +166,13 @@ const DailyPlanScreen = () => {
               <TouchableOpacity
                 key={key}
                 onPress={() => setSelectedDate(key)}
-                className="flex-1 rounded-2xl py-3"
-                style={{ backgroundColor: selected ? colors.primary : colors.surface }}
+                className="w-14 items-center justify-center rounded-2xl py-3 mr-2 border"
+                style={{
+                  backgroundColor: selected ? colors.primary : colors.surface,
+                  borderColor: selected ? colors.primary : colors.surfaceBorder,
+                }}
               >
-                <ApText size="xs" textAlign="center" color={selected ? colors.background : colors.textMuted}>
+                <ApText size="xs" font="semibold" textAlign="center" color={selected ? colors.background : colors.textMuted}>
                   {date.toLocaleDateString("en-US", { weekday: "short" })}
                 </ApText>
                 <ApText size="lg" font="bold" textAlign="center" color={selected ? colors.background : colors.textPrimary}>
@@ -178,7 +181,7 @@ const DailyPlanScreen = () => {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
 
         {!selectedPlan ? (
           <ApEmptyState

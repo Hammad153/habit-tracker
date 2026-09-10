@@ -42,6 +42,8 @@ const IdentityScreen = () => {
               icon="flag-outline"
               title="Who do you want to become?"
               subtitle='Create an identity like "I am a runner", then link habits that prove it.'
+              actionLabel="Create Identity"
+              onAction={() => router.push("/create-identity")}
             />
           )}
 
