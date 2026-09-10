@@ -5,6 +5,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 ## Features
 
 ### Habit Management
+
 - Create habits with icons, colors, categories, and flexible schedules (daily, specific days, X times/week, every N days)
 - Numeric goals with units (e.g. "30 reps", "10 pages")
 - Three behavioral tiers: full behavior, minimum (2-minute version), emergency minimum (crisis days)
@@ -13,6 +14,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - Tags, archive/restore, and reorder support
 
 ### Behavioral Science Engine
+
 - Adaptive suggestions to reduce targets, frequency, or change timing
 - Intervention system with recovery options, difficulty reduction, identity reinforcement, and momentum protection
 - AI Coach generating supportive, direct, celebratory, or cautionary messages (NVIDIA LLM with deterministic fallback)
@@ -20,6 +22,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - Portfolio overload detection
 
 ### Gamification & Rewards
+
 - XP and leveling system
 - Virtual coin economy earned through completions and streak milestones
 - Reward shop for themes, avatars, journal themes, and celebrations
@@ -28,18 +31,21 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - Leaderboard per habit
 
 ### Identity System
+
 - Create identities ("who I want to become") with title, description, icon, and color
 - Link habits to identities
 - Evidence points computed from completion history
 - Leveling system with progress bars
 
 ### Daily Planner
+
 - Task creation with priorities (high, medium, low) and statuses (pending, completed, skipped)
 - Time slots with start/end and duration
 - Task-to-habit linking
 - Calendar view integration
 
 ### Budget & Finance
+
 - Budgets with daily, weekly, monthly, or custom periods
 - Per-category allocations
 - Expense and income tracking
@@ -48,31 +54,37 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - Currency: Nigerian Naira (NGN)
 
 ### Journaling
+
 - Entries with mood, tags, favorites, and pins
 - 9 built-in templates (daily reflection, morning, evening, gratitude, goal planning, free writing, weekly review, monthly reflection, blank)
 
 ### Analytics
+
 - Weekly and monthly completion rates
 - Day-of-week completion distribution
 - Category breakdown and leaderboard
 - 30-day overview with streak stats
 
 ### Data Export
+
 - CSV export (Excel, Google Sheets compatible)
 - JSON backup export
 - Share sheet integration
 
 ### Notifications
+
 - Push notifications for habit reminders
 - Behavioral insight notifications
 - In-app notification feed
 
 ### Offline Support
+
 - GET response caching
 - Mutation queue for offline writes with automatic flush on reconnection
 - Optimistic UI updates for habit toggles
 
 ### Authentication & Settings
+
 - Email/password auth with JWT (access + refresh tokens), automatic token refresh
 - Forgot/reset password via email
 - Light/dark/system theme modes
@@ -80,15 +92,17 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - AI Coach preferences (tone, frequency)
 
 ### Subscription Tiers
-| Tier | Price | Features |
-|------|-------|----------|
-| Free | - | Up to 5 habits, basic analytics, badges & XP |
-| Basic | $3.99/mo | Unlimited habits, smart reminders, data export |
+
+| Tier    | Price    | Features                                          |
+| ------- | -------- | ------------------------------------------------- |
+| Free    | -        | Up to 5 habits, basic analytics, badges & XP      |
+| Basic   | $3.99/mo | Unlimited habits, smart reminders, data export    |
 | Premium | $7.99/mo | Custom themes, AI Habit Coach, advanced analytics |
 
 ## Tech Stack
 
 ### Frontend
+
 - React Native 0.81.5 with Expo SDK 54
 - Expo Router v6 (file-based routing, typed routes)
 - TypeScript 5.3+
@@ -100,6 +114,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 - React Native SVG, Confetti Cannon, View Shot
 
 ### Backend
+
 - NestJS 11 with Prisma 7.8 ORM
 - PostgreSQL
 - NVIDIA API (LLM for AI coach, with deterministic fallback)
@@ -112,6 +127,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 22+
 - pnpm 9+
 - PostgreSQL (for backend)
@@ -120,7 +136,7 @@ A full-stack habit tracking, daily planning, budgeting, and personal development
 
 ```bash
 cd hbt-app
-cp .env.example .env        # Set EXPO_PUBLIC_API_URL (defaults to localhost:3000)
+cp .env.example .env        # Set EXPO_PUBLIC_API_URL
 pnpm install
 pnpm start                   # Starts Expo dev server
 pnpm android                 # Run on Android
@@ -142,9 +158,11 @@ pnpm start:dev               # Start in watch mode (port 3000)
 ### Environment Variables
 
 **Frontend** (`.env`):
-- `EXPO_PUBLIC_API_URL` -- Backend API URL (default: `http://localhost:3000/api/v1/`)
+
+- `EXPO_PUBLIC_API_URL` -- Backend API URL, including `/api/v1` (for example `https://api.example.com/api/v1`)
 
 **Backend** (`.env`):
+
 - `DATABASE_URL` -- PostgreSQL connection string
 - `JWT_SECRET` / `JWT_REFRESH_SECRET` -- Token signing secrets
 - `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS` -- SMTP config
@@ -156,11 +174,11 @@ pnpm start:dev               # Start in watch mode (port 3000)
 
 ### EAS Build Profiles
 
-| Profile | Channel | Distribution | Build Type |
-|---------|---------|--------------|------------|
-| `development` | development | internal | APK |
-| `preview` | preview | internal | APK |
-| `production` | production | store | App Bundle (.aab) |
+| Profile       | Channel     | Distribution | Build Type        |
+| ------------- | ----------- | ------------ | ----------------- |
+| `development` | development | internal     | APK               |
+| `preview`     | preview     | internal     | APK               |
+| `production`  | production  | store        | App Bundle (.aab) |
 
 ```bash
 eas build -p android --profile preview     # Preview APK
@@ -185,6 +203,22 @@ eas update:list --branch preview --limit 3
 ### Backend Deployment
 
 Deployed to Vercel via `vercel.json` serverless config. All routes go through `api/index.ts`.
+
+## Web Deployment
+
+The Expo app is exported as a static web app. The marketing site in `hbt-web` is a separate Next.js deployment; deploy both projects if the public download site and the authenticated web app should be available.
+
+```bash
+cd hbt-app
+pnpm install --frozen-lockfile
+EXPO_PUBLIC_API_URL=https://api.example.com/api/v1 npx expo export --platform web
+```
+
+Deploy the generated `dist/` directory to a static host. For Vercel, set the project root to `hbt-app`, build command to `npx expo export --platform web`, and output directory to `dist`. For Cloudflare Pages or Netlify, use the same build command and output directory. Set `EXPO_PUBLIC_API_URL` in the host's production environment before building.
+
+The first PWA slice is included in `public/manifest.webmanifest` and `public/sw.js`. The service worker caches the app shell and same-origin static assets; it deliberately does not cache API responses or authenticated data yet. The app must be served over HTTPS for install prompts and service workers to work in production.
+
+For the complete deployment checklist and follow-up milestones, see [WEB_DEPLOYMENT_PLAN.md](WEB_DEPLOYMENT_PLAN.md).
 
 ## Project Structure
 
