@@ -30,6 +30,7 @@ import DailyGoalsCard from "./components/DailyGoalsCard";
 import UserGreeting from "./components/UserGreeting";
 import HabitCard from "@/src/modules/habits/components/HabitCard";
 import UpgradeModal from "@/src/modules/subscription/components/UpgradeModal";
+import TrialBanner from "@/src/modules/subscription/components/TrialBanner";
 import { MOTIVATION_MESSAGES } from "@/src/constants";
 import { isSameDateKey, toDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
@@ -261,6 +262,8 @@ const HomeScreen = () => {
             onJournalPress={() => router.push("/journal")}
           />
         </View>
+
+        <TrialBanner />
 
         <HorizontalDatePicker
           selectedDate={selectedDate}

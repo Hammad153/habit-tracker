@@ -1,54 +1,100 @@
-export enum SubscriptionTier {
-  FREE = "FREE",
-  BASIC = "BASIC",
-  PREMIUM = "PREMIUM",
+export type SubscriptionTier = "TRIAL" | "BASIC" | "PREMIUM";
+
+export type BillingInterval = "MONTHLY" | "YEARLY";
+
+/** Every feature the backend can grant/deny (server-authoritative). */
+export interface IEntitlements {
+  unlimitedHabits: boolean;
+  dailyPlan: boolean;
+  journal: boolean;
+  basicAnalytics: boolean;
+  advancedAnalytics: boolean;
+  badgesAndXp: boolean;
+  smartReminders: boolean;
+  dataExport: boolean;
+  customThemes: boolean;
+  aiCoach: boolean;
+  rewards: boolean;
+  identities: boolean;
 }
 
+/**
+ * Mirror of the backend GET /subscription payload. `accessGranted` is decided
+ * by the server — the UI only reflects it (the real gate is backend-side).
+ */
 export interface ISubscriptionInfo {
+  currentPlan: string;
   tier: SubscriptionTier;
-  habitLimit: number; // -1 means unlimited
+  status: string;
+  accessGranted: boolean;
+  habitLimit: number; // -1 = unlimited
   currentHabitCount: number;
   canCreateHabit: boolean;
+  currency: string;
+  amount: number | null;
+  billingInterval: BillingInterval | null;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+  trialDaysLeft: number | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  cancelledAt: string | null;
+  gracePeriodEndsAt: string | null;
+  paymentMethodNeedsUpdate: boolean;
+  nextBillingDate: string | null;
+  entitlements: IEntitlements;
 }
 
-export const FREE_SUBSCRIPTION: ISubscriptionInfo = {
-  tier: SubscriptionTier.FREE,
-  habitLimit: 5,
-  currentHabitCount: 0,
-  canCreateHabit: true,
-};
+export interface IPlan {
+  id: string;
+  tier: "TRIAL" | "BASIC" | "PREMIUM";
+  displayName: string;
+  billingInterval: BillingInterval;
+  amount: number; // whole Naira
+  currency: string;
+  tagline: string;
+  mostPopular: boolean;
+  annualSavings: number | null;
+}
+
+export interface IPlansResponse {
+  currency: string;
+  trialDurationDays: number;
+  plans: IPlan[];
+}
 
 export const TIER_LABELS: Record<SubscriptionTier, string> = {
-  [SubscriptionTier.FREE]: "Free",
-  [SubscriptionTier.BASIC]: "Basic",
-  [SubscriptionTier.PREMIUM]: "Premium",
+  TRIAL: "Free Trial",
+  BASIC: "Basic",
+  PREMIUM: "Premium",
 };
 
-export const TIER_PRICES: Record<SubscriptionTier, string> = {
-  [SubscriptionTier.FREE]: "$0",
-  [SubscriptionTier.BASIC]: "$3.99/mo",
-  [SubscriptionTier.PREMIUM]: "$7.99/mo",
+export const PLAN_ID_TO_TIER: Record<string, SubscriptionTier> = {
+  TRIAL: "TRIAL",
+  BASIC_MONTHLY: "BASIC",
+  BASIC_YEARLY: "BASIC",
+  PREMIUM_MONTHLY: "PREMIUM",
+  PREMIUM_YEARLY: "PREMIUM",
 };
 
-export interface ITierFeature {
-  name: string;
-  free: boolean | string;
-  basic: boolean | string;
-  premium: boolean | string;
-}
-
-export const TIER_FEATURES: ITierFeature[] = [
-  {
-    name: "Track habits",
-    free: "Up to 5",
-    basic: "Unlimited",
-    premium: "Unlimited",
-  },
-  { name: "Basic analytics", free: true, basic: true, premium: true },
-  { name: "Badges & XP", free: true, basic: true, premium: true },
-  { name: "Smart reminders", free: false, basic: true, premium: true },
-  { name: "Data export", free: false, basic: true, premium: true },
-  { name: "Custom themes", free: false, basic: false, premium: true },
-  { name: "AI Habit Coach", free: false, basic: false, premium: true },
-  { name: "Advanced analytics", free: false, basic: false, premium: true },
-];
+/** Marketing copy for plan cards (entitlements decide actual access). */
+export const TIER_FEATURES: Record<
+  Exclude<SubscriptionTier, "TRIAL">,
+  { label: string; premiumOnly?: boolean }[]
+> = {
+  BASIC: [
+    { label: "Unlimited habits" },
+    { label: "Daily plan & journal" },
+    { label: "Badges, XP & rewards" },
+    { label: "Smart reminders" },
+    { label: "Data export" },
+  ],
+  PREMIUM: [
+    { label: "Everything in Basic" },
+    { label: "AI Habit Coach" },
+    { label: "Advanced analytics" },
+    { label: "Custom themes" },
+    { label: "Deeper daily insights" },
+  ],
+};
