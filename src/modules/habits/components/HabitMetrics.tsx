@@ -112,15 +112,25 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
   }
 
   return (
-    <View className="mb-4 rounded-2xl p-4" style={{ backgroundColor: colors.surface }}>
+    <View
+      className="mb-5 rounded-3xl p-4 mx-4"
+      style={{
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.surfaceBorder,
+      }}
+    >
       {/* Header */}
       <View className="mb-4 flex-row items-center justify-between">
-        <ApText font="semibold" className="text-base" style={{ color: colors.textPrimary }}>
+        <ApText font="bold" size="base" color={colors.textPrimary}>
           This Week
         </ApText>
-        <View className="flex-row items-center gap-1 rounded-full px-2 py-1" style={{ backgroundColor: colors.primary + "15" }}>
+        <View
+          className="flex-row items-center gap-1 rounded-full px-3 py-1"
+          style={{ backgroundColor: colors.primary + "1A" }}
+        >
           <Ionicons name="trending-up" size={14} color={colors.primary} />
-          <ApText font="medium" className="text-xs" style={{ color: colors.primary }}>
+          <ApText font="bold" size="xs" color={colors.primary}>
             {weeklyStats.avgRate.toFixed(0)}% avg
           </ApText>
         </View>
@@ -169,7 +179,7 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
                     width={barWidth - 4}
                     height={barHeight - 2}
                     rx={3}
-                    fill={isToday ? colors.primary : colors.primary + "80"}
+                    fill={isToday ? colors.primary : colors.primary + "90"}
                   />
                 )}
               </React.Fragment>
@@ -232,7 +242,7 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
       <View className="flex-row gap-2">
         <StatCard
           icon="checkmark-circle"
-          label="Completed"
+          label="Done"
           value={weeklyStats.totalCompletions.toString()}
           color={colors.success}
           colors={colors}
@@ -246,7 +256,7 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
         />
         <StatCard
           icon="star"
-          label="Perfect Days"
+          label="Perfect"
           value={weeklyStats.perfectDays.toString()}
           color={colors.primary}
           colors={colors}
@@ -255,7 +265,7 @@ const HabitMetrics: React.FC<HabitMetricsProps> = ({ habits }) => {
           icon="list"
           label="Active"
           value={weeklyStats.totalHabits.toString()}
-          color={colors.surface}
+          color={colors.primary}
           colors={colors}
         />
       </View>
@@ -272,12 +282,23 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon, label, value, color, colors }) => (
-  <View className="flex-1 items-center rounded-xl py-2" style={{ backgroundColor: color + "10" }}>
-    <Ionicons name={icon as any} size={16} color={color} />
-    <ApText font="bold" className="mt-1 text-sm" style={{ color: colors.textPrimary }}>
+  <View
+    className="flex-1 items-center rounded-2xl py-3 px-1 border"
+    style={{
+      backgroundColor: colors.surfaceLight || colors.background,
+      borderColor: colors.surfaceBorder,
+    }}
+  >
+    <View
+      className="w-7 h-7 rounded-full items-center justify-center mb-1.5"
+      style={{ backgroundColor: color + "1A" }}
+    >
+      <Ionicons name={icon as any} size={15} color={color} />
+    </View>
+    <ApText font="bold" size="sm" color={colors.textPrimary}>
       {value}
     </ApText>
-    <ApText font="normal" className="text-xs" style={{ color: colors.textSecondary }}>
+    <ApText font="medium" size="xs" color={colors.textMuted} className="mt-0.5">
       {label}
     </ApText>
   </View>

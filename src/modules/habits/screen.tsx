@@ -14,6 +14,7 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
+import HabitMetrics from "./components/HabitMetrics";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 const HabitPageScreen = () => {
@@ -84,62 +85,90 @@ const HabitPageScreen = () => {
           }
         />
 
-        {/* Filter Pills */}
-        {activeHabits.length > 0 && (
-          <View className="flex-row px-4 mb-3 space-x-2">
-            {[
-              { id: "all", label: `All (${activeHabits.length})` },
-              {
-                id: "todo",
-                label: `To Do (${
-                  activeHabits.filter(
-                    (h: any) =>
-                      !h.completions?.some(
-                        (c: any) => isSameDateKey(c.date, today) && c.status,
-                      ),
-                  ).length
-                })`,
-              },
-              {
-                id: "done",
-                label: `Done (${
-                  activeHabits.filter((h: any) =>
-                    h.completions?.some(
-                      (c: any) => isSameDateKey(c.date, today) && c.status,
-                    ),
-                  ).length
-                })`,
-              },
-            ].map((tab) => {
-              const active = filter === tab.id;
-              return (
-                <TouchableOpacity
-                  key={tab.id}
-                  onPress={() => setFilter(tab.id as any)}
-                  className="px-3.5 py-1.5 rounded-full mr-2 border"
-                  style={{
-                    backgroundColor: active ? colors.primary : colors.surface,
-                    borderColor: active ? colors.primary : colors.surfaceBorder,
-                  }}
-                >
-                  <ApText
-                    size="xs"
-                    font="bold"
-                    color={active ? colors.background : colors.textSecondary}
-                  >
-                    {tab.label}
-                  </ApText>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-
         <ApScrollView
           showsVerticalScrollIndicator={false}
           refreshing={refreshing}
           onRefresh={handleRefresh}
         >
+          {/* Restored Habit Metrics & Weekly Stats */}
+          <HabitMetrics habits={habits} />
+
+          {/* Full Width Segmented Control Filter Tabs */}
+          {activeHabits.length > 0 && (
+            <View
+              className="flex-row mx-4 mb-4 p-1.5 rounded-2xl"
+              style={{
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              {[
+                {
+                  id: "all",
+                  title: "All",
+                  count: activeHabits.length,
+                },
+                {
+                  id: "todo",
+                  title: "To Do",
+                  count: activeHabits.filter(
+                    (h: any) =>
+                      !h.completions?.some(
+                        (c: any) => isSameDateKey(c.date, today) && c.status,
+                      ),
+                  ).length,
+                },
+                {
+                  id: "done",
+                  title: "Done",
+                  count: activeHabits.filter((h: any) =>
+                    h.completions?.some(
+                      (c: any) => isSameDateKey(c.date, today) && c.status,
+                    ),
+                  ).length,
+                },
+              ].map((tab) => {
+                const active = filter === tab.id;
+                return (
+                  <TouchableOpacity
+                    key={tab.id}
+                    onPress={() => setFilter(tab.id as any)}
+                    activeOpacity={0.7}
+                    className="flex-1 py-2.5 px-2 rounded-xl flex-row items-center justify-center"
+                    style={{
+                      backgroundColor: active ? colors.primary : "transparent",
+                    }}
+                  >
+                    <ApText
+                      size="xs"
+                      font="bold"
+                      color={active ? colors.background : colors.textSecondary}
+                    >
+                      {tab.title}
+                    </ApText>
+                    <View
+                      className="px-1.5 py-0.5 rounded-full ml-1.5"
+                      style={{
+                        backgroundColor: active
+                          ? colors.background + "30"
+                          : colors.surfaceBorder,
+                      }}
+                    >
+                      <ApText
+                        size="xs"
+                        font="bold"
+                        color={active ? colors.background : colors.textMuted}
+                      >
+                        {tab.count}
+                      </ApText>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
           <View className="px-2 pb-12">
             {error && habits.length === 0 ? (
               <ApErrorState onRetry={handleRefresh} />
