@@ -111,7 +111,7 @@ const DailyGoalsCard: React.FC<DailyGoalsCardProps> = ({
             />
           </Svg>
           <View className="absolute inset-0 items-center justify-center">
-            <ApText size="sm" font="bold" color={colors.white}>
+            <ApText size="sm" font="bold" color={colors.textPrimary}>
               {Math.round(percentage)}%
             </ApText>
           </View>

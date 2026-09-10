@@ -99,7 +99,8 @@ const ProgressScreen = () => {
         right={
           <Pressable
             onPress={() => router.push("/timeline")}
-            className="w-10 h-10 items-center justify-center rounded-full bg-primary/10"
+            className="w-10 h-10 items-center justify-center rounded-full"
+            style={{ backgroundColor: colors.primary + "1A" }}
           >
             <Ionicons name="calendar" size={22} color={colors.primary} />
           </Pressable>

@@ -95,6 +95,12 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         description: "Browse pre-built habits",
       },
       {
+        label: "Appearance & Sounds",
+        icon: "color-palette-outline",
+        route: "/settings/appearance",
+        description: "Customize theme & audio feedback",
+      },
+      {
         label: "Export Data",
         icon: "download",
         route: "/export",
