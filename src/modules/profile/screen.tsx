@@ -125,19 +125,19 @@ const ProfileScreen = () => {
 
         <View className="px-5 mb-20 space-y-2">
           <ApText
-            size="sm"
+            size="xs"
             font="bold"
             color={colors.textMuted}
-            className="mb-2 uppercase"
-            style={{ letterSpacing: 1 }}
+            className="mb-2 uppercase tracking-wider"
           >
-            General
+            Preferences
           </ApText>
-          <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
+          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
             <SettingsItem
-              label="Journal"
-              icon="journal"
-              onPress={() => router.push("/journal")}
+              label="Appearance"
+              icon="color-palette"
+              value={appearanceValue}
+              onPress={() => router.push("/settings/appearance")}
             />
             <SettingsItem
               label="Sounds & Haptics"
@@ -150,39 +150,22 @@ const ProfileScreen = () => {
               icon="sparkles"
               onPress={() => router.push("/settings/coach")}
             />
-            <SettingsItem
-              label="Appearance"
-              icon="color-palette"
-              value={appearanceValue}
-              onPress={() => router.push("/settings/appearance")}
-            />
           </View>
 
           <ApText
-            size="sm"
+            size="xs"
             font="bold"
             color={colors.textMuted}
-            className="mb-2 uppercase"
-            style={{ letterSpacing: 1 }}
+            className="mb-2 uppercase tracking-wider"
           >
-            Account
+            Account & Security
           </ApText>
-          <View className="rounded-2xl overflow-hidden mb-6" style={{ backgroundColor: colors.surface }}>
+          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
             <SettingsItem
               label="Subscription"
               icon="star"
               value="Manage"
               onPress={() => router.push("/subscription")}
-            />
-            <SettingsItem
-              label="Export Data"
-              icon="download"
-              onPress={() => router.push("/export" as any)}
-            />
-            <SettingsItem
-              label="Advanced Analytics"
-              icon="analytics"
-              onPress={() => router.push("/analytics" as any)}
             />
             <SettingsItem
               label="Change Password"
@@ -191,19 +174,20 @@ const ProfileScreen = () => {
             />
           </View>
 
-          <SettingsItem
-            label="Log Out"
-            icon="log-out"
-            isDestructive
-            onPress={handleLogout}
-          />
-
-          <SettingsItem
-            label="Delete Account"
-            icon="trash"
-            isDestructive
-            onPress={() => setShowDeleteModal(true)}
-          />
+          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+            <SettingsItem
+              label="Log Out"
+              icon="log-out"
+              isDestructive
+              onPress={handleLogout}
+            />
+            <SettingsItem
+              label="Delete Account"
+              icon="trash"
+              isDestructive
+              onPress={() => setShowDeleteModal(true)}
+            />
+          </View>
         </View>
       </ApScrollView>
 

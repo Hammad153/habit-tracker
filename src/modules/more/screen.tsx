@@ -19,14 +19,8 @@ interface MoreMenuItem {
 
 const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
   {
-    title: "Personal",
+    title: "Personal & Habits",
     items: [
-      {
-        label: "Profile",
-        icon: "person-circle",
-        route: "/profile",
-        description: "Account info, stats & settings",
-      },
       {
         label: "Identity",
         icon: "flag",
@@ -39,12 +33,6 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         icon: "journal",
         route: "/journal",
         description: "Reflect on your day",
-      },
-      {
-        label: "Daily Plan",
-        icon: "calendar",
-        route: "/(tabs)/daily-plan",
-        description: "Plan tasks, priorities & reflection",
       },
       {
         label: "Planner Calendar",
@@ -62,7 +50,7 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
     ],
   },
   {
-    title: "Insights",
+    title: "Insights & Data",
     items: [
       {
         label: "Advanced Analytics",
@@ -77,16 +65,15 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         description: "View your habit history",
       },
       {
-        label: "Awards",
-        icon: "trophy",
-        route: "/(tabs)/awards",
-        description: "Your achievements & badges",
-        color: "#F59E0B",
+        label: "Export Data",
+        icon: "download",
+        route: "/export",
+        description: "Download your habit records",
       },
     ],
   },
   {
-    title: "Tools",
+    title: "Tools & Customization",
     items: [
       {
         label: "Habit Templates",
@@ -101,13 +88,7 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
         description: "Customize theme & audio feedback",
       },
       {
-        label: "Export Data",
-        icon: "download",
-        route: "/export",
-        description: "Download your habit records",
-      },
-      {
-        label: "Notifications",
+        label: "Notifications Feed",
         icon: "notifications",
         route: "/notifications",
         description: "View your activity feed",
