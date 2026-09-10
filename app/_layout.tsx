@@ -10,7 +10,11 @@ import ApProvider from "@/src/provider";
 import ApRouteAuthGuard from "@/src/guard";
 
 function registerWebServiceWorker() {
-  if (Platform.OS === "web" && process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+  if (
+    Platform.OS === "web" &&
+    process.env.NODE_ENV === "production" &&
+    "serviceWorker" in navigator
+  ) {
     window.addEventListener("load", () => {
       void navigator.serviceWorker.register("/sw.js");
     });
