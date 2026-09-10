@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -9,21 +10,24 @@ import { ApSafeAreaView, ToastProvider } from "@/src/components";
 import ApProvider from "@/src/provider";
 import ApRouteAuthGuard from "@/src/guard";
 
-function registerWebServiceWorker() {
-  if (
-    Platform.OS === "web" &&
-    process.env.NODE_ENV === "production" &&
-    "serviceWorker" in navigator
-  ) {
-    window.addEventListener("load", () => {
-      void navigator.serviceWorker.register("/sw.js");
-    });
-  }
-}
-
-registerWebServiceWorker();
-
 const RootLayout = () => {
+  useEffect(() => {
+    if (
+      Platform.OS !== "web" ||
+      process.env.NODE_ENV !== "production" ||
+      !("serviceWorker" in navigator)
+    ) {
+      return;
+    }
+
+    const register = () => {
+      void navigator.serviceWorker.register("/sw.js");
+    };
+
+    window.addEventListener("load", register);
+    return () => window.removeEventListener("load", register);
+  }, []);
+
   return (
     <SafeAreaProvider>
       <PaperProvider>
