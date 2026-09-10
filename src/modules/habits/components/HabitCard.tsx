@@ -156,6 +156,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 cx={center}
                 cy={center}
                 r={radius}
+                fill="none"
                 stroke={colors.surfaceBorder}
                 strokeWidth={strokeWidth}
               />
@@ -163,6 +164,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
                 cx={center}
                 cy={center}
                 r={radius}
+                fill="none"
                 stroke={isCompleted ? colors.primary : activeIconColor}
                 strokeWidth={strokeWidth}
                 strokeDasharray={`${circumference} ${circumference}`}

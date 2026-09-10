@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { ApStorageService, ApStorageKeys } from "@/src/services";
-import { ApTheme, LightTheme, DarkTheme } from "@/src/components/theme";
+import { ApTheme, LightTheme, DarkTheme, GoldenTheme, FocusTheme } from "@/src/components/theme";
 import { ThemeMode } from "./model";
 
 interface IProps {
@@ -78,10 +78,20 @@ export const SettingsProvider: React.FC<IProps> = ({ children }) => {
   };
 
   const isDark =
-    themeMode === "system"
+    themeMode === "golden" || themeMode === "focus" || themeMode === "dark"
+      ? true
+      : themeMode === "system"
       ? systemColorScheme === "dark"
-      : themeMode === "dark";
-  const colors = isDark ? DarkTheme : LightTheme;
+      : false;
+
+  const colors =
+    themeMode === "golden"
+      ? GoldenTheme
+      : themeMode === "focus"
+      ? FocusTheme
+      : isDark
+      ? DarkTheme
+      : LightTheme;
 
   return (
     <SettingsContext.Provider

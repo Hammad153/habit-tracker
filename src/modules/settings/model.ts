@@ -1,4 +1,4 @@
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode = "light" | "dark" | "system" | "golden" | "focus";
 
 export interface ISettingsState {
   soundEnabled: boolean;
