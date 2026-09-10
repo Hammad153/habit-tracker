@@ -214,7 +214,7 @@ pnpm install --frozen-lockfile
 EXPO_PUBLIC_API_URL=https://api.example.com/api/v1 npx expo export --platform web
 ```
 
-Deploy the generated `dist/` directory to a static host. For Vercel, set the project root to `hbt-app`, build command to `npx expo export --platform web`, and output directory to `dist`. For Cloudflare Pages or Netlify, use the same build command and output directory. Set `EXPO_PUBLIC_API_URL` in the host's production environment before building.
+Deploy the generated `dist/` directory to a static host. For Vercel, set the project root to `hbt-app`; the checked-in `vercel.json` supplies the `pnpm build:web` build command, frozen-lockfile install command, and `dist` output directory. For Cloudflare Pages or Netlify, use `npx expo export --platform web` as the build command and `dist` as the output directory. Set `EXPO_PUBLIC_API_URL` in the host's production environment before building.
 
 The first PWA slice is included in `public/manifest.webmanifest` and `public/sw.js`. The service worker caches the app shell and same-origin static assets; it deliberately does not cache API responses or authenticated data yet. The app must be served over HTTPS for install prompts and service workers to work in production.
 

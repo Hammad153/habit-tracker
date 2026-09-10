@@ -1,9 +1,6 @@
 {
   "version": 2,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/$1"
-    }
-  ]
+  "buildCommand": "pnpm build:web",
+  "outputDirectory": "dist",
+  "installCommand": "pnpm install --frozen-lockfile"
 }
