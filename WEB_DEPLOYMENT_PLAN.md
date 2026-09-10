@@ -12,7 +12,7 @@
 ## Deployment Steps
 
 1. Deploy `hbt-be` as the API and record its public HTTPS URL.
-2. Configure the backend `CORS_ORIGINS` with every web origin, including the production domain and preview domain if previews are used.
+2. Confirm the backend deployment is running the current all-origins CORS configuration. `CORS_ORIGINS` is retained for compatibility but is not required.
 3. Create a separate static hosting project for `hbt-app` with project root `hbt-app`.
 4. Set `EXPO_PUBLIC_API_URL` to `https://<api-domain>/api/v1` in the web host's production environment.
 5. Use `npx expo export --platform web` as the build command and `dist` as the output directory.
@@ -27,7 +27,7 @@
 - Mail provider settings for verification, password reset, and transactional mail.
 - Paystack keys and webhook URL if subscriptions are enabled.
 - Cloudinary settings if profile or journal uploads are enabled.
-- `CORS_ORIGINS` containing the exact HTTPS web origin(s), comma-separated.
+- CORS is currently enabled for all origins to support web and native clients. Restrict this before handling sensitive credentialed traffic from untrusted origins.
 - A stable public API URL with `/api/v1` available and HTTPS enabled.
 
 ## PWA Follow-up Milestones
