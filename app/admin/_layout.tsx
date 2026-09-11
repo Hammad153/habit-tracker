@@ -18,6 +18,11 @@ const menu = [
     label: "Audit Logs",
     icon: "document-text-outline",
   },
+  {
+    path: "/admin/notifications",
+    label: "Notifications",
+    icon: "notifications-outline",
+  },
 ] as const;
 
 export default function AdminLayout() {

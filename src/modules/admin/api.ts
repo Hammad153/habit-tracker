@@ -38,4 +38,6 @@ export const AdminService = {
     axiosInstance.get("/admin/audit-logs", { params }).then((res) => res.data),
   getSystemConfig: () =>
     axiosInstance.get("/admin/system/config").then((res) => res.data),
+  getNotificationOverview: () =>
+    axiosInstance.get("/admin/notifications/overview").then((res) => res.data),
 };
