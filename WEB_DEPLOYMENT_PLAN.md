@@ -13,7 +13,7 @@
 
 1. Deploy `hbt-be` as the API and record its public HTTPS URL.
 2. Confirm the backend deployment is running the current all-origins CORS configuration. `CORS_ORIGINS` is retained for compatibility but is not required.
-3. Create a separate static hosting project for `hbt-app` with project root `hbt-app`.
+3. Create a separate static hosting project for the Expo repository. Because the connected GitHub repository is already the `hbt-app` project, leave Vercel's Root Directory blank or set it to `.`. Only use `hbt-app` as the Root Directory if deploying from a parent monorepo that contains this repository as a folder.
 4. Set `EXPO_PUBLIC_API_URL` to `https://<api-domain>/api/v1` in the web host's production environment.
 5. Use `npx expo export --platform web` as the build command and `dist` as the output directory.
 6. Attach the web domain, enable HTTPS, and verify `/manifest.webmanifest` and `/sw.js` return `200`.
