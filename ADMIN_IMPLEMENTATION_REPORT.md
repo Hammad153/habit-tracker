@@ -37,3 +37,14 @@
 
 - Supported now: `/analytics/admin/overview`, `/analytics/admin/dashboard`, `/admin/users`, `/admin/users/:id`, `/admin/users/:id/status`, `/admin/habits`, `/admin/habits/:id`, `/admin/shop/items`, `/admin/economy/stats`, `/admin/system/config`, and `/admin/audit-logs`.
 - Rewards/streak administration is not exposed as a dedicated admin API. The UI should not invent write controls for it until the backend contract is added.
+
+## Implemented In This Pass
+
+- Replaced the single stateful `/admin` screen with nested Expo Router routes and a persistent admin shell.
+- Added `/admin`, `/admin/users`, `/admin/users/:id`, `/admin/habits`, `/admin/habits/:id`, `/admin/analytics`, `/admin/shop`, `/admin/settings`, and `/admin/audit-logs`.
+- Added active navigation, browser URL changes, direct-route support, back navigation, and admin-mode authorization checks.
+- Added responsive desktop sidebar and mobile navigation rail.
+- Added formatted cards, tables/list rows, badges, dates, number formatting, search fields, empty states, loading states, retry error states, and user suspend/reactivate controls.
+- Extended the existing admin API client for pagination/search, details, and status updates.
+
+Automated browser navigation coverage remains a follow-up because the current repository test setup does not include a Playwright target for the Expo web export. TypeScript diagnostics are clean for the new route tree; run the production export before deployment.
