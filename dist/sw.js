@@ -1,5 +1,10 @@
-const CACHE_NAME = "routina-web-v1";
-const APP_SHELL = ["/", "/manifest.webmanifest"];
+const CACHE_NAME = "routina-web-v2";
+const APP_SHELL = [
+  "/",
+  "/offline.html",
+  "/manifest.webmanifest",
+  "/favicon.ico",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -31,9 +36,19 @@ self.addEventListener("fetch", (event) => {
     return;
 
   if (event.request.mode === "navigate") {
-    event.respondWith(fetch(event.request).catch(() => caches.match("/")));
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match("/offline.html")),
+    );
     return;
   }
+
+  const requestUrl = new URL(event.request.url);
+  const isStaticAsset =
+    requestUrl.pathname.startsWith("/_expo/") ||
+    requestUrl.pathname.startsWith("/assets/") ||
+    requestUrl.pathname === "/manifest.webmanifest" ||
+    requestUrl.pathname === "/favicon.ico";
+  if (!isStaticAsset) return;
 
   event.respondWith(
     caches.match(event.request).then(
