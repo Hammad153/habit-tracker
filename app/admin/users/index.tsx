@@ -81,7 +81,11 @@ export default function AdminUsers() {
                 </View>
                 <View className="mt-3 flex-row flex-wrap gap-x-4 gap-y-1">
                   <ApText size="xs" color={colors.textMuted}>
-                    {user.role === "ADMIN" ? "Administrator" : "User"}
+                    {user.subscription?.freeAccessEnabled
+                      ? "Free access"
+                      : user.subscription?.planId ||
+                        user.subscription?.status ||
+                        "No subscription"}
                   </ApText>
                   <ApText size="xs" color={colors.textMuted}>
                     {formatNumber(user.habitsCount)} habits

@@ -22,13 +22,33 @@ const TONES: Array<{ value: CoachTonePref; label: string; hint: string }> = [
   { value: "ENCOURAGING", label: "Encouraging", hint: "Supportive and warm" },
   { value: "DIRECT", label: "Direct", hint: "Straight to the point" },
   { value: "CALM", label: "Calm", hint: "Low-pressure, never urgent" },
-  { value: "CHALLENGING", label: "Challenging", hint: "Respectfully pushes you" },
+  {
+    value: "CHALLENGING",
+    label: "Challenging",
+    hint: "Respectfully pushes you",
+  },
 ];
 
-const FREQUENCIES: Array<{ value: CoachFrequency; label: string; hint: string }> = [
-  { value: "MINIMAL", label: "Minimal", hint: "Only recovery and critical moments" },
-  { value: "STANDARD", label: "Standard", hint: "Important guidance, weekly review" },
-  { value: "FREQUENT", label: "Frequent", hint: "Everything, including celebrations" },
+const FREQUENCIES: Array<{
+  value: CoachFrequency;
+  label: string;
+  hint: string;
+}> = [
+  {
+    value: "MINIMAL",
+    label: "Minimal",
+    hint: "Only recovery and critical moments",
+  },
+  {
+    value: "STANDARD",
+    label: "Standard",
+    hint: "Important guidance, weekly review",
+  },
+  {
+    value: "FREQUENT",
+    label: "Frequent",
+    hint: "Everything, including celebrations",
+  },
 ];
 
 const ToggleRow = ({
@@ -72,7 +92,10 @@ const ToggleRow = ({
         value={value}
         disabled={disabled}
         onValueChange={onChange}
-        trackColor={{ false: colors.surfaceInactive, true: colors.primary + "80" }}
+        trackColor={{
+          false: colors.surfaceInactive,
+          true: colors.primary + "80",
+        }}
         thumbColor={value ? colors.primary : colors.textMuted}
       />
     </View>
@@ -103,14 +126,20 @@ const OptionRow = ({
       }}
     >
       <View className="flex-1">
-        <ApText size="base" font={selected ? "bold" : "normal"} color={colors.textPrimary}>
+        <ApText
+          size="base"
+          font={selected ? "bold" : "normal"}
+          color={colors.textPrimary}
+        >
           {label}
         </ApText>
         <ApText size="xs" color={colors.textMuted} className="mt-0.5">
           {hint}
         </ApText>
       </View>
-      {selected && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+      {selected && (
+        <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+      )}
     </Pressable>
   );
 };
@@ -163,8 +192,14 @@ const CoachSettingsScreen = () => {
   return (
     <ApContainer>
       <ApHeader title="AI Coach" hasBackButton />
-      <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-        <View className="rounded-2xl overflow-hidden mb-5" style={{ backgroundColor: colors.surface }}>
+      <ScrollView
+        className="flex-1 px-5 pt-4"
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          className="rounded-2xl overflow-hidden mb-5"
+          style={{ backgroundColor: colors.surface }}
+        >
           <ToggleRow
             icon="chatbubbles-outline"
             title="AI Coach"
@@ -185,14 +220,35 @@ const CoachSettingsScreen = () => {
             title="Weekly Review"
             description="A summary of your week, every week"
             value={prefs.weeklyReviewEnabled}
-            onChange={(v) => update({ weeklyReviewEnabled: v }, "weeklyReviewEnabled")}
+            onChange={(v) =>
+              update({ weeklyReviewEnabled: v }, "weeklyReviewEnabled")
+            }
+          />
+          <ToggleRow
+            icon="notifications-outline"
+            title="Re-engagement nudges"
+            description="Gentle, personalized prompts when a due habit is still incomplete"
+            value={prefs.reengagementEnabled}
+            onChange={(v) =>
+              update({ reengagementEnabled: v }, "reengagementEnabled")
+            }
+            disabled={!prefs.coachEnabled}
           />
         </View>
 
-        <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2" style={{ letterSpacing: 1 }}>
+        <ApText
+          size="xs"
+          font="bold"
+          color={colors.textMuted}
+          className="uppercase mb-2"
+          style={{ letterSpacing: 1 }}
+        >
           Tone
         </ApText>
-        <View className="rounded-2xl overflow-hidden mb-5" style={{ backgroundColor: colors.surface }}>
+        <View
+          className="rounded-2xl overflow-hidden mb-5"
+          style={{ backgroundColor: colors.surface }}
+        >
           {TONES.map((t) => (
             <OptionRow
               key={t.value}
@@ -207,10 +263,19 @@ const CoachSettingsScreen = () => {
           ))}
         </View>
 
-        <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2" style={{ letterSpacing: 1 }}>
+        <ApText
+          size="xs"
+          font="bold"
+          color={colors.textMuted}
+          className="uppercase mb-2"
+          style={{ letterSpacing: 1 }}
+        >
           Frequency
         </ApText>
-        <View className="rounded-2xl overflow-hidden mb-8" style={{ backgroundColor: colors.surface }}>
+        <View
+          className="rounded-2xl overflow-hidden mb-8"
+          style={{ backgroundColor: colors.surface }}
+        >
           {FREQUENCIES.map((f) => (
             <OptionRow
               key={f.value}

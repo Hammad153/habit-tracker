@@ -1,11 +1,7 @@
 import axiosInstance from "@/src/libs/axios";
 
 export type CoachTonePref =
-  | "ENCOURAGING"
-  | "DIRECT"
-  | "CALM"
-  | "CHALLENGING"
-  | "BALANCED";
+  "ENCOURAGING" | "DIRECT" | "CALM" | "CHALLENGING" | "BALANCED";
 
 export type CoachFrequency = "MINIMAL" | "STANDARD" | "FREQUENT";
 
@@ -15,6 +11,7 @@ export interface ICoachPreferences {
   coachTone: CoachTonePref;
   coachFrequency: CoachFrequency;
   weeklyReviewEnabled: boolean;
+  reengagementEnabled: boolean;
 }
 
 export class CoachPreferencesApiService {

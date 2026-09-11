@@ -44,6 +44,11 @@ export interface ISubscriptionInfo {
   paymentMethodNeedsUpdate: boolean;
   nextBillingDate: string | null;
   entitlements: IEntitlements;
+  accessSource: "TRIAL" | "PAID" | "ADMIN_FREE_ACCESS" | "ADMIN";
+  freeAccessEnabled: boolean;
+  freeAccessGrantedAt: string | null;
+  freeAccessExpiresAt: string | null;
+  freeAccessReason: string | null;
 }
 
 export interface IPlan {

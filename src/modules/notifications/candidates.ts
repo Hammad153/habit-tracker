@@ -11,7 +11,8 @@ export type NotificationType =
   | "ADAPTIVE_PROPOSAL_AVAILABLE"
   | "ADAPTATION_OUTCOME"
   | "WEEKLY_REVIEW_READY"
-  | "IDENTITY_REINFORCEMENT";
+  | "IDENTITY_REINFORCEMENT"
+  | "REENGAGEMENT";
 
 export interface INotificationCandidate {
   type: NotificationType;
@@ -40,15 +41,13 @@ export class BehavioralNotificationApiService {
       Pick<INotificationCandidate, "fingerprint" | "type" | "priority">
     >,
   ) => {
-    return axiosInstance
-      .post("/notifications/delivered", { items })
-      .then(
-        (res) =>
-          res.data as {
-            stored: number;
-            deliveries: Array<{ fingerprint: string; id: string }>;
-          },
-      );
+    return axiosInstance.post("/notifications/delivered", { items }).then(
+      (res) =>
+        res.data as {
+          stored: number;
+          deliveries: Array<{ fingerprint: string; id: string }>;
+        },
+    );
   };
 }
 
@@ -60,17 +59,23 @@ export class BehavioralNotificationApiService {
 export class BehavioralEventApiService {
   static interventionViewed = (fingerprint: string) =>
     axiosInstance
-      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/viewed`)
+      .post(
+        `/analytics/events/intervention/${encodeURIComponent(fingerprint)}/viewed`,
+      )
       .catch(() => undefined);
 
   static interventionDismissed = (fingerprint: string) =>
     axiosInstance
-      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/dismissed`)
+      .post(
+        `/analytics/events/intervention/${encodeURIComponent(fingerprint)}/dismissed`,
+      )
       .catch(() => undefined);
 
   static interventionActionStarted = (fingerprint: string) =>
     axiosInstance
-      .post(`/analytics/events/intervention/${encodeURIComponent(fingerprint)}/action-started`)
+      .post(
+        `/analytics/events/intervention/${encodeURIComponent(fingerprint)}/action-started`,
+      )
       .catch(() => undefined);
 
   static proposalViewed = (proposalId: string) =>

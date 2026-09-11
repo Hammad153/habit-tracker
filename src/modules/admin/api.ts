@@ -13,6 +13,19 @@ export const AdminService = {
     axiosInstance
       .patch(`/admin/users/${id}/status`, { isSuspended, reason })
       .then((res) => res.data),
+  updateUserSubscriptionAccess: (
+    id: string,
+    freeAccessEnabled: boolean,
+    reason?: string,
+    expiresAt?: string,
+  ) =>
+    axiosInstance
+      .patch(`/admin/users/${id}/subscription-access`, {
+        freeAccessEnabled,
+        reason,
+        expiresAt,
+      })
+      .then((res) => res.data),
   getHabits: (params?: Record<string, string | number | boolean | undefined>) =>
     axiosInstance.get("/admin/habits", { params }).then((res) => res.data),
   getHabit: (id: string) =>

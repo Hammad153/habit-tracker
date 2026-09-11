@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ApLoader, ApText } from "@/src/components";
+import { ApLoader, ApModal, ApText } from "@/src/components";
 import AdminPage from "@/src/modules/admin/components/AdminPage";
 import { AdminService } from "@/src/modules/admin/api";
 import {
@@ -23,6 +23,9 @@ export default function AdminUserDetail() {
   const colors = useTheme();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState(false);
+  const [accessModalVisible, setAccessModalVisible] = useState(false);
+  const [accessReason, setAccessReason] = useState("");
+  const [accessSaving, setAccessSaving] = useState(false);
   const load = () => {
     setError(false);
     if (id)
@@ -45,6 +48,30 @@ export default function AdminUserDetail() {
       load();
     } catch (e) {
       ToastService.ApiError(e);
+    }
+  };
+  const subscription = data?.subscription;
+  const freeAccessEnabled = Boolean(subscription?.freeAccessEnabled);
+  const saveFreeAccess = async () => {
+    const account = data?.profile ?? data?.user;
+    if (!account) return;
+    setAccessSaving(true);
+    try {
+      await AdminService.updateUserSubscriptionAccess(
+        account.id,
+        !freeAccessEnabled,
+        accessReason.trim() || undefined,
+      );
+      ToastService.Success(
+        freeAccessEnabled ? "Free access removed" : "Free access granted",
+      );
+      setAccessModalVisible(false);
+      setAccessReason("");
+      load();
+    } catch (e) {
+      ToastService.ApiError(e);
+    } finally {
+      setAccessSaving(false);
     }
   };
   if (!data && !error) return <ApLoader />;
@@ -96,6 +123,44 @@ export default function AdminUserDetail() {
         <ApText size="sm" color={colors.textMuted}>
           {user.role === "ADMIN" ? "Administrator" : "User"}
         </ApText>
+      </View>
+      <View
+        className="mb-4 rounded-2xl border p-5"
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.surfaceBorder,
+        }}
+      >
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <ApText size="lg" font="bold">
+              Subscription access
+            </ApText>
+            <ApText size="sm" color={colors.textMuted} className="mt-2">
+              {freeAccessEnabled
+                ? "Admin-granted free access"
+                : subscription?.status || "Normal subscription rules"}
+            </ApText>
+          </View>
+          <Pressable
+            onPress={() => setAccessModalVisible(true)}
+            className="rounded-xl px-3 py-2"
+            style={{
+              backgroundColor: freeAccessEnabled
+                ? colors.danger
+                : colors.primary,
+            }}
+          >
+            <ApText size="sm" font="bold" color={colors.background}>
+              {freeAccessEnabled ? "Remove" : "Grant access"}
+            </ApText>
+          </Pressable>
+        </View>
+        {subscription?.freeAccessReason && (
+          <ApText size="xs" color={colors.textMuted} className="mt-3">
+            Reason: {subscription.freeAccessReason}
+          </ApText>
+        )}
       </View>
       <View className="flex-row flex-wrap gap-3">
         <MetricCard label="Habits" value={formatNumber(user.totalHabits)} />
@@ -163,6 +228,58 @@ export default function AdminUserDetail() {
           Back to users
         </ApText>
       </Pressable>
+      <ApModal
+        visible={accessModalVisible}
+        onClose={() => !accessSaving && setAccessModalVisible(false)}
+        title={freeAccessEnabled ? "Remove Free Access?" : "Grant Free Access?"}
+        subTitle={
+          freeAccessEnabled
+            ? "This user will return to the normal subscription rules."
+            : `${user.name} will use subscription-protected features without purchasing a plan.`
+        }
+      >
+        <TextInput
+          value={accessReason}
+          onChangeText={setAccessReason}
+          placeholder="Reason (optional)"
+          placeholderTextColor={colors.textMuted}
+          className="rounded-xl border px-4 py-3"
+          style={{
+            color: colors.textPrimary,
+            borderColor: colors.surfaceBorder,
+          }}
+        />
+        <View className="mt-4 flex-row gap-3">
+          <Pressable
+            onPress={() => setAccessModalVisible(false)}
+            disabled={accessSaving}
+            className="flex-1 items-center rounded-xl border py-3"
+            style={{ borderColor: colors.surfaceBorder }}
+          >
+            <ApText font="bold" color={colors.textMuted}>
+              Cancel
+            </ApText>
+          </Pressable>
+          <Pressable
+            onPress={() => void saveFreeAccess()}
+            disabled={accessSaving}
+            className="flex-1 items-center rounded-xl py-3"
+            style={{
+              backgroundColor: freeAccessEnabled
+                ? colors.danger
+                : colors.primary,
+            }}
+          >
+            <ApText font="bold" color={colors.background}>
+              {accessSaving
+                ? "Saving..."
+                : freeAccessEnabled
+                  ? "Remove access"
+                  : "Grant access"}
+            </ApText>
+          </Pressable>
+        </View>
+      </ApModal>
     </AdminPage>
   );
 }
