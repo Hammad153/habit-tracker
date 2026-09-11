@@ -17,9 +17,12 @@ interface IProps {
 
 type TAuthContext = {
   user: IAuthUser | null;
+  isAdminMode: boolean;
   isLoading: boolean;
   authStatus: AuthStatus;
   signIn: (tokens: IAuthTokens, user: IAuthUser) => Promise<void>;
+  enterAdminMode: () => void;
+  exitAdminMode: () => void;
   signOut: () => Promise<void>;
 };
 
@@ -35,6 +38,7 @@ export const useAuthState = () => {
 
 export const AuthProvider: React.FC<IProps> = ({ children }) => {
   const [user, setUser] = useState<IAuthUser | null>(null);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const [authStatus, setAuthStatus] = useState<AuthStatus>("INITIALIZING");
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
@@ -48,6 +52,7 @@ export const AuthProvider: React.FC<IProps> = ({ children }) => {
       queryClient.cancelQueries();
       queryClient.clear();
       setUser(null);
+      setIsAdminMode(false);
       setAuthStatus("UNAUTHENTICATED");
     });
   }, [queryClient]);
@@ -60,8 +65,26 @@ export const AuthProvider: React.FC<IProps> = ({ children }) => {
     ])
       .then(([userData, accessToken, refreshToken]) => {
         if (userData && accessToken && refreshToken) {
-          setUser(userData);
-          setAuthStatus("AUTHENTICATED");
+          return AuthService.getProfile()
+            .then((serverUser) => {
+              const hydratedUser = {
+                ...userData,
+                role: serverUser.role ?? userData.role,
+              };
+              setUser(hydratedUser);
+              return ApStorageService.setItemAsync(
+                ApStorageKeys.User,
+                hydratedUser,
+              );
+            })
+            .catch(() => {
+              // Keep the cached session if profile hydration is temporarily unavailable.
+              setUser(userData);
+            })
+            .finally(() => {
+              setIsAdminMode(false);
+              setAuthStatus("AUTHENTICATED");
+            });
         } else {
           setAuthStatus("UNAUTHENTICATED");
         }
@@ -78,8 +101,25 @@ export const AuthProvider: React.FC<IProps> = ({ children }) => {
   const signIn = (tokens: IAuthTokens, userData: IAuthUser) => {
     return persistAuthSession(tokens, userData).then(() => {
       queryClient.clear();
-      setUser(userData);
-      setAuthStatus("AUTHENTICATED");
+      return AuthService.getProfile()
+        .then((serverUser) => {
+          const hydratedUser = {
+            ...userData,
+            role: serverUser.role ?? userData.role,
+          };
+          setUser(hydratedUser);
+          return ApStorageService.setItemAsync(
+            ApStorageKeys.User,
+            hydratedUser,
+          );
+        })
+        .catch(() => {
+          setUser(userData);
+        })
+        .finally(() => {
+          setIsAdminMode(false);
+          setAuthStatus("AUTHENTICATED");
+        });
     });
   };
 
@@ -95,11 +135,25 @@ export const AuthProvider: React.FC<IProps> = ({ children }) => {
     await queryClient.cancelQueries();
     queryClient.clear();
     setUser(null);
+    setIsAdminMode(false);
     setAuthStatus("UNAUTHENTICATED");
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, authStatus, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdminMode,
+        isLoading,
+        authStatus,
+        signIn,
+        enterAdminMode: () => {
+          if (user?.role === "ADMIN") setIsAdminMode(true);
+        },
+        exitAdminMode: () => setIsAdminMode(false),
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

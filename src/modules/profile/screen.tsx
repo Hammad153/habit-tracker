@@ -18,7 +18,8 @@ import StatCard from "./components/StatCard";
 import SettingsItem from "./components/SettingsItem";
 
 const ProfileScreen = () => {
-  const { user, signOut } = useAuthState();
+  const { user, signOut, enterAdminMode, isAdminMode, exitAdminMode } =
+    useAuthState();
   const { profile, loading, fetchProfile } = useProfileState();
   const { themeMode, soundEnabled, hapticEnabled, colors } = useSettingsState();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -59,6 +60,18 @@ const ProfileScreen = () => {
   const appearanceValue =
     themeMode === "system" ? "System" : themeMode === "dark" ? "Dark" : "Light";
   const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
+  const isAdmin = user?.role === "ADMIN";
+
+  const handleAdminMode = () => {
+    if (isAdminMode) {
+      exitAdminMode();
+      router.replace("/(tabs)");
+      return;
+    }
+
+    enterAdminMode();
+    router.push("/admin");
+  };
 
   return (
     <ApContainer>
@@ -132,7 +145,13 @@ const ProfileScreen = () => {
           >
             Preferences
           </ApText>
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <View
+            className="rounded-3xl overflow-hidden mb-6 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             <SettingsItem
               label="Appearance"
               icon="color-palette"
@@ -152,6 +171,33 @@ const ProfileScreen = () => {
             />
           </View>
 
+          {isAdmin && (
+            <>
+              <ApText
+                size="xs"
+                font="bold"
+                color={colors.textMuted}
+                className="mb-2 uppercase tracking-wider"
+              >
+                Administration
+              </ApText>
+              <View
+                className="rounded-3xl overflow-hidden mb-6 border"
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.surfaceBorder,
+                }}
+              >
+                <SettingsItem
+                  label={isAdminMode ? "Exit Admin Mode" : "Enter Admin Mode"}
+                  icon={isAdminMode ? "exit-outline" : "shield-checkmark"}
+                  value={isAdminMode ? "Using admin tools" : "Admin access"}
+                  onPress={handleAdminMode}
+                />
+              </View>
+            </>
+          )}
+
           <ApText
             size="xs"
             font="bold"
@@ -160,7 +206,13 @@ const ProfileScreen = () => {
           >
             Account & Security
           </ApText>
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <View
+            className="rounded-3xl overflow-hidden mb-6 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             <SettingsItem
               label="Subscription"
               icon="star"
@@ -174,7 +226,13 @@ const ProfileScreen = () => {
             />
           </View>
 
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <View
+            className="rounded-3xl overflow-hidden mb-6 border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             <SettingsItem
               label="Log Out"
               icon="log-out"

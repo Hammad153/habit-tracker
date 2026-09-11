@@ -55,6 +55,10 @@ const RootLayout = () => {
                   />
                   <Stack.Screen name="+not-found" />
                   <Stack.Screen
+                    name="admin"
+                    options={{ headerShown: false, presentation: "card" }}
+                  />
+                  <Stack.Screen
                     name="timeline"
                     options={{ headerShown: false }}
                   />
