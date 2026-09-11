@@ -86,7 +86,7 @@ export default function AdminDashboard() {
               {count(data.notifications?.deliveriesTotal)}
             </ApText>
             <ApText size="sm" className="mt-2">
-              Ready weekly reviews: {count(data.reviewsReady)}
+              Ready weekly reviews: {count(data.weeklyReviews?.completed)}
             </ApText>
           </View>
         </>

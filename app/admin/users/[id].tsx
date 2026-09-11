@@ -32,11 +32,12 @@ export default function AdminUserDetail() {
   };
   useEffect(load, [id]);
   const toggleStatus = async () => {
-    if (!data?.user) return;
+    const account = data?.profile ?? data?.user;
+    if (!account) return;
     try {
-      const next = !data.user.isSuspended;
+      const next = !account.isSuspended;
       await AdminService.updateUserStatus(
-        data.user.id,
+        account.id,
         next,
         next ? "Suspended from admin panel" : "Reactivated from admin panel",
       );
@@ -56,7 +57,7 @@ export default function AdminUserDetail() {
         <ErrorState onRetry={load} />
       </AdminPage>
     );
-  const user = data?.user ?? data;
+  const user = data?.profile ?? data?.user ?? data;
   if (!user)
     return (
       <AdminPage

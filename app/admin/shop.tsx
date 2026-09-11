@@ -81,12 +81,17 @@ export default function AdminShop() {
                       </ApText>
                     </View>
                     <StatusBadge
-                      label={item.isActive === false ? "Inactive" : "Available"}
-                      tone={item.isActive === false ? "neutral" : "success"}
+                      label={
+                        item.status === "ACTIVE"
+                          ? "Available"
+                          : item.status || "Unavailable"
+                      }
+                      tone={item.status === "ACTIVE" ? "success" : "neutral"}
                     />
                   </View>
                   <ApText size="sm" color={colors.textMuted} className="mt-2">
-                    Cost: {formatNumber(item.cost)} coins
+                    Cost: {formatNumber(item.cost)} coins ·{" "}
+                    {formatNumber(item.redemptionsCount)} redemptions
                   </ApText>
                 </Row>
               ))}
