@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Keep the web build as a mobile app viewport on larger screens. Native
+   layouts are unaffected because these selectors only target Expo web's root. */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: #e2e8f0;
+}
+
+#root {
+  justify-content: center;
+  overflow: hidden;
+}
+
+#root > div {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+@media (max-width: 430px) {
+  body {
+    background: transparent;
+  }
+
+  #root > div {
+    max-width: none;
+  }
+}
+
 /* Remove browser focus ring/outline on web inputs */
 input, textarea, select {
   outline: none !important;
