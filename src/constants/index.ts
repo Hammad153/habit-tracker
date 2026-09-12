@@ -1,31 +1,27 @@
+import { DesignTokens } from "@/src/components/theme";
+
 export const PERIOD_DAYS: Record<string, number> = {
   Week: 7,
   Month: 30,
   Year: 365,
 };
 
-/**
- * Feature flags — controls which user-facing features are currently active.
- *
- * Budget is deliberately HIDDEN from the active navigation (flagged OFF) while
- * its routes, modules, API, backend services and database tables all remain
- * intact. To reactivate later, flip `BUDGET_ENABLED` to `true` and re-add the
- * Budget entry to the tab/carousel/Menu navigation. Do not delete Budget code.
- */
 export const FEATURE_FLAGS = {
   BUDGET_ENABLED: false,
 } as const;
 
-export const HABIT_COLORS = [
-  "#13ec5b",
-  "#10b981",
-  "#0ea5e9",
-  "#8b5cf6",
-  "#f43f5e",
-  "#f59e0b",
-  "#6366f1",
-  "#ec4899",
-];
+export const CATEGORY_KEYS = [
+  "rose",
+  "amber",
+  "mint",
+  "violet",
+  "sky",
+  "sand",
+] as const;
+
+export const HABIT_COLORS = CATEGORY_KEYS.map(
+  (k) => DesignTokens.category[k].ink
+);
 
 export const HABIT_ICONS = [
   "water",

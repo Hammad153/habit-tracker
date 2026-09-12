@@ -1,25 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Dumbbell,
+  Flower2,
+  Rocket,
+  Heart,
+  Briefcase,
+  Grid,
+  Plus,
+} from "lucide-react-native";
 import { router } from "expo-router";
 import {
   ApText,
   ApContainer,
   ApHeader,
   ApScrollView,
-  ApLoader,
+  ListRow,
+  SkeletonHabitList,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { ToastService } from "@/src/services";
 import { IHabitTemplate } from "./model";
 import { TemplateApiService } from "./api";
+import { getHabitLucideIcon } from "@/src/utils/icons";
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Fitness: "barbell",
-  Mindfulness: "flower",
-  Productivity: "rocket",
-  Health: "heart",
-  Career: "briefcase",
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "Fitness":
+      return Dumbbell;
+    case "Mindfulness":
+      return Flower2;
+    case "Productivity":
+      return Rocket;
+    case "Health":
+      return Heart;
+    case "Career":
+      return Briefcase;
+    default:
+      return Grid;
+  }
 };
 
 const TemplateScreen = () => {
@@ -42,16 +61,12 @@ const TemplateScreen = () => {
       ? templates
       : templates.filter((t) => t.category === selectedCategory);
 
-  // Selecting a template routes to the FULL create-habit page, prefilled
-  // from the template — identical fields and behavior to manual creation.
   const handleUseTemplate = (template: IHabitTemplate) => {
     router.push({
       pathname: "/create-habit",
       params: { template: JSON.stringify(template) },
     });
   };
-
-  if (loading) return <ApLoader />;
 
   return (
     <ApContainer>
@@ -61,99 +76,74 @@ const TemplateScreen = () => {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="px-5 mb-4"
+          className="mb-4"
         >
           {categories.map((category) => {
             const isSelected = selectedCategory === category;
+            const CatIcon = getCategoryIcon(category);
             return (
               <TouchableOpacity
                 key={category}
                 onPress={() => setSelectedCategory(category)}
-                className="mr-2 px-4 py-2 rounded-full"
+                className="mr-2 px-3 py-1.5 rounded-full flex-row items-center"
                 style={{
-                  backgroundColor: isSelected ? colors.primary : colors.surface,
-                  borderWidth: isSelected ? 0 : 1,
-                  borderColor: colors.surfaceBorder,
+                  backgroundColor: isSelected ? colors.primary : colors.surface2,
                 }}
               >
-                <View className="flex-row items-center">
-                  {category !== "All" && (
-                    <Ionicons
-                      name={(CATEGORY_ICONS[category] || "grid") as any}
-                      size={14}
-                      color={isSelected ? "#FFFFFF" : colors.textMuted}
-                      style={{ marginRight: 4 }}
-                    />
-                  )}
-                  <ApText
-                    size="sm"
-                    font={isSelected ? "bold" : "medium"}
-                    color={isSelected ? "#FFFFFF" : colors.textMuted}
-                  >
-                    {category}
-                  </ApText>
-                </View>
+                {category !== "All" && (
+                  <CatIcon
+                    size={13}
+                    color={isSelected ? colors.background : colors.textMuted}
+                    style={{ marginRight: 4 }}
+                  />
+                )}
+                <ApText
+                  size="xs"
+                  font={isSelected ? "semibold" : "normal"}
+                  color={isSelected ? colors.background : colors.textMuted}
+                >
+                  {category}
+                </ApText>
               </TouchableOpacity>
             );
           })}
         </ScrollView>
 
         {/* Template cards */}
-        <View className="px-5">
-          {filteredTemplates.map((template) => {
-            return (
-              <TouchableOpacity
-                key={template.id}
-                onPress={() => handleUseTemplate(template)}
-                className="flex-row items-center p-4 mb-3 rounded-2xl border"
-                style={{
-                  backgroundColor: colors.surface,
-                  borderColor: colors.surfaceBorder,
-                }}
-              >
-                <View
-                  className="w-12 h-12 rounded-xl items-center justify-center"
-                  style={{ backgroundColor: template.iconBg }}
-                >
-                  <Ionicons
-                    name={template.icon as any}
-                    size={22}
-                    color={template.iconColor}
-                  />
-                </View>
-
-                <View className="flex-1 ml-3">
-                  <View className="flex-row items-center">
-                    <ApText
-                      size="base"
-                      font="semibold"
-                      color={colors.textPrimary}
+        <View>
+          {loading ? (
+            <SkeletonHabitList count={5} />
+          ) : (
+            filteredTemplates.map((template) => {
+              const IconComp = getHabitLucideIcon(template.title);
+              return (
+                <View key={template.id} className="mb-2">
+                  <ListRow
+                    left={
+                      <View
+                        className="w-10 h-10 rounded-xl items-center justify-center"
+                        style={{ backgroundColor: colors.accentLight }}
+                      >
+                      <IconComp size={18} color={colors.primary} />
+                    </View>
+                  }
+                  title={template.title}
+                  subtitle={`${template.subtitle || ""}${template.subtitle ? " · " : ""}Goal: ${template.goal} ${template.unit || "times"}`}
+                  right={
+                    <View
+                      className="w-7 h-7 rounded-full items-center justify-center self-center"
+                      style={{ backgroundColor: colors.accentLight }}
                     >
-                      {template.title}
-                    </ApText>
-                  </View>
-                  {template.subtitle && (
-                    <ApText size="xs" color={colors.textMuted} className="mt-1">
-                      {template.subtitle}
-                    </ApText>
-                  )}
-                  <ApText
-                    size="xs"
-                    color={colors.textSecondary}
-                    className="mt-1"
-                  >
-                    Goal: {template.goal} {template.unit || "times"} •{" "}
-                    {template.frequency || "Daily"}
-                  </ApText>
-                </View>
-
-                <Ionicons name="add-circle" size={24} color={colors.primary} />
-              </TouchableOpacity>
+                      <Plus size={14} color={colors.primary} />
+                    </View>
+                  }
+                  onPress={() => handleUseTemplate(template)}
+                />
+              </View>
             );
-          })}
+          })
+          )}
         </View>
-
-        <View className="h-20" />
       </ApScrollView>
     </ApContainer>
   );

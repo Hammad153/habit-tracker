@@ -1,6 +1,5 @@
 import React from "react";
 import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
 
@@ -13,73 +12,50 @@ const OverviewStats: React.FC<OverviewStatsProps> = ({ streak, totalDone }) => {
   const colors = useTheme();
 
   return (
-    <View className="flex-row gap-4 mb-6">
-      <View
-        className="flex-1 p-4 rounded-2xl"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
-          borderWidth: 1,
-        }}>
-        <View className="flex-row items-center mb-3">
-          <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: colors.warning + '1A' }}>
-            <Ionicons name="flame" size={16} color={colors.warning} />
-          </View>
-          <View>
-            <ApText size="xs" color={colors.textMuted}>
-              Current
-            </ApText>
-            <ApText size="xs" color={colors.textMuted}>
-              Streak
-            </ApText>
-          </View>
-        </View>
-        <View className="flex-row items-baseline">
-          <ApText
-            size="3xl"
-            font="bold"
-            color={colors.textPrimary}
-            className="mr-1">
-            {streak}
-          </ApText>
-          <ApText size="sm" color={colors.textMuted}>
-            Days
-          </ApText>
-        </View>
+    <View className="flex-row items-center justify-around py-4 mb-6">
+      <View className="items-center flex-1">
+        <ApText
+          size="3xl"
+          font="semibold"
+          color={colors.textPrimary}
+          style={{ letterSpacing: -0.5 }}
+        >
+          {streak}
+        </ApText>
+        <ApText
+          size="xs"
+          font="medium"
+          color={colors.textMuted}
+          className="uppercase mt-1"
+          style={{ letterSpacing: 0.8 }}
+        >
+          Current Streak
+        </ApText>
       </View>
 
       <View
-        className="flex-1 p-4 rounded-2xl"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
-          borderWidth: 1,
-        }}>
-        <View className="flex-row items-center mb-3">
-          <View className="w-8 h-8 rounded-full items-center justify-center mr-2" style={{ backgroundColor: colors.success + '1A' }}>
-            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-          </View>
-          <View>
-            <ApText size="xs" color={colors.textMuted}>
-              Total Done
-            </ApText>
-            <ApText size="xs" color="transparent">
-              .
-            </ApText>
-          </View>
-        </View>
-        <View className="flex-row items-baseline">
-          <ApText
-            size="3xl"
-            font="bold"
-            color={colors.textPrimary}
-            className="mr-1">
-            {totalDone}
-          </ApText>
-          <ApText size="sm" color={colors.textMuted}>
-            Log{totalDone !== 1 ? "s" : ""}
-          </ApText>
-        </View>
+        className="w-[1px] h-8 self-center"
+        style={{ backgroundColor: colors.surfaceBorder }}
+      />
+
+      <View className="items-center flex-1">
+        <ApText
+          size="3xl"
+          font="semibold"
+          color={colors.textPrimary}
+          style={{ letterSpacing: -0.5 }}
+        >
+          {totalDone}
+        </ApText>
+        <ApText
+          size="xs"
+          font="medium"
+          color={colors.textMuted}
+          className="uppercase mt-1"
+          style={{ letterSpacing: 0.8 }}
+        >
+          Total Logs
+        </ApText>
       </View>
     </View>
   );

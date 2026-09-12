@@ -4,8 +4,8 @@ import { subDays, format } from "date-fns";
 import { View } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 import { ApText } from "@/src/components/Text";
-import { Ionicons } from "@expo/vector-icons";
-import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
+import { ApCard } from "@/src/components/Card";
+import Svg, { Path, Defs, LinearGradient, Stop, Line } from "react-native-svg";
 import { isSameDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
 interface CompletionChartProps {
@@ -38,14 +38,13 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
     chartData.reduce((a, b) => a + b, 0) / chartData.length,
   );
 
-  // Simple trend calculation (comparing last 3 days to previous 3 days)
   const lastThree = chartData.slice(4).reduce((a, b) => a + b, 0) / 3;
   const prevThree = chartData.slice(1, 4).reduce((a, b) => a + b, 0) / 3;
   const trend = Math.round(lastThree - prevThree);
 
   // Generate SVG path for a 100x100 viewBox
   const points = chartData
-    .map((val, i) => `${(i * 100) / 6},${100 - val}`)
+    .map((val, i) => `${(i * 100) / 6},${100 - Math.max(val, 2)}`)
     .join(" ");
   const linePath = `M ${points}`;
   const areaPath = `${linePath} L 100,100 L 0,100 Z`;
@@ -55,84 +54,85 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
   );
 
   return (
-    <View
-      className="p-4 rounded-3xl mb-6 relative overflow-hidden"
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.surfaceBorder,
-        borderWidth: 1,
-        minHeight: 220,
-      }}>
-      <View className="flex-row justify-between items-start mb-8 z-10">
+    <ApCard className="p-4 mb-6 relative overflow-hidden" style={{ minHeight: 220 }}>
+      <View className="flex-row justify-between items-start mb-6 z-10">
         <View>
-          <ApText size="sm" color={colors.textMuted} className="mb-1">
+          <ApText
+            size="xs"
+            font="medium"
+            color={colors.textMuted}
+            className="uppercase mb-1"
+            style={{ letterSpacing: 0.8 }}
+          >
             Overall Completion
           </ApText>
-          <View className="flex-row items-center">
+          <View className="flex-row items-baseline">
             <ApText
               size="3xl"
-              font="bold"
+              font="semibold"
               color={colors.textPrimary}
-              className="mr-2">
+              className="mr-2"
+              style={{ letterSpacing: -0.5 }}
+            >
               {overallCompletion}%
             </ApText>
             {trend !== 0 && (
-              <View
-                className={`${trend > 0 ? "bg-green-500/20" : "bg-red-500/20"} px-2 py-0.5 rounded-full`}>
-                <ApText
-                  size="xs"
-                  color={trend > 0 ? colors.success : colors.danger}
-                  font="bold">
-                  {trend > 0 ? `+${trend}%` : `${trend}%`} this week
-                </ApText>
-              </View>
+              <ApText
+                size="xs"
+                font="medium"
+                color={trend > 0 ? colors.success : colors.danger}
+              >
+                {trend > 0 ? `+${trend}%` : `${trend}%`} this week
+              </ApText>
             )}
           </View>
         </View>
-        <Ionicons
-          name="ellipsis-horizontal"
-          size={20}
-          color={colors.textMuted}
-        />
       </View>
 
       <View
-        className="absolute bottom-0 left-0 right-0 h-40 w-full"
-        style={{ paddingBottom: 30 }}>
+        className="absolute bottom-0 left-0 right-0 h-36 w-full"
+        style={{ paddingBottom: 28 }}
+      >
         <Svg
           height="100%"
           width="100%"
           viewBox="0 0 100 100"
-          preserveAspectRatio="none">
+          preserveAspectRatio="none"
+        >
           <Defs>
-            <LinearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={colors.primary} stopOpacity="0.5" />
+            <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={colors.primary} stopOpacity="0.2" />
               <Stop offset="1" stopColor={colors.primary} stopOpacity="0" />
             </LinearGradient>
           </Defs>
-          <Path d={areaPath} fill="url(#gradient)" />
+          {/* Grid lines */}
+          <Line x1="0" y1="25" x2="100" y2="25" stroke={colors.surfaceBorder} strokeWidth="0.5" />
+          <Line x1="0" y1="50" x2="100" y2="50" stroke={colors.surfaceBorder} strokeWidth="0.5" />
+          <Line x1="0" y1="75" x2="100" y2="75" stroke={colors.surfaceBorder} strokeWidth="0.5" />
+          <Path d={areaPath} fill="url(#chartGradient)" />
           <Path
             d={linePath}
             fill="none"
             stroke={colors.primary}
-            strokeWidth="3"
+            strokeWidth="2.5"
             strokeLinecap="round"
           />
         </Svg>
       </View>
 
-      <View className="flex-row justify-between absolute bottom-4 left-4 right-4">
+      <View className="flex-row justify-between absolute bottom-3 left-4 right-4">
         {labels.map((label, index) => (
           <ApText
             key={index}
             size="xs"
             color={colors.textMuted}
-            style={{ fontSize: 10 }}>
+            style={{ fontSize: 11 }}
+          >
             {label}
           </ApText>
         ))}
       </View>
-    </View>
+    </ApCard>
   );
 };
 

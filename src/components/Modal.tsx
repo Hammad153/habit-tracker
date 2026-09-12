@@ -1,123 +1,79 @@
 import React from "react";
-import {
-  View,
-  Modal,
-  ModalProps,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { ApText } from "./Text";
-import { useTheme } from "../modules/settings/context";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Modal, Pressable, ScrollView } from "react-native";
+import { X } from "lucide-react-native";
+import { useTheme } from "@/src/modules/settings/context";
 
-interface IProps extends ModalProps {
-  title?: string;
-  subTitle?: string;
-  wrapperClassName?: string;
-  modalClassName?: string;
-  className?: string;
-  height?: number;
+export interface ApModalProps {
+  visible: boolean;
   onClose: () => void;
-  showCloseButton?: boolean;
-  dismissOnBackdrop?: boolean;
+  title?: string;
+  subtitle?: string;
+  subTitle?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
-export const ApModal: React.FC<IProps> = ({
-  title,
-  subTitle,
-  wrapperClassName,
-  modalClassName,
-  className,
-  height,
+export const ApModal: React.FC<ApModalProps> = ({
+  visible,
   onClose,
-  showCloseButton = true,
-  dismissOnBackdrop = true,
+  title,
+  subtitle,
+  subTitle,
   children,
-  ...modalProps
+  className = "",
 }) => {
+  const sub = subtitle || subTitle;
   const colors = useTheme();
-
-  const handleBackdropPress = () => {
-    if (dismissOnBackdrop) {
-      onClose();
-    }
-  };
 
   return (
     <Modal
+      visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      {...modalProps}
     >
       <View
-        className={`flex-1 justify-center items-center bg-black/60 px-6 ${wrapperClassName || ""}`}
+        className="flex-1 items-center justify-center px-5"
+        style={{ backgroundColor: colors.overlay }}
       >
-        {/* Backdrop layer sits BEHIND the card: outside taps dismiss, while
-            inputs inside the card receive their own touches (typing works). */}
-        {dismissOnBackdrop && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Close modal"
-            onPress={handleBackdropPress}
-            style={StyleSheet.absoluteFill}
-          />
-        )}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          className={`w-full ${modalClassName || ""}`}
-          pointerEvents="box-none"
+        <View
+          className={`w-full max-w-[340px] bg-background-elevated rounded-lg p-5 max-h-[85%] ${className}`}
+          style={{
+            shadowColor: colors.inkPrimary,
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
+            shadowOffset: { width: 0, height: 12 },
+            elevation: 8,
+          }}
         >
-              <View
-                className={`rounded-3xl p-6 border ${className || ""}`}
-                style={[
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.surfaceBorder,
-                  },
-                  height ? { height } : {},
-                ]}
-              >
-                {(title || showCloseButton) && (
-                  <View className="flex-row justify-between items-center mb-4">
-                    <View className="flex-1 mr-2">
-                      {title && (
-                        <ApText
-                          size="xl"
-                          font="bold"
-                          color={colors.textPrimary}
-                        >
-                          {title}
-                        </ApText>
-                      )}
-                      {subTitle && (
-                        <ApText
-                          size="sm"
-                          color={colors.textSecondary}
-                          className="mt-1"
-                        >
-                          {subTitle}
-                        </ApText>
-                      )}
-                    </View>
-                    {showCloseButton && (
-                      <TouchableOpacity onPress={onClose}>
-                        <Ionicons
-                          name="close"
-                          size={24}
-                          color={colors.textMuted}
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                )}
-                {children}
+          {title ? (
+            <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-1 mr-2">
+                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                  {title}
+                </Text>
+                {sub ? (
+                  <Text className="text-[13px] text-ink-secondary mt-0.5">
+                    {sub}
+                  </Text>
+                ) : null}
               </View>
-        </KeyboardAvoidingView>
+              <Pressable
+                onPress={onClose}
+                hitSlop={8}
+                className="w-8 h-8 rounded-pill bg-background-surface items-center justify-center"
+              >
+                <X size={16} color={colors.inkPrimary} strokeWidth={2} />
+              </Pressable>
+            </View>
+          ) : null}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {children}
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );
 };
+
+export default ApModal;

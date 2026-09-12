@@ -1,69 +1,94 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
-import { ApModal } from "./Modal";
-import { ApText } from "./Text";
-import { useTheme } from "../modules/settings/context";
+import { View, Text, Modal, Pressable } from "react-native";
+import { useTheme } from "@/src/modules/settings/context";
 
-interface IProps {
+export interface ApConfirmModalProps {
   visible: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
   title: string;
+  description?: string;
   subTitle?: string;
+  subtitle?: string;
   confirmText?: string;
   cancelText?: string;
-  destructive?: boolean;
-  onConfirm: () => void;
-  onClose: () => void;
+  isDestructive?: boolean;
 }
 
-export const ApConfirmModal: React.FC<IProps> = ({
+export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
   visible,
+  onClose,
+  onConfirm,
   title,
+  description,
   subTitle,
+  subtitle,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  destructive = false,
-  onConfirm,
-  onClose,
+  isDestructive = true,
 }) => {
+  const desc = description || subTitle || subtitle;
   const colors = useTheme();
 
   return (
-    <ApModal
+    <Modal
       visible={visible}
-      onClose={onClose}
-      title={title}
-      subTitle={subTitle}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
-      <View className="flex-row gap-x-2 mt-2">
-        <TouchableOpacity
-          onPress={onClose}
-          className="flex-1 py-4 rounded-full border items-center"
+      <View
+        className="flex-1 items-center justify-center px-6"
+        style={{ backgroundColor: colors.overlay }}
+      >
+        <View
+          className="w-full max-w-[320px] bg-background-elevated rounded-lg p-5"
           style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
+            shadowColor: colors.inkPrimary,
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
+            shadowOffset: { width: 0, height: 12 },
+            elevation: 8,
           }}
         >
-          <ApText font="semibold" color={colors.textMuted}>
-            {cancelText}
-          </ApText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onConfirm}
-          className="flex-1 py-4 rounded-full items-center"
-          style={{
-            backgroundColor: destructive ? colors.danger : colors.primary,
-            shadowColor: destructive ? colors.danger : colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
-        >
-          <ApText font="bold" color={colors.white}>
-            {confirmText}
-          </ApText>
-        </TouchableOpacity>
+          <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary mb-2">
+            {title}
+          </Text>
+          {desc ? (
+            <Text className="text-[15px] leading-[22px] text-ink-secondary mb-6">
+              {desc}
+            </Text>
+          ) : (
+            <View className="h-4" />
+          )}
+          <View className="flex-row gap-3">
+            <Pressable
+              onPress={onClose}
+              className="flex-1 h-[44px] rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+            >
+              <Text className="text-[15px] font-semibold text-ink-primary">
+                {cancelText}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={onConfirm}
+              className={`flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80 ${
+                isDestructive ? "bg-danger-soft" : "bg-background-inverse"
+              }`}
+            >
+              <Text
+                className={`text-[15px] font-semibold ${
+                  isDestructive ? "text-danger" : "text-ink-inverse"
+                }`}
+              >
+                {confirmText}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
-    </ApModal>
+    </Modal>
   );
 };
+
+export default ApConfirmModal;

@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, ScrollView, Switch, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Pressable, Switch, View } from "react-native";
+import { MessageSquare, Sparkles, FileText, Check } from "lucide-react-native";
 import {
   ApContainer,
   ApErrorState,
   ApHeader,
-  ApLoader,
   ApText,
+  ApCard,
+  ApScrollView,
+  SkeletonCard,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { ToastService } from "@/src/services";
@@ -32,14 +34,14 @@ const FREQUENCIES: Array<{ value: CoachFrequency; label: string; hint: string }>
 ];
 
 const ToggleRow = ({
-  icon,
+  icon: IconComponent,
   title,
   description,
   value,
   onChange,
   disabled,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   title: string;
   description: string;
   value: boolean;
@@ -49,18 +51,18 @@ const ToggleRow = ({
   const colors = useTheme();
   return (
     <View
-      className="flex-row items-center justify-between p-4 border-b"
-      style={{ borderBottomColor: colors.surfaceBorder }}
+      className="flex-row items-center justify-between p-4"
+      style={{ borderBottomWidth: 1, borderBottomColor: colors.surfaceBorder }}
     >
       <View className="flex-row items-center flex-1 mr-3">
         <View
-          className="w-10 h-10 rounded-full items-center justify-center mr-4"
-          style={{ backgroundColor: colors.background }}
+          className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+          style={{ backgroundColor: colors.accentLight }}
         >
-          <Ionicons name={icon} size={20} color={colors.primary} />
+          <IconComponent size={18} color={colors.primary} />
         </View>
         <View className="flex-1">
-          <ApText size="base" font="semibold" color={colors.textPrimary}>
+          <ApText size="sm" font="medium" color={colors.textPrimary}>
             {title}
           </ApText>
           <ApText size="xs" color={colors.textMuted} className="mt-0.5">
@@ -72,8 +74,8 @@ const ToggleRow = ({
         value={value}
         disabled={disabled}
         onValueChange={onChange}
-        trackColor={{ false: colors.surfaceInactive, true: colors.primary + "80" }}
-        thumbColor={value ? colors.primary : colors.textMuted}
+        trackColor={{ false: colors.surfaceInactive, true: colors.primary }}
+        thumbColor={colors.background}
       />
     </View>
   );
@@ -96,21 +98,20 @@ const OptionRow = ({
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      className={`flex-row items-center justify-between p-4 ${selected ? "" : ""}`}
+      className="flex-row items-center justify-between p-3.5"
       style={{
-        backgroundColor: selected ? colors.primary + "14" : "transparent",
-        borderRadius: selected ? 12 : 0,
+        backgroundColor: selected ? colors.accentLight : "transparent",
       }}
     >
       <View className="flex-1">
-        <ApText size="base" font={selected ? "bold" : "normal"} color={colors.textPrimary}>
+        <ApText size="sm" font={selected ? "semibold" : "medium"} color={colors.textPrimary}>
           {label}
         </ApText>
         <ApText size="xs" color={colors.textMuted} className="mt-0.5">
           {hint}
         </ApText>
       </View>
-      {selected && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+      {selected && <Check size={16} color={colors.primary} />}
     </Pressable>
   );
 };
@@ -136,22 +137,19 @@ const CoachSettingsScreen = () => {
     (patch: Partial<ICoachPreferences>, key: string) => {
       if (!prefs || savingKey) return;
       setSavingKey(key);
-      // Optimistic UI; server is the source of truth.
       setPrefs({ ...prefs, ...patch });
       CoachPreferencesApiService.update(patch)
         .then((saved) => setPrefs(saved))
         .catch((err) => {
           ToastService.ApiError(err);
-          setPrefs(prefs); // revert on failure
+          setPrefs(prefs);
         })
         .finally(() => setSavingKey(null));
     },
     [prefs, savingKey],
   );
 
-  if (loading) return <ApLoader />;
-
-  if (error || !prefs) {
+  if (!loading && (error || !prefs)) {
     return (
       <ApContainer>
         <ApHeader title="AI Coach" hasBackButton />
@@ -163,17 +161,24 @@ const CoachSettingsScreen = () => {
   return (
     <ApContainer>
       <ApHeader title="AI Coach" hasBackButton />
-      <ScrollView className="flex-1 px-5 pt-4" showsVerticalScrollIndicator={false}>
-        <View className="rounded-2xl overflow-hidden mb-5" style={{ backgroundColor: colors.surface }}>
+      {loading || !prefs ? (
+        <ApScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+          <SkeletonCard style={{ height: 210, marginBottom: 20 }} />
+          <SkeletonCard style={{ height: 180, marginBottom: 20 }} />
+          <SkeletonCard style={{ height: 150 }} />
+        </ApScrollView>
+      ) : (
+        <ApScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        <ApCard className="overflow-hidden mb-5">
           <ToggleRow
-            icon="chatbubbles-outline"
+            icon={MessageSquare}
             title="AI Coach"
             description="Personalized coaching on your habits"
             value={prefs.coachEnabled}
             onChange={(v) => update({ coachEnabled: v }, "coachEnabled")}
           />
           <ToggleRow
-            icon="sparkles-outline"
+            icon={Sparkles}
             title="AI-generated wording"
             description="When off, coaching uses fixed text"
             value={prefs.aiCoachEnabled}
@@ -181,56 +186,83 @@ const CoachSettingsScreen = () => {
             disabled={!prefs.coachEnabled}
           />
           <ToggleRow
-            icon="document-text-outline"
+            icon={FileText}
             title="Weekly Review"
             description="A summary of your week, every week"
             value={prefs.weeklyReviewEnabled}
             onChange={(v) => update({ weeklyReviewEnabled: v }, "weeklyReviewEnabled")}
           />
-        </View>
+        </ApCard>
 
-        <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2" style={{ letterSpacing: 1 }}>
+        <ApText
+          size="xs"
+          font="semibold"
+          color={colors.textMuted}
+          className="uppercase mb-2"
+          style={{ letterSpacing: 0.8 }}
+        >
           Tone
         </ApText>
-        <View className="rounded-2xl overflow-hidden mb-5" style={{ backgroundColor: colors.surface }}>
-          {TONES.map((t) => (
-            <OptionRow
+        <ApCard className="overflow-hidden mb-5">
+          {TONES.map((t, index) => (
+            <View
               key={t.value}
-              label={t.label}
-              hint={t.hint}
-              selected={prefs.coachTone === t.value}
-              onPress={() =>
-                prefs.coachTone !== t.value &&
-                update({ coachTone: t.value }, `tone-${t.value}`)
-              }
-            />
+              style={{
+                borderTopWidth: index > 0 ? 1 : 0,
+                borderTopColor: colors.surfaceBorder,
+              }}
+            >
+              <OptionRow
+                label={t.label}
+                hint={t.hint}
+                selected={prefs.coachTone === t.value}
+                onPress={() =>
+                  prefs.coachTone !== t.value &&
+                  update({ coachTone: t.value }, `tone-${t.value}`)
+                }
+              />
+            </View>
           ))}
-        </View>
+        </ApCard>
 
-        <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2" style={{ letterSpacing: 1 }}>
+        <ApText
+          size="xs"
+          font="semibold"
+          color={colors.textMuted}
+          className="uppercase mb-2"
+          style={{ letterSpacing: 0.8 }}
+        >
           Frequency
         </ApText>
-        <View className="rounded-2xl overflow-hidden mb-8" style={{ backgroundColor: colors.surface }}>
-          {FREQUENCIES.map((f) => (
-            <OptionRow
+        <ApCard className="overflow-hidden mb-8">
+          {FREQUENCIES.map((f, index) => (
+            <View
               key={f.value}
-              label={f.label}
-              hint={f.hint}
-              selected={prefs.coachFrequency === f.value}
-              onPress={() =>
-                prefs.coachFrequency !== f.value &&
-                update({ coachFrequency: f.value }, `freq-${f.value}`)
-              }
-            />
+              style={{
+                borderTopWidth: index > 0 ? 1 : 0,
+                borderTopColor: colors.surfaceBorder,
+              }}
+            >
+              <OptionRow
+                label={f.label}
+                hint={f.hint}
+                selected={prefs.coachFrequency === f.value}
+                onPress={() =>
+                  prefs.coachFrequency !== f.value &&
+                  update({ coachFrequency: f.value }, `freq-${f.value}`)
+                }
+              />
+            </View>
           ))}
-        </View>
+        </ApCard>
 
         {savingKey && (
-          <ApText size="xs" color={colors.textMuted} className="text-center">
+          <ApText size="xs" color={colors.textMuted} className="text-center mb-4">
             Saving…
           </ApText>
         )}
-      </ScrollView>
+      </ApScrollView>
+      )}
     </ApContainer>
   );
 };

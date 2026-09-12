@@ -1,142 +1,80 @@
 import React from "react";
-import { View, StyleProp, ViewStyle, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import { ApText } from "./Text";
+import { View, Text, Pressable } from "react-native";
+import { ArrowLeft } from "lucide-react-native";
+import { router } from "expo-router";
 import { useTheme } from "@/src/modules/settings/context";
 
-export interface IProps {
-  title: React.ReactNode | string;
-  left?: React.ReactNode;
-  right?: React.ReactNode;
+export interface ApHeaderProps {
+  title?: string;
   hasBackButton?: boolean;
-  subheader?: React.ReactNode;
-  headerClassName?: string;
-  titleClassName?: string;
-  containerClassName?: string;
-  backContainerClassName?: string;
-  containerStyle?: StyleProp<ViewStyle>;
+  onBackPress?: () => void;
   onBack?: () => void;
-  hasBackGround?: boolean;
-  icons?: React.ReactNode;
-  transparent?: boolean;
+  rightAction?: React.ReactNode;
+  right?: React.ReactNode;
+  subtitle?: string;
+  subheader?: string;
+  className?: string;
 }
 
-export const ApHeader: React.FC<IProps> = ({
+export const ApHeader: React.FC<ApHeaderProps> = ({
   title,
-  left,
-  right,
-  icons,
   hasBackButton = false,
-  subheader,
-  headerClassName,
-  titleClassName,
-  containerClassName,
-  backContainerClassName,
-  containerStyle,
+  onBackPress,
   onBack,
-  hasBackGround = true,
-  transparent = false,
+  rightAction,
+  right,
+  subtitle,
+  subheader,
+  className = "",
 }) => {
+  const handleBackAction = onBackPress || onBack;
+  const rightNode = rightAction || right;
+  const subText = subtitle || subheader;
   const colors = useTheme();
-  const router = useRouter();
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else if (router.canGoBack()) {
-      router.back();
+    if (handleBackAction) {
+      handleBackAction();
     } else {
-      router.replace("/(tabs)");
+      router.back();
     }
   };
 
   return (
     <View
-      style={[
-        containerStyle,
-        {
-          overflow: "hidden",
-          borderBottomWidth: transparent ? 0 : 1,
-          borderBottomColor: colors.surfaceBorder,
-        },
-      ]}
-      className={`w-full ${containerClassName}`}
+      className={`h-[56px] px-5 flex-row items-center justify-between bg-transparent ${className}`}
     >
-      {!transparent && hasBackGround && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: colors.surface,
-          }}
-        />
-      )}
-
-      <View className={`px-5 pt-4 pb-4 ${headerClassName}`}>
-        <View className="flex-row items-center">
-          <View className="flex-row items-center" style={{ width: 60 }}>
-            {hasBackButton && (
-              <Pressable
-                onPress={handleBack}
-                className={`w-10 h-10 items-center justify-center rounded-2xl ${backContainerClassName}`}
-                style={{ backgroundColor: colors.surfaceBorder }}
-                hitSlop={10}
-              >
-                <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
-              </Pressable>
-            )}
-            {left}
-          </View>
-
-          <View className="flex-1 items-center justify-center">
-            {typeof title === "string" ? (
-              <ApText
-                font="bold"
-                size="xl"
-                numberOfLines={1}
-                className={titleClassName}
-                color={colors.textPrimary}
-              >
-                {title}
-              </ApText>
-            ) : (
-              title
-            )}
-          </View>
-
-          <View
-            className="flex-row items-center justify-end"
-            style={{ width: 60 }}
+      <View className="flex-row items-center flex-1 mr-3">
+        {hasBackButton && (
+          <Pressable
+            onPress={handleBack}
+            hitSlop={8}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center mr-3 active:opacity-80"
           >
-            {icons}
-            {right}
-          </View>
-        </View>
-        {subheader && (
-          <View className="mt-1 mx-auto text-center">
-            {typeof subheader === "string" ? (
-              <ApText
-                size="xs"
-                color={colors.textMuted}
-                font="bold"
-                numberOfLines={2}
-                style={{ letterSpacing: 0.5 }}
-              >
-                {subheader.toUpperCase()}
-              </ApText>
-            ) : (
-              subheader
-            )}
-          </View>
+            <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+          </Pressable>
         )}
+        {title ? (
+          <View className="flex-1">
+            <Text
+              className="text-[22px] leading-[28px] font-bold text-ink-primary text-left"
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            {subText ? (
+              <Text className="text-[12px] font-semibold text-ink-tertiary">
+                {subText}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
       </View>
+      {rightNode ? (
+        <View className="flex-row items-center gap-2">{rightNode}</View>
+      ) : null}
     </View>
   );
 };
 
+export default ApHeader;

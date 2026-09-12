@@ -1,97 +1,118 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { TextInput, View } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { router } from "expo-router";
+import { X } from "lucide-react-native";
 import {
-  ApContainer,
+  ApTextInput,
+  Button,
   ApDateField,
-  ApHeader,
-  ApScrollView,
-  ApSubmitButton,
-  ApText,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
-import { toDateKey } from "@/src/utils/date";
 import { useBudgetState } from "../context";
+import { toDateKey } from "@/src/utils/date";
+import { ToastService } from "@/src/services";
 
-const Field = ({ label, value, onChangeText, keyboardType = "default", multiline = false }: any) => {
+export const IncomeFormScreen = () => {
   const colors = useTheme();
-  return (
-    <View className="mb-4">
-      <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase">
-        {label}
-      </ApText>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        multiline={multiline}
-        className="rounded-2xl border px-4 py-3"
-        style={{ color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.surfaceBorder, minHeight: multiline ? 88 : undefined }}
-      />
-    </View>
-  );
-};
+  const { createIncome } = useBudgetState();
 
-const IncomeFormScreen = () => {
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const { incomes, createIncome, updateIncome, fetchIncomes } = useBudgetState();
-  const editing = useMemo(() => incomes.find((item) => item.id === id), [incomes, id]);
-  // The context's `loading` is shared by every budget request, so the button
-  // tracks this request on its own.
-  const [submitting, setSubmitting] = useState(false);
-  const [title, setTitle] = useState(editing?.title ?? "");
-  const [amount, setAmount] = useState(editing?.amount ? String(editing.amount) : "");
-  const [incomeDate, setIncomeDate] = useState(editing?.incomeDate?.slice(0, 10) ?? toDateKey(new Date()));
-  const [note, setNote] = useState(editing?.note ?? "");
+  const [amount, setAmount] = useState("");
+  const [source, setSource] = useState("");
+  const [date, setDate] = useState(toDateKey(new Date()));
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchIncomes();
-  }, []);
+  const handleSave = async () => {
+    const numAmount = Number(amount);
+    if (!Number.isFinite(numAmount) || numAmount <= 0) {
+      ToastService.Error("Please enter a valid amount");
+      return;
+    }
 
-  useEffect(() => {
-    if (!editing) return;
-    setTitle(editing.title);
-    setAmount(String(editing.amount));
-    setIncomeDate(editing.incomeDate.slice(0, 10));
-    setNote(editing.note ?? "");
-  }, [editing?.id]);
-
-  const canSave = title.trim().length > 0 && Number(amount) > 0;
-
-  const submit = async () => {
-    if (!canSave || submitting) return;
-    const payload = { title: title.trim(), amount: Number(amount), incomeDate, note: note.trim() || undefined };
-    setSubmitting(true);
+    setSaving(true);
     try {
-      const saved = editing
-        ? await updateIncome(editing.id, payload)
-        : await createIncome(payload);
-      // Stay on the screen if the request failed, so nothing typed is lost.
-      if (saved) router.back();
+      await createIncome({
+        amount: numAmount,
+        note: source.trim() || undefined,
+        incomeDate: date,
+      });
+      ToastService.Success("Income recorded");
+      router.back();
+    } catch {
+      ToastService.Error("Failed to record income");
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   };
 
   return (
-    <ApContainer>
-      <ApHeader title={editing ? "Edit Income" : "Add Income"} hasBackButton />
-      <ApScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <View className="mt-4 px-1">
-          <Field label="Title" value={title} onChangeText={setTitle} />
-          <Field label="Amount" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" />
-          <ApDateField label="Date" value={incomeDate} onChange={setIncomeDate} />
-          <Field label="Note" value={note} onChangeText={setNote} multiline />
-          <ApSubmitButton
-            label="Save Income"
-            loadingLabel="Saving income..."
-            onPress={submit}
-            loading={submitting}
-            enabled={!!canSave}
-          />
+    <View className="flex-1 justify-end bg-background">
+      <View className="flex-1" style={{ backgroundColor: colors.overlay }}>
+        <Pressable className="flex-1" onPress={() => router.back()} />
+
+        <View
+          className="bg-background-elevated rounded-t-xl max-h-[90%] px-5 pt-3 pb-8"
+          style={{
+            shadowColor: colors.inkPrimary,
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
+            shadowOffset: { width: 0, height: -8 },
+            elevation: 8,
+          }}
+        >
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+            <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-3" />
+
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                Add income
+              </Text>
+              <Pressable
+                onPress={() => router.back()}
+                hitSlop={8}
+                className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+              >
+                <X size={20} color={colors.inkPrimary} strokeWidth={2} />
+              </Pressable>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+              <ApTextInput
+                label="Amount ($)"
+                placeholder="0.00"
+                value={amount}
+                onChangeText={setAmount}
+                keyboardType="decimal-pad"
+                containerClassName="mb-3"
+              />
+
+              <ApTextInput
+                label="Source / Description"
+                placeholder="e.g. Salary, Freelance, Dividend"
+                value={source}
+                onChangeText={setSource}
+                containerClassName="mb-3"
+              />
+
+              <ApDateField
+                label="Date"
+                value={date}
+                onChange={setDate}
+                className="mb-4"
+              />
+
+              <View className="mt-2">
+                <Button
+                  label={saving ? "Recording..." : "Record income"}
+                  onPress={handleSave}
+                  loading={saving}
+                  variant="primary"
+                />
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
-      </ApScrollView>
-    </ApContainer>
+      </View>
+    </View>
   );
 };
 

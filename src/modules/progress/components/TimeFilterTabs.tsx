@@ -17,27 +17,27 @@ const TimeFilterTabs: React.FC<TimeFilterTabsProps> = ({
   const colors = useTheme();
   return (
     <View
-      className="flex-row rounded-2xl p-1.5 mb-6"
-      style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}>
+      className="flex-row rounded-full p-1 mb-6"
+      style={{ backgroundColor: colors.surface2 }}
+    >
       {TABS.map((tab) => {
         const isSelected = selectedTab === tab;
         return (
           <Pressable
             key={tab}
             onPress={() => onSelectTab(tab)}
-            className="flex-1 py-2.5 items-center rounded-xl"
+            className="flex-1 py-1.5 items-center justify-center rounded-full"
             style={{
-              backgroundColor: isSelected ? colors.primary : "transparent",
-              shadowColor: isSelected ? colors.primary : "transparent",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: isSelected ? 0.25 : 0,
-              shadowRadius: 6,
-              elevation: isSelected ? 3 : 0,
-            }}>
+              backgroundColor: isSelected ? colors.surface : "transparent",
+              borderWidth: isSelected ? 1 : 0,
+              borderColor: isSelected ? colors.primary : "transparent",
+            }}
+          >
             <ApText
-              size="sm"
-              font="bold"
-              color={isSelected ? colors.background : colors.textMuted}>
+              size="xs"
+              font={isSelected ? "semibold" : "normal"}
+              color={isSelected ? colors.primary : colors.textMuted}
+            >
               {tab}
             </ApText>
           </Pressable>

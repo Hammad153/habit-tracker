@@ -1,25 +1,20 @@
 import React, { useEffect } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { Crown, Star, Hourglass, Check } from "lucide-react-native";
 import {
   ApText,
   ApContainer,
   ApHeader,
   ApScrollView,
-  ApLoader,
   ApEmptyState,
+  ApCard,
+  Skeleton,
+  SkeletonCard,
 } from "@/src/components";
 import { router } from "expo-router";
 import { useTheme } from "@/src/modules/settings/context";
 import { useSubscriptionState } from "../context";
 import { IPlan, SubscriptionTier, TIER_FEATURES } from "../model";
-
-const TIER_COLORS: Record<SubscriptionTier, string[]> = {
-  TRIAL: ["#8b5cf6", "#a78bfa"],
-  BASIC: ["#0ea5e9", "#38bdf8"],
-  PREMIUM: ["#6366f1", "#8b5cf6"],
-};
 
 const intervalLabel = (interval: string | null | undefined) =>
   interval === "YEARLY"
@@ -48,12 +43,7 @@ const SubscriptionScreen = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading && !subscription) {
-    return <ApLoader />;
-  }
-
   const tier: SubscriptionTier = subscription?.tier || "TRIAL";
-  const tierColors = TIER_COLORS[tier];
   const status = subscription?.status || "TRIALING";
   const trialEnded = Boolean(subscription) && !subscription?.accessGranted;
 
@@ -78,37 +68,32 @@ const SubscriptionScreen = () => {
     }
   };
 
+  const TierIcon = tier === "PREMIUM" ? Crown : tier === "BASIC" ? Star : Hourglass;
+
   return (
     <ApContainer>
       <ApHeader title="Subscription" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        {/* Current plan banner */}
-        <View className="px-5 mt-4 mb-6">
-          <LinearGradient
-            colors={[tierColors[0] + "30", tierColors[1] + "15"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="rounded-2xl p-5 border"
-            style={{ borderColor: tierColors[0] + "40" }}
-          >
+        {loading && !subscription ? (
+          <View className="mt-2 mb-6">
+            <SkeletonCard style={{ height: 130, marginBottom: 24 }} />
+            <Skeleton width="40%" height={20} style={{ marginBottom: 12 }} />
+            <SkeletonCard style={{ height: 120, marginBottom: 12 }} />
+            <SkeletonCard style={{ height: 120 }} />
+          </View>
+        ) : (
+          <>
+            {/* Current plan banner */}
+            <View className="mt-2 mb-6">
+              <ApCard className="p-5">
             <View className="flex-row items-center mb-2">
-              <Ionicons
-                name={
-                  tier === "PREMIUM"
-                    ? "diamond"
-                    : tier === "BASIC"
-                      ? "star"
-                      : "hourglass"
-                }
-                size={24}
-                color={tierColors[0]}
-              />
-              <ApText
-                size="xl"
-                font="bold"
-                color={tierColors[0]}
-                className="ml-2"
+              <View
+                className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+                style={{ backgroundColor: colors.accentLight }}
               >
+                <TierIcon size={20} color={colors.primary} />
+              </View>
+              <ApText size="lg" font="semibold" color={colors.textPrimary}>
                 {tier === "TRIAL" ? "Free Trial" : `${tier} Plan`}
               </ApText>
             </View>
@@ -145,11 +130,9 @@ const SubscriptionScreen = () => {
               <View className="flex-row items-center mt-3">
                 <View
                   className="px-3 py-1 rounded-full"
-                  style={{
-                    backgroundColor: tierColors[0] + "20",
-                  }}
+                  style={{ backgroundColor: colors.accentLight }}
                 >
-                  <ApText size="xs" font="semibold" color={tierColors[0]}>
+                  <ApText size="xs" font="medium" color={colors.primary}>
                     {subscription.tier === "TRIAL"
                       ? `${subscription.currentHabitCount} habits tracked`
                       : `${formatAmount(subscription.amount)}${
@@ -165,24 +148,23 @@ const SubscriptionScreen = () => {
                 </View>
               </View>
             )}
-          </LinearGradient>
+          </ApCard>
         </View>
 
-        {/* Plan cards (prices always come from the backend) */}
-        <View className="px-5">
+        {/* Plan cards */}
+        <View>
           <ApText
-            size="sm"
-            font="bold"
+            size="xs"
+            font="medium"
             color={colors.textMuted}
             className="mb-3 uppercase"
-            style={{ letterSpacing: 1 }}
+            style={{ letterSpacing: 0.8 }}
           >
             Choose a Plan
           </ApText>
 
           {plans.length === 0 ? (
             <ApEmptyState
-              icon="cloud-offline-outline"
               title="Plans aren't available yet"
               subtitle="Pull to retry, or check your connection."
               actionLabel="Retry"
@@ -191,131 +173,98 @@ const SubscriptionScreen = () => {
           ) : (
             plans.map((plan) => {
               const current = isCurrentPlan(plan);
-              const planColors = TIER_COLORS[plan.tier];
               const features =
                 TIER_FEATURES[plan.tier as "BASIC" | "PREMIUM"] ?? [];
               const yearly = plan.billingInterval === "YEARLY";
+              const PlanIcon = plan.tier === "PREMIUM" ? Crown : Star;
 
               return (
-                <View
+                <ApCard
                   key={plan.id}
-                  className="mb-4 rounded-2xl border overflow-hidden"
+                  className="mb-4 p-4"
                   style={{
-                    borderColor: plan.mostPopular
-                      ? planColors[0]
-                      : current
-                        ? planColors[0]
-                        : colors.surfaceBorder,
-                    backgroundColor: colors.surface,
+                    borderColor: plan.mostPopular || current
+                      ? colors.primary
+                      : colors.surfaceBorder,
                   }}
                 >
-                  <LinearGradient
-                    colors={[planColors[0] + "15", "transparent"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    className="p-4"
-                  >
-                    <View className="flex-row justify-between items-start mb-3">
-                      <View className="flex-1">
-                        <View className="flex-row items-center">
-                          <Ionicons
-                            name={
-                              plan.tier === "PREMIUM"
-                                ? "diamond"
-                                : "star"
-                            }
-                            size={20}
-                            color={planColors[0]}
-                          />
-                          <ApText
-                            size="lg"
-                            font="bold"
-                            color={colors.textPrimary}
-                            className="ml-2"
-                          >
-                            {plan.displayName}
-                            {yearly ? " · Yearly" : " · Monthly"}
-                          </ApText>
-                        </View>
+                  <View className="flex-row justify-between items-start mb-3">
+                    <View className="flex-1 mr-2">
+                      <View className="flex-row items-center">
+                        <PlanIcon size={18} color={colors.primary} />
                         <ApText
-                          size="xs"
-                          color={colors.textMuted}
-                          className="mt-1"
-                        >
-                          {plan.tagline}
-                        </ApText>
-                      </View>
-                      <View className="items-end">
-                        <ApText size="lg" font="bold" color={planColors[0]}>
-                          {formatAmount(plan.amount)}
-                          <ApText size="sm" color={colors.textMuted}>
-                            {intervalLabel(plan.billingInterval)}
-                          </ApText>
-                        </ApText>
-                        {plan.annualSavings ? (
-                          <ApText size="xs" color={colors.textSecondary}>
-                            Save {formatAmount(plan.annualSavings)}/yr
-                          </ApText>
-                        ) : null}
-                      </View>
-                    </View>
-
-                    {plan.mostPopular && !current && (
-                      <View
-                        className="self-start px-2 py-0.5 rounded-full mb-2"
-                        style={{ backgroundColor: planColors[0] + "25" }}
-                      >
-                        <ApText size="xs" font="semibold" color={planColors[0]}>
-                          Most popular
-                        </ApText>
-                      </View>
-                    )}
-
-                    {features.map((feature) => (
-                      <View
-                        key={feature.label}
-                        className="flex-row items-center mb-1.5"
-                      >
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={17}
-                          color={planColors[0]}
-                        />
-                        <ApText
-                          size="sm"
-                          color={colors.textSecondary}
+                          size="base"
+                          font="semibold"
+                          color={colors.textPrimary}
                           className="ml-2"
                         >
-                          {feature.label}
+                          {plan.displayName}
+                          {yearly ? " · Yearly" : " · Monthly"}
                         </ApText>
                       </View>
-                    ))}
-
-                    <TouchableOpacity
-                      onPress={() => handleChoosePlan(plan)}
-                      disabled={current || loading}
-                      className="mt-3 py-3 rounded-xl items-center"
-                      style={{
-                        backgroundColor: current
-                          ? colors.surfaceInactive
-                          : planColors[0],
-                        opacity: loading ? 0.6 : 1,
-                      }}
-                    >
-                      <ApText
-                        size="sm"
-                        font="bold"
-                        color={current ? colors.textMuted : "#FFFFFF"}
-                      >
-                        {current
-                          ? "Current Plan"
-                          : trialEnded
-                            ? "Restore Access"
-                            : `Choose ${plan.displayName}`}
+                      <ApText size="xs" color={colors.textMuted} className="mt-1">
+                        {plan.tagline}
                       </ApText>
-                    </TouchableOpacity>
-                  </LinearGradient>
-                </View>
+                    </View>
+                    <View className="items-end">
+                      <ApText size="base" font="semibold" color={colors.primary}>
+                        {formatAmount(plan.amount)}
+                        <ApText size="xs" color={colors.textMuted}>
+                          {intervalLabel(plan.billingInterval)}
+                        </ApText>
+                      </ApText>
+                      {plan.annualSavings ? (
+                        <ApText size="xs" color={colors.textSecondary}>
+                          Save {formatAmount(plan.annualSavings)}/yr
+                        </ApText>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  {plan.mostPopular && !current && (
+                    <View
+                      className="self-start px-2 py-0.5 rounded-full mb-3"
+                      style={{ backgroundColor: colors.accentLight }}
+                    >
+                      <ApText size="xs" font="medium" color={colors.primary}>
+                        Most popular
+                      </ApText>
+                    </View>
+                  )}
+
+                  {features.map((feature) => (
+                    <View key={feature.label} className="flex-row items-center mb-1.5">
+                      <Check size={14} color={colors.primary} />
+                      <ApText size="xs" color={colors.textSecondary} className="ml-2">
+                        {feature.label}
+                      </ApText>
+                    </View>
+                  ))}
+
+                  <TouchableOpacity
+                    onPress={() => handleChoosePlan(plan)}
+                    disabled={current || loading}
+                    className="mt-3 py-2.5 rounded-xl items-center"
+                    style={{
+                      backgroundColor: current
+                        ? colors.surfaceInactive
+                        : colors.primary,
+                      opacity: loading ? 0.6 : 1,
+                    }}
+                  >
+                    <ApText
+                      size="sm"
+                      font="semibold"
+                      color={current ? colors.textMuted : colors.background}
+                    >
+                      {current
+                        ? "Current Plan"
+                        : trialEnded
+                          ? "Restore Access"
+                          : `Choose ${plan.displayName}`}
+                    </ApText>
+                  </TouchableOpacity>
+                </ApCard>
               );
             })
           )}
@@ -323,7 +272,7 @@ const SubscriptionScreen = () => {
 
         {/* Manage current subscription */}
         {(status === "ACTIVE" || status === "NON_RENEWING") && (
-          <View className="px-5 mt-2">
+          <View className="mt-2">
             {status === "ACTIVE" ? (
               <TouchableOpacity
                 onPress={cancelSubscription}
@@ -331,7 +280,7 @@ const SubscriptionScreen = () => {
                 className="py-3 rounded-xl items-center border"
                 style={{ borderColor: colors.surfaceBorder, opacity: loading ? 0.6 : 1 }}
               >
-                <ApText size="sm" font="semibold" color={colors.textMuted}>
+                <ApText size="sm" font="medium" color={colors.textMuted}>
                   Cancel future renewal
                 </ApText>
               </TouchableOpacity>
@@ -341,11 +290,11 @@ const SubscriptionScreen = () => {
                 disabled={loading}
                 className="py-3 rounded-xl items-center"
                 style={{
-                  backgroundColor: tierColors[0] + "20",
+                  backgroundColor: colors.accentLight,
                   opacity: loading ? 0.6 : 1,
                 }}
               >
-                <ApText size="sm" font="semibold" color={tierColors[0]}>
+                <ApText size="sm" font="medium" color={colors.primary}>
                   Resume renewal
                 </ApText>
               </TouchableOpacity>
@@ -361,9 +310,9 @@ const SubscriptionScreen = () => {
             </ApText>
           </View>
         )}
-
-        <View className="h-20" />
-      </ApScrollView>
+      </>
+    )}
+  </ApScrollView>
     </ApContainer>
   );
 };

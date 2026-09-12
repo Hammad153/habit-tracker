@@ -1,11 +1,17 @@
 import React, { useEffect } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { ApContainer, ApEmptyState, ApHeader, ApScrollView, ApText } from "@/src/components";
+import { MapPin, Calendar, ChevronRight } from "lucide-react-native";
+import {
+  ApHeader,
+  ApEmptyState,
+} from "@/src/components";
+import { Card } from "@/src/components/Card";
+import { ProgressBar } from "@/src/components/ProgressBar";
 import { useTheme } from "@/src/modules/settings/context";
 import { normalizeDateKey, parseDateKey, toDateKey } from "@/src/utils/date";
 import { useDailyPlanState } from "../context";
+import { format } from "date-fns";
 
 const formatTime = (value?: string) => {
   if (!value) return "";
@@ -15,7 +21,7 @@ const formatTime = (value?: string) => {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 };
 
-const PlannerCalendarScreen = () => {
+export const PlannerCalendarScreen = () => {
   const colors = useTheme();
   const { plans, fetchPlans } = useDailyPlanState();
 
@@ -28,61 +34,53 @@ const PlannerCalendarScreen = () => {
   }, []);
 
   return (
-    <ApContainer>
-      <ApHeader title="Planner" hasBackButton />
-      <ApScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        {!plans.length ? (
-          <ApEmptyState icon="calendar-outline" title="No plans yet" subtitle="Create a dated roadmap from the Daily Plan tab." />
+    <View className="flex-1 bg-background">
+      <ApHeader title="Planner calendar" hasBackButton />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
+      >
+        {plans.length === 0 ? (
+          <ApEmptyState
+            title="No plans yet"
+            description="Create daily schedules from the Plan tab to view them here."
+          />
         ) : (
-          plans.map((plan) => {
-            const items = plan.items ?? plan.tasks ?? [];
-            const done = plan.completedItems ?? items.filter((task) => task.status === "COMPLETED").length;
-            const total = plan.totalItems ?? items.length;
-            const pct = plan.progressPercentage ?? (total ? Math.round((done / total) * 100) : 0);
-            const date = parseDateKey(normalizeDateKey(plan.planDate));
-            const status = plan.status === "COMPLETED" ? "Completed" : plan.status === "IN_PROGRESS" ? "In progress" : "Not started";
-            return (
-              <TouchableOpacity
-                key={plan.id}
-                onPress={() => router.push("/(tabs)/daily-plan")}
-                className="mb-3 rounded-2xl border p-4"
-                style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-              >
-                <View className="flex-row items-start justify-between">
-                  <View className="flex-row flex-1 items-start pr-3">
-                    <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: colors.primary + "18" }}>
-                      <Ionicons name="map-outline" size={20} color={colors.primary} />
+          <View className="gap-3">
+            {plans.map((plan) => {
+              const items = plan.items ?? plan.tasks ?? [];
+              const done = plan.completedItems ?? items.filter((t) => t.status === "COMPLETED").length;
+              const total = plan.totalItems ?? items.length;
+              const pct = total ? done / total : 0;
+              const date = parseDateKey(normalizeDateKey(plan.planDate));
+
+              return (
+                <Pressable
+                  key={plan.id}
+                  onPress={() => router.push("/(tabs)/daily-plan")}
+                >
+                  <Card className="p-4">
+                    <View className="flex-row items-center justify-between mb-2">
+                      <Text className="text-[15px] font-bold text-ink-primary">
+                        {format(date, "EEEE, MMMM d")}
+                      </Text>
+                      <Text className="text-[14px] font-bold text-accent">
+                        {Math.round(pct * 100)}%
+                      </Text>
                     </View>
-                    <View className="ml-3 flex-1">
-                      <ApText size="base" font="bold" color={colors.textPrimary}>
-                        {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-                      </ApText>
-                      <ApText size="xs" color={colors.textMuted}>
-                        {done} of {total} completed • {status}
-                      </ApText>
-                      <ApText size="xs" color={colors.textSecondary} className="mt-1">
-                        Next: {plan.nextItem ? `${plan.nextItem.title}${plan.nextItem.startTime ? ` - ${formatTime(plan.nextItem.startTime)}` : ""}` : "Nothing pending"}
-                      </ApText>
-                      {plan.dayStartTime || plan.dayEndTime ? (
-                        <ApText size="xs" color={colors.textMuted} className="mt-1">
-                          Day schedule: {formatTime(plan.dayStartTime)} - {formatTime(plan.dayEndTime)}
-                        </ApText>
-                      ) : null}
-                    </View>
-                  </View>
-                  <ApText size="lg" font="bold" color={colors.primary}>
-                    {pct}%
-                  </ApText>
-                </View>
-                <View className="mt-3 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-                  <View className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: colors.primary }} />
-                </View>
-              </TouchableOpacity>
-            );
-          })
+                    <Text className="text-[12.5px] text-ink-secondary mb-3">
+                      {done} of {total} completed
+                    </Text>
+                    <ProgressBar progress={pct} tone="accent" height={4} />
+                  </Card>
+                </Pressable>
+              );
+            })}
+          </View>
         )}
-      </ApScrollView>
-    </ApContainer>
+      </ScrollView>
+    </View>
   );
 };
 

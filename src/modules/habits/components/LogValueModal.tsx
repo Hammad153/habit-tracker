@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity, TextInput } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { CheckCircle2, Leaf, ShieldAlert } from "lucide-react-native";
 import { ApText } from "@/src/components/Text";
 import { ApModal } from "@/src/components/Modal";
 import { useTheme } from "@/src/modules/settings/context";
@@ -10,7 +10,7 @@ import { CompletionKind } from "@/src/modules/identities/model";
 interface VersionOption {
   kind: CompletionKind;
   label: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   description?: string | null;
   hint: string;
 }
@@ -18,13 +18,15 @@ interface VersionOption {
 interface LogValueModalProps {
   isVisible: boolean;
   onClose: () => void;
-  /** Receives the logged quantity AND the chosen version. */
-  onSave: (value: number, kind: CompletionKind) => void;
-  initialValue: number;
+  onSave?: (value: number, kind: CompletionKind) => void;
+  initialValue?: number;
+  currentValue?: number;
   goal: number;
   unit?: string;
-  title: string;
-  /** Configured fallback versions — omitted options are not offered. */
+  title?: string;
+  habitTitle?: string;
+  habitId?: string;
+  selectedDate?: string;
   fullBehavior?: string | null;
   minimumBehavior?: string | null;
   emergencyMinimum?: string | null;
@@ -41,14 +43,18 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
   onClose,
   onSave,
   initialValue,
+  currentValue,
   goal,
   unit = "times",
   title,
+  habitTitle,
   fullBehavior,
   minimumBehavior,
   emergencyMinimum,
 }) => {
-  const [value, setValue] = useState(initialValue.toString());
+  const initVal = initialValue ?? currentValue ?? 0;
+  const habitName = title || habitTitle || "Habit";
+  const [value, setValue] = useState(initVal.toString());
   const [kind, setKind] = useState<CompletionKind>("FULL");
   const colors = useTheme();
   const { triggerSuccess } = useFeedback();
@@ -57,7 +63,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
     {
       kind: "FULL",
       label: "Full",
-      icon: "checkmark-circle-outline",
+      icon: CheckCircle2,
       description: fullBehavior,
       hint: `+${COIN_HINTS.FULL} coins`,
     },
@@ -66,7 +72,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
           {
             kind: "MINIMUM" as const,
             label: "Minimum",
-            icon: "leaf-outline",
+            icon: Leaf,
             description: minimumBehavior,
             hint: `+${COIN_HINTS.MINIMUM} coins`,
           },
@@ -77,7 +83,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
           {
             kind: "EMERGENCY" as const,
             label: "Emergency",
-            icon: "medkit-outline",
+            icon: ShieldAlert,
             description: emergencyMinimum,
             hint: `+${COIN_HINTS.EMERGENCY} coins`,
           },
@@ -87,7 +93,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
 
   useEffect(() => {
     if (isVisible) {
-      setValue(initialValue.toString());
+      setValue(initVal.toString());
       setKind("FULL");
     }
   }, [isVisible, initialValue]);
@@ -97,9 +103,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
 
   const handleSave = () => {
     triggerSuccess();
-    // Reduced versions always count as success regardless of quantity; the
-    // server records the goal as the value for them.
-    onSave(
+    onSave?.(
       kind === "FULL" ? parseFloat(value) || 0 : goal,
       kind,
     );
@@ -107,32 +111,29 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
   };
 
   return (
-    <ApModal visible={isVisible} onClose={onClose} title={`Log ${title}`}>
+    <ApModal visible={isVisible} onClose={onClose} title={`Log ${habitName}`}>
       {/* Version selector */}
-      <View className="flex-row mb-4">
+      <View className="flex-row mb-4 gap-2">
         {versions.map((option) => {
           const active = kind === option.kind;
+          const IconComp = option.icon;
           return (
             <TouchableOpacity
               key={option.kind}
               onPress={() => setKind(option.kind)}
-              className="flex-1 items-center py-3 rounded-2xl mr-1.5"
+              className="flex-1 items-center py-2.5 rounded-xl border"
               style={{
-                backgroundColor: active
-                  ? colors.primary + "1E"
-                  : colors.surfaceBorder + "40",
-                borderWidth: 1.5,
-                borderColor: active ? colors.primary : "transparent",
+                backgroundColor: active ? colors.accentLight : colors.surface,
+                borderColor: active ? colors.primary : colors.surfaceBorder,
               }}
             >
-              <Ionicons
-                name={option.icon as any}
-                size={18}
+              <IconComp
+                size={16}
                 color={active ? colors.primary : colors.textMuted}
               />
               <ApText
                 size="xs"
-                font={active ? "bold" : "normal"}
+                font={active ? "semibold" : "normal"}
                 color={active ? colors.primary : colors.textSecondary}
                 className="mt-1"
               >
@@ -146,7 +147,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       {selectedVersion?.description && (
         <View
           className="mb-4 p-3 rounded-xl"
-          style={{ backgroundColor: colors.surfaceBorder + "30" }}
+          style={{ backgroundColor: colors.surface2 }}
         >
           <ApText size="xs" color={colors.textSecondary}>
             {selectedVersion.description}
@@ -154,7 +155,6 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
         </View>
       )}
 
-      {/* Quantity entry only matters for the full version */}
       {kind === "FULL" ? (
         <View className="items-center mb-6">
           <View className="flex-row items-baseline">
@@ -162,12 +162,12 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
               value={value}
               onChangeText={setValue}
               keyboardType="numeric"
-              className="text-5xl font-bold mr-2"
-              style={{ color: colors.primary }}
+              className="text-4xl font-semibold mr-2"
+              style={{ color: colors.textPrimary }}
               autoFocus
               selectTextOnFocus
             />
-            <ApText size="lg" color={colors.textMuted} font="semibold">
+            <ApText size="base" color={colors.textMuted} font="medium">
               / {goal} {unit}
             </ApText>
           </View>
@@ -175,43 +175,36 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       ) : (
         <View className="items-center mb-6">
           <View
-            className="px-4 py-2 rounded-full"
-            style={{ backgroundColor: colors.primary + "14" }}
+            className="px-3 py-1.5 rounded-full"
+            style={{ backgroundColor: colors.accentLight }}
           >
-            <ApText size="xs" font="semibold" color={colors.primary}>
-              Counts as done · earns fewer coins than full
+            <ApText size="xs" font="medium" color={colors.primary}>
+              Counts as done · earns fewer coins
             </ApText>
           </View>
         </View>
       )}
 
-      <View className="flex-row space-x-3 gap-x-2">
+      <View className="flex-row gap-2">
         <TouchableOpacity
           onPress={onClose}
-          className="flex-1 py-4 rounded-full border items-center"
+          className="flex-1 py-3 rounded-xl border items-center"
           style={{
             backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
           }}
         >
-          <ApText font="semibold" color={colors.textMuted}>
+          <ApText font="medium" color={colors.textMuted}>
             Cancel
           </ApText>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSave}
-          className="flex-1 py-4 rounded-full items-center"
-          style={{
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
+          className="flex-1 py-3 rounded-xl items-center"
+          style={{ backgroundColor: colors.primary }}
         >
-          <ApText font="bold" color={colors.background}>
-            {kind === "FULL" ? "Save Progress" : `Done · ${selectedVersion?.hint ?? ""}`}
+          <ApText font="semibold" color={colors.background}>
+            {kind === "FULL" ? "Save" : "Done"}
           </ApText>
         </TouchableOpacity>
       </View>

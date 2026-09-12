@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TextInput, TouchableOpacity } from "react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import { router } from "expo-router";
-import { ApText, ApContainer, ApHeader } from "@/src/components";
+import { ApText, ApContainer, ApHeader, ApScrollView } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { ProfileService } from "./api";
 import { ToastService } from "@/src/services";
@@ -25,20 +25,21 @@ const PasswordField: React.FC<FieldProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [show, setShow] = useState(false);
   return (
-    <View className="mb-5">
-      <ApText size="xs" font="semibold" color={colors.textSecondary} className="mb-1.5 uppercase" style={{ letterSpacing: 1 }}>
+    <View className="mb-4">
+      <ApText
+        size="xs"
+        font="medium"
+        color={colors.textMuted}
+        className="mb-1.5 uppercase"
+        style={{ letterSpacing: 0.8 }}
+      >
         {label}
       </ApText>
       <View
-        className="flex-row items-center rounded-2xl px-4 border"
+        className="flex-row items-center rounded-xl px-3.5 border"
         style={{
           backgroundColor: colors.surface,
           borderColor: isFocused ? colors.primary : colors.surfaceBorder,
-          shadowColor: isFocused ? colors.primary : "transparent",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isFocused ? 0.1 : 0,
-          shadowRadius: 8,
-          elevation: isFocused ? 3 : 0,
         }}
       >
         <TextInput
@@ -47,18 +48,18 @@ const PasswordField: React.FC<FieldProps> = ({
           secureTextEntry={!show}
           placeholder="••••••••"
           placeholderTextColor={colors.textMuted}
-          className="flex-1 py-4"
-          style={{ color: colors.textPrimary, fontSize: 16, fontFamily: "Inter-Medium" }}
+          className="flex-1 py-3 text-sm"
+          style={{ color: colors.textPrimary }}
           autoCapitalize="none"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />
         <TouchableOpacity onPress={() => setShow((s) => !s)} hitSlop={10}>
-          <Ionicons
-            name={show ? "eye-off" : "eye"}
-            size={20}
-            color={colors.textMuted}
-          />
+          {show ? (
+            <EyeOff size={18} color={colors.textMuted} />
+          ) : (
+            <Eye size={18} color={colors.textMuted} />
+          )}
         </TouchableOpacity>
       </View>
       {error ? (
@@ -108,10 +109,10 @@ const ChangePasswordScreen = () => {
   };
 
   return (
-    <ApContainer className="flex-1">
+    <ApContainer>
       <ApHeader title="Change Password" hasBackButton />
-      <ScrollView
-        className="flex-1 px-5 pt-6"
+      <ApScrollView
+        contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
         <PasswordField
@@ -139,14 +140,14 @@ const ChangePasswordScreen = () => {
         <TouchableOpacity
           onPress={handleSubmit}
           disabled={submitting}
-          className="py-4 rounded-2xl items-center mt-2"
+          className="py-3 rounded-xl items-center mt-3"
           style={{ backgroundColor: colors.primary, opacity: submitting ? 0.6 : 1 }}
         >
-          <ApText font="bold" color={colors.background}>
+          <ApText font="semibold" size="sm" color={colors.background}>
             {submitting ? "Updating..." : "Update Password"}
           </ApText>
         </TouchableOpacity>
-      </ScrollView>
+      </ApScrollView>
     </ApContainer>
   );
 };

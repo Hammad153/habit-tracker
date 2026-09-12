@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { AuthService } from "./api";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
+import Button from "@/src/components/buttons/Button";
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState("");
@@ -39,123 +40,58 @@ const ForgotPasswordScreen = () => {
   if (emailSent) {
     return (
       <AuthLayout
-        title="Email Sent!"
+        title="Email sent"
         subtitle="Check your inbox for password reset instructions"
         footer={
-          <>
-            <Text style={{ color: colors.textSecondary }}>
-              Remember your password?{" "}
-            </Text>
+          <Text className="text-[13.5px] text-ink-secondary">
+            Remember your password?{" "}
             <Link href="/login" asChild>
-              <TouchableOpacity>
-                <Text className="font-bold" style={{ color: colors.primary }}>
-                  Back to Sign In
-                </Text>
-              </TouchableOpacity>
+              <Text className="font-bold text-accent">Back to sign in</Text>
             </Link>
-          </>
+          </Text>
         }
       >
-        <View className="items-center py-8">
-          <View
-            className="w-20 h-20 rounded-full items-center justify-center mb-4"
-            style={{ backgroundColor: colors.primary + "20" }}
-          >
-            <Text style={{ fontSize: 40 }}>📧</Text>
-          </View>
-          <Text
-            className="text-center mt-4"
-            style={{ color: colors.textSecondary }}
-          >
-            We&apos;ve sent password reset instructions to{" "}
-            <Text className="font-bold" style={{ color: colors.textPrimary }}>
-              {email}
-            </Text>
-          </Text>
-          <Text
-            className="text-center mt-4"
-            style={{ color: colors.textSecondary }}
-          >
-            If you don&apos;t see the email, check your spam folder.
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => setEmailSent(false)}
-          activeOpacity={0.85}
-          className="py-4 rounded-full mt-5 items-center"
-          style={{
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.3,
-            shadowRadius: 10,
-            elevation: 6,
-          }}
-        >
-          <Text
-            className="font-bold text-lg"
-            style={{ color: colors.background }}
-          >
-            Resend Email
-          </Text>
-        </TouchableOpacity>
+        <Button
+          label="Resend email"
+          onPress={handleResetPassword}
+          loading={loading}
+          variant="secondary"
+        />
       </AuthLayout>
     );
   }
 
   return (
     <AuthLayout
-      title="Forgot Password"
-      subtitle="Enter your email to reset your password"
+      title="Forgot password"
+      subtitle="Enter your email to receive reset instructions"
       footer={
-        <>
-          <Text style={{ color: colors.textSecondary }}>
-            Remember your password?{" "}
-          </Text>
+        <Text className="text-[13.5px] text-ink-secondary">
+          Remember your password?{" "}
           <Link href="/login" asChild>
-            <TouchableOpacity>
-              <Text className="font-bold" style={{ color: colors.primary }}>
-                Back to Sign In
-              </Text>
-            </TouchableOpacity>
+            <Text className="font-bold text-accent">Back to sign in</Text>
           </Link>
-        </>
+        </Text>
       }
     >
       <AuthInput
-        label="Email Address"
-        icon="mail-outline"
+        label="Email address"
+        icon="mail"
+        placeholder="alex@gmail.com"
         value={email}
         onChangeText={setEmail}
-        placeholder="Enter your email"
-        keyboardType="email-address"
         autoCapitalize="none"
-        autoComplete="email"
+        keyboardType="email-address"
       />
 
-      <TouchableOpacity
-        onPress={handleResetPassword}
-        disabled={loading}
-        activeOpacity={0.85}
-        className="py-4 rounded-full mt-5 items-center"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading ? 0.75 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          elevation: 6,
-        }}
-      >
-        <Text
-          className="font-bold text-lg"
-          style={{ color: colors.background }}
-        >
-          {loading ? "Sending..." : "Send Reset Link"}
-        </Text>
-      </TouchableOpacity>
+      <View className="mt-2">
+        <Button
+          label="Send reset instructions"
+          onPress={handleResetPassword}
+          loading={loading}
+          variant="primary"
+        />
+      </View>
     </AuthLayout>
   );
 };

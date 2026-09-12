@@ -3,47 +3,52 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   TextInputProps,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Mail, Lock, User, Eye, EyeOff, LucideIcon } from "lucide-react-native";
 import { useTheme } from "@/src/modules/settings/context";
 
 interface IProps extends TextInputProps {
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon?: "mail" | "lock" | "user" | any;
   secure?: boolean;
 }
 
-const AuthInput: React.FC<IProps> = ({ label, icon, secure, ...rest }) => {
+const iconComponentMap: Record<string, LucideIcon> = {
+  mail: Mail,
+  "mail-outline": Mail,
+  lock: Lock,
+  "lock-closed-outline": Lock,
+  user: User,
+  "person-outline": User,
+};
+
+export const AuthInput: React.FC<IProps> = ({ label, icon, secure, ...rest }) => {
   const colors = useTheme();
   const [focused, setFocused] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
 
+  const IconComponent = (icon && iconComponentMap[icon as string]) || (icon === "user" ? User : icon === "lock" ? Lock : Mail);
+
   return (
-    <View className="mb-5">
-      <Text
-        className="mb-1.5 font-semibold text-xs uppercase"
-        style={{ color: colors.textSecondary, letterSpacing: 1 }}
-      >
-        {label}
-      </Text>
+    <View className="mb-4">
+      {label && (
+        <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+          {label}
+        </Text>
+      )}
       <View
-        className="flex-row items-center px-4 rounded-2xl border"
+        className="w-full h-[52px] flex-row items-center px-4 rounded-sm bg-background-surface"
         style={{
-          backgroundColor: colors.surface,
-          borderColor: focused ? colors.primary : colors.surfaceBorder,
-          shadowColor: focused ? colors.primary : "transparent",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: focused ? 0.1 : 0,
-          shadowRadius: 8,
-          elevation: focused ? 3 : 0,
+          borderWidth: focused ? 1.5 : 0,
+          borderColor: focused ? colors.accent : "transparent",
         }}
       >
-        <Ionicons
-          name={icon}
-          size={20}
-          color={focused ? colors.primary : colors.textMuted}
+        <IconComponent
+          size={18}
+          color={focused ? colors.inkPrimary : colors.inkTertiary}
+          strokeWidth={2}
         />
         <TextInput
           {...rest}
@@ -56,18 +61,18 @@ const AuthInput: React.FC<IProps> = ({ label, icon, secure, ...rest }) => {
             rest.onBlur?.(e);
           }}
           secureTextEntry={secure && !showSecret}
-          placeholderTextColor={colors.textMuted}
-          className="flex-1 py-4 px-3 text-base"
-          style={{ color: colors.textPrimary }}
+          placeholderTextColor={colors.inkTertiary}
+          className="flex-1 py-0 px-3 text-[15px] font-medium text-ink-primary h-full"
+          style={rest.style}
         />
         {secure ? (
-          <TouchableOpacity onPress={() => setShowSecret((v) => !v)}>
-            <Ionicons
-              name={showSecret ? "eye-off" : "eye"}
-              size={22}
-              color={colors.textMuted}
-            />
-          </TouchableOpacity>
+          <Pressable onPress={() => setShowSecret((v) => !v)} hitSlop={8}>
+            {showSecret ? (
+              <EyeOff size={18} color={colors.inkTertiary} strokeWidth={2} />
+            ) : (
+              <Eye size={18} color={colors.inkTertiary} strokeWidth={2} />
+            )}
+          </Pressable>
         ) : null}
       </View>
     </View>

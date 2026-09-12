@@ -1,59 +1,72 @@
 import React, { useEffect } from "react";
-import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ApContainer, ApEmptyState, ApHeader, ApScrollView, ApText } from "@/src/components";
+import { View, Text, ScrollView } from "react-native";
+import {
+  ApHeader,
+  ApEmptyState,
+  Skeleton,
+} from "@/src/components";
+import { ProgressBar } from "@/src/components/ProgressBar";
 import { useTheme } from "@/src/modules/settings/context";
 import { useBudgetState } from "../context";
-import helper from "@/src/helper";
 
-const CategoryBreakdownScreen = () => {
+export const CategoryBreakdownScreen = () => {
   const colors = useTheme();
-  const { summary, fetchSummary } = useBudgetState();
+  const { summary, fetchSummary, loading } = useBudgetState();
 
   useEffect(() => {
     fetchSummary();
   }, []);
 
+  const breakdown = summary?.categoryBreakdown ?? [];
+  const maxTotal = Math.max(...breakdown.map((b: any) => b.total || 0), 1);
+
   return (
-    <ApContainer>
-      <ApHeader title="Breakdown" hasBackButton />
-      <ApScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        {!summary?.categoryBreakdown?.length ? (
-          <ApEmptyState icon="pie-chart-outline" title="No breakdown yet" subtitle="Expenses will appear here by category." />
+    <View className="flex-1 bg-background">
+      <ApHeader title="Category breakdown" hasBackButton />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
+      >
+        {loading && !summary ? (
+          <View className="gap-3">
+            {[1, 2, 3, 4].map((i) => (
+              <View key={i} className="p-4 rounded-lg bg-background-surface">
+                <View className="flex-row items-center justify-between mb-3">
+                  <Skeleton width="40%" height={16} />
+                  <Skeleton width="20%" height={16} />
+                </View>
+                <Skeleton width="100%" height={6} borderRadius={3} />
+              </View>
+            ))}
+          </View>
+        ) : breakdown.length === 0 ? (
+          <ApEmptyState
+            title="No data available"
+            description="Add expenses to see category-level spending breakdown."
+          />
         ) : (
-          <View className="mt-4">
-            {summary.categoryBreakdown.map((item) => {
-              const percentage = summary.totalExpenses ? Math.round((item.total / summary.totalExpenses) * 100) : 0;
+          <View className="gap-3">
+            {breakdown.map((item: any, idx: number) => {
+              const pct = (item.total || 0) / maxTotal;
               return (
-                <View key={item.category} className="mb-4 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <View className="h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: (item.color || colors.primary) + "18" }}>
-                        <Ionicons name={(item.icon as any) || "apps-outline"} size={20} color={item.color || colors.primary} />
-                      </View>
-                      <View className="ml-3">
-                        <ApText size="base" font="bold" color={colors.textPrimary}>
-                          {item.category}
-                        </ApText>
-                        <ApText size="xs" color={colors.textMuted}>
-                          {percentage}% of spending
-                        </ApText>
-                      </View>
-                    </View>
-                    <ApText size="base" font="bold" color={colors.textPrimary}>
-                      {helper.formatCurrency(item.total)}
-                    </ApText>
+                <View key={item.categoryId || idx} className="p-4 rounded-lg bg-background-surface">
+                  <View className="flex-row items-center justify-between mb-2">
+                    <Text className="text-[15px] font-semibold text-ink-primary">
+                      {item.categoryName || "General"}
+                    </Text>
+                    <Text className="text-[15px] font-bold text-ink-primary">
+                      ${(item.total || 0).toLocaleString()}
+                    </Text>
                   </View>
-                  <View className="mt-4 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-                    <View className="h-full rounded-full" style={{ width: `${percentage}%`, backgroundColor: item.color || colors.primary }} />
-                  </View>
+                  <ProgressBar progress={pct} tone="accent" height={5} />
                 </View>
               );
-            })} 
+            })}
           </View>
         )}
-      </ApScrollView>
-    </ApContainer>
+      </ScrollView>
+    </View>
   );
 };
 

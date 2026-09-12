@@ -1,19 +1,22 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Award, Flame } from "lucide-react-native";
 import {
   ApText,
   ApContainer,
   ApHeader,
   ApScrollView,
-  ApLoader,
   ApEmptyState,
   ApErrorState,
+  ApCard,
+  SkeletonCard,
+  SkeletonStatRow,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import axiosInstance from "@/src/libs/axios";
 import { AnalyticsData } from "./model";
+import { getHabitLucideIcon } from "@/src/utils/icons";
 
 const AdvancedAnalyticsScreen = () => {
   const { colors } = useSettingsState();
@@ -41,9 +44,14 @@ const AdvancedAnalyticsScreen = () => {
     return (
       <ApContainer>
         <ApHeader title="Analytics" hasBackButton />
-        <View className="flex-1 items-center justify-center">
-          <ApLoader inline />
-        </View>
+        <ApScrollView showsVerticalScrollIndicator={false}>
+          <View className="mt-2">
+            <SkeletonStatRow />
+            <SkeletonCard style={{ height: 180, marginBottom: 16 }} />
+            <SkeletonCard style={{ height: 180, marginBottom: 16 }} />
+            <SkeletonCard style={{ height: 160 }} />
+          </View>
+        </ApScrollView>
       </ApContainer>
     );
   }
@@ -62,7 +70,6 @@ const AdvancedAnalyticsScreen = () => {
       <ApContainer>
         <ApHeader title="Analytics" hasBackButton />
         <ApEmptyState
-          icon="bar-chart-outline"
           title="No analytics yet"
           subtitle="Complete a few habits and your insights will show up here."
         />
@@ -80,124 +87,174 @@ const AdvancedAnalyticsScreen = () => {
     <ApContainer>
       <ApHeader title="Analytics" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <View className="px-5 mt-4">
-          {/* Overview Cards */}
-          <View className="flex-row gap-3 mb-6">
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Weekly Rate
-              </ApText>
-              <ApText size="lg" font="bold" color={colors.primary}>
+        <View className="mt-2">
+          {/* Stat Pairs Row 1 */}
+          <View className="flex-row items-center justify-around py-4 mb-4">
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
                 {data.weeklyCompletionRate}%
               </ApText>
-            </View>
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Monthly Rate
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Weekly Rate
               </ApText>
-              <ApText size="lg" font="bold" color={colors.accent}>
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
                 {data.monthlyCompletionRate}%
               </ApText>
-            </View>
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Best Day
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Monthly Rate
               </ApText>
-              <ApText size="lg" font="bold" color={colors.warning}>
-                {data.bestDay}
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
+                {data.bestDay.substring(0, 3)}
+              </ApText>
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Best Day
               </ApText>
             </View>
           </View>
 
-          <View className="flex-row gap-3 mb-6">
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Plan Rate
-              </ApText>
-              <ApText size="lg" font="bold" color={colors.primary}>
+          {/* Stat Pairs Row 2 */}
+          <View className="flex-row items-center justify-around py-4 mb-6">
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
                 {data.dailyPlanCompletionRate}%
               </ApText>
-            </View>
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Active Habits
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Plan Rate
               </ApText>
-              <ApText size="lg" font="bold" color={colors.warning}>
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
                 {data.totalHabits}
               </ApText>
-            </View>
-            <View
-              className="flex-1 p-4 rounded-2xl border"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
-              <ApText size="xs" color={colors.textMuted}>
-                Total Done
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Habits
               </ApText>
-              <ApText size="lg" font="bold" color={colors.accent}>
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
                 {totalCompletions}
+              </ApText>
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Total Done
               </ApText>
             </View>
           </View>
 
           {/* Day Distribution */}
-          <View
-            className="p-4 rounded-2xl border mb-6"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
+          <ApCard className="p-4 mb-6">
             <ApText
-              size="sm"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-3"
+              size="xs"
+              font="semibold"
+              color={colors.textMuted}
+              className="uppercase mb-3"
+              style={{ letterSpacing: 0.8 }}
             >
               Completions by Day
             </ApText>
             <View className="flex-row justify-between items-end" style={{ height: 100 }}>
               {data.dayDistribution.map((d) => {
-                const height = maxDayCount > 0 ? (d.count / maxDayCount) * 80 : 0;
+                const height = maxDayCount > 0 ? (d.count / maxDayCount) * 75 : 0;
                 return (
                   <View key={d.day} className="items-center flex-1">
-                    <ApText size="xs" font="bold" color={colors.primary}>
+                    <ApText size="xs" font="medium" color={colors.textPrimary}>
                       {d.count}
                     </ApText>
                     <View
-                      className="w-6 rounded-t-lg mt-1"
+                      className="w-5 rounded-t mt-1"
                       style={{
                         height: Math.max(height, 4),
                         backgroundColor: colors.primary,
@@ -207,6 +264,7 @@ const AdvancedAnalyticsScreen = () => {
                       size="xs"
                       color={colors.textMuted}
                       className="mt-1"
+                      style={{ fontSize: 11 }}
                     >
                       {d.day.substring(0, 2)}
                     </ApText>
@@ -214,123 +272,112 @@ const AdvancedAnalyticsScreen = () => {
                 );
               })}
             </View>
-          </View>
+          </ApCard>
 
           {/* Category Breakdown */}
           {data.categoryBreakdown.length > 0 && (
-            <View
-              className="p-4 rounded-2xl border mb-6"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
-              }}
-            >
+            <ApCard className="p-4 mb-6">
               <ApText
-                size="sm"
-                font="bold"
-                color={colors.textPrimary}
-                className="mb-3"
+                size="xs"
+                font="semibold"
+                color={colors.textMuted}
+                className="uppercase mb-3"
+                style={{ letterSpacing: 0.8 }}
               >
                 Category Breakdown
               </ApText>
-              {data.categoryBreakdown.map((cat) => (
+              {data.categoryBreakdown.map((cat, i) => (
                 <View
                   key={cat.category}
-                  className="flex-row justify-between items-center py-2"
+                  className="flex-row justify-between items-center py-2.5"
+                  style={{
+                    borderTopWidth: i > 0 ? 1 : 0,
+                    borderTopColor: colors.surfaceBorder,
+                  }}
                 >
                   <View className="flex-row items-center">
                     <View
-                      className="w-3 h-3 rounded-full mr-2"
+                      className="w-2.5 h-2.5 rounded-full mr-2.5"
                       style={{ backgroundColor: colors.primary }}
                     />
-                    <ApText size="sm" color={colors.textPrimary}>
+                    <ApText size="sm" font="medium" color={colors.textPrimary}>
                       {cat.category}
                     </ApText>
                   </View>
                   <View className="flex-row items-center">
                     <ApText size="xs" color={colors.textMuted} className="mr-3">
-                      {cat.count} habits
+                      {cat.count} habit{cat.count !== 1 ? "s" : ""}
                     </ApText>
-                    <ApText size="sm" font="bold" color={colors.primary}>
+                    <ApText size="sm" font="semibold" color={colors.primary}>
                       {cat.completions}
                     </ApText>
                   </View>
                 </View>
               ))}
-            </View>
+            </ApCard>
           )}
 
           {/* Habit Streaks Leaderboard */}
-          <View
-            className="p-4 rounded-2xl border mb-6"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-            }}
-          >
+          <ApCard className="p-4 mb-6">
             <ApText
-              size="sm"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-3"
+              size="xs"
+              font="semibold"
+              color={colors.textMuted}
+              className="uppercase mb-3"
+              style={{ letterSpacing: 0.8 }}
             >
               Habit Leaderboard
             </ApText>
-            {data.habitStreaks.slice(0, 5).map((habit, index) => (
-              <View
-                key={habit.habitId}
-                className="flex-row items-center py-3"
-                style={{
-                  borderBottomWidth:
-                    index < data.habitStreaks.length - 1 ? 1 : 0,
-                  borderBottomColor: colors.surfaceBorder,
-                }}
-              >
-                <ApText
-                  size="lg"
-                  font="bold"
-                  color={
-                    index === 0
-                      ? colors.warning
-                      : index === 1
-                        ? colors.textSecondary
-                        : index === 2
-                          ? "#b45309" // bronze — intentional, no theme token
-                          : colors.textMuted
-                  }
-                  className="w-8"
-                >
-                  #{index + 1}
-                </ApText>
-                <Ionicons
-                  name={habit.icon as any}
-                  size={18}
-                  color={habit.iconColor}
-                />
-                <View className="flex-1 ml-2">
-                  <ApText
-                    size="sm"
-                    font="semibold"
-                    color={colors.textPrimary}
-                  >
-                    {habit.habitTitle}
-                  </ApText>
-                  <ApText size="xs" color={colors.textMuted}>
-                    🔥 {habit.longestStreak} day streak •{" "}
-                    {habit.totalCompletions} completions
-                  </ApText>
-                </View>
+            {data.habitStreaks.slice(0, 5).map((habit, index) => {
+              const IconComp = getHabitLucideIcon(habit.habitTitle);
+              return (
                 <View
-                  className="px-2 py-1 rounded-full"
-                  style={{ backgroundColor: colors.primary + "20" }}
+                  key={habit.habitId}
+                  className="flex-row items-center py-3"
+                  style={{
+                    borderTopWidth: index > 0 ? 1 : 0,
+                    borderTopColor: colors.surfaceBorder,
+                  }}
                 >
-                  <ApText size="xs" font="bold" color={colors.primary}>
-                    {habit.completionRate}%
+                  <ApText
+                    size="base"
+                    font="semibold"
+                    color={index === 0 ? colors.primary : colors.textMuted}
+                    className="w-7"
+                  >
+                    #{index + 1}
                   </ApText>
+                  <View
+                    className="w-8 h-8 rounded-lg items-center justify-center mr-2.5"
+                    style={{ backgroundColor: colors.accentLight }}
+                  >
+                    <IconComp size={16} color={colors.primary} strokeWidth={2} />
+                  </View>
+                  <View className="flex-1 min-w-0 mr-2">
+                    <ApText
+                      size="sm"
+                      font="medium"
+                      color={colors.textPrimary}
+                      numberOfLines={1}
+                    >
+                      {habit.habitTitle}
+                    </ApText>
+                    <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
+                      {habit.longestStreak} streak · {habit.totalCompletions} completions
+                    </ApText>
+                  </View>
+                  <View
+                    className="px-2 py-0.5 rounded-full"
+                    style={{ backgroundColor: colors.accentLight }}
+                  >
+                    <ApText size="xs" font="semibold" color={colors.primary}>
+                      {habit.completionRate}%
+                    </ApText>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
+              );
+            })}
+          </ApCard>
         </View>
 
         <View className="h-20" />

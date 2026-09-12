@@ -1,20 +1,29 @@
 import React, { useEffect } from "react";
-import { View, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TouchableOpacity } from "react-native";
+import {
+  Flag,
+  BookOpen,
+  Calendar,
+  Gift,
+  BarChart2,
+  Clock,
+  Download,
+  Grid,
+  Palette,
+  Bell,
+  ChevronRight,
+} from "lucide-react-native";
 import { router } from "expo-router";
-import { ApText, ApContainer, ApScrollView } from "@/src/components";
+import { ApText, ApContainer, ApScrollView, Avatar, ApCard, ApHeader } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useProfileState } from "@/src/modules/profile/context";
-import { ApHeader } from "@/src/components";
 
 interface MoreMenuItem {
   label: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   route: string;
   description: string;
-  badge?: string;
-  color?: string;
 }
 
 const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
@@ -23,29 +32,27 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
     items: [
       {
         label: "Identity",
-        icon: "flag",
+        icon: Flag,
         route: "/identities",
         description: "Define who you want to become",
-        color: "#8B5CF6",
       },
       {
         label: "Journal",
-        icon: "journal",
+        icon: BookOpen,
         route: "/journal",
         description: "Reflect on your day",
       },
       {
         label: "Planner Calendar",
-        icon: "calendar-outline",
+        icon: Calendar,
         route: "/planner-calendar",
         description: "Browse plans by date",
       },
       {
         label: "Reward Shop",
-        icon: "cart",
+        icon: Gift,
         route: "/reward-shop",
         description: "Spend coins on themes & extras",
-        color: "#F59E0B",
       },
     ],
   },
@@ -54,19 +61,19 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
     items: [
       {
         label: "Advanced Analytics",
-        icon: "bar-chart",
+        icon: BarChart2,
         route: "/analytics",
         description: "Deep dive into your habit data",
       },
       {
         label: "Timeline",
-        icon: "time",
+        icon: Clock,
         route: "/timeline",
         description: "View your habit history",
       },
       {
         label: "Export Data",
-        icon: "download",
+        icon: Download,
         route: "/export",
         description: "Download your habit records",
       },
@@ -77,19 +84,19 @@ const MENU_SECTIONS: { title: string; items: MoreMenuItem[] }[] = [
     items: [
       {
         label: "Habit Templates",
-        icon: "grid",
+        icon: Grid,
         route: "/templates",
         description: "Browse pre-built habits",
       },
       {
         label: "Appearance & Sounds",
-        icon: "color-palette-outline",
+        icon: Palette,
         route: "/settings/appearance",
         description: "Customize theme & audio feedback",
       },
       {
         label: "Notifications Feed",
-        icon: "notifications",
+        icon: Bell,
         route: "/notifications",
         description: "View your activity feed",
       },
@@ -110,130 +117,94 @@ const MoreScreen = () => {
     router.push(route as any);
   };
 
+  const displayName = user?.name || profile?.name || "User";
+  const displayEmail = user?.email || profile?.email || "";
+
   return (
     <ApContainer>
+      <ApHeader title="More" subheader="Access all features & settings" />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <ApHeader title="More" subheader="Access all features & settings" />
-
-        {/* User Banner */}
+        {/* User Card */}
         <TouchableOpacity
           onPress={() => navigateTo("/profile")}
-          activeOpacity={0.85}
-          className="mx-5 mb-6 p-4 rounded-3xl flex-row items-center"
-          style={{ backgroundColor: colors.primary + "12", borderWidth: 1, borderColor: colors.primary + "20" }}
+          activeOpacity={0.8}
+          className="mb-6 mt-2"
         >
-          <View
-            className="w-16 h-16 rounded-full items-center justify-center overflow-hidden border-2"
-            style={{ backgroundColor: colors.surface, borderColor: colors.primary }}
-          >
-            {user?.avatar || profile?.avatar ? (
-              <Image
-                source={{ uri: user?.avatar || profile?.avatar }}
-                className="w-full h-full"
-              />
-            ) : (
-              <ApText size="xl" font="bold" color={colors.primary}>
-                {(user?.name || profile?.name)?.substring(0, 2).toUpperCase() || "HI"}
+          <ApCard className="p-4 flex-row items-center">
+            <Avatar name={displayName} size="lg" />
+            <View className="ml-3.5 flex-1 min-w-0">
+              <ApText size="base" font="semibold" color={colors.textPrimary} numberOfLines={1}>
+                {displayName}
               </ApText>
-            )}
-          </View>
-
-          <View className="ml-4 flex-1">
-            <ApText size="base" font="bold" color={colors.textPrimary} numberOfLines={1}>
-              {user?.name || profile?.name || "User"}
-            </ApText>
-            <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
-              {user?.email || profile?.email || ""}
-            </ApText>
-            <View className="flex-row mt-2 space-x-3">
-              <View className="flex-row items-center">
-                <Ionicons name="flame" size={13} color={colors.primary} />
-                <ApText size="xs" color={colors.textSecondary} className="ml-1">
+              <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
+                {displayEmail}
+              </ApText>
+              <View className="flex-row items-center mt-1 gap-3">
+                <ApText size="xs" color={colors.textSecondary}>
                   {profile?.currentStreak ?? 0} streak
                 </ApText>
-              </View>
-              <View className="flex-row items-center ml-3">
-                <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
-                <ApText size="xs" color={colors.textSecondary} className="ml-1">
+                <ApText size="xs" color={colors.textMuted}>·</ApText>
+                <ApText size="xs" color={colors.textSecondary}>
                   {profile?.totalHabits ?? 0} habits
                 </ApText>
-              </View>
-              <View className="flex-row items-center ml-3">
-                <Ionicons name="diamond" size={13} color="#F59E0B" />
-                <ApText size="xs" color={colors.textSecondary} className="ml-1">
+                <ApText size="xs" color={colors.textMuted}>·</ApText>
+                <ApText size="xs" color={colors.textSecondary}>
                   {profile?.coins ?? 0} coins
                 </ApText>
               </View>
             </View>
-          </View>
-
-          <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} />
+          </ApCard>
         </TouchableOpacity>
 
         {/* Menu Sections */}
         {MENU_SECTIONS.map((section) => (
-          <View key={section.title} className="px-5 mb-6">
+          <View key={section.title} className="mb-5">
             <ApText
               size="xs"
-              font="bold"
+              font="semibold"
               color={colors.textMuted}
-              className="mb-3 uppercase"
-              style={{ letterSpacing: 1 }}
+              className="mb-2 uppercase"
+              style={{ letterSpacing: 0.8 }}
             >
               {section.title}
             </ApText>
 
-            <View
-              className="rounded-2xl overflow-hidden"
-              style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-            >
-              {section.items.map((item, index) => (
-                <TouchableOpacity
-                  key={item.route}
-                  onPress={() => navigateTo(item.route)}
-                  activeOpacity={0.7}
-                  className="flex-row items-center px-4 py-4"
-                  style={{
-                    borderBottomWidth: index < section.items.length - 1 ? 1 : 0,
-                    borderBottomColor: colors.surfaceBorder,
-                  }}
-                >
-                  <View
-                    className="w-10 h-10 rounded-xl items-center justify-center"
-                    style={{ backgroundColor: (item.color || colors.primary) + "18" }}
+            <ApCard className="overflow-hidden">
+              {section.items.map((item, index) => {
+                const IconComp = item.icon;
+                return (
+                  <TouchableOpacity
+                    key={item.route}
+                    onPress={() => navigateTo(item.route)}
+                    activeOpacity={0.7}
+                    className="flex-row items-center px-4 py-3.5"
+                    style={{
+                      borderTopWidth: index > 0 ? 1 : 0,
+                      borderTopColor: colors.surfaceBorder,
+                    }}
                   >
-                    <Ionicons
-                      name={item.icon as any}
-                      size={20}
-                      color={item.color || colors.primary}
-                    />
-                  </View>
-                  <View className="ml-3 flex-1">
-                    <ApText size="sm" font="semibold" color={colors.textPrimary}>
-                      {item.label}
-                    </ApText>
-                    <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                      {item.description}
-                    </ApText>
-                  </View>
-                  {item.badge && (
                     <View
-                      className="px-2 py-0.5 rounded-full mr-2"
-                      style={{ backgroundColor: colors.primary + "20" }}
+                      className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+                      style={{ backgroundColor: colors.accentLight }}
                     >
-                      <ApText size="xs" font="bold" color={colors.primary}>
-                        {item.badge}
+                      <IconComp size={18} color={colors.primary} />
+                    </View>
+                    <View className="flex-1 mr-2 min-w-0">
+                      <ApText size="sm" font="medium" color={colors.textPrimary}>
+                        {item.label}
+                      </ApText>
+                      <ApText size="xs" color={colors.textMuted} numberOfLines={1} className="mt-0.5">
+                        {item.description}
                       </ApText>
                     </View>
-                  )}
-                  <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <ChevronRight size={16} color={colors.textMuted} />
+                  </TouchableOpacity>
+                );
+              })}
+            </ApCard>
           </View>
         ))}
-
-        <View className="h-10" />
       </ApScrollView>
     </ApContainer>
   );

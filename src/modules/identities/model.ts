@@ -1,3 +1,5 @@
+import { DesignTokens } from "@/src/components/theme";
+
 export type IdentityStatus = "ACTIVE" | "ARCHIVED";
 
 export type CompletionKind = "FULL" | "MINIMUM" | "EMERGENCY";
@@ -8,7 +10,6 @@ export interface IIdentityKindCounts {
   EMERGENCY: number;
 }
 
-/** Linked-habit row as included by the API (`habitLinks.habit`). */
 export interface IIdentityHabitLink {
   identityId: string;
   habitId: string;
@@ -22,11 +23,6 @@ export interface IIdentityHabitLink {
   };
 }
 
-/**
- * The server returns identity fields plus a derived evidence summary spread
- * on top. Evidence is computed from completion history and can never be
- * edited directly — it only grows through showing up.
- */
 export interface IIdentity {
   id: string;
   userId: string;
@@ -38,7 +34,6 @@ export interface IIdentity {
   createdAt: string;
   updatedAt: string;
 
-  // ---- Derived evidence progress ----
   habitLinks?: IIdentityHabitLink[];
   linkedHabits?: number;
   completedOnDate?: number;
@@ -64,11 +59,11 @@ export const IDENTITY_ICONS: { name: string; label: string }[] = [
   { name: "planet", label: "Explorer" },
 ];
 
-export const IDENTITY_COLORS: { value: string; label: string }[] = [
-  { value: "#3B82F6", label: "Blue" },
-  { value: "#8B5CF6", label: "Violet" },
-  { value: "#EC4899", label: "Pink" },
-  { value: "#F59E0B", label: "Amber" },
-  { value: "#10B981", label: "Emerald" },
-  { value: "#EF4444", label: "Red" },
+export const IDENTITY_COLORS = [
+  { value: DesignTokens.category.rose.ink, label: "Rose" },
+  { value: DesignTokens.category.amber.ink, label: "Amber" },
+  { value: DesignTokens.category.mint.ink, label: "Mint" },
+  { value: DesignTokens.category.violet.ink, label: "Violet" },
+  { value: DesignTokens.category.sky.ink, label: "Sky" },
+  { value: DesignTokens.category.sand.ink, label: "Sand" },
 ];

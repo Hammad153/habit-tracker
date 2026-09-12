@@ -1,7 +1,7 @@
 import React from "react";
-import { View, ScrollView, Switch } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ApText, ApContainer, ApHeader } from "@/src/components";
+import { View, Switch } from "react-native";
+import { Fingerprint, Volume2 } from "lucide-react-native";
+import { ApText, ApContainer, ApHeader, ApCard, ApScrollView } from "@/src/components";
 import { useSettingsState } from "./context";
 
 const SoundsScreen = () => {
@@ -17,7 +17,7 @@ const SoundsScreen = () => {
     {
       id: "haptic",
       label: "Haptic Feedback",
-      icon: "finger-print",
+      icon: Fingerprint,
       value: hapticEnabled,
       onToggle: setHapticEnabled,
       description:
@@ -26,7 +26,7 @@ const SoundsScreen = () => {
     {
       id: "sound",
       label: "Sound Effects",
-      icon: "volume-high",
+      icon: Volume2,
       value: soundEnabled,
       onToggle: setSoundEnabled,
       description:
@@ -35,61 +35,66 @@ const SoundsScreen = () => {
   ];
 
   return (
-    <ApContainer className="flex-1">
+    <ApContainer>
       <ApHeader title="Sounds & Haptics" hasBackButton />
-      <ScrollView className="flex-1 px-5 pt-6">
+      <ApScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <ApText
-          size="sm"
+          size="xs"
           color={colors.textMuted}
-          className="mb-4 uppercase"
-          font="bold"
+          className="mb-2 uppercase"
+          font="semibold"
+          style={{ letterSpacing: 0.8 }}
         >
           Feedback
         </ApText>
-        <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
-          {settings.map((item, index) => (
-            <View
-              key={item.id}
-              className={`p-4 ${index !== settings.length - 1 ? "border-b" : ""}`}
-              style={{ borderBottomColor: colors.surfaceBorder }}
-            >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-4"
-                    style={{ backgroundColor: colors.background }}
-                  >
-                    <Ionicons
-                      name={item.icon as any}
-                      size={20}
-                      color={colors.primary}
-                    />
+        <ApCard className="overflow-hidden mb-4">
+          {settings.map((item, index) => {
+            const IconComp = item.icon;
+            return (
+              <View
+                key={item.id}
+                className="p-4"
+                style={{
+                  borderTopWidth: index > 0 ? 1 : 0,
+                  borderTopColor: colors.surfaceBorder,
+                }}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1 mr-3">
+                    <View
+                      className="w-9 h-9 rounded-xl items-center justify-center mr-3"
+                      style={{ backgroundColor: colors.accentLight }}
+                    >
+                      <IconComp size={18} color={colors.primary} />
+                    </View>
+                    <View className="flex-1">
+                      <ApText
+                        size="sm"
+                        color={colors.textPrimary}
+                        font="medium"
+                      >
+                        {item.label}
+                      </ApText>
+                      <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                        {item.description}
+                      </ApText>
+                    </View>
                   </View>
-                  <ApText
-                    size="base"
-                    color={colors.textPrimary}
-                    font="semibold"
-                  >
-                    {item.label}
-                  </ApText>
+                  <Switch
+                    value={item.value}
+                    onValueChange={item.onToggle}
+                    trackColor={{
+                      false: colors.surfaceInactive,
+                      true: colors.primary,
+                    }}
+                    thumbColor={colors.background}
+                  />
                 </View>
-                <Switch
-                  value={item.value}
-                  onValueChange={item.onToggle}
-                  trackColor={{
-                    false: colors.surfaceInactive,
-                    true: colors.primary + "80",
-                  }}
-                  thumbColor={item.value ? colors.primary : colors.textMuted}
-                />
               </View>
-              <ApText size="xs" color={colors.textMuted} className="mt-2 ml-14">
-                {item.description}
-              </ApText>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+            );
+          })}
+        </ApCard>
+      </ApScrollView>
     </ApContainer>
   );
 };

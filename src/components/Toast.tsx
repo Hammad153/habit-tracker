@@ -1,233 +1,167 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { View, Text, StyleSheet, Dimensions, Platform } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  Easing,
-} from "react-native-reanimated";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState, useCallback, useRef, useEffect, createContext, useContext } from "react";
+import { Text, Animated, View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CheckCircle2, AlertCircle, Info } from "lucide-react-native";
 import { useTheme } from "@/src/modules/settings/context";
 import { toastEmitter, ToastPayload } from "@/src/services/toast-emitter";
 
-type ToastType = "success" | "error" | "info";
-
-const TOAST_DURATION = 3000;
-const SCREEN_WIDTH = Dimensions.get("window").width;
-
-const variantConfig: Record<
-  ToastType,
-  { icon: keyof typeof Ionicons.glyphMap; color: string; bgTint: string }
-> = {
-  success: {
-    icon: "checkmark-circle",
-    color: "#10b981",
-    bgTint: "rgba(16, 185, 129, 0.12)",
-  },
-  error: {
-    icon: "alert-circle",
-    color: "#EF4444",
-    bgTint: "rgba(239, 68, 68, 0.12)",
-  },
-  info: {
-    icon: "information-circle",
-    color: "#3B82F6",
-    bgTint: "rgba(59, 130, 246, 0.12)",
-  },
-};
-
-interface Props {
-  children: React.ReactNode;
+interface ToastContextType {
+  showToast: (options: ToastPayload) => void;
+  hideToast: () => void;
 }
 
-export const ToastProvider: React.FC<Props> = ({ children }) => {
-  const [toast, setToast] = useState<ToastPayload | null>(null);
-  const insets = useSafeAreaInsets();
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const colors = useTheme();
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const translateY = useSharedValue(-120);
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.95);
-
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
+  const insets = useSafeAreaInsets();
+  const [toast, setToast] = useState<ToastPayload | null>(null);
+  const translateY = useRef(new Animated.Value(16)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hideToast = useCallback(() => {
-    translateY.value = withTiming(-120, {
-      duration: 300,
-      easing: Easing.bezier(0.4, 0, 1, 1),
-    });
-    opacity.value = withTiming(0, { duration: 250 });
-    scale.value = withTiming(0.95, { duration: 250 });
-
-    setTimeout(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: 16,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 0.96,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
       setToast(null);
-    }, 300);
-  }, [translateY, opacity, scale]);
+    });
+  }, [opacity, translateY, scale]);
 
   const showToast = useCallback(
-    (payload: ToastPayload) => {
-      clearTimer();
-      setToast(payload);
+    (options: ToastPayload) => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+      setToast(options);
 
-      translateY.value = -120;
-      opacity.value = 0;
-      scale.value = 0.95;
+      Animated.parallel([
+        Animated.spring(translateY, {
+          toValue: 0,
+          friction: 8,
+          tension: 60,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 8,
+          tension: 60,
+          useNativeDriver: true,
+        }),
+      ]).start();
 
-      requestAnimationFrame(() => {
-        translateY.value = withSpring(0, {
-          damping: 20,
-          stiffness: 300,
-          mass: 0.8,
-        });
-        opacity.value = withTiming(1, { duration: 300 });
-        scale.value = withSpring(1, {
-          damping: 15,
-          stiffness: 200,
-        });
-      });
-
-      timerRef.current = setTimeout(() => {
-        hideToast();
-      }, TOAST_DURATION);
+      hideTimer.current = setTimeout(hideToast, 2800);
     },
-    [clearTimer, hideToast, translateY, opacity, scale],
+    [hideToast, opacity, translateY, scale]
   );
 
   useEffect(() => {
     const unsubscribe = toastEmitter.on(showToast);
     return () => {
       unsubscribe();
-      clearTimer();
+      if (hideTimer.current) clearTimeout(hideTimer.current);
     };
-  }, [showToast, clearTimer]);
+  }, [showToast]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
-    opacity: opacity.value,
-  }));
+  // Tab bar height is 60. Bottom offset is Math.max(16, insets.bottom).
+  // Position toast with 16px of clearance above the floating tab bar:
+  const tabBottomOffset = Math.max(16, insets.bottom > 0 ? insets.bottom : 16);
+  const toastBottom = tabBottomOffset + 60 + 16;
 
-  const variant = toast ? variantConfig[toast.type] : variantConfig.info;
+  const type = toast?.type || "info";
+  const iconConfig = {
+    success: {
+      icon: CheckCircle2,
+      color: colors.success,
+      bg: colors.successSoft,
+    },
+    error: {
+      icon: AlertCircle,
+      color: colors.danger,
+      bg: colors.dangerSoft,
+    },
+    info: {
+      icon: Info,
+      color: colors.accent,
+      bg: colors.accentSoft,
+    },
+  }[type];
+
+  const IconComponent = iconConfig.icon;
 
   return (
-    <>
-      {children}
-      {toast && (
-        <Animated.View
-          style={[
-            styles.container,
-            animatedStyle,
-            {
-              top: insets.top + 8,
-            },
-          ]}
-          pointerEvents="box-none"
-        >
-          <View
-            style={[
-              styles.toast,
-              {
-                backgroundColor: colors.isDark
-                  ? "rgba(30, 41, 59, 0.97)"
-                  : "rgba(255, 255, 255, 0.97)",
-                borderColor: variant.color + "40",
-                shadowColor: variant.color,
-              },
-            ]}
-          >
-            {/* Accent bar on the left */}
-            <View
-              style={[styles.accentBar, { backgroundColor: variant.color }]}
-            />
-
-            {/* Icon with tinted background */}
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: variant.bgTint },
-              ]}
+    <ToastContext.Provider value={{ showToast, hideToast }}>
+      <View style={{ flex: 1 }}>
+        {children}
+        <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+          {toast && (
+            <Animated.View
+              pointerEvents="none"
+              className="absolute left-4 right-4 items-center z-50"
+              style={{
+                bottom: toastBottom,
+                transform: [{ translateY }, { scale }],
+                opacity,
+              }}
             >
-              <Ionicons name={variant.icon} size={22} color={variant.color} />
-            </View>
-
-            {/* Message text */}
-            <Text
-              style={[
-                styles.message,
-                {
-                  color: colors.isDark ? "#F1F5F9" : "#0F172A",
-                },
-              ]}
-              numberOfLines={2}
-            >
-              {toast.message}
-            </Text>
-          </View>
-        </Animated.View>
-      )}
-    </>
+              <View
+                className="min-h-[46px] px-4 py-2.5 rounded-full flex-row items-center max-w-[92%]"
+                style={{
+                  backgroundColor: colors.backgroundElevated,
+                  borderColor: colors.border,
+                  borderWidth: StyleSheet.hairlineWidth,
+                  shadowColor: colors.inkPrimary,
+                  shadowOpacity: 0.1,
+                  shadowRadius: 16,
+                  shadowOffset: { width: 0, height: 4 },
+                  elevation: 6,
+                }}
+              >
+                <View
+                  className="w-6 h-6 rounded-full items-center justify-center mr-2.5"
+                  style={{ backgroundColor: iconConfig.bg }}
+                >
+                  <IconComponent size={14} color={iconConfig.color} strokeWidth={2.5} />
+                </View>
+                <Text
+                  className="text-[13.5px] leading-[18px] font-semibold text-ink-primary"
+                  numberOfLines={2}
+                >
+                  {toast.message}
+                </Text>
+              </View>
+            </Animated.View>
+          )}
+        </View>
+      </View>
+    </ToastContext.Provider>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    zIndex: 9999,
-    alignItems: "center",
-  },
-  toast: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: SCREEN_WIDTH - 32,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    paddingLeft: 0,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.15,
-        shadowRadius: 24,
-      },
-      android: {
-        elevation: 12,
-      },
-      web: {
-        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-      },
-    }),
-  },
-  accentBar: {
-    width: 4,
-    height: "100%",
-    borderRadius: 2,
-    marginRight: 12,
-    marginLeft: 0,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  message: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-    letterSpacing: 0.1,
-  },
-});
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within ToastProvider");
+  }
+  return context;
+};
+
+export default ToastProvider;

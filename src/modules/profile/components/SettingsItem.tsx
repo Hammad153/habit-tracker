@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronRight } from "lucide-react-native";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
 
 interface SettingsItemProps {
   label: string;
-  icon: string;
+  icon?: React.ComponentType<{ size?: number; color?: string }>;
   value?: string;
   onPress?: () => void;
   isDestructive?: boolean;
@@ -14,7 +14,7 @@ interface SettingsItemProps {
 
 const SettingsItem: React.FC<SettingsItemProps> = ({
   label,
-  icon,
+  icon: IconComponent,
   value,
   onPress,
   isDestructive = false,
@@ -24,34 +24,37 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center py-4 border-b px-3"
+      className="flex-row items-center py-3.5 px-4"
       style={{
+        borderBottomWidth: 1,
         borderBottomColor: colors.surfaceBorder,
-        opacity: onPress ? 1 : 1,
-      }}>
-      <View
-        className="w-10 h-10 rounded-full items-center justify-center mr-4"
-        style={{ backgroundColor: colors.surfaceLight }}>
-        <Ionicons
-          name={icon as any}
-          size={20}
-          color={isDestructive ? colors.danger : colors.primary}
-        />
-      </View>
+      }}
+    >
+      {IconComponent && (
+        <View className="mr-3">
+          <IconComponent
+            size={18}
+            color={isDestructive ? colors.danger : colors.textMuted}
+          />
+        </View>
+      )}
       <View className="flex-1">
         <ApText
-          size="base"
+          size="sm"
           font="medium"
-          color={isDestructive ? colors.danger : colors.textPrimary}>
+          color={isDestructive ? colors.danger : colors.textPrimary}
+        >
           {label}
         </ApText>
       </View>
       {value && (
-        <ApText size="sm" color={colors.textMuted} className="mr-2">
+        <ApText size="xs" color={colors.textMuted} className="mr-2">
           {value}
         </ApText>
       )}
-      <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+      {!isDestructive && (
+        <ChevronRight size={16} color={colors.textMuted} />
+      )}
     </Pressable>
   );
 };

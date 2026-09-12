@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, Text, Pressable, Modal, TouchableWithoutFeedback } from "react-native";
 import {
   format,
   startOfMonth,
@@ -15,10 +15,8 @@ import {
   isBefore,
   startOfDay,
 } from "date-fns";
-import { ApText } from "./Text";
-import { ApModal } from "./Modal";
+import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useTheme } from "../modules/settings/context";
-import { Ionicons } from "@expo/vector-icons";
 
 interface ApDatePickerProps {
   visible: boolean;
@@ -30,7 +28,7 @@ interface ApDatePickerProps {
   title?: string;
 }
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 export const ApDatePicker: React.FC<ApDatePickerProps> = ({
   visible,
@@ -47,10 +45,9 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
   const min = minDate ? startOfDay(minDate) : undefined;
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 
-  // Reopening the picker should land on the month of the selected day.
   useEffect(() => {
     if (visible && selectedDate) setCurrentMonth(selectedDate);
-  }, [visible]);
+  }, [visible, selectedDate]);
 
   const generateCalendarDays = () => {
     const monthStart = startOfMonth(currentMonth);
@@ -67,128 +64,127 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
     return days;
   };
 
-  // Navigation is bounded by the selectable range, not by "today", so a picker
-  // that allows future dates can actually reach those months.
-  const canGoNext = !isAfter(
-    startOfMonth(addMonths(currentMonth, 1)),
-    startOfMonth(max),
-  );
-  const canGoPrev =
-    !min || !isBefore(startOfMonth(subMonths(currentMonth, 1)), startOfMonth(min));
-
-  const handlePrevMonth = () => {
-    if (canGoPrev) setCurrentMonth(subMonths(currentMonth, 1));
-  };
-
-  const handleNextMonth = () => {
-    if (canGoNext) setCurrentMonth(addMonths(currentMonth, 1));
-  };
-
-  const handleSelectDate = (date: Date) => {
-    onSelect(date);
+  const handleSelectDay = (day: Date) => {
+    onSelect(day);
     onClose();
   };
 
   const days = generateCalendarDays();
 
   return (
-    <ApModal
+    <Modal
       visible={visible}
-      onClose={onClose}
-      title={title}
-      showCloseButton
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
-      <View className="flex-row justify-between items-center mb-4">
-        <TouchableOpacity
-          onPress={handlePrevMonth}
-          className="p-2"
-          disabled={!canGoPrev}
-          style={{ opacity: canGoPrev ? 1 : 0.3 }}
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View
+          className="flex-1 items-center justify-center px-5"
+          style={{ backgroundColor: colors.overlay }}
         >
-          <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <ApText size="lg" font="bold" color={colors.textPrimary}>
-          {format(currentMonth, "MMMM yyyy")}
-        </ApText>
-        <TouchableOpacity
-          onPress={handleNextMonth}
-          className="p-2"
-          disabled={!canGoNext}
-          style={{ opacity: canGoNext ? 1 : 0.3 }}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={22}
-            color={colors.textPrimary}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View className="flex-row mb-2">
-        {WEEKDAYS.map((day) => (
-          <View key={day} className="flex-1 items-center py-1">
-            <ApText size="xs" font="semibold" color={colors.textMuted}>
-              {day}
-            </ApText>
-          </View>
-        ))}
-      </View>
-
-      <View className="flex-row flex-wrap">
-        {days.map((day, index) => {
-          const isCurrentMonth = isSameMonth(day, currentMonth);
-          const isSelected = selectedDate && isSameDay(day, selectedDate);
-          const isDisabled =
-            isAfter(startOfDay(day), max) ||
-            (!!min && isBefore(startOfDay(day), min));
-          const isToday = isSameDay(day, today);
-
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() =>
-                !isDisabled && isCurrentMonth && handleSelectDate(day)
-              }
-              disabled={isDisabled || !isCurrentMonth}
-              className="items-center justify-center"
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View
+              className="w-full max-w-[340px] bg-background-elevated rounded-lg p-5"
               style={{
-                width: "14.28%",
-                height: 40,
+                shadowColor: colors.inkPrimary,
+                shadowOpacity: 0.16,
+                shadowRadius: 24,
+                shadowOffset: { width: 0, height: 12 },
+                elevation: 8,
               }}
             >
-              <View
-                className="w-9 h-9 rounded-full items-center justify-center"
-                style={[
-                  isSelected && {
-                    backgroundColor: colors.primary,
-                  },
-                  isToday &&
-                    !isSelected && {
-                      borderWidth: 1,
-                      borderColor: colors.primary,
-                    },
-                ]}
-              >
-                <ApText
-                  size="sm"
-                  font={isSelected || isToday ? "bold" : "medium"}
-                  color={
-                    isSelected
-                      ? colors.background
-                      : isDisabled || !isCurrentMonth
-                        ? colors.textMuted + "40"
-                        : isToday
-                          ? colors.primary
-                          : colors.textPrimary
-                  }
+              {/* Header */}
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                  {title}
+                </Text>
+                <Pressable
+                  onPress={onClose}
+                  hitSlop={8}
+                  className="w-8 h-8 rounded-pill bg-background-surface items-center justify-center"
                 >
-                  {format(day, "d")}
-                </ApText>
+                  <X size={16} color={colors.inkPrimary} strokeWidth={2} />
+                </Pressable>
               </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ApModal>
+
+              {/* Month Navigation */}
+              <View className="flex-row items-center justify-between mb-4">
+                <Pressable
+                  onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                  className="w-9 h-9 rounded-pill bg-background-surface items-center justify-center"
+                >
+                  <ChevronLeft size={18} color={colors.inkPrimary} strokeWidth={2} />
+                </Pressable>
+                <Text className="text-[15px] font-semibold text-ink-primary">
+                  {format(currentMonth, "MMMM yyyy")}
+                </Text>
+                <Pressable
+                  onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                  className="w-9 h-9 rounded-pill bg-background-surface items-center justify-center"
+                >
+                  <ChevronRight size={18} color={colors.inkPrimary} strokeWidth={2} />
+                </Pressable>
+              </View>
+
+              {/* Weekday headers */}
+              <View className="flex-row justify-between mb-2">
+                {WEEKDAYS.map((wd) => (
+                  <View key={wd} className="w-10 items-center">
+                    <Text className="text-[12px] font-semibold text-ink-tertiary">
+                      {wd}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Days Grid */}
+              <View className="flex-row flex-wrap justify-between">
+                {days.map((d, index) => {
+                  const isCurrentMonth = isSameMonth(d, currentMonth);
+                  const isSelected = selectedDate && isSameDay(d, selectedDate);
+                  const isToday = isSameDay(d, today);
+                  const isDisabled =
+                    (max && isAfter(startOfDay(d), max)) ||
+                    (min && isBefore(startOfDay(d), min));
+
+                  let bgClass = "bg-transparent";
+                  let textClass = "text-ink-primary";
+
+                  if (isSelected) {
+                    bgClass = "bg-background-inverse";
+                    textClass = "text-ink-inverse";
+                  } else if (isToday) {
+                    bgClass = "bg-background-surface";
+                    textClass = "text-accent font-bold";
+                  } else if (!isCurrentMonth) {
+                    textClass = "text-ink-disabled";
+                  }
+
+                  if (isDisabled) {
+                    textClass = "text-ink-disabled";
+                  }
+
+                  return (
+                    <Pressable
+                      key={index}
+                      disabled={isDisabled}
+                      onPress={() => handleSelectDay(d)}
+                      className={`w-10 h-10 rounded-pill items-center justify-center my-0.5 ${bgClass}`}
+                    >
+                      <Text className={`text-[13.5px] font-medium ${textClass}`}>
+                        {format(d, "d")}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
   );
 };
+
+export default ApDatePicker;

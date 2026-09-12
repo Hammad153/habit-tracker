@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { View, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Calendar } from "lucide-react-native";
 import { router } from "expo-router";
 import {
-  ApLoader,
   ApHeader,
   ApContainer,
   ApScrollView,
   ApText,
   ApEmptyState,
+  SkeletonHabitList,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
@@ -100,74 +100,72 @@ const ProgressScreen = () => {
           <Pressable
             onPress={() => router.push("/timeline")}
             className="w-10 h-10 items-center justify-center rounded-full"
-            style={{ backgroundColor: colors.primary + "1A" }}
+            style={{ backgroundColor: colors.accentLight }}
           >
-            <Ionicons name="calendar" size={22} color={colors.primary} />
+            <Calendar size={20} color={colors.primary} />
           </Pressable>
         }
       />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <View className="px-5">
-          <TimeFilterTabs
-            selectedTab={selectedTab}
-            onSelectTab={setSelectedTab}
-          />
-          <OverviewStats
-            streak={profile?.currentStreak ?? 0}
-            totalDone={allCompletions.filter((c) => c.status).length}
-          />
-          <CompletionChart
-            habits={habits ?? []}
-            periodDays={PERIOD_DAYS[selectedTab]}
-          />
+        <TimeFilterTabs
+          selectedTab={selectedTab}
+          onSelectTab={setSelectedTab}
+        />
+        <OverviewStats
+          streak={profile?.currentStreak ?? 0}
+          totalDone={allCompletions.filter((c) => c.status).length}
+        />
+        <CompletionChart
+          habits={habits ?? []}
+          periodDays={PERIOD_DAYS[selectedTab]}
+        />
 
-          <View>
-            <ApText
-              size="xl"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-4"
-            >
-              Habit Breakdown
-            </ApText>
-            {isLoading ? (
-              <ApLoader size="small" inline />
-            ) : habitBreakdown.length === 0 ? (
-              <ApEmptyState
-                icon="stats-chart-outline"
-                title="No progress yet"
-                subtitle="Create a habit and start tracking — your consistency will show up here."
-                actionLabel="Create Habit"
-                onAction={() => router.push("/create-habit")}
+        <View className="mb-6">
+          <ApText
+            size="xs"
+            font="semibold"
+            color={colors.textMuted}
+            className="uppercase mb-3"
+            style={{ letterSpacing: 0.8 }}
+          >
+            Habit Breakdown
+          </ApText>
+          {isLoading ? (
+            <SkeletonHabitList count={3} />
+          ) : habitBreakdown.length === 0 ? (
+            <ApEmptyState
+              title="No progress yet"
+              subtitle="Create a habit and start tracking — your consistency will show up here."
+              actionLabel="Create Habit"
+              onAction={() => router.push("/create-habit")}
+            />
+          ) : (
+            habitBreakdown.map((habit) => (
+              <HabitBreakdownCard
+                key={habit.id}
+                title={habit.title}
+                category={habit.category}
+                percentage={habit.percentage}
+                icon={habit.icon}
+                iconBg={habit.iconBg}
+                iconColor={habit.iconColor}
+                completions={habit.completions}
               />
-            ) : (
-              habitBreakdown.map((habit) => (
-                <HabitBreakdownCard
-                  key={habit.id}
-                  title={habit.title}
-                  category={habit.category}
-                  percentage={habit.percentage}
-                  icon={habit.icon}
-                  iconBg={habit.iconBg}
-                  iconColor={habit.iconColor}
-                  completions={habit.completions}
-                />
-              ))
-            )}
-          </View>
-          <View className="mb-20">
-            <ApText
-              size="xl"
-              font="bold"
-              color={colors.textPrimary}
-              className="mb-4"
-            >
-              Monthly Activity
-            </ApText>
-            <View className="mb-20">
-              <ActivityHeatmap completions={allCompletions} />
-            </View>
-          </View>
+            ))
+          )}
+        </View>
+
+        <View className="mb-6">
+          <ApText
+            size="xs"
+            font="semibold"
+            color={colors.textMuted}
+            className="uppercase mb-3"
+            style={{ letterSpacing: 0.8 }}
+          >
+            Activity Heatmap
+          </ApText>
+          <ActivityHeatmap completions={allCompletions} />
         </View>
       </ApScrollView>
     </ApContainer>

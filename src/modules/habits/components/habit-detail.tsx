@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, ScrollView, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { ArrowLeft, MoreHorizontal, Calendar, Bell, Clock, Sparkles, Check } from "lucide-react-native";
+import { router } from "expo-router";
 import {
-  ApText,
-  ApContainer,
-  ApHeader,
-  ApLoader,
   ApErrorState,
+  Skeleton,
+  SkeletonCard,
 } from "@/src/components";
+import { Card } from "@/src/components/Card";
+import { Button } from "@/src/components/buttons/Button";
+import { ListRow } from "@/src/components/ListRow";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { ToastService } from "@/src/services";
@@ -19,7 +20,7 @@ import { IReminder } from "@/src/modules/reminders/model";
 import { IHabit } from "@/src/modules/habits/model";
 import { useRewardsState } from "@/src/modules/rewards/context";
 import { RewardsService } from "@/src/modules/rewards/api";
-import { BundleStatus, IRewardBreakdownLine, ITemptationBundle } from "@/src/modules/rewards/model";
+import { BundleStatus, ITemptationBundle } from "@/src/modules/rewards/model";
 import {
   CoachApiService,
   ICoach,
@@ -27,18 +28,14 @@ import {
   IIntervention,
   InterventionActionType,
 } from "@/src/modules/habits/intervention";
-import InsightCard from "./InsightCard";
-import AdaptiveSuggestionCard from "./AdaptiveSuggestionCard";
 import {
   AdaptiveApiService,
   IAdaptationOutcomeEntry,
   IAdaptiveSuggestion,
 } from "@/src/modules/habits/adaptive";
-import { BehavioralEventApiService } from "@/src/modules/notifications/candidates";
-import OutcomeCard from "./OutcomeCard";
-import { router } from "expo-router";
-import HabitTimer from "./HabitTimer";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
+import { getLucideIcon, getCategoryKeyForId } from "@/src/utils/icons";
+import { CategoryKey } from "@/src/components/ListRow";
 
 interface HabitDetailScreenProps {
   habitId: string;
@@ -46,111 +43,56 @@ interface HabitDetailScreenProps {
 
 const todayStr = () => toDateKey(new Date());
 
-const StatTile = ({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value: string;
-  color: string;
-}) => {
-  const colors = useTheme();
-  return (
-    <View
-      className="flex-1 rounded-2xl p-4 items-center"
-      style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-    >
-      <Ionicons name={icon} size={20} color={color} />
-      <ApText size="xl" font="bold" color={colors.textPrimary} className="mt-2">
-        {value}
-      </ApText>
-      <ApText size="xs" color={colors.textMuted} className="mt-1">
-        {label}
-      </ApText>
-    </View>
-  );
-};
-
-const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
+export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const colors = useTheme();
   const { toggleHabit } = useHabitState();
-
   const { freezeDay } = useRewardsState();
+
   const [habit, setHabit] = useState<IHabit | null>(null);
   const [reminder, setReminder] = useState<IReminder | null>(null);
   const [bundles, setBundles] = useState<ITemptationBundle[]>([]);
-  const [freezingDate, setFreezingDate] = useState<string | null>(null);
-  const [usingBundleId, setUsingBundleId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [showTimer, setShowTimer] = useState(false);
   const [insight, setInsight] = useState<IIntervention | null>(null);
   const [coach, setCoach] = useState<ICoach | null>(null);
   const [adaptive, setAdaptive] = useState<IAdaptiveSuggestion | null>(null);
-  const [adaptiveHeadline, setAdaptiveHeadline] = useState("");
-  const [adaptiveMessage, setAdaptiveMessage] = useState("");
-  const [adaptiveActionLabel, setAdaptiveActionLabel] = useState<string | undefined>();
-  const [adaptiveBusy, setAdaptiveBusy] = useState(false);
-  const [lastOutcome, setLastOutcome] = useState<IAdaptationOutcomeEntry | null>(
-    null,
-  );
-  const [dismissedFingerprints, setDismissedFingerprints] = useState<string[]>([]);
-  const [insightBusy, setInsightBusy] = useState(false);
+  const [completing, setCompleting] = useState(false);
 
   const load = useCallback(() => {
+    setLoading(true);
     setError(false);
-    return HabitService.getById(habitId)
+
+    HabitService.getById(habitId)
       .then((data) => {
         setHabit(data);
-        // Reminder is best-effort; a habit without one is perfectly valid.
         return ReminderApiService.getByHabit(habitId).catch(() => null);
       })
       .then((rem) => {
-        setReminder(rem && rem.id ? rem : null);
-        // Bundles are best-effort; a habit without them is valid.
+        setReminder(rem && (rem as any).id ? (rem as any) : null);
         return RewardsService.listBundles(habitId).catch(() => []);
       })
       .then((bnd) => {
         setBundles(Array.isArray(bnd) ? bnd : []);
-        // Insight is best-effort and must never block the screen.
         return InterventionApiService.getForHabit(habitId).catch(() => null);
       })
       .then((res) => {
         setInsight(res?.intervention ?? null);
         setCoach(null);
-        // AI enhancement is independent and must never block or fail loudly:
-        // deterministic card stays if the coach layer is unavailable.
         const enhance = res?.intervention
           ? CoachApiService.getForHabit(habitId)
-              .then((c) => setCoach(c.coach))
+              .then((c) => setCoach((c as any).coach))
               .catch(() => setCoach(null))
           : Promise.resolve();
-        // Adaptive suggestion is independent and best-effort too.
         const adapt = AdaptiveApiService.getSuggestion(habitId)
           .then((res) => {
-            if (res.suggestion && res.coach) {
+            if (res.suggestion) {
               setAdaptive(res.suggestion);
-              setAdaptiveHeadline(res.coach.headline);
-              setAdaptiveMessage(res.coach.message);
-              setAdaptiveActionLabel(res.coach.actionLabel);
-              // Phase 4.1 — ADAPTIVE_PROPOSAL_VIEWED (server validates id).
-              BehavioralEventApiService.proposalViewed(res.suggestion.id);
             } else {
               setAdaptive(null);
             }
           })
           .catch(() => setAdaptive(null));
-        // Measured adjustment results (Phase 3.6) — best-effort.
-        const outcomes = AdaptiveApiService.getOutcomes(habitId)
-          .then((o) => {
-            const recent = o.recent?.[0];
-            setLastOutcome(recent ?? null);
-          })
-          .catch(() => setLastOutcome(null));
-        return Promise.all([enhance, adapt, outcomes]);
+        return Promise.all([enhance, adapt]);
       })
       .catch((err) => {
         setError(true);
@@ -163,472 +105,257 @@ const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
     load();
   }, [load]);
 
-  const accent = habit?.iconColor || colors.primary;
-
   const completions = useMemo(() => habit?.completions ?? [], [habit]);
   const streak = useMemo(
     () => getCurrentStreak(completions, habit ?? undefined),
-    [completions, habit],
+    [completions, habit]
   );
   const totalDone = useMemo(
     () => completions.filter((c) => c.status).length,
-    [completions],
-  );
-  const history = useMemo(
-    () => [...completions].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 10),
-    [completions],
+    [completions]
   );
 
   const today = todayStr();
   const todayCompletion = completions.find((c) =>
-    isSameDateKey(c.date, today),
+    isSameDateKey(c.date, today)
   );
-  const isCompletedToday = !!todayCompletion?.status;
+  const isCompletedToday = Boolean(todayCompletion?.status);
 
   const handleMarkComplete = useCallback(() => {
-    if (!habit) return;
-    // Reuse the existing toggle flow so completion logic stays in one place.
-    if (!isCompletedToday) {
-      toggleHabit(habit.id, today)
-        .then((rewards) => {
-          if (rewards && typeof rewards.coinsAwarded === "number") {
-            const milestones = (rewards.newStreakMilestones ?? []) as number[];
-            const extras = milestones.length
-              ? ` incl. ${milestones.join("-")}-day streak bonus${milestones.length > 1 ? "es" : ""}`
-              : "";
-            ToastService.Success(
-              `+${rewards.coinsAwarded} coins earned${extras}!`,
-            );
-          }
-          load();
-        });
-    }
+    if (!habit || isCompletedToday) return;
+    setCompleting(true);
+    toggleHabit(habit.id, today)
+      .then((rewards) => {
+        if (rewards && typeof rewards.coinsAwarded === "number") {
+          ToastService.Success("+" + rewards.coinsAwarded + " coins earned!");
+        } else {
+          ToastService.Success("Habit logged for today!");
+        }
+        load();
+      })
+      .catch((err) => ToastService.ApiError(err))
+      .finally(() => setCompleting(false));
   }, [habit, isCompletedToday, load, toggleHabit, today]);
 
-  const handleInsightAction = useCallback(
-    (action: InterventionActionType) => {
-      if (!habit || !insight) return;
-      if (action === "USE_MINIMUM_VERSION" || action === "USE_EMERGENCY_VERSION") {
-        // Reuse the existing completion flow with the recommended kind.
-        const kind =
-          action === "USE_MINIMUM_VERSION" ? "MINIMUM" : "EMERGENCY";
-        setInsightBusy(true);
-        toggleHabit(habit.id, today, habit.goal ?? undefined, kind)
-          .then((rewards) => {
-            ToastService.Success(
-              rewards && typeof rewards.coinsAwarded === "number"
-                ? `+${rewards.coinsAwarded} coins earned!`
-                : "Completed — nice work!",
-            );
-            setInsight(null);
-            load();
-          })
-          .catch((err) => ToastService.ApiError(err))
-          .finally(() => setInsightBusy(false));
-        return;
-      }
-      if (action === "OPEN_HABIT_EDIT" || action === "CONFIGURE_HABIT_STACK") {
-        router.push(`/edit-habit?habitId=${habit.id}`);
-        return;
-      }
-      if (action === "REVIEW_ACTIVE_HABITS") {
-        router.push("/manage-habits");
-      }
-    },
-    [habit, insight, toggleHabit, today, load],
-  );
-
-  const handleDismissInsight = useCallback(() => {
-    setInsight((current) => {
-      if (current?.fingerprint) {
-        setDismissedFingerprints((prev) =>
-          prev.includes(current.fingerprint) ? prev : [...prev, current.fingerprint],
-        );
-      }
-      return null;
-    });
-  }, []);
-
-  const handleFreeze = useCallback(
-    (date: string) => {
-      if (!habit || freezingDate) return;
-      setFreezingDate(date);
-      freezeDay(habit.id, date).finally(() => {
-        setFreezingDate(null);
-        load();
-      });
-    },
-    [habit, freezingDate, freezeDay, load],
-  );
-
-  const handleUseBundle = useCallback(
-    (bundle: ITemptationBundle) => {
-      if (usingBundleId) return;
-      setUsingBundleId(bundle.id);
-      RewardsService.consumeBundle(bundle.id)
-        .then(() => ToastService.Success(`"${bundle.title}" enjoyed!`))
-        .catch((err) => ToastService.ApiError(err))
-        .finally(() => {
-          setUsingBundleId(null);
-          load();
-        });
-    },
-    [usingBundleId, load],
-  );
-
-  if (loading) return <ApLoader />;
-
-  if (error || !habit) {
+  if (error || (!loading && !habit)) {
     return (
-      <ApContainer>
-        <ApHeader title="Habit" hasBackButton />
-        <ApErrorState onRetry={() => { setLoading(true); load(); }} />
-      </ApContainer>
+      <View className="flex-1 bg-background">
+        <View className="h-[56px] px-5 flex-row items-center justify-between">
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={8}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+          >
+            <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+          </Pressable>
+        </View>
+        <ApErrorState onRetry={load} />
+      </View>
     );
   }
 
-  const description = habit.subtitle;
+  const IconComponent = getLucideIcon(habit?.icon || "Check");
+  const categoryKey: CategoryKey = habit ? getCategoryKeyForId(habit.id) : "sky";
+  const categoryTokens = colors.category[categoryKey];
+  const scheduleText = habit ? getScheduleLabel(habit) : "";
 
   return (
-    <ApContainer>
-      <ApHeader title="Habit Breakdown" hasBackButton />
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Hero */}
-        <View className="px-5 mt-4">
-          <LinearGradient
-            colors={[accent + "33", colors.surface]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="p-6 rounded-3xl border"
-            style={{ borderColor: colors.surfaceBorder }}
+    <View className="flex-1 bg-background">
+      {/* Top Navbar */}
+      <View className="h-[56px] px-5 flex-row items-center justify-between">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+        >
+          <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+        </Pressable>
+        {habit && (
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/edit-habit",
+                params: { habitId: habit.id },
+              })
+            }
+            hitSlop={8}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
           >
-            <View className="flex-row items-center">
-              <View
-                className="w-16 h-16 rounded-2xl items-center justify-center"
-                style={{ backgroundColor: (habit.iconBg || accent + "20") as string }}
-              >
-                <Ionicons name={(habit.icon as any) || "ellipse"} size={32} color={accent} />
-              </View>
-              <View className="ml-4 flex-1">
-                <ApText size="2xl" font="bold" color={colors.textPrimary} numberOfLines={2}>
-                  {habit.title}
-                </ApText>
-                {isCompletedToday && (
-                  <View className="flex-row items-center mt-1">
-                    <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                    <ApText size="xs" font="semibold" color={colors.success} className="ml-1">
-                      Completed today
-                    </ApText>
-                  </View>
-                )}
-              </View>
+            <MoreHorizontal size={20} color={colors.inkPrimary} strokeWidth={2} />
+          </Pressable>
+        )}
+      </View>
+
+      {loading || !habit ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 10,
+            paddingBottom: 110,
+          }}
+        >
+          <View className="flex-row items-center gap-3.5 my-3">
+            <Skeleton width={52} height={52} borderRadius={12} />
+            <View className="flex-1 gap-2">
+              <Skeleton width="60%" height={20} />
+              <Skeleton width="40%" height={14} />
             </View>
-
-            {description ? (
-              <ApText size="sm" color={colors.textSecondary} className="mt-4">
-                {description}
-              </ApText>
-            ) : null}
-
-            {habit.category ? (
-              <View className="flex-row mt-4">
-                <View
-                  className="flex-row items-center px-3 py-1 rounded-full"
-                  style={{ backgroundColor: colors.background }}
-                >
-                  <Ionicons name="pricetag" size={12} color={accent} />
-                  <ApText size="xs" font="semibold" color={colors.textSecondary} className="ml-1">
-                    {habit.category}
-                  </ApText>
-                </View>
-              </View>
-            ) : null}
-          </LinearGradient>
-        </View>
-
-        {/* Stats */}
-        <View className="px-5 mt-5 flex-row gap-3">
-          <StatTile icon="flame" label="Day streak" value={`${streak}`} color={colors.warning} />
-          <StatTile icon="checkmark-done" label="Completed" value={`${totalDone}`} color={colors.success} />
-          <StatTile
-            icon="trophy"
-            label="Goal"
-            value={`${habit.goal || 1}${habit.unit ? "" : "x"}`}
-            color={accent}
-          />
-        </View>
-
-        {/* Habit insight (deterministic intervention) */}
-        {insight &&
-        !dismissedFingerprints.includes(insight.fingerprint) &&
-        !(insight.category === "USER_ACTION_REQUIRED" && isCompletedToday) ? (
-          <View className="px-5 mt-5">
-            <InsightCard
-              intervention={insight}
-              coach={coach}
-              busy={insightBusy}
-              onViewed={(fp) => BehavioralEventApiService.interventionViewed(fp)}
-              onDismissed={(fp) =>
-                BehavioralEventApiService.interventionDismissed(fp)
-              }
-              onActionStarted={(fp) =>
-                BehavioralEventApiService.interventionActionStarted(fp)
-              }
-              onAction={handleInsightAction}
-              onDismiss={handleDismissInsight}
-            />
           </View>
-        ) : null}
 
-        {/* Adaptive insight — user-approved adjustments only (Phase 3.5) */}
-        {adaptive &&
-        !dismissedFingerprints.includes(adaptive.fingerprint) &&
-        !isCompletedToday ? (
-          <View className="px-5 mt-5">
-            <AdaptiveSuggestionCard
-              suggestion={adaptive}
-              headline={adaptiveHeadline}
-              message={adaptiveMessage}
-              actionLabel={adaptiveActionLabel}
-              unit={habit.unit}
-              busy={adaptiveBusy}
-              onAccept={() => {
-                if (adaptiveBusy) return;
-                setAdaptiveBusy(true);
-                AdaptiveApiService.accept(habit.id, adaptive.id)
-                  .then(() => {
-                    ToastService.Success(
-                      "Your habit has been adjusted. Let's see how this version performs.",
-                    );
-                    setAdaptive(null);
-                    load();
-                  })
-                  .catch((err) => ToastService.ApiError(err))
-                  .finally(() => setAdaptiveBusy(false));
-              }}
-              onReject={() => {
-                if (adaptiveBusy) return;
-                setAdaptiveBusy(true);
-                AdaptiveApiService.reject(habit.id, adaptive.id)
-                  .then(() => setAdaptive(null))
-                  .catch((err) => ToastService.ApiError(err))
-                  .finally(() => setAdaptiveBusy(false));
-              }}
-            />
-          </View>
-        ) : null}
-
-        {/* Adjustment result — deterministic backend numbers only */}
-        {lastOutcome ? (
-          <View className="px-5 mt-5">
-            <OutcomeCard entry={lastOutcome} />
-          </View>
-        ) : null}
-
-        {/* Schedule */}
-        <View className="px-5 mt-6">
-          <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
-            Schedule
-          </ApText>
+          <SkeletonCard style={{ height: 96, marginVertical: 12 }} />
+          <SkeletonCard style={{ height: 140, marginBottom: 16 }} />
+          <SkeletonCard style={{ height: 110 }} />
+        </ScrollView>
+      ) : (
+        <>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 20,
+              paddingTop: 10,
+              paddingBottom: 110,
+            }}
+          >
+            {/* Habit Header */}
+        <View className="flex-row items-center gap-3.5 my-3">
           <View
-            className="flex-row items-center rounded-2xl p-4"
-            style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
+            className="w-[52px] h-[52px] rounded-md items-center justify-center"
+            style={{ backgroundColor: categoryTokens.bg }}
           >
-            <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: accent + "20" }}>
-              <Ionicons name="calendar" size={18} color={accent} />
-            </View>
-            <View className="ml-3 flex-1">
-              <ApText size="base" font="semibold" color={colors.textPrimary}>
-                {getScheduleLabel(habit)}
-              </ApText>
-              {habit.unit ? (
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                  Target: {habit.goal} {habit.unit}
-                </ApText>
-              ) : null}
-            </View>
+            <IconComponent size={24} color={categoryTokens.ink} strokeWidth={2} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[19px] font-bold text-ink-primary">
+              {habit.title}
+            </Text>
+            <Text className="text-[12.5px] font-medium text-ink-secondary mt-0.5">
+              {habit.category || "General"} · {scheduleText}
+            </Text>
           </View>
         </View>
 
-        {/* Reminder */}
-        <View className="px-5 mt-6">
-          <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
-            Reminder
-          </ApText>
-          <View
-            className="flex-row items-center rounded-2xl p-4"
-            style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-          >
-            <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: accent + "20" }}>
-              <Ionicons name={reminder?.enabled ? "notifications" : "notifications-off"} size={18} color={accent} />
-            </View>
-            <View className="ml-3 flex-1">
-              {reminder?.enabled ? (
-                <>
-                  <ApText size="base" font="semibold" color={colors.textPrimary}>
-                    {reminder.time}
-                  </ApText>
-                  <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                    {reminder.days?.join(", ") || "Every day"}
-                  </ApText>
-                </>
-              ) : (
-                <ApText size="sm" color={colors.textMuted}>
-                  No reminder set
-                </ApText>
-              )}
-            </View>
+        {/* Stats Row (Plain numbers per Section 4) */}
+        <View className="flex-row items-center justify-between my-4">
+          <View>
+            <Text className="text-[24px] font-bold text-ink-primary">
+              {streak}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Day streak
+            </Text>
+          </View>
+          <View>
+            <Text className="text-[24px] font-bold text-ink-primary">
+              {totalDone}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Completed
+            </Text>
+          </View>
+          <View>
+            <Text className="text-[24px] font-bold text-ink-primary">
+              {habit.goal || 1}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Goal / day
+            </Text>
           </View>
         </View>
 
-        {/* Temptation bundles */}
-        {bundles.length > 0 && (
-          <View className="px-5 mt-6">
-            <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
-              Reward Bundles
-            </ApText>
-            {bundles.map((bundle) => {
-              const unlocked = bundle.status === BundleStatus.UNLOCKED;
-              const used = bundle.status === BundleStatus.USED;
-              return (
-                <View
-                  key={bundle.id}
-                  className="flex-row items-center rounded-2xl p-4 mb-3"
-                  style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-                >
-                  <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: accent + "20" }}>
-                    <Ionicons
-                      name={used ? "checkmark-done" : unlocked ? "gift" : "lock-closed"}
-                      size={18}
-                      color={unlocked ? accent : colors.textMuted}
-                    />
-                  </View>
-                  <View className="ml-3 flex-1">
-                    <ApText size="base" font="semibold" color={colors.textPrimary}>
-                      {bundle.title}
-                    </ApText>
-                    <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                      {used ? "Enjoyed" : unlocked ? "Unlocked — treat yourself" : "Locked · complete this habit fully to unlock"}
-                    </ApText>
-                  </View>
-                  {unlocked && (
-                    <Pressable
-                      onPress={() => handleUseBundle(bundle)}
-                      disabled={usingBundleId !== null}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Use reward bundle ${bundle.title}`}
-                      className="px-4 h-9 rounded-full items-center justify-center"
-                      style={{ backgroundColor: accent }}
-                    >
-                      <ApText size="xs" font="bold" color={colors.background}>
-                        Use
-                      </ApText>
-                    </Pressable>
-                  )}
-                </View>
-              );
-            })}
+        <View className="h-[1px] bg-border my-2" />
+
+        {/* Coach / Insight Card (Elevated Card 3.3) */}
+        {(coach || insight || adaptive) && (
+          <View className="my-4">
+            <Card elevated>
+              <Text className="text-[11px] font-semibold text-ink-tertiary">
+                Coach
+              </Text>
+              <Text className="text-[14.5px] font-bold text-ink-primary mt-1.5">
+                {coach?.headline || insight?.title || "Consistency insight"}
+              </Text>
+              <Text className="text-[12.5px] leading-[18px] text-ink-secondary mt-1.5">
+                {coach?.message || insight?.reason || "Keep showing up with regular repetitions."}
+              </Text>
+            </Card>
           </View>
         )}
 
-        {/* Completion history */}
-        <View className="px-5 mt-6">
-          <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase" style={{ letterSpacing: 1 }}>
-            Recent History
-          </ApText>
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-          >
-            {history.length === 0 ? (
-              <View className="p-5 items-center">
-                <Ionicons name="time-outline" size={22} color={colors.textMuted} />
-                <ApText size="sm" color={colors.textMuted} className="mt-2">
-                  No history yet — start today!
-                </ApText>
-              </View>
-            ) : (
-              history.map((c, index) => (
-                <View
-                  key={c.id || c.date}
-                  className={`flex-row items-center justify-between px-4 py-3 ${
-                    index !== history.length - 1 ? "border-b" : ""
-                  }`}
-                  style={{ borderBottomColor: colors.surfaceBorder }}
-                >
-                  <View className="flex-row items-center">
-                    <Ionicons
-                      name={c.status ? "checkmark-circle" : "close-circle"}
-                      size={18}
-                      color={c.status ? colors.success : colors.textMuted}
-                    />
-                    <ApText size="sm" color={colors.textPrimary} className="ml-3">
-                      {c.date}
-                    </ApText>
-                  </View>
-                  <View className="flex-row items-center">
-                    {habit.unit ? (
-                      <ApText size="xs" color={colors.textMuted}>
-                        {c.value ?? 0} {habit.unit}
-                      </ApText>
-                    ) : (
-                      <ApText size="xs" font="semibold" color={c.status ? colors.success : colors.textMuted}>
-                        {c.status ? "Done" : "Missed"}
-                      </ApText>
-                    )}
-                    {!c.status && (
-                      <Pressable
-                        onPress={() => handleFreeze(c.date)}
-                        disabled={freezingDate !== null}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Protect ${c.date} with a streak freeze`}
-                        hitSlop={8}
-                        className="ml-2"
-                      >
-                        <Ionicons
-                          name="snow"
-                          size={16}
-                          color={freezingDate === c.date ? accent : colors.primary}
-                        />
-                      </Pressable>
-                    )}
-                  </View>
-                </View>
-              ))
-            )}
-          </View>
+        {/* Schedule & Reminder rows */}
+        <Text className="text-[12px] font-semibold text-ink-tertiary mt-4 mb-2">
+          Schedule
+        </Text>
+        <View className="bg-background-surface rounded-lg px-4 py-1">
+          <ListRow
+            title={scheduleText}
+            subLabel={"Target: " + (habit.goal || 1) + " " + (habit.unit || "times")}
+            icon={Calendar}
+            iconBg={colors.backgroundSurface2}
+            iconColor={colors.inkSecondary}
+            isLast={!reminder}
+          />
+          {reminder && (
+            <ListRow
+              title={reminder.time + " reminder"}
+              subLabel={reminder.days ? reminder.days.join(", ") : "Every day"}
+              icon={Bell}
+              iconBg={colors.backgroundSurface2}
+              iconColor={colors.inkSecondary}
+              isLast={true}
+            />
+          )}
         </View>
+
+        {/* Behavioral Info if configured */}
+        {(habit.minimumBehavior || habit.scheduledTime || habit.location) && (
+          <>
+            <Text className="text-[12px] font-semibold text-ink-tertiary mt-5 mb-2">
+              Behavioral routine
+            </Text>
+            <View className="bg-background-surface rounded-lg px-4 py-1">
+              {habit.scheduledTime && (
+                <ListRow
+                  title="Cue time"
+                  subLabel={habit.scheduledTime + (habit.location ? " · " + habit.location : "")}
+                  icon={Clock}
+                  iconBg={colors.backgroundSurface2}
+                  iconColor={colors.inkSecondary}
+                  isLast={!habit.minimumBehavior}
+                />
+              )}
+              {habit.minimumBehavior && (
+                <ListRow
+                  title="Minimum version"
+                  subLabel={habit.minimumBehavior}
+                  icon={Sparkles}
+                  iconBg={colors.backgroundSurface2}
+                  iconColor={colors.inkSecondary}
+                  isLast={true}
+                />
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
-      {/* Start Habit CTA */}
-      <View
-        className="absolute left-0 right-0 bottom-0 px-5 pt-3 pb-6"
-        style={{ backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.surfaceBorder }}
-      >
-        <Pressable
-          onPress={() => setShowTimer(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Start habit session"
-          className="h-14 rounded-full items-center justify-center flex-row"
-          style={{ backgroundColor: accent }}
+        {/* Pinned Bottom Action Button outside scroll area */}
+        <View
+          className="absolute bottom-0 left-0 right-0 p-5 bg-background border-t border-border"
+          style={{ paddingBottom: 24 }}
         >
-          <Ionicons name="play-circle" size={24} color={colors.background} />
-          <ApText size="base" font="bold" color={colors.background} className="ml-2">
-            Start Habit
-          </ApText>
-        </Pressable>
-      </View>
-
-      <HabitTimer
-        visible={showTimer}
-        habitTitle={habit.title}
-        color={accent}
-        onClose={() => setShowTimer(false)}
-        onComplete={isCompletedToday ? undefined : handleMarkComplete}
-      />
-    </ApContainer>
-  );
+          <Button
+            label={isCompletedToday ? "Completed today" : "Log today"}
+            onPress={handleMarkComplete}
+            disabled={isCompletedToday}
+            loading={completing}
+            variant={isCompletedToday ? "secondary" : "primary"}
+          />
+        </View>
+      </>
+    )}
+  </View>
+);
 };
 
 export default HabitDetailScreen;

@@ -1,51 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { RefreshControl, ScrollView, Text, Pressable, View } from "react-native";
+import { Plus, ChevronRight, TrendingUp, TrendingDown, DollarSign } from "lucide-react-native";
 import { router } from "expo-router";
 import {
-  ApContainer,
   ApEmptyState,
   ApErrorState,
   ApHeader,
-  ApLoader,
-  ApText,
+  Skeleton,
+  SkeletonStatRow,
+  SkeletonHabitList,
 } from "@/src/components";
+import { Card } from "@/src/components/Card";
+import { Button } from "@/src/components/buttons/Button";
+import { ListRow } from "@/src/components/ListRow";
+import { ProgressBar } from "@/src/components/ProgressBar";
 import { useTheme } from "@/src/modules/settings/context";
 import { useBudgetState } from "./context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import helper from "@/src/helper";
 
-const StatCard = ({
-  label,
-  value,
-  icon,
-  color,
-}: {
-  label: string;
-  value: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
-}) => {
-  const colors = useTheme();
-  return (
-    <View
-      className="flex-1 rounded-2xl border p-3"
-      style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-    >
-      <View className="mb-2 h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: color + "18" }}>
-        <Ionicons name={icon} size={18} color={color} />
-      </View>
-      <ApText size="xs" color={colors.textMuted} numberOfLines={1}>
-        {label}
-      </ApText>
-      <ApText size="lg" font="bold" color={colors.textPrimary} numberOfLines={1}>
-        {value}
-      </ApText>
-    </View>
-  );
-};
-
-const BudgetScreen = () => {
+export const BudgetScreen = () => {
   const colors = useTheme();
   const { loading, error, summary, fetchSummary, ensureCategories } = useBudgetState();
   const { addNotification, notifications } = useNotificationsState();
@@ -57,194 +31,195 @@ const BudgetScreen = () => {
     load();
   }, [load]);
 
-  useEffect(() => {
-    if (!summary?.warning) return;
-    const today = new Date().toISOString().slice(0, 10);
-    const alreadyCreated = notifications.some(
-      (notification) =>
-        notification.createdAt.startsWith(today) &&
-        notification.type === "system" &&
-        notification.title === "Budget warning",
-    );
-    if (alreadyCreated) return;
-    addNotification({
-      title: "Budget warning",
-      body: summary.warning,
-      type: "system",
-      route: "/(tabs)/budget",
-    });
-  }, [summary?.warning, addNotification, notifications]);
-
-  const topCategory = useMemo(
-    () => summary?.categoryBreakdown?.[0],
-    [summary?.categoryBreakdown],
-  );
-
   const onRefresh = () => {
     setRefreshing(true);
     load().finally(() => setRefreshing(false));
   };
 
-  if (loading && !summary && !refreshing) {
-    return <ApLoader />;
-  }
+  const isInitialLoading = loading && !summary && !refreshing;
 
-  if (error && !summary) {
+  if (error && !summary && !isInitialLoading) {
     return (
-      <ApContainer>
-        <ApHeader title="Budget" hasBackButton/>
+      <View className="flex-1 bg-background">
+        <ApHeader title="Budget" hasBackButton />
         <ApErrorState onRetry={onRefresh} />
-      </ApContainer>
+      </View>
     );
   }
 
+  const totalBudget = summary?.totalBudget ?? 0;
+  const totalSpent = summary?.totalExpenses ?? 0;
+  const remaining = totalBudget - totalSpent;
+  const usageRate = totalBudget > 0 ? Math.min(1, totalSpent / totalBudget) : 0;
+
   return (
-    <ApContainer>
+    <View className="flex-1 bg-background">
       <ApHeader
         title="Budget"
         hasBackButton
-        right={
-          <TouchableOpacity onPress={() => router.push("/add-budget")} className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.primary }}>
-            <Ionicons name="add" size={22} color={colors.background} />
-          </TouchableOpacity>
+        rightAction={
+          <Pressable
+            onPress={() => router.push("/add-budget")}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+          >
+            <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
+          </Pressable>
         }
       />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 20, paddingBottom: 120 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 96 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
+        }
       >
-        <View className="flex-row gap-3">
-          <StatCard label="Income" value={helper.formatCurrency(summary?.totalIncome)} icon="trending-up-outline" color={colors.primary} />
-          <StatCard label="Total expenses" value={helper.formatCurrency(summary?.totalExpenses)} icon="card-outline" color={colors.warning} />
-        </View>
-        <View className="mt-3 flex-row gap-3">
-          <StatCard label="Budget left" value={helper.formatCurrency(summary?.remainingBudget)} icon="wallet-outline" color={summary && summary.remainingBudget < 0 ? "#EF4444" : "#10B981"} />
-          <StatCard label="Net cash flow" value={helper.formatCurrency(summary?.netCashFlow ?? summary?.remainingBalance)} icon="scale-outline" color={(summary?.netCashFlow ?? summary?.remainingBalance ?? 0) < 0 ? "#EF4444" : colors.accent} />
-        </View>
-        <View className="mt-3 flex-row gap-3">
-          <StatCard label="Budgeted" value={helper.formatCurrency(summary?.budgetedExpenseTotal ?? summary?.budgetedExpenses)} icon="checkmark-circle-outline" color={colors.primary} />
-          <StatCard label="Unbudgeted" value={helper.formatCurrency(summary?.unbudgetedExpenseTotal ?? summary?.unbudgetedExpenses)} icon="alert-circle-outline" color={colors.warning} />
-        </View>
-
-        <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-          <View className="flex-row items-center justify-between">
+        {/* Plain Stats Numbers (Section 4) */}
+        {isInitialLoading ? (
+          <SkeletonStatRow className="my-4" />
+        ) : (
+          <View className="flex-row items-center justify-between my-4">
             <View>
-              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                Budget Progress
-              </ApText>
-              <ApText size="2xl" font="bold" color={colors.textPrimary} className="mt-1">
-                {summary?.budgetUsagePercentage ?? 0}%
-              </ApText>
-              <ApText size="xs" color={colors.textMuted} className="mt-1">
-                Scope: {summary?.scope === "AUTO" || !summary?.scope ? "Auto" : summary.scope.toLowerCase()}
-              </ApText>
+              <Text className="text-[24px] font-bold text-ink-primary">
+                ${totalBudget.toLocaleString()}
+              </Text>
+              <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+                Total budget
+              </Text>
             </View>
-            <View className="flex-row gap-2">
-              <TouchableOpacity onPress={() => router.push("/budgets")} className="rounded-xl px-3 py-2" style={{ backgroundColor: colors.background }}>
-                <ApText size="xs" font="bold" color={colors.textSecondary}>
-                  View all
-                </ApText>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push("/add-budget")} className="rounded-xl px-3 py-2" style={{ backgroundColor: colors.primary + "18" }}>
-                <ApText size="xs" font="bold" color={colors.primary}>
-                  Add Budget
-                </ApText>
-              </TouchableOpacity>
+            <View>
+              <Text className="text-[24px] font-bold text-ink-primary">
+                ${totalSpent.toLocaleString()}
+              </Text>
+              <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+                Total spent
+              </Text>
+            </View>
+            <View>
+              <Text
+                className={"text-[24px] font-bold " + (remaining < 0 ? "text-danger" : "text-accent")}
+              >
+                ${remaining.toLocaleString()}
+              </Text>
+              <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+                Remaining
+              </Text>
             </View>
           </View>
-          <View className="mt-3 h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-            <View
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.min(summary?.budgetUsagePercentage ?? 0, 100)}%`,
-                backgroundColor: (summary?.budgetUsagePercentage ?? 0) >= 100 ? "#EF4444" : colors.primary,
-              }}
+        )}
+
+        {isInitialLoading ? (
+          <Skeleton height={6} radius={3} className="my-3" />
+        ) : (
+          <ProgressBar
+            progress={usageRate}
+            tone={usageRate >= 1 ? "danger" : usageRate >= 0.8 ? "warning" : "accent"}
+            height={6}
+            className="my-3"
+          />
+        )}
+
+        <View className="h-[1px] bg-border my-3" />
+
+        {/* Quick Actions */}
+        <View className="flex-row gap-3 my-3">
+          <Pressable
+            onPress={() => router.push("/add-expense")}
+            className="flex-1 h-[48px] rounded-pill bg-background-surface flex-row items-center justify-center active:opacity-80"
+          >
+            <TrendingDown size={16} color={colors.danger} strokeWidth={2} />
+            <Text className="text-[14px] font-semibold text-ink-primary ml-2">
+              Add expense
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/add-income")}
+            className="flex-1 h-[48px] rounded-pill bg-background-surface flex-row items-center justify-center active:opacity-80"
+          >
+            <TrendingUp size={16} color={colors.accent} strokeWidth={2} />
+            <Text className="text-[14px] font-semibold text-ink-primary ml-2">
+              Add income
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Active Budgets List */}
+        <View className="mt-4">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-[12px] font-semibold text-ink-tertiary">
+              Active budgets
+            </Text>
+            {!isInitialLoading && (
+              <Pressable onPress={() => router.push("/budgets")}>
+                <Text className="text-[12px] font-semibold text-accent">
+                  All budgets
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
+          {isInitialLoading ? (
+            <SkeletonHabitList count={3} />
+          ) : (!summary?.budgets || summary.budgets.length === 0) ? (
+            <ApEmptyState
+              title="No budgets configured"
+              description="Create a monthly or weekly budget to start planning."
+              actionLabel="Create budget"
+              onAction={() => router.push("/add-budget")}
             />
-          </View>
-          {summary?.warning ? (
-            <View className="mt-3 flex-row items-start rounded-xl p-3" style={{ backgroundColor: "#EF444418" }}>
-              <Ionicons name="alert-circle-outline" size={18} color="#EF4444" />
-              <ApText size="sm" color="#EF4444" className="ml-2 flex-1">
-                {summary.warning}
-              </ApText>
-            </View>
-          ) : null}
-        </View>
-
-        <View className="mt-5">
-          <View className="flex-row gap-3">
-            <TouchableOpacity onPress={() => router.push("/add-expense")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.warning + "16" }}>
-              <Ionicons name="remove-circle-outline" size={22} color={colors.warning} />
-              <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">
-                Add Expense
-              </ApText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/add-income")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.primary + "16" }}>
-              <Ionicons name="cash-outline" size={22} color={colors.primary} />
-              <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">
-                Add Income
-              </ApText>
-            </TouchableOpacity>
-          </View>
-          <View className="mt-3 flex-row gap-3">
-            <TouchableOpacity onPress={() => router.push("/expense-history")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.accent + "16" }}>
-              <Ionicons name="list-outline" size={22} color={colors.accent} />
-              <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">
-                History
-              </ApText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/category-breakdown")} className="flex-1 rounded-2xl p-4" style={{ backgroundColor: colors.warning + "16" }}>
-              <Ionicons name="pie-chart-outline" size={22} color={colors.warning} />
-              <ApText size="sm" font="bold" color={colors.textPrimary} className="mt-2">
-                Breakdown
-              </ApText>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View className="mt-6">
-          <ApText size="lg" font="bold" color={colors.textPrimary} className="mb-3">
-            Spending Breakdown
-          </ApText>
-          {!summary?.categoryBreakdown?.length ? (
-            <ApEmptyState icon="wallet-outline" title="No spending yet" subtitle="Add an expense to see your budget picture." />
           ) : (
-            summary.categoryBreakdown.map((item) => {
-              const width = summary.totalExpenses ? (item.total / summary.totalExpenses) * 100 : 0;
-              return (
-                <View key={item.category} className="mb-3 rounded-2xl border p-3" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <View className="h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: (item.color || colors.primary) + "18" }}>
-                        <Ionicons name={(item.icon as any) || "apps-outline"} size={16} color={item.color || colors.primary} />
-                      </View>
-                      <ApText size="sm" font="semibold" color={colors.textPrimary} className="ml-2">
-                        {item.category}
-                      </ApText>
-                    </View>
-                    <ApText size="sm" font="bold" color={colors.textPrimary}>
-                      {helper.formatCurrency(item.total)}
-                    </ApText>
-                  </View>
-                  <View className="mt-3 h-2 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-                    <View className="h-full rounded-full" style={{ width: `${width}%`, backgroundColor: item.color || colors.primary }} />
-                  </View>
-                </View>
-              );
-            })
+            <View className="bg-background-surface rounded-lg px-4 py-1 mb-4">
+              {summary.budgets.map((b: any, index: number) => {
+                const bSpent = b.budgetedExpenseTotal ?? 0;
+                const bRate = b.amount > 0 ? Math.round((bSpent / b.amount) * 100) : 0;
+                return (
+                  <ListRow
+                    key={b.id}
+                    title={b.title || "Budget"}
+                    subLabel={`$${bSpent.toLocaleString()} of $${b.amount.toLocaleString()} (${bRate}%)`}
+                    icon={DollarSign}
+                    iconBg={colors.backgroundSurface2}
+                    iconColor={colors.inkSecondary}
+                    trailingControl={
+                      <ChevronRight size={18} color={colors.inkTertiary} strokeWidth={2} />
+                    }
+                    onPress={() =>
+                      router.push({
+                        pathname: "/budget-detail",
+                        params: { budgetId: b.id },
+                      })
+                    }
+                    isLast={index === summary.budgets.length - 1}
+                  />
+                );
+              })}
+            </View>
           )}
         </View>
 
-        {topCategory ? (
-          <View className="mt-2 rounded-2xl p-4" style={{ backgroundColor: colors.primary + "12" }}>
-            <ApText size="sm" color={colors.textSecondary}>
-              Your largest spending category this month is {topCategory.category}. Keep an eye on it if you are trying to stay disciplined.
-            </ApText>
-          </View>
-        ) : null}
+        {/* Breakdown Navigation */}
+        <View className="mt-2 gap-2">
+          <Pressable
+            onPress={() => router.push("/category-breakdown")}
+            className="flex-row items-center justify-between p-4 rounded-lg bg-background-surface active:opacity-80"
+          >
+            <Text className="text-[15px] font-medium text-ink-primary">
+              Category breakdown
+            </Text>
+            <ChevronRight size={18} color={colors.inkTertiary} strokeWidth={2} />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/expense-history")}
+            className="flex-row items-center justify-between p-4 rounded-lg bg-background-surface active:opacity-80"
+          >
+            <Text className="text-[15px] font-medium text-ink-primary">
+              Expense history
+            </Text>
+            <ChevronRight size={18} color={colors.inkTertiary} strokeWidth={2} />
+          </Pressable>
+        </View>
       </ScrollView>
-    </ApContainer>
+    </View>
   );
 };
 

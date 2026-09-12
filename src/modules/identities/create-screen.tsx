@@ -1,12 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { X, Check } from "lucide-react-native";
 import { router } from "expo-router";
 import {
-  ApText,
-  ApContainer,
-  ApHeader,
-  ApLoader,
+  ApTextInput,
+  Button,
   ApConfirmModal,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -14,17 +12,13 @@ import { ToastService } from "@/src/services";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useIdentitiesState } from "./context";
 import { IIdentity, IDENTITY_COLORS, IDENTITY_ICONS } from "./model";
+import { getLucideIcon, CATEGORY_CYCLE } from "@/src/utils/icons";
 
 interface IdentityFormProps {
-  /** When provided the screen operates in edit mode. */
   identity?: IIdentity;
 }
 
-/**
- * Full-page identity form — used for both create and edit.
- * The route files pass the `identity` prop when editing.
- */
-const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
+export const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
   const colors = useTheme();
   const { habits } = useHabitState();
   const {
@@ -35,44 +29,38 @@ const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
     unlinkHabit,
   } = useIdentitiesState();
 
-  const isEdit = !!identity;
+  const isEdit = Boolean(identity);
 
   const [title, setTitle] = useState(identity?.title ?? "");
-  const [description, setDescription] = useState(
-    identity?.description ?? "",
-  );
-  const [icon, setIcon] = useState(identity?.icon ?? "fitness");
-  const [color, setColor] = useState(
-    identity?.color ?? IDENTITY_COLORS[0].value,
-  );
+  const [description, setDescription] = useState(identity?.description ?? "");
+  const [icon, setIcon] = useState(identity?.icon ?? "target");
+  const [color, setColor] = useState(identity?.color ?? IDENTITY_COLORS[0].value);
   const [selectedHabitIds, setSelectedHabitIds] = useState<string[]>(() =>
-    (identity?.habitLinks ?? []).map(
-      (link) => link.habit?.id ?? link.habitId,
-    ),
+    (identity?.habitLinks ?? []).map((link) => link.habit?.id ?? link.habitId)
   );
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const linkableHabits = useMemo(
     () => habits.filter((h) => !h.isArchived),
-    [habits],
+    [habits]
   );
 
   const originalLinkedIds = useMemo(
     () =>
       new Set(
         (identity?.habitLinks ?? []).map(
-          (link) => link.habit?.id ?? link.habitId,
-        ),
+          (link) => link.habit?.id ?? link.habitId
+        )
       ),
-    [identity],
+    [identity]
   );
 
   const toggleHabitSelection = (habitId: string) => {
     setSelectedHabitIds((current) =>
       current.includes(habitId)
         ? current.filter((id) => id !== habitId)
-        : [...current, habitId],
+        : [...current, habitId]
     );
   };
 
@@ -84,14 +72,13 @@ const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
     }
     setSaving(true);
     try {
-      if (isEdit) {
+      if (isEdit && identity) {
         await updateIdentity(identity.id, {
           title: title.trim(),
           description: description.trim() || undefined,
           icon,
           color,
         });
-        // Reconcile habit links
         for (const habitId of selectedHabitIds) {
           if (!originalLinkedIds.has(habitId)) {
             await linkHabit(identity.id, habitId);
@@ -104,253 +91,174 @@ const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
         }
         ToastService.Success("Identity updated");
       } else {
-        await createIdentity({
+        const created = await createIdentity({
           title: title.trim(),
           description: description.trim() || undefined,
           icon,
           color,
         });
+        if (created && (created as any).id) {
+          for (const habitId of selectedHabitIds) {
+            await linkHabit((created as any).id, habitId);
+          }
+        }
         ToastService.Success("Identity created");
       }
       router.back();
-    } catch (err) {
-      ToastService.ApiError(err);
+    } catch {
+      ToastService.Error("Failed to save identity");
+    } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
     if (!identity) return;
-    setConfirmDelete(false);
-    await deleteIdentity(identity.id);
-    router.back();
+    try {
+      await deleteIdentity(identity.id);
+      ToastService.Success("Identity deleted");
+      router.back();
+    } catch {
+      ToastService.Error("Failed to delete identity");
+    }
   };
 
-  if (saving) {
-    return (
-      <ApLoader
-        label={isEdit ? "Saving changes..." : "Creating identity..."}
-      />
-    );
-  }
-
   return (
-    <ApContainer>
-      <ApHeader
-        title={isEdit ? "Edit Identity" : "New Identity"}
-        hasBackButton
-      />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <ApText size="xs" font="semibold" color={colors.textSecondary}>
-          IDENTITY
-        </ApText>
-        <ApText size="xs" color={colors.textMuted} className="mt-0.5 mb-1.5">
-          Phrase it as &quot;I am someone who...&quot;
-        </ApText>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="e.g. A runner"
-          placeholderTextColor={colors.textMuted}
-          className="px-4 py-3 rounded-2xl"
+    <View className="flex-1 justify-end bg-background">
+      <View className="flex-1" style={{ backgroundColor: colors.overlay }}>
+        <Pressable className="flex-1" onPress={() => router.back()} />
+
+        <View
+          className="bg-background-elevated rounded-t-xl max-h-[92%] px-5 pt-3 pb-8"
           style={{
-            backgroundColor: colors.surfaceBorder + "60",
-            color: colors.textPrimary,
+            shadowColor: colors.inkPrimary,
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
+            shadowOffset: { width: 0, height: -8 },
+            elevation: 8,
           }}
-        />
-
-        <ApText
-          size="xs"
-          font="semibold"
-          color={colors.textSecondary}
-          className="mt-5"
         >
-          WHY IT MATTERS (OPTIONAL)
-        </ApText>
-        <TextInput
-          value={description}
-          onChangeText={setDescription}
-          placeholder="What does this identity mean to you?"
-          placeholderTextColor={colors.textMuted}
-          multiline
-          className="mt-1.5 px-4 py-3 rounded-2xl"
-          style={{
-            backgroundColor: colors.surfaceBorder + "60",
-            color: colors.textPrimary,
-            minHeight: 90,
-            textAlignVertical: "top",
-          }}
-        />
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+            <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-3" />
 
-        <ApText
-          size="xs"
-          font="semibold"
-          color={colors.textSecondary}
-          className="mt-5"
-        >
-          ICON
-        </ApText>
-        <View className="flex-row flex-wrap mt-2">
-          {IDENTITY_ICONS.map((option) => (
-            <TouchableOpacity
-              key={option.name}
-              onPress={() => setIcon(option.name)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: icon === option.name }}
-              className="w-11 h-11 rounded-xl items-center justify-center mr-2 mb-2"
-              style={{
-                backgroundColor:
-                  icon === option.name ? colors.primary + "26" : colors.surface,
-                borderWidth: icon === option.name ? 2 : 1,
-                borderColor:
-                  icon === option.name ? colors.primary : colors.surfaceBorder,
-              }}
-            >
-              <Ionicons
-                name={option.name as any}
-                size={20}
-                color={icon === option.name ? colors.primary : colors.textMuted}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <ApText
-          size="xs"
-          font="semibold"
-          color={colors.textSecondary}
-          className="mt-4"
-        >
-          COLOR
-        </ApText>
-        <View className="flex-row flex-wrap mt-2">
-          {IDENTITY_COLORS.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              onPress={() => setColor(option.value)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: color === option.value }}
-              className="w-9 h-9 rounded-full mr-2 mb-2"
-              style={{
-                backgroundColor: option.value,
-                borderWidth: color === option.value ? 3 : 0,
-                borderColor: colors.textPrimary,
-              }}
-            />
-          ))}
-        </View>
-
-        {/* Proving Habits — only shown in edit mode */}
-        {isEdit && (
-          <>
-            <ApText
-              size="xs"
-              font="semibold"
-              color={colors.textSecondary}
-              className="mt-5"
-            >
-              PROVING HABITS
-            </ApText>
-            <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-              Completions of these habits count as evidence.
-            </ApText>
-            <View className="flex-row flex-wrap mt-2 mb-3">
-              {linkableHabits.map((habit) => {
-                const checked = selectedHabitIds.includes(habit.id);
-                return (
-                  <TouchableOpacity
-                    key={habit.id}
-                    onPress={() => toggleHabitSelection(habit.id)}
-                    className="flex-row items-center px-3 py-2 rounded-full mr-1.5 mb-1.5"
-                    style={{
-                      backgroundColor: checked
-                        ? color + "1E"
-                        : colors.surfaceBorder + "50",
-                      borderWidth: 1.5,
-                      borderColor: checked ? color : "transparent",
-                    }}
-                  >
-                    <Ionicons
-                      name={habit.icon as any}
-                      size={13}
-                      color={checked ? color : colors.textMuted}
-                    />
-                    <ApText
-                      size="xs"
-                      font={checked ? "semibold" : "normal"}
-                      color={
-                        checked ? colors.textPrimary : colors.textSecondary
-                      }
-                      className="ml-1.5"
-                      numberOfLines={1}
-                    >
-                      {habit.title}
-                    </ApText>
-                  </TouchableOpacity>
-                );
-              })}
-              {linkableHabits.length === 0 && (
-                <ApText size="xs" color={colors.textMuted}>
-                  No habits yet — create one first.
-                </ApText>
-              )}
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                {isEdit ? "Edit identity" : "New identity"}
+              </Text>
+              <Pressable
+                onPress={() => router.back()}
+                hitSlop={8}
+                className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+              >
+                <X size={20} color={colors.inkPrimary} strokeWidth={2} />
+              </Pressable>
             </View>
-          </>
-        )}
 
-        <TouchableOpacity
-          onPress={handleSave}
-          disabled={saving || !title.trim()}
-          className="h-14 rounded-full items-center justify-center flex-row mt-6"
-          style={{
-            backgroundColor: colors.primary,
-            opacity: saving || !title.trim() ? 0.6 : 1,
-          }}
-        >
-          <Ionicons
-            name="checkmark-circle"
-            size={22}
-            color={colors.background}
-          />
-          <ApText
-            size="base"
-            font="bold"
-            color={colors.background}
-            className="ml-2"
-          >
-            {isEdit ? "Save Changes" : "Create Identity"}
-          </ApText>
-        </TouchableOpacity>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+              <ApTextInput
+                label="Identity title"
+                placeholder="e.g. Runner, Writer, Mindful person"
+                value={title}
+                onChangeText={setTitle}
+                containerClassName="mb-3"
+              />
 
-        {isEdit && (
-          <TouchableOpacity
-            onPress={() => setConfirmDelete(true)}
-            className="mt-3 h-12 items-center justify-center rounded-full border"
-            style={{ borderColor: colors.danger }}
-          >
-            <ApText size="sm" font="semibold" color={colors.danger}>
-              Delete Identity
-            </ApText>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
+              <ApTextInput
+                label="Statement / Description"
+                placeholder="Why is this identity important to you?"
+                value={description}
+                onChangeText={setDescription}
+                containerClassName="mb-4"
+              />
+
+              {/* Icon */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Icon
+              </Text>
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {IDENTITY_ICONS.map((item) => {
+                  const IconComp = getLucideIcon(item.name);
+                  const isSelected = icon === item.name;
+                  return (
+                    <Pressable
+                      key={item.name}
+                      onPress={() => setIcon(item.name)}
+                      className={"w-11 h-11 rounded-md items-center justify-center " + (isSelected ? "bg-background-inverse" : "bg-background-surface")}
+                    >
+                      <IconComp
+                        size={20}
+                        color={isSelected ? colors.inkInverse : colors.inkSecondary}
+                        strokeWidth={2}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Linked Habits */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Linked habits that prove this
+              </Text>
+              {linkableHabits.length === 0 ? (
+                <Text className="text-[13.5px] text-ink-secondary mb-4">
+                  No habits to link yet. Create habits first.
+                </Text>
+              ) : (
+                <View className="bg-background-surface rounded-lg px-4 py-1 mb-6">
+                  {linkableHabits.map((habit, index) => {
+                    const isSelected = selectedHabitIds.includes(habit.id);
+                    const isLast = index === linkableHabits.length - 1;
+                    return (
+                      <Pressable
+                        key={habit.id}
+                        onPress={() => toggleHabitSelection(habit.id)}
+                        className={"flex-row items-center justify-between py-3.5 " + (isLast ? "" : "border-b border-border")}
+                      >
+                        <Text className="text-[15px] font-medium text-ink-primary flex-1">
+                          {habit.title}
+                        </Text>
+                        <View
+                          className={"w-5 h-5 rounded-pill items-center justify-center " + (isSelected ? "bg-accent" : "border-[1.6px] border-border")}
+                        >
+                          {isSelected && <Check size={12} color={colors.inkInverse} strokeWidth={3} />}
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
+
+              <View className="gap-3">
+                <Button
+                  label={saving ? "Saving..." : isEdit ? "Save changes" : "Create identity"}
+                  onPress={handleSave}
+                  loading={saving}
+                  variant="primary"
+                />
+
+                {isEdit && (
+                  <Button
+                    label="Delete identity"
+                    onPress={() => setConfirmDelete(true)}
+                    variant="destructive"
+                  />
+                )}
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </View>
 
       <ApConfirmModal
         visible={confirmDelete}
-        title="Delete identity?"
-        subTitle={`${
-          identity?.title ?? "This identity"
-        } will be removed. If it has history, it is archived instead of deleted.`}
-        confirmText="Delete"
-        destructive
-        onConfirm={handleDelete}
         onClose={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title="Delete identity"
+        description="Are you sure? This will not delete your linked habits."
+        confirmText="Delete"
+        isDestructive
       />
-    </ApContainer>
+    </View>
   );
 };
 

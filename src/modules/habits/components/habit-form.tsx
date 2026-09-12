@@ -1,46 +1,41 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
-  TouchableOpacity,
+  Text,
+  Pressable,
   ScrollView,
   Platform,
   Switch,
+  KeyboardAvoidingView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { ApText, ApContainer, ApHeader, ApLoader, ApTextInput } from "@/src/components";
-import { Dropdown } from "@/src/components/Dropdown";
+import { X, ChevronDown, Check, Clock, Calendar, Sparkles, Grid, Minus, Plus } from "lucide-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { ApTextInput, Button, Dropdown, Skeleton } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { ToastService, NotificationService } from "@/src/services";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFeedback } from "@/src/utils/feedback";
-import { HABIT_CATEGORIES, HABIT_COLORS, HABIT_ICONS } from "@/src/constants";
+import { HABIT_CATEGORIES, HABIT_COLORS } from "@/src/constants";
 import { DAYS_OF_WEEK, IReminder } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
-import ReminderPicker from "@/src/modules/reminders/components/ReminderPicker";
-import SchedulePicker from "@/src/modules/habits/components/SchedulePicker";
 import { HabitService } from "@/src/modules/habits/api";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useLocalSearchParams } from "expo-router";
 import type { IHabitTemplate } from "@/src/modules/templates/model";
+import { LUCIDE_HABIT_ICONS, getLucideIcon, CATEGORY_CYCLE } from "@/src/utils/icons";
+import { CategoryKey } from "@/src/components/ListRow";
 
 export interface HabitFormProps {
   habitId?: string;
 }
 
-/**
- * The cue field accepts human input ("7:30", "8pm", "07:30 after coffee").
- * Normalize to strict HH:mm for the API; unparseable text means "no time".
- */
 const normalizeCueTime = (raw: string): string | null => {
   const t = raw.trim();
   if (!t) return null;
   const m =
-    t.match(/(\d{1,2})\s*[:.h]\s*(\d{2})?\s*(am|pm)?/i) ??
-    t.match(/^(\d{1,2})(am|pm)$/i);
+    t.match(/(\\d{1,2})\\s*[:.h]\\s*(\\d{2})?\\s*(am|pm)?/i) ??
+    t.match(/^(\\d{1,2})(am|pm)$/i);
   if (!m) return null;
   let h = parseInt(m[1], 10);
   const min = m[2] ? parseInt(m[2], 10) : 0;
@@ -51,114 +46,37 @@ const normalizeCueTime = (raw: string): string | null => {
   return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 };
 
-const CollapsibleSection: React.FC<{
-  title: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}> = ({ title, icon, defaultOpen = false, children }) => {
-  const colors = useTheme();
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <View
-      className="rounded-2xl border mb-3 overflow-hidden"
-      style={{ borderColor: colors.surfaceBorder }}
-    >
-      <TouchableOpacity
-        onPress={() => setOpen((o) => !o)}
-        accessibilityRole="button"
-        accessibilityState={{ expanded: open }}
-        className="flex-row items-center px-4 py-3"
-        style={{ backgroundColor: colors.background }}
-      >
-        <Ionicons name={icon} size={16} color={colors.primary} />
-        <ApText
-          size="xs"
-          font="bold"
-          color={colors.textSecondary}
-          className="uppercase ml-2 flex-1"
-          style={{ letterSpacing: 1 }}
-        >
-          {title}
-        </ApText>
-        <Ionicons
-          name={open ? "chevron-up" : "chevron-down"}
-          size={16}
-          color={colors.textMuted}
-        />
-      </TouchableOpacity>
-      {open ? <View className="px-4 pb-4 pt-1">{children}</View> : null}
-    </View>
-  );
+const DAY_LABELS: Record<string, string> = {
+  Mon: "M",
+  Tue: "T",
+  Wed: "W",
+  Thu: "T",
+  Fri: "F",
+  Sat: "S",
+  Sun: "S",
+  monday: "M",
+  tuesday: "T",
+  wednesday: "W",
+  thursday: "T",
+  friday: "F",
+  saturday: "S",
+  sunday: "S",
 };
 
-/** Small wizard progress indicator. */
-const StepIndicator: React.FC<{ current: number; total: number }> = ({
-  current,
-  total,
-}) => {
-  const colors = useTheme();
-  return (
-    <View className="flex-row items-center justify-center px-6 pt-4">
-      {Array.from({ length: total }, (_, index) => {
-        const active = index <= current;
-        return (
-          <View key={index} className="flex-row items-center">
-            {index > 0 && (
-              <View
-                className="h-0.5 mx-1.5"
-                style={{
-                  width: 18,
-                  backgroundColor: index <= current
-                    ? colors.primary
-                    : colors.surfaceBorder,
-                }}
-              />
-            )}
-            <View
-              className="h-6 w-6 rounded-full items-center justify-center"
-              style={{
-                backgroundColor: active ? colors.primary : colors.surface,
-                borderWidth: 1,
-                borderColor: active ? colors.primary : colors.surfaceBorder,
-              }}
-            >
-              {index < current ? (
-                <Ionicons name="checkmark" size={12} color={colors.background} />
-              ) : index === current ? (
-                <View
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: colors.background }}
-                />
-              ) : null}
-            </View>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
-
-const STEPS = [
-  { key: "name", title: "What habit do you want to build?", subtitle: "Name it something you actually want to do every day." },
-  { key: "when", title: "When do you want to do it?", subtitle: "Choose the days and a reminder so it fits your rhythm." },
-  { key: "how", title: "How often?", subtitle: "Set your daily target so success is measurable." },
-  { key: "extra", title: "Anything else? (optional)", subtitle: "Add small versions, a duration, or fine-tune it later." },
-] as const;
-
-const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
+export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) => {
+  const params = useLocalSearchParams<{ habitId?: string; template?: string }>();
+  const habitId = propHabitId || params.habitId;
   const isEditMode = Boolean(habitId);
   const colors = useTheme();
   const { user } = useAuthState();
-  const { createHabit, updateHabit } = useHabitState();
+  const { habits, createHabit, updateHabit } = useHabitState();
   const { addNotification } = useNotificationsState();
   const { triggerSelection, triggerSuccess } = useFeedback();
 
   const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState(0);
-  // Template prefill (Phase: align template flow with the full create page)
-  const params = useLocalSearchParams<{ template?: string }>();
+
+  // Template prefill
   const template = useMemo<IHabitTemplate | null>(() => {
     if (isEditMode || !params.template) return null;
     try {
@@ -167,50 +85,36 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
       return null;
     }
   }, [isEditMode, params.template]);
-  // Seed from a selected habit template (create mode only).
-  useEffect(() => {
-    if (!template) return;
-    setName(template.title ?? "");
-    setSubtitle(template.subtitle ?? "");
-    if (template.icon) setSelectedIcon(template.icon);
-    if (template.iconColor) {
-      setSelectedColor(template.iconColor);
-    }
-    if (template.category) setCategory(template.category);
-    setGoal(String(template.goal ?? 1));
-    setUnit(template.unit ?? "times");
-  }, [template]);
 
-  // Habit fields
+  // Form states
   const [name, setName] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [category, setCategory] = useState("General");
   const [goal, setGoal] = useState("1");
   const [unit, setUnit] = useState("times");
-  const [selectedIcon, setSelectedIcon] = useState("water");
-  const [selectedColor, setSelectedColor] = useState(HABIT_COLORS[0]);
+  const [selectedIcon, setSelectedIcon] = useState("heart");
+  const [selectedCategoryKey, setSelectedCategoryKey] = useState<CategoryKey>("mint");
 
-  // Schedule state
-  const [scheduleType, setScheduleType] = useState("daily");
-  const [scheduleDays, setScheduleDays] = useState<string[]>([]);
+  // Schedule
+  const [scheduleType, setScheduleType] = useState<"daily" | "specific_days" | "times_per_week" | "interval">("daily");
+  const [scheduleDays, setScheduleDays] = useState<string[]>([...DAYS_OF_WEEK]);
   const [timesPerWeek, setTimesPerWeek] = useState(3);
   const [intervalDays, setIntervalDays] = useState(2);
 
-  // Reminder state
+  // Reminder
   const [reminderEnabled, setReminderEnabled] = useState(false);
   const [reminderTime, setReminderTime] = useState("08:00");
   const [reminderDays, setReminderDays] = useState<string[]>([...DAYS_OF_WEEK]);
   const [existingReminder, setExistingReminder] = useState<IReminder | null>(null);
 
-  // Date range state for temporary habits
+  // Date range
   const [hasDateRange, setHasDateRange] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [pickerMode, setPickerMode] = useState<'start' | 'end'>('start');
 
-  // Behavioral layer (implementation intention, versions, stacking, identity)
+  // Behavioral layer
   const [showBehavioral, setShowBehavioral] = useState(false);
   const [scheduledTime, setScheduledTime] = useState("");
   const [location, setLocation] = useState("");
@@ -218,103 +122,70 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
   const [minimumBehavior, setMinimumBehavior] = useState("");
   const [emergencyMinimum, setEmergencyMinimum] = useState("");
   const [stackAfterHabitId, setStackAfterHabitId] = useState<string | null>(null);
-  const [identityIds, setIdentityIds] = useState<string[]>([]);
 
-  const formatDate = (date: Date | undefined): string => {
-    if (!date) return 'Select date';
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  // Seed from template
+  useEffect(() => {
+    if (!template) return;
+    setName(template.title ?? "");
+    setSubtitle(template.subtitle ?? "");
+    if (template.icon) setSelectedIcon(template.icon);
+    if (template.category) setCategory(template.category);
+    setGoal(String(template.goal ?? 1));
+    setUnit(template.unit ?? "times");
+  }, [template]);
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowStartPicker(false);
-      setShowEndPicker(false);
-    }
-    if (selectedDate) {
-      if (pickerMode === 'start') {
-        setStartDate(selectedDate);
-      } else {
-        setEndDate(selectedDate);
-      }
-    }
-  };
-
-  const openDatePicker = (mode: 'start' | 'end') => {
-    setPickerMode(mode);
-    if (mode === 'start') {
-      setShowStartPicker(true);
-    } else {
-      setShowEndPicker(true);
-    }
-  };
-
-  // Load existing habit and reminder data (only in edit mode)
+  // Load existing habit
   const loadData = useCallback(async () => {
     if (!habitId) return;
-    
     try {
       setInitialLoading(true);
+      const h = await HabitService.getById(habitId);
+      if (h) {
+        setName(h.title || "");
+        setSubtitle(h.subtitle || "");
+        setCategory(h.category || "General");
+        setSelectedIcon(h.icon || "heart");
+        setScheduleType((h.scheduleType as any) || "daily");
+        setScheduleDays(h.scheduleDays || [...DAYS_OF_WEEK]);
+        setTimesPerWeek(h.timesPerWeek || 3);
+        setIntervalDays(h.intervalDays || 2);
+        setGoal(String(h.goal || 1));
+        setUnit(h.unit || "times");
 
-      // Fetch habit details
-      const habit = await HabitService.getById(habitId);
-      if (habit) {
-        setName(habit.title || "");
-        setSubtitle(habit.subtitle || "");
-        setCategory(habit.category || "General");
-        setSelectedIcon(habit.icon || "water");
-        setSelectedColor(habit.iconColor || HABIT_COLORS[0]);
-        setScheduleType(habit.scheduleType || "daily");
-        setScheduleDays(habit.scheduleDays || []);
-        setTimesPerWeek(habit.timesPerWeek || 3);
-        setIntervalDays(habit.intervalDays || 2);
-        
-        // Load date range if present
-        if (habit.startDate || habit.endDate) {
+        if (h.startDate || h.endDate) {
           setHasDateRange(true);
-          setStartDate(habit.startDate ? new Date(habit.startDate) : undefined);
-          setEndDate(habit.endDate ? new Date(habit.endDate) : undefined);
+          setStartDate(h.startDate ? new Date(h.startDate) : undefined);
+          setEndDate(h.endDate ? new Date(h.endDate) : undefined);
         }
 
-        // Behavioral layer
-        const hasBehavioral =
-          Boolean(
-            habit.scheduledTime ||
-              habit.location ||
-              habit.fullBehavior ||
-              habit.minimumBehavior ||
-              habit.emergencyMinimum ||
-              habit.stackAfterHabitId,
-          ) || (habit.identityLinks?.length ?? 0) > 0;
-        setShowBehavioral(hasBehavioral);
-        setScheduledTime(habit.scheduledTime ?? "");
-        setLocation(habit.location ?? "");
-        setFullBehavior(habit.fullBehavior ?? "");
-        setMinimumBehavior(habit.minimumBehavior ?? "");
-        setEmergencyMinimum(habit.emergencyMinimum ?? "");
-        setStackAfterHabitId(habit.stackAfterHabitId ?? null);
-        setIdentityIds(
-          (habit.identityLinks ?? []).map(
-            (link: { identityId: string }) => link.identityId,
-          ),
+        const hasBeh = Boolean(
+          h.scheduledTime ||
+            h.location ||
+            h.fullBehavior ||
+            h.minimumBehavior ||
+            h.emergencyMinimum ||
+            h.stackAfterHabitId
         );
+        setShowBehavioral(hasBeh);
+        setScheduledTime(h.scheduledTime ?? "");
+        setLocation(h.location ?? "");
+        setFullBehavior(h.fullBehavior ?? "");
+        setMinimumBehavior(h.minimumBehavior ?? "");
+        setEmergencyMinimum(h.emergencyMinimum ?? "");
+        setStackAfterHabitId(h.stackAfterHabitId ?? null);
       }
 
-      // Fetch existing reminder for this habit
       try {
         const reminders = await ReminderApiService.getByHabit(habitId);
         if (reminders && reminders.length > 0) {
-          const reminder = reminders[0];
-          setExistingReminder(reminder);
-          setReminderEnabled(reminder.enabled);
-          setReminderTime(reminder.time || "08:00");
-          setReminderDays(reminder.days || [...DAYS_OF_WEEK]);
+          const rem = reminders[0];
+          setExistingReminder(rem);
+          setReminderEnabled(rem.enabled);
+          setReminderTime(rem.time || "08:00");
+          setReminderDays(rem.days || [...DAYS_OF_WEEK]);
         }
       } catch {
-        // No reminders for this habit — that's fine
+        // No existing reminder
       }
     } catch {
       ToastService.Error("Failed to load habit details");
@@ -328,13 +199,41 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
     loadData();
   }, [loadData]);
 
+  const toggleDaySelection = (day: string) => {
+    triggerSelection();
+    setScheduleDays((current) =>
+      current.includes(day)
+        ? current.filter((d) => d !== day)
+        : [...current, day]
+    );
+  };
+
+  const toggleReminderDaySelection = (day: string) => {
+    triggerSelection();
+    setReminderDays((current) =>
+      current.includes(day)
+        ? current.filter((d) => d !== day)
+        : [...current, day]
+    );
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       ToastService.Error("Please enter a habit name");
       return;
     }
 
-    // Validate date range if enabled
+    const parsedGoal = Number(goal);
+    if (!Number.isFinite(parsedGoal) || parsedGoal <= 0) {
+      ToastService.Error("Enter a daily target of at least 1");
+      return;
+    }
+
+    if (scheduleType === "specific_days" && scheduleDays.length === 0) {
+      ToastService.Error("Please select at least one day");
+      return;
+    }
+
     if (hasDateRange) {
       if (!startDate || !endDate) {
         ToastService.Error("Please select both start and end dates");
@@ -347,15 +246,16 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
     }
 
     setSaving(true);
-    
+    const catTokens = colors.category[selectedCategoryKey];
+
     const habitData = {
-      title: name,
+      title: name.trim(),
       subtitle: subtitle.trim() || undefined,
       icon: selectedIcon,
-      iconColor: selectedColor,
-      iconBg: `${selectedColor}20`,
+      iconColor: catTokens.ink,
+      iconBg: catTokens.bg,
       category,
-      goal: Math.max(1, Number(goal) || 1),
+      goal: Math.max(1, parsedGoal),
       unit: unit.trim() || "times",
       scheduleType,
       scheduleDays: scheduleType === "specific_days" ? scheduleDays : [],
@@ -363,78 +263,39 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
       intervalDays: scheduleType === "interval" ? intervalDays : undefined,
       startDate: hasDateRange && startDate ? startDate.toISOString() : undefined,
       endDate: hasDateRange && endDate ? endDate.toISOString() : undefined,
-      // Behavioral layer — empty strings are normalized to null so clearing a
-      // field on the client actually clears it server-side.
-      scheduledTime: showBehavioral
-          ? normalizeCueTime(scheduledTime)
-          : null,
+      scheduledTime: showBehavioral ? normalizeCueTime(scheduledTime) : null,
       location: showBehavioral && location.trim() ? location.trim() : null,
       fullBehavior: showBehavioral && fullBehavior.trim() ? fullBehavior.trim() : null,
       minimumBehavior: showBehavioral && minimumBehavior.trim() ? minimumBehavior.trim() : null,
       emergencyMinimum: showBehavioral && emergencyMinimum.trim() ? emergencyMinimum.trim() : null,
       stackAfterHabitId: showBehavioral ? stackAfterHabitId : null,
-      identityIds: showBehavioral ? identityIds : [],
+      identityIds: [],
     };
 
     try {
       if (isEditMode && habitId) {
-        // Update existing habit
         await updateHabit(habitId, habitData);
 
-        // Handle reminder changes
         if (existingReminder) {
           if (reminderEnabled) {
-            // Update existing reminder
             await ReminderApiService.update(existingReminder.id, {
               time: reminderTime,
               days: reminderDays,
               enabled: true,
             });
-            await NotificationService.scheduleHabitReminder(
-              habitId,
-              name,
-              reminderTime,
-              reminderDays,
-            );
-            await addNotification({
-              title: "Reminder updated",
-              body: `${name} will remind you at ${reminderTime}.`,
-              type: "habit",
-              route: "/(tabs)/habits",
-            });
+            await NotificationService.scheduleHabitReminder(habitId, name, reminderTime, reminderDays);
           } else {
-            // Disable reminder
-            await ReminderApiService.update(existingReminder.id, {
-              enabled: false,
-            });
+            await ReminderApiService.update(existingReminder.id, { enabled: false });
             await NotificationService.cancelHabitReminder(habitId);
-            await addNotification({
-              title: "Reminder disabled",
-              body: `${name} reminders are turned off.`,
-              type: "habit",
-              route: "/(tabs)/habits",
-            });
           }
         } else if (reminderEnabled && user?.id) {
-          // Create new reminder
           await ReminderApiService.create({
             userId: user.id,
             habitId,
             time: reminderTime,
             days: reminderDays,
           });
-          await NotificationService.scheduleHabitReminder(
-            habitId,
-            name,
-            reminderTime,
-            reminderDays,
-          );
-          await addNotification({
-            title: "Reminder scheduled",
-            body: `${name} will remind you at ${reminderTime}.`,
-            type: "habit",
-            route: "/(tabs)/habits",
-          });
+          await NotificationService.scheduleHabitReminder(habitId, name, reminderTime, reminderDays);
         }
 
         await addNotification({
@@ -444,38 +305,22 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
           route: "/(tabs)/habits",
         });
       } else {
-        // Create new habit
-        const result: any = await createHabit(habitData);
-        
-        if (result?.id) {
-          // Create reminder if enabled and habit was created
-          if (reminderEnabled && user?.id) {
-            await ReminderApiService.create({
-              userId: user.id,
-              habitId: result.id,
-              time: reminderTime,
-              days: reminderDays,
-            });
-            await NotificationService.scheduleHabitReminder(
-              result.id,
-              name,
-              reminderTime,
-              reminderDays,
-            );
-            await addNotification({
-              title: "Reminder scheduled",
-              body: `${name} will remind you at ${reminderTime}.`,
-              type: "habit",
-              route: "/(tabs)/habits",
-            });
-          }
-          await addNotification({
-            title: "Habit created",
-            body: `${name} is ready to track.`,
-            type: "habit",
-            route: "/(tabs)/habits",
+        const res: any = await createHabit(habitData);
+        if (res?.id && reminderEnabled && user?.id) {
+          await ReminderApiService.create({
+            userId: user.id,
+            habitId: res.id,
+            time: reminderTime,
+            days: reminderDays,
           });
+          await NotificationService.scheduleHabitReminder(res.id, name, reminderTime, reminderDays);
         }
+        await addNotification({
+          title: "Habit created",
+          body: `${name} is ready to track.`,
+          type: "habit",
+          route: "/(tabs)/habits",
+        });
       }
 
       triggerSuccess();
@@ -487,232 +332,310 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
     }
   };
 
-  const accentColor = colors.primary;
-  const handleSavePress = handleSubmit;
-
-  const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
-    triggerSelection();
-  };
-
-  const handleIconSelect = (icon: string) => {
-    setSelectedIcon(icon);
-    triggerSelection();
-  };
-
-  /** Move to the next step; the final step submits. */
-  const goNext = () => {
-    if (step === 0 && !name.trim()) {
-      ToastService.Error("Give your habit a name");
-      return;
-    }
-    if (step === 1 && scheduleType === "specific_days" && scheduleDays.length === 0) {
-      ToastService.Error("Pick at least one day");
-      return;
-    }
-    if (step === 2) {
-      const parsedGoal = Number(goal);
-      if (!Number.isFinite(parsedGoal) || parsedGoal <= 0) {
-        ToastService.Error("Enter a daily target of at least 1");
-        return;
-      }
-    }
-    if (step >= STEPS.length - 1) {
-      handleSavePress();
-      return;
-    }
-    setStep((current) => current + 1);
-  };
-
-  const goBack = () => setStep((current) => Math.max(0, current - 1));
-
-  if (initialLoading) {
-    return (
-      <ApContainer>
-        <ApHeader title={isEditMode ? "Edit Habit" : "New Habit"} hasBackButton />
-        <ApLoader label="Loading habit..." />
-      </ApContainer>
-    );
-  }
-
-  const stepMeta = STEPS[step];
-
   return (
-    <ApContainer>
-      <ApHeader title={isEditMode ? "Edit Habit" : "New Habit"} hasBackButton />
+    <View className="flex-1 justify-end">
+      {/* Dimmed backdrop */}
+      <Pressable
+        className="absolute inset-0"
+        style={{ backgroundColor: colors.overlay }}
+        onPress={() => router.back()}
+      />
 
-      <StepIndicator current={step} total={STEPS.length} />
+      {/* Scrollable Bottom Sheet */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        className="w-full justify-end"
+        style={{ maxHeight: "92%" }}
+      >
+        <View
+          className="bg-background-elevated rounded-t-xl px-5 pt-3 pb-8 flex-col"
+          style={{
+            maxHeight: "100%",
+            shadowColor: colors.inkPrimary,
+            shadowOpacity: 0.16,
+            shadowRadius: 24,
+            shadowOffset: { width: 0, height: -8 },
+            elevation: 8,
+          }}
+        >
+          {/* Drag Handle */}
+          <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-3" />
 
-      <View className="px-6 pt-4">
-        <ApText size="xl" font="bold" color={colors.textPrimary}>
-          {stepMeta.title}
-        </ApText>
-        <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-          {stepMeta.subtitle}
-        </ApText>
-      </View>
+          {/* Header */}
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+              {isEditMode ? "Edit habit" : "New habit"}
+            </Text>
+            <Pressable
+              onPress={() => router.back()}
+              hitSlop={8}
+              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+            >
+              <X size={20} color={colors.inkPrimary} strokeWidth={2} />
+            </Pressable>
+          </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <View className="px-5 mt-4">
-          {/* ── Step 1: Name & identity ── */}
-          {step === 0 && (
-            <View>
-              {/* Live preview */}
-              <LinearGradient
-                colors={[selectedColor + "40", colors.surface]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="p-4 rounded-3xl border"
-                style={{ borderColor: colors.surfaceBorder }}
-              >
-                <View className="flex-row items-center">
-                  <View
-                    className="w-12 h-12 rounded-xl items-center justify-center"
-                    style={{ backgroundColor: `${selectedColor}20` }}
-                  >
-                    <Ionicons name={selectedIcon as any} size={24} color={selectedColor} />
-                  </View>
-                  <View className="ml-4 flex-1">
-                    <ApText size="base" font="bold" color={colors.textPrimary} numberOfLines={1}>
-                      {name || "Habit Name"}
-                    </ApText>
-                    {subtitle ? (
-                      <ApText size="xs" color={colors.textSecondary} numberOfLines={1} className="mt-0.5">
-                        {subtitle}
-                      </ApText>
-                    ) : null}
-                  </View>
-                </View>
-              </LinearGradient>
-
-              {/* Browse templates — create mode only */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            {initialLoading ? (
+              <View className="gap-4 pt-2">
+                <Skeleton width="30%" height={14} />
+                <Skeleton width="100%" height={48} borderRadius={10} />
+                <Skeleton width="25%" height={14} />
+                <Skeleton width="100%" height={48} borderRadius={10} />
+                <Skeleton width="35%" height={14} />
+                <Skeleton width="100%" height={80} borderRadius={10} />
+                <Skeleton width="100%" height={48} borderRadius={10} />
+              </View>
+            ) : (
+              <>
+                {/* Browse Templates link in create mode */}
               {!isEditMode && (
-                <TouchableOpacity
+                <Pressable
                   onPress={() => router.push("/templates")}
-                  className="mt-4 flex-row items-center justify-between px-4 py-3 rounded-2xl border"
-                  style={{
-                    backgroundColor: colors.primary + "10",
-                    borderColor: colors.primary + "30",
-                  }}
+                  className="flex-row items-center justify-between p-3.5 mb-4 rounded-sm bg-background-surface active:opacity-80"
                 >
                   <View className="flex-row items-center">
-                    <Ionicons name="grid" size={18} color={colors.primary} />
-                    <ApText size="sm" font="semibold" color={colors.primary} className="ml-2">
-                      Browse Templates
-                    </ApText>
+                    <Grid size={18} color={colors.accent} strokeWidth={2} />
+                    <Text className="text-[14px] font-semibold text-accent ml-2">
+                      Browse habit templates
+                    </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.primary} />
-                </TouchableOpacity>
+                  <Text className="text-[12px] font-semibold text-ink-tertiary">→</Text>
+                </Pressable>
               )}
 
+              {/* Habit Name & Subtitle */}
               <ApTextInput
-                label="HABIT NAME"
+                label="Habit name"
+                placeholder="e.g. Read 20 minutes"
                 value={name}
                 onChangeText={setName}
-                placeholder="e.g. Read before bed"
-                containerClassName="mt-5"
+                containerClassName="mb-3"
               />
 
               <ApTextInput
-                label="WHY (OPTIONAL)"
+                label="Why / Motivation (optional)"
+                placeholder="What does this habit give you?"
                 value={subtitle}
                 onChangeText={setSubtitle}
-                placeholder="What does this habit give you?"
-                containerClassName="mt-4"
+                containerClassName="mb-4"
               />
 
-              <CollapsibleSection title="Appearance" icon="color-palette-outline">
-                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mb-2">
-                  Color
-                </ApText>
-                <View className="flex-row flex-wrap">
-                  {HABIT_COLORS.map((c: string) => (
-                    <TouchableOpacity
-                      key={c}
-                      onPress={() => handleColorSelect(c)}
-                      className="w-9 h-9 rounded-full mr-2 mb-2"
-                      style={{
-                        backgroundColor: c,
-                        borderWidth: selectedColor === c ? 3 : 0,
-                        borderColor: colors.textPrimary,
+              {/* Icon & Category Color */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Icon
+              </Text>
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {LUCIDE_HABIT_ICONS.slice(0, 12).map((item) => {
+                  const IconComp = item.icon;
+                  const isSelected = selectedIcon === item.name;
+                  return (
+                    <Pressable
+                      key={item.name}
+                      onPress={() => {
+                        setSelectedIcon(item.name);
+                        triggerSelection();
                       }}
-                    />
-                  ))}
-                </View>
-                <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase mt-2 mb-2">
-                  Icon
-                </ApText>
-                <View className="flex-row flex-wrap">
-                  {HABIT_ICONS.map((iconName: string) => (
-                    <TouchableOpacity
-                      key={iconName}
-                      onPress={() => handleIconSelect(iconName)}
-                      className="w-11 h-11 rounded-xl items-center justify-center mr-2 mb-2"
+                      className={"w-11 h-11 rounded-md items-center justify-center " + (isSelected ? "bg-background-inverse" : "bg-background-surface")}
+                    >
+                      <IconComp
+                        size={20}
+                        color={isSelected ? colors.inkInverse : colors.inkSecondary}
+                        strokeWidth={2}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {/* Category Color Palette */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Color tag
+              </Text>
+              <View className="flex-row gap-2 mb-4">
+                {CATEGORY_CYCLE.map((catKey) => {
+                  const isSelected = selectedCategoryKey === catKey;
+                  const cat = colors.category[catKey];
+                  return (
+                    <Pressable
+                      key={catKey}
+                      onPress={() => {
+                        setSelectedCategoryKey(catKey);
+                        triggerSelection();
+                      }}
+                      className="w-8 h-8 rounded-pill items-center justify-center"
                       style={{
-                        backgroundColor:
-                          selectedIcon === iconName
-                            ? colors.primary + "26"
-                            : colors.background,
-                        borderWidth: selectedIcon === iconName ? 2 : 1,
-                        borderColor:
-                          selectedIcon === iconName ? colors.primary : colors.surfaceBorder,
+                        backgroundColor: cat.bg,
+                        borderWidth: isSelected ? 2 : 0,
+                        borderColor: cat.ink,
                       }}
                     >
-                      <Ionicons
-                        name={iconName as any}
-                        size={20}
-                        color={selectedIcon === iconName ? colors.primary : colors.textMuted}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </CollapsibleSection>
-            </View>
-          )}
+                      {isSelected && <Check size={14} color={cat.ink} strokeWidth={3} />}
+                    </Pressable>
+                  );
+                })}
+              </View>
 
-          {/* ── Step 2: When ── */}
-          {step === 1 && (
-            <View>
-              <SchedulePicker
-                scheduleType={scheduleType}
-                scheduleDays={scheduleDays}
-                timesPerWeek={timesPerWeek}
-                intervalDays={intervalDays}
-                onScheduleTypeChange={(t: string) => {
-                  setScheduleType(t);
-                  triggerSelection();
-                }}
-                onScheduleDaysChange={setScheduleDays}
-                onTimesPerWeekChange={setTimesPerWeek}
-                onIntervalDaysChange={setIntervalDays}
+              {/* Category */}
+              <Dropdown
+                label="Category"
+                options={HABIT_CATEGORIES.map((c) => ({ label: c, value: c }))}
+                value={category}
+                onChange={setCategory}
+                className="mb-4"
               />
 
-              <View className="mt-3">
-                <ReminderPicker
-                  time={reminderTime}
-                  days={reminderDays}
-                  enabled={reminderEnabled}
-                  onTimeChange={setReminderTime}
-                  onDaysChange={setReminderDays}
-                  onEnabledChange={setReminderEnabled}
-                />
+              {/* Frequency / Schedule */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Frequency
+              </Text>
+              <View className="flex-row gap-2 mb-3">
+                {[
+                  { id: "daily", label: "Every day" },
+                  { id: "specific_days", label: "Specific days" },
+                  { id: "times_per_week", label: "X per week" },
+                ].map((opt) => (
+                  <Pressable
+                    key={opt.id}
+                    onPress={() => {
+                      setScheduleType(opt.id as any);
+                      triggerSelection();
+                    }}
+                    className={"px-3.5 py-1.5 rounded-pill " + (scheduleType === opt.id ? "bg-background-inverse" : "bg-background-surface")}
+                  >
+                    <Text
+                      className={"text-[12px] font-semibold " + (scheduleType === opt.id ? "text-ink-inverse" : "text-ink-secondary")}
+                    >
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                ))}
               </View>
-            </View>
-          )}
 
-          {/* ── Step 3: How often ── */}
-          {step === 2 && (
-            <View>
-              <ApText size="lg" font="bold" color={colors.textPrimary}>
-                Daily target
-              </ApText>
-              <ApText size="xs" color={colors.textMuted} className="mt-0.5">
-                How much counts as a completed day?
-              </ApText>
-              <View className="flex-row mt-3">
-                <View className="flex-1 mr-2">
+              {/* Specific days pills */}
+              {scheduleType === "specific_days" && (
+                <View className="mb-4">
+                  <View className="flex-row justify-between mb-2">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isSelected = scheduleDays.includes(day);
+                      return (
+                        <Pressable
+                          key={day}
+                          onPress={() => toggleDaySelection(day)}
+                          className={
+                            "w-10 h-10 rounded-pill items-center justify-center " +
+                            (isSelected
+                              ? "bg-background-inverse"
+                              : "bg-background-surface")
+                          }
+                          accessibilityLabel={day}
+                        >
+                          <Text
+                            className={
+                              "text-[13px] font-semibold " +
+                              (isSelected
+                                ? "text-ink-inverse"
+                                : "text-ink-secondary")
+                            }
+                          >
+                            {DAY_LABELS[day] || day[0]}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Text className="text-[11.5px] font-medium text-ink-tertiary">
+                    {scheduleDays.length === 7
+                      ? "Every day"
+                      : scheduleDays.length === 0
+                        ? "Select at least 1 day"
+                        : `${scheduleDays.length} day${scheduleDays.length === 1 ? "" : "s"} selected`}
+                  </Text>
+                </View>
+              )}
+
+              {/* X per week selector */}
+              {scheduleType === "times_per_week" && (
+                <View className="mb-4">
+                  <View className="flex-row items-center justify-between mb-2.5">
+                    <Text className="text-[12px] font-medium text-ink-secondary">
+                      {timesPerWeek} {timesPerWeek === 1 ? "time" : "times"} per week
+                    </Text>
+                    <View className="flex-row items-center gap-2">
+                      <Pressable
+                        onPress={() => {
+                          setTimesPerWeek((prev) => Math.max(1, prev - 1));
+                          triggerSelection();
+                        }}
+                        className="w-7 h-7 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+                        accessibilityLabel="Decrease times per week"
+                      >
+                        <Minus size={14} color={colors.inkPrimary} strokeWidth={2} />
+                      </Pressable>
+                      <Text className="text-[14px] font-bold text-ink-primary px-1">
+                        {timesPerWeek}
+                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          setTimesPerWeek((prev) => Math.min(6, prev + 1));
+                          triggerSelection();
+                        }}
+                        className="w-7 h-7 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+                        accessibilityLabel="Increase times per week"
+                      >
+                        <Plus size={14} color={colors.inkPrimary} strokeWidth={2} />
+                      </Pressable>
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between">
+                    {[1, 2, 3, 4, 5, 6].map((num) => {
+                      const isSelected = timesPerWeek === num;
+                      return (
+                        <Pressable
+                          key={num}
+                          onPress={() => {
+                            setTimesPerWeek(num);
+                            triggerSelection();
+                          }}
+                          className={
+                            "w-11 h-10 rounded-pill items-center justify-center " +
+                            (isSelected
+                              ? "bg-background-inverse"
+                              : "bg-background-surface")
+                          }
+                        >
+                          <Text
+                            className={
+                              "text-[13px] font-semibold " +
+                              (isSelected
+                                ? "text-ink-inverse"
+                                : "text-ink-secondary")
+                            }
+                          >
+                            {num}x
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* Daily Target */}
+              <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                Daily goal
+              </Text>
+              <View className="flex-row gap-3 mb-4">
+                <View className="flex-1">
                   <ApTextInput
-                    label="AMOUNT"
+                    label="Amount"
                     value={goal}
                     onChangeText={setGoal}
                     keyboardType="decimal-pad"
@@ -720,201 +643,211 @@ const HabitForm: React.FC<HabitFormProps> = ({ habitId }) => {
                 </View>
                 <View className="flex-1">
                   <ApTextInput
-                    label="UNIT"
+                    label="Unit"
                     value={unit}
                     onChangeText={setUnit}
-                    placeholder="times, km…"
+                    placeholder="times, min, km"
                   />
                 </View>
               </View>
 
-              <View className="mt-4">
-                <Dropdown
-                  label="Category"
-                  options={HABIT_CATEGORIES.map((c: string) => ({ label: c, value: c }))}
-                  value={category}
-                  onChange={(v: string) => {
-                    setCategory(v);
+              {/* Reminder Section */}
+              <View className="flex-row items-center justify-between py-3 mb-2 border-t border-border">
+                <View>
+                  <Text className="text-[14px] font-semibold text-ink-primary">
+                    Daily reminder
+                  </Text>
+                  <Text className="text-[12px] text-ink-secondary">
+                    Receive a push notification
+                  </Text>
+                </View>
+                <Switch
+                  value={reminderEnabled}
+                  onValueChange={(val) => {
+                    setReminderEnabled(val);
                     triggerSelection();
                   }}
+                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
+                  thumbColor={colors.white}
                 />
               </View>
-            </View>
-          )}
 
-          {/* ── Step 4: Optional extras ── */}
-          {step === 3 && (
-            <View>
-              <CollapsibleSection title="Behavioral setup" icon="sparkles-outline">
-                <View className="flex-row items-center justify-between pb-3 border-b" style={{ borderTopColor: colors.surfaceBorder }}>
-                  <ApText size="xs" color={colors.textSecondary} className="flex-1 pr-3">
-                    Add cue time, smaller versions and habit stacking.
-                  </ApText>
-                  <Switch
-                    value={showBehavioral}
-                    onValueChange={(v: boolean) => setShowBehavioral(v)}
-                    trackColor={{ false: colors.surfaceBorder, true: colors.primary + "80" }}
-                    thumbColor={showBehavioral ? colors.primary : colors.textMuted}
+              {reminderEnabled && (
+                <View className="mb-4 bg-background-surface rounded-md p-3.5">
+                  <ApTextInput
+                    label="Reminder time"
+                    placeholder="08:00"
+                    value={reminderTime}
+                    onChangeText={setReminderTime}
+                    containerClassName="mb-3"
                   />
+                  <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+                    Reminder days
+                  </Text>
+                  <View className="flex-row justify-between">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isSelected = reminderDays.includes(day);
+                      return (
+                        <Pressable
+                          key={day}
+                          onPress={() => toggleReminderDaySelection(day)}
+                          className={"w-9 h-9 rounded-pill items-center justify-center " + (isSelected ? "bg-background-inverse" : "bg-background-surface2")}
+                        >
+                          <Text
+                            className={"text-[12px] font-semibold " + (isSelected ? "text-ink-inverse" : "text-ink-secondary")}
+                          >
+                            {DAY_LABELS[day] || day[0]}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
                 </View>
-                {showBehavioral && (
-                  <>
-                    <ApTextInput
-                      label="CUE TIME"
-                      value={scheduledTime}
-                      onChangeText={setScheduledTime}
-                      placeholder="e.g. 07:30"
-                      containerClassName="mt-3"
-                    />
-                    <ApTextInput
-                      label="LOCATION (OPTIONAL)"
-                      value={location}
-                      onChangeText={setLocation}
-                      placeholder="e.g. at my desk"
-                      containerClassName="mt-4"
-                    />
-                    <ApTextInput
-                      label="FULL VERSION"
-                      value={fullBehavior}
-                      onChangeText={setFullBehavior}
-                      placeholder={`e.g. Read ${goal} ${unit}`}
-                      containerClassName="mt-4"
-                    />
-                    <ApTextInput
-                      label="MINIMUM VERSION"
-                      value={minimumBehavior}
-                      onChangeText={setMinimumBehavior}
-                      placeholder="e.g. Read one page"
-                      containerClassName="mt-4"
-                    />
-                    <ApTextInput
-                      label="EMERGENCY MINIMUM"
-                      value={emergencyMinimum}
-                      onChangeText={setEmergencyMinimum}
-                      placeholder="The bare minimum for very hard days"
-                      containerClassName="mt-4"
-                    />
-                  </>
-                )}
-              </CollapsibleSection>
+              )}
 
-              <CollapsibleSection title="Duration (optional)" icon="calendar-clear-outline">
-                <View className="flex-row items-center justify-between">
-                  <ApText size="sm" color={colors.textPrimary}>
-                    Temporary habit (auto-deletes)
-                  </ApText>
-                  <Switch
-                    value={hasDateRange}
-                    onValueChange={(v: boolean) => setHasDateRange(v)}
-                    trackColor={{ false: colors.surfaceBorder, true: colors.primary + "80" }}
-                    thumbColor={hasDateRange ? colors.primary : colors.textMuted}
-                  />
+              {/* Behavioral Setup Section (Atomic Habits) */}
+              <View className="flex-row items-center justify-between py-3 mb-2 border-t border-border">
+                <View className="flex-1 pr-2">
+                  <Text className="text-[14px] font-semibold text-ink-primary">
+                    Behavioral setup
+                  </Text>
+                  <Text className="text-[12px] text-ink-secondary">
+                    Cue, small versions & habit stacking
+                  </Text>
                 </View>
-                {hasDateRange && (
-                  <>
-                    <TouchableOpacity
-                      onPress={() => openDatePicker('start')}
-                      className="flex-row items-center justify-between py-3 mt-2 border-b"
-                      style={{ borderBottomColor: colors.surfaceBorder }}
-                    >
-                      <ApText size="sm" color={colors.textPrimary}>Start Date</ApText>
-                      <ApText size="sm" color={startDate ? colors.primary : colors.textMuted}>
-                        {formatDate(startDate)}
-                      </ApText>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => openDatePicker('end')}
-                      className="flex-row items-center justify-between py-3"
-                    >
-                      <ApText size="sm" color={colors.textPrimary}>End Date</ApText>
-                      <ApText size="sm" color={endDate ? colors.primary : colors.textMuted}>
-                        {formatDate(endDate)}
-                      </ApText>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </CollapsibleSection>
-
-              <View
-                className="rounded-2xl border p-4"
-                style={{ backgroundColor: colors.primary + "08", borderColor: colors.primary + "22" }}
-              >
-                <View className="flex-row items-center">
-                  <Ionicons name="checkmark-circle-outline" size={18} color={colors.primary} />
-                  <ApText size="sm" font="semibold" color={colors.textPrimary} className="ml-2 flex-1">
-                    Ready to go
-                  </ApText>
-                </View>
-                <ApText size="xs" color={colors.textSecondary} className="mt-1">
-                  {name || "Your habit"} will appear in today&apos;s list. You can edit everything later.
-                </ApText>
+                <Switch
+                  value={showBehavioral}
+                  onValueChange={(val) => {
+                    setShowBehavioral(val);
+                    triggerSelection();
+                  }}
+                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
+                  thumbColor={colors.white}
+                />
               </View>
-            </View>
-          )}
-        </View>
-      </ScrollView>
 
-      {/* Hidden date pickers */}
-      {showStartPicker && (
-        <DateTimePicker
-          value={startDate || new Date()}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-          minimumDate={new Date()}
-        />
-      )}
-      {showEndPicker && (
-        <DateTimePicker
-          value={endDate || startDate || new Date()}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-          minimumDate={startDate || new Date()}
-        />
-      )}
+              {showBehavioral && (
+                <View className="mb-4 bg-background-surface rounded-md p-3.5 gap-3">
+                  <ApTextInput
+                    label="Cue time"
+                    placeholder="e.g. 07:30"
+                    value={scheduledTime}
+                    onChangeText={setScheduledTime}
+                  />
+                  <ApTextInput
+                    label="Location (optional)"
+                    placeholder="e.g. at my desk"
+                    value={location}
+                    onChangeText={setLocation}
+                  />
+                  <ApTextInput
+                    label="Minimum version"
+                    placeholder="e.g. Read 1 page"
+                    value={minimumBehavior}
+                    onChangeText={setMinimumBehavior}
+                  />
+                  <ApTextInput
+                    label="Emergency minimum"
+                    placeholder="The bare minimum for very hard days"
+                    value={emergencyMinimum}
+                    onChangeText={setEmergencyMinimum}
+                  />
+                  {habits.filter((h) => h.id !== habitId && !h.isArchived).length > 0 && (
+                    <Dropdown
+                      label="Stack after habit"
+                      options={[
+                        { label: "None", value: "" },
+                        ...habits
+                          .filter((h) => h.id !== habitId && !h.isArchived)
+                          .map((h) => ({ label: h.title, value: h.id })),
+                      ]}
+                      value={stackAfterHabitId || ""}
+                      onChange={(val) => setStackAfterHabitId(val || null)}
+                    />
+                  )}
+                </View>
+              )}
 
-      {/* Navigation / Submit */}
-      <View
-        className="absolute left-0 right-0 bottom-0 px-5 pt-3 pb-6 flex-row items-center"
-        style={{ backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.surfaceBorder }}
-      >
-        {step > 0 ? (
-          <TouchableOpacity
-            onPress={goBack}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            className="h-14 px-5 rounded-full items-center justify-center mr-3"
-            style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-          >
-            <Ionicons name="arrow-back" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        ) : null}
-        <TouchableOpacity
-          onPress={goNext}
-          disabled={saving}
-          accessibilityRole="button"
-          accessibilityLabel={step >= STEPS.length - 1 ? (isEditMode ? 'Save habit changes' : 'Create habit') : "Continue"}
-          className="h-14 flex-1 rounded-full items-center justify-center flex-row"
-          style={{ backgroundColor: accentColor, opacity: saving ? 0.6 : 1 }}
-        >
-          <ApText size="base" font="bold" color={colors.background}>
-            {saving
-              ? "Saving…"
-              : step >= STEPS.length - 1
-                ? isEditMode
-                  ? "Save Changes"
-                  : "Create Habit"
-                : "Continue"}
-          </ApText>
-          {step >= STEPS.length - 1 ? (
-            <Ionicons name="checkmark-circle" size={22} color={colors.background} className="ml-2" style={{ marginLeft: 8 }} />
-          ) : (
-            <Ionicons name="arrow-forward" size={20} color={colors.background} className="ml-2" style={{ marginLeft: 8 }} />
+              {/* Duration Section (Temporary Habit) */}
+              <View className="flex-row items-center justify-between py-3 mb-2 border-t border-border">
+                <View>
+                  <Text className="text-[14px] font-semibold text-ink-primary">
+                    Temporary habit
+                  </Text>
+                  <Text className="text-[12px] text-ink-secondary">
+                    Set a start and end date
+                  </Text>
+                </View>
+                <Switch
+                  value={hasDateRange}
+                  onValueChange={(val) => {
+                    setHasDateRange(val);
+                    triggerSelection();
+                  }}
+                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
+                  thumbColor={colors.white}
+                />
+              </View>
+
+              {hasDateRange && (
+                <View className="mb-4 bg-background-surface rounded-md p-3.5 gap-2">
+                  <Pressable
+                    onPress={() => setShowStartPicker(true)}
+                    className="flex-row items-center justify-between py-2 border-b border-border"
+                  >
+                    <Text className="text-[14px] text-ink-primary">Start Date</Text>
+                    <Text className="text-[14px] font-semibold text-accent">
+                      {startDate ? startDate.toLocaleDateString() : "Select date"}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setShowEndPicker(true)}
+                    className="flex-row items-center justify-between py-2"
+                  >
+                    <Text className="text-[14px] text-ink-primary">End Date</Text>
+                    <Text className="text-[14px] font-semibold text-accent">
+                      {endDate ? endDate.toLocaleDateString() : "Select date"}
+                    </Text>
+                  </Pressable>
+
+                  {showStartPicker && (
+                    <DateTimePicker
+                      value={startDate || new Date()}
+                      mode="date"
+                      onChange={(_, d) => {
+                        setShowStartPicker(false);
+                        if (d) setStartDate(d);
+                      }}
+                    />
+                  )}
+                  {showEndPicker && (
+                    <DateTimePicker
+                      value={endDate || startDate || new Date()}
+                      mode="date"
+                      onChange={(_, d) => {
+                        setShowEndPicker(false);
+                        if (d) setEndDate(d);
+                      }}
+                    />
+                  )}
+                </View>
+              )}
+
+              {/* Submit button */}
+              <View className="mt-4">
+                <Button
+                  label={saving ? "Saving..." : isEditMode ? "Save changes" : "Create habit"}
+                  onPress={handleSubmit}
+                  loading={saving}
+                  variant="primary"
+                />
+              </View>
+            </>
           )}
-        </TouchableOpacity>
-      </View>
-    </ApContainer>
+        </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+    </View>
   );
 };
 

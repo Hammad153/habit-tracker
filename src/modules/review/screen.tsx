@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Trophy, Activity, User, Flag, RotateCcw, Check } from "lucide-react-native";
 import {
   ApContainer,
-  ApErrorState,
   ApHeader,
-  ApLoader,
   ApText,
+  ApCard,
+  SkeletonCard,
 } from "@/src/components";
 import {
   IWeeklyReviewResponse,
@@ -16,52 +16,42 @@ import { useTheme } from "@/src/modules/settings/context";
 import { ToastService } from "@/src/services";
 
 const SectionCard = ({
-  icon,
+  icon: IconComp,
   title,
   children,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   title: string;
   children: React.ReactNode;
 }) => {
   const colors = useTheme();
   return (
-    <View
-      className="rounded-2xl p-4 mb-3"
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.surfaceBorder,
-      }}
-    >
-      <View className="flex-row items-center mb-2">
-        <Ionicons name={icon} size={16} color={colors.primary} />
+    <ApCard className="p-4 mb-3">
+      <View className="flex-row items-center mb-3">
+        <IconComp size={16} color={colors.primary} />
         <ApText
           size="xs"
-          font="bold"
+          font="medium"
           color={colors.textMuted}
           className="uppercase ml-2"
-          style={{ letterSpacing: 1 }}
+          style={{ letterSpacing: 0.8 }}
         >
           {title}
         </ApText>
       </View>
       {children}
-    </View>
+    </ApCard>
   );
 };
 
 const Bullet = ({ text }: { text: string }) => {
   const colors = useTheme();
   return (
-    <View className="flex-row items-start mb-1.5">
-      <Ionicons
-        name="checkmark-circle"
-        size={14}
-        color={colors.success}
-        style={{ marginTop: 2 }}
-      />
-      <ApText size="sm" color={colors.textSecondary} className="ml-2 flex-1">
+    <View className="flex-row items-start mb-2">
+      <View className="mt-0.5 mr-2">
+        <Check size={14} color={colors.primary} />
+      </View>
+      <ApText size="sm" color={colors.textSecondary} className="flex-1">
         {text}
       </ApText>
     </View>
@@ -108,13 +98,18 @@ const WeeklyReviewScreen = () => {
       .finally(() => setRegenerating(false));
   }, [regenerating, data]);
 
-  if (loading) return <ApLoader />;
-
-  if (error || !data) {
+  if (loading || !data) {
     return (
       <ApContainer>
         <ApHeader title="Weekly Review" hasBackButton />
-        <ApErrorState onRetry={() => { setLoading(true); load(); }} />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 }}
+        >
+          <SkeletonCard height={80} className="mt-2 mb-4" />
+          <SkeletonCard height={120} className="mb-4" />
+          <SkeletonCard height={120} className="mb-4" />
+        </ScrollView>
       </ApContainer>
     );
   }
@@ -126,14 +121,19 @@ const WeeklyReviewScreen = () => {
       <ApHeader title="Weekly Review" hasBackButton />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 }}
         refreshControl={
           <RefreshControl refreshing={regenerating} onRefresh={handleRegenerate} />
         }
       >
-        {/* Week label + AI badge */}
-        <View className="flex-row items-center justify-between mt-2">
-          <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase" style={{ letterSpacing: 1 }}>
+        <View className="flex-row items-center justify-between mt-2 mb-3">
+          <ApText
+            size="xs"
+            font="medium"
+            color={colors.textMuted}
+            className="uppercase"
+            style={{ letterSpacing: 0.8 }}
+          >
             Your Week · {formatWeekLabel(data.week.start, data.week.end)}
           </ApText>
           {data.inProgress && (
@@ -154,7 +154,7 @@ const WeeklyReviewScreen = () => {
           </View>
         ) : (
           <>
-            <ApText size="xl" font="bold" color={colors.textPrimary} className="mt-3">
+            <ApText size="xl" font="semibold" color={colors.textPrimary} className="mt-1">
               {review.headline}
             </ApText>
             <ApText size="sm" color={colors.textSecondary} className="mt-2 mb-4">
@@ -162,7 +162,7 @@ const WeeklyReviewScreen = () => {
             </ApText>
 
             {review.wins.length > 0 && (
-              <SectionCard icon="trophy-outline" title="Wins">
+              <SectionCard icon={Trophy} title="Wins">
                 {review.wins.map((w, i) => (
                   <Bullet key={`w-${i}`} text={w} />
                 ))}
@@ -170,7 +170,7 @@ const WeeklyReviewScreen = () => {
             )}
 
             {review.patterns.length > 0 && (
-              <SectionCard icon="pulse-outline" title="Patterns">
+              <SectionCard icon={Activity} title="Patterns">
                 {review.patterns.map((p, i) => (
                   <Bullet key={`p-${i}`} text={p} />
                 ))}
@@ -178,7 +178,7 @@ const WeeklyReviewScreen = () => {
             )}
 
             {!!review.identityReflection && (
-              <SectionCard icon="person-circle-outline" title="Who you're becoming">
+              <SectionCard icon={User} title="Who you are becoming">
                 <ApText size="sm" color={colors.textPrimary}>
                   {review.identityReflection}
                 </ApText>
@@ -186,7 +186,7 @@ const WeeklyReviewScreen = () => {
             )}
 
             {review.nextWeekFocus.length > 0 && (
-              <SectionCard icon="flag-outline" title="Next week">
+              <SectionCard icon={Flag} title="Next week">
                 {review.nextWeekFocus.map((f, i) => (
                   <Bullet key={`f-${i}`} text={f} />
                 ))}
@@ -199,13 +199,14 @@ const WeeklyReviewScreen = () => {
                 disabled={regenerating}
                 accessibilityRole="button"
                 accessibilityLabel="Regenerate weekly review"
-                className="h-10 rounded-full items-center justify-center self-end px-5 mt-1"
+                className="h-10 rounded-full items-center justify-center self-end px-5 mt-2 flex-row"
                 style={{
-                  backgroundColor: colors.primary + "18",
+                  backgroundColor: colors.accentLight,
                   opacity: regenerating ? 0.6 : 1,
                 }}
               >
-                <ApText size="xs" font="bold" color={colors.primary}>
+                <RotateCcw size={14} color={colors.primary} className="mr-1.5" />
+                <ApText size="xs" font="semibold" color={colors.primary}>
                   {regenerating ? "Refreshing…" : "Regenerate"}
                 </ApText>
               </Pressable>

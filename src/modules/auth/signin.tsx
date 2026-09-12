@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
+import { Text, Pressable, View } from "react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
 import { AuthService } from "./api";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
+import Button from "@/src/components/buttons/Button";
 
 const SigninScreen = () => {
   const [email, setEmail] = useState("");
@@ -46,72 +47,52 @@ const SigninScreen = () => {
 
   return (
     <AuthLayout
-      title="Welcome Back"
-      subtitle="Sign in to continue your habit journey"
+      title="Welcome back"
+      subtitle="Sign in to continue your habits"
       footer={
-        <>
-          <Text style={{ color: colors.textSecondary }}>
-            Don&apos;t have an account?{" "}
-          </Text>
+        <Text className="text-[13.5px] text-ink-secondary">
+          Don&apos;t have an account?{" "}
           <Link href="/signup" asChild>
-            <TouchableOpacity>
-              <Text className="font-bold" style={{ color: colors.primary }}>
-                Sign Up
-              </Text>
-            </TouchableOpacity>
+            <Text className="font-bold text-accent">Sign up</Text>
           </Link>
-        </>
+        </Text>
       }
     >
       <AuthInput
-        label="Email Address"
-        icon="mail-outline"
+        label="Email address"
+        icon="mail"
+        placeholder="alex@gmail.com"
         value={email}
         onChangeText={setEmail}
-        placeholder="Enter your email"
-        keyboardType="email-address"
         autoCapitalize="none"
-        autoComplete="email"
+        keyboardType="email-address"
       />
 
       <AuthInput
         label="Password"
-        icon="lock-closed-outline"
+        icon="lock"
+        placeholder="••••••••"
         value={password}
         onChangeText={setPassword}
-        placeholder="Enter your password"
         secure
-        autoCapitalize="none"
       />
 
-      <TouchableOpacity
-        className="self-end mb-3"
-        onPress={() => router.push("/forgot-password")}
-      >
-        <Text className="text-sm" style={{ color: colors.primary }}>
-          Forgot Password?
-        </Text>
-      </TouchableOpacity>
+      <View className="items-end mb-6">
+        <Link href="/forgot-password" asChild>
+          <Pressable>
+            <Text className="text-[13px] font-semibold text-ink-secondary">
+              Forgot password?
+            </Text>
+          </Pressable>
+        </Link>
+      </View>
 
-      <TouchableOpacity
+      <Button
+        label="Sign in"
         onPress={handleLogin}
-        disabled={loading}
-        activeOpacity={0.85}
-        className="py-4 rounded-full mt-5 items-center"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading ? 0.75 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          elevation: 6,
-        }}
-      >
-        <Text className="font-bold text-lg" style={{ color: colors.background }}>
-          {loading ? "Signing In..." : "Sign In"}
-        </Text>
-      </TouchableOpacity>
+        loading={loading}
+        variant="primary"
+      />
     </AuthLayout>
   );
 };

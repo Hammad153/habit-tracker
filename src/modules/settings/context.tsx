@@ -42,7 +42,7 @@ export const SettingsProvider: React.FC<IProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [soundEnabled, setSoundEnabledState] = useState(true);
   const [hapticEnabled, setHapticEnabledState] = useState(true);
-  const [themeMode, setThemeModeState] = useState<ThemeMode>("dark");
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("light");
 
   useEffect(() => {
     ApStorageService.getRawItemAsync(ApStorageKeys.SoundEnabled)

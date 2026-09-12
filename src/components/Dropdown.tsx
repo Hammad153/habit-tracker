@@ -1,30 +1,28 @@
 import React, { useState } from "react";
 import {
   View,
-  TouchableOpacity,
+  Text,
+  Pressable,
   Modal,
   TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
   ScrollView,
 } from "react-native";
-import { ApText } from "./Text";
-import { useTheme } from "../modules/settings/context";
-import { Ionicons } from "@expo/vector-icons";
+import { ChevronDown, Check, LucideIcon } from "lucide-react-native";
+import { useTheme } from "@/src/modules/settings/context";
 
-interface DropdownOption {
+export interface DropdownOption {
   value: string;
   label: string;
-  icon?: string;
+  icon?: LucideIcon | React.ComponentType<{ size: number; color: string }>;
 }
 
-interface DropdownProps {
+export interface DropdownProps {
   options: DropdownOption[];
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   label?: string;
+  className?: string;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -33,6 +31,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onChange,
   placeholder = "Select...",
   label,
+  className = "",
 }) => {
   const colors = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -45,122 +44,80 @@ export const Dropdown: React.FC<DropdownProps> = ({
   };
 
   return (
-    <View>
+    <View className={`w-full ${className}`}>
       {label && (
-        <ApText size="sm" color={colors.textSecondary} className="mb-1.5">
+        <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
           {label}
-        </ApText>
+        </Text>
       )}
-      <TouchableOpacity
+      <Pressable
         onPress={() => setIsOpen(true)}
-        className="flex-row items-center justify-between px-4 py-4 rounded-2xl border"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.surfaceBorder,
-        }}
+        className="w-full h-[52px] bg-background-surface rounded-sm px-4 flex-row items-center justify-between"
       >
-        <View className="flex-row items-center flex-1">
-          {selectedOption?.icon && (
-            <Ionicons
-              name={selectedOption.icon as any}
-              size={18}
-              color={colors.primary}
-              className="mr-2"
-            />
-          )}
-          <ApText
-            size="sm"
-            color={selectedOption ? colors.textPrimary : colors.textMuted}
-          >
-            {selectedOption?.label || placeholder}
-          </ApText>
-        </View>
-        <Ionicons
-          name="chevron-down"
-          size={18}
-          color={colors.textMuted}
-        />
-      </TouchableOpacity>
+        <Text
+          className={`text-[15px] font-medium ${
+            selectedOption ? "text-ink-primary" : "text-ink-tertiary"
+          }`}
+        >
+          {selectedOption ? selectedOption.label : placeholder}
+        </Text>
+        <ChevronDown size={20} color={colors.inkTertiary} strokeWidth={2} />
+      </Pressable>
 
+      {/* Options sheet */}
       <Modal
-        transparent
-        animationType="fade"
         visible={isOpen}
+        transparent
+        animationType="slide"
         onRequestClose={() => setIsOpen(false)}
       >
         <TouchableWithoutFeedback onPress={() => setIsOpen(false)}>
           <View
-            className="flex-1 justify-center items-center bg-black/60 px-6"
+            className="flex-1 justify-end"
+            style={{ backgroundColor: colors.overlay }}
           >
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                className="w-full max-h-80"
+            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+              <View
+                className="bg-background-elevated rounded-t-xl px-5 pb-8 pt-3 max-h-[70%]"
+                style={{
+                  shadowColor: colors.inkPrimary,
+                  shadowOpacity: 0.16,
+                  shadowRadius: 24,
+                  shadowOffset: { width: 0, height: -8 },
+                  elevation: 8,
+                }}
               >
-                <View
-                  className="rounded-2xl p-2 border"
-                  style={{
-                    backgroundColor: colors.surface,
-                    borderColor: colors.surfaceBorder,
-                  }}
-                >
-                  <View className="flex-row justify-between items-center px-3 py-2 mb-2">
-                    <ApText size="base" font="semibold" color={colors.textPrimary}>
-                      {label || "Select Option"}
-                    </ApText>
-                    <TouchableOpacity onPress={() => setIsOpen(false)}>
-                      <Ionicons name="close" size={20} color={colors.textMuted} />
-                    </TouchableOpacity>
-                  </View>
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                    {options.map((option) => (
-                      <TouchableOpacity
-                        key={option.value}
-                        onPress={() => handleSelect(option.value)}
-                        className="flex-row items-center px-4 py-3 rounded-xl"
-                        style={{
-                          backgroundColor:
-                            option.value === value
-                              ? colors.primary + "15"
-                              : "transparent",
-                        }}
+                <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-4" />
+                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary mb-3">
+                  {label || "Select option"}
+                </Text>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {options.map((opt, index) => {
+                    const isSelected = opt.value === value;
+                    const isLast = index === options.length - 1;
+                    return (
+                      <Pressable
+                        key={opt.value}
+                        onPress={() => handleSelect(opt.value)}
+                        className={`flex-row items-center justify-between py-3.5 ${
+                          isLast ? "" : "border-b border-border"
+                        }`}
                       >
-                        {option.icon && (
-                          <Ionicons
-                            name={option.icon as any}
-                            size={20}
-                            color={
-                              option.value === value
-                                ? colors.primary
-                                : colors.textMuted
-                            }
-                            className="mr-3"
-                          />
-                        )}
-                        <ApText
-                          size="sm"
-                          font={option.value === value ? "semibold" : "normal"}
-                          color={
-                            option.value === value
-                              ? colors.primary
-                              : colors.textPrimary
-                          }
+                        <Text
+                          className={`text-[15px] leading-[22px] font-medium ${
+                            isSelected ? "text-ink-primary" : "text-ink-secondary"
+                          }`}
                         >
-                          {option.label}
-                        </ApText>
-                        {option.value === value && (
-                          <Ionicons
-                            name="checkmark"
-                            size={18}
-                            color={colors.primary}
-                            className="ml-auto"
-                          />
+                          {opt.label}
+                        </Text>
+                        {isSelected && (
+                          <Check size={18} color={colors.accent} strokeWidth={2.5} />
                         )}
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-              </KeyboardAvoidingView>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
@@ -168,3 +125,5 @@ export const Dropdown: React.FC<DropdownProps> = ({
     </View>
   );
 };
+
+export default Dropdown;

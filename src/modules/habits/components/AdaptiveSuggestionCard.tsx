@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/src/components";
+import { TrendingUp } from "lucide-react-native";
+import { ApText, ApCard } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import {
   IAdaptiveSuggestion,
@@ -19,10 +19,6 @@ interface AdaptiveCardProps {
   onReject: () => void;
 }
 
-/**
- * Phase 3.5 — adaptive insight card.
- * Values come from the deterministic engine; the user decides.
- */
 const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
   suggestion,
   headline,
@@ -41,22 +37,15 @@ const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
   );
 
   return (
-    <View
-      className="rounded-2xl p-4"
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.primary + "40",
-      }}
-    >
+    <ApCard className="p-4 mb-3">
       <View className="flex-row items-center">
-        <Ionicons name="trending-up-outline" size={16} color={colors.primary} />
+        <TrendingUp size={16} color={colors.primary} />
         <ApText
           size="xs"
-          font="bold"
+          font="medium"
           color={colors.textMuted}
           className="uppercase ml-2"
-          style={{ letterSpacing: 1 }}
+          style={{ letterSpacing: 0.8 }}
         >
           Adaptive Insight
         </ApText>
@@ -68,10 +57,10 @@ const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
 
       {change !== "" && (
         <View
-          className="self-start px-3 py-1.5 rounded-xl mt-2"
-          style={{ backgroundColor: colors.primary + "14" }}
+          className="self-start px-2.5 py-1 rounded-full mt-2"
+          style={{ backgroundColor: colors.accentLight }}
         >
-          <ApText size="sm" font="bold" color={colors.primary}>
+          <ApText size="xs" font="semibold" color={colors.primary}>
             {change}
           </ApText>
         </View>
@@ -81,7 +70,7 @@ const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
         {message}
       </ApText>
 
-      <View className="flex-row gap-3 mt-3">
+      <View className="flex-row gap-3 mt-3.5">
         <Pressable
           onPress={onAccept}
           disabled={busy}
@@ -90,7 +79,7 @@ const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
           className="h-9 rounded-full items-center justify-center flex-1"
           style={{ backgroundColor: colors.primary, opacity: busy ? 0.6 : 1 }}
         >
-          <ApText size="xs" font="bold" color={colors.background}>
+          <ApText size="xs" font="semibold" color={colors.background}>
             {busy ? "Applying…" : actionLabel || "Try it"}
           </ApText>
         </Pressable>
@@ -99,15 +88,18 @@ const AdaptiveSuggestionCard: React.FC<AdaptiveCardProps> = ({
           disabled={busy}
           accessibilityRole="button"
           accessibilityLabel="Keep current habit"
-          className="h-9 rounded-full items-center justify-center flex-1"
-          style={{ backgroundColor: colors.background, borderWidth: 1, borderColor: colors.surfaceBorder }}
+          className="h-9 rounded-full items-center justify-center flex-1 border"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
+          }}
         >
-          <ApText size="xs" font="semibold" color={colors.textSecondary}>
+          <ApText size="xs" font="medium" color={colors.textSecondary}>
             Keep current
           </ApText>
         </Pressable>
       </View>
-    </View>
+    </ApCard>
   );
 };
 

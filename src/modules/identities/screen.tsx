@@ -1,191 +1,124 @@
 import React from "react";
-import { View, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { Plus } from "lucide-react-native";
 import {
-  ApText,
-  ApContainer,
-  ApScrollView,
   ApHeader,
   ApEmptyState,
+  SkeletonCard,
 } from "@/src/components";
+import { Card } from "@/src/components/Card";
+import { ProgressBar } from "@/src/components/ProgressBar";
 import { router } from "expo-router";
-import { useSettingsState } from "@/src/modules/settings/context";
+import { useTheme } from "@/src/modules/settings/context";
 import { useIdentitiesState } from "./context";
 import { IIdentity } from "./model";
+import { getLucideIcon, getCategoryKeyForId } from "@/src/utils/icons";
+import { CategoryKey } from "@/src/components/ListRow";
 
-const LEVEL_BAR_HEIGHT = 8;
-
-const IdentityScreen = () => {
-  const { colors } = useSettingsState();
+export const IdentityScreen = () => {
+  const colors = useTheme();
   const { loading, activeIdentities } = useIdentitiesState();
 
   const progressFor = (identity: IIdentity) => {
     const points = identity.evidencePoints ?? 0;
     const level = identity.level ?? 1;
-    const pct = identity.progressToNextLevel;
-    return { points, level, pct };
+    const pct = identity.progressToNextLevel ?? 0;
+    return { points, level, pct: Math.min(1, Math.max(0, pct / 100)) };
   };
 
+  const isInitialLoading = loading && activeIdentities.length === 0;
+
   return (
-    <ApContainer>
-      <ApScrollView showsVerticalScrollIndicator={false}>
-        <ApHeader
-          title="Identity"
-          subheader="Every action is a vote for the person you want to become"
-          hasBackButton
-        />
-
-        {/* Active identities */}
-        <View className="px-5 mt-4">
-          {activeIdentities.length === 0 && !loading && (
-            <ApEmptyState
-              icon="flag-outline"
-              title="Who do you want to become?"
-              subtitle='Create an identity like "I am a runner", then link habits that prove it.'
-              actionLabel="Create Identity"
-              onAction={() => router.push("/create-identity")}
-            />
-          )}
-
-          {activeIdentities.map((identity) => {
-            const accent = identity.color || colors.primary;
-            const { points, level, pct } = progressFor(identity);
-            return (
-              <Pressable
-                key={identity.id}
-                onPress={() =>
-                  router.push(`/edit-identity?id=${identity.id}`)
-                }
-                className="rounded-3xl p-4 mb-4 mt-4"
-                style={{
-                  backgroundColor: colors.surface,
-                  borderWidth: 1,
-                  borderColor: colors.surfaceBorder,
-                }}
-              >
-                <View className="flex-row items-center">
-                  <View
-                    className="w-11 h-11 rounded-2xl items-center justify-center"
-                    style={{ backgroundColor: accent + "1E" }}
-                  >
-                    <Ionicons
-                      name={(identity.icon || "flag") as any}
-                      size={22}
-                      color={accent}
-                    />
-                  </View>
-                  <View className="flex-1 ml-3">
-                    <ApText
-                      size="base"
-                      font="bold"
-                      color={colors.textPrimary}
-                      numberOfLines={1}
-                    >
-                      {identity.title}
-                    </ApText>
-                    <ApText size="xs" color={colors.textMuted}>
-                      Level {level} · {identity.levelTitle}
-                    </ApText>
-                  </View>
-                  <View
-                    className="px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: accent + "1A" }}
-                  >
-                    <ApText size="xs" font="bold" color={accent}>
-                      {points} pts
-                    </ApText>
-                  </View>
-                </View>
-
-                {identity.description ? (
-                  <ApText
-                    size="xs"
-                    color={colors.textSecondary}
-                    className="mt-2"
-                    numberOfLines={2}
-                  >
-                    {identity.description}
-                  </ApText>
-                ) : null}
-
-                {/* Level bar */}
-                <View
-                  className="mt-3 rounded-full overflow-hidden"
-                  style={{
-                    height: LEVEL_BAR_HEIGHT,
-                    backgroundColor: colors.surfaceBorder,
-                  }}
-                >
-                  {pct != null && (
-                    <View
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${Math.max(pct, 2)}%`,
-                        backgroundColor: accent,
-                      }}
-                    />
-                  )}
-                </View>
-
-                <View className="flex-row justify-between mt-2">
-                  <ApText size="xs" color={colors.textMuted}>
-                    {identity.linkedHabits ?? 0} linked habit
-                    {(identity.linkedHabits ?? 0) === 1 ? "" : "s"}
-                  </ApText>
-                  <ApText size="xs" color={colors.textMuted}>
-                    {identity.completedOnDate ?? 0} today ·{" "}
-                    {pct === null
-                      ? "Max level reached"
-                      : `${identity.pointsToNextLevel ?? 0} pts to level ${level + 1}`}
-                  </ApText>
-                </View>
-
-                {(identity.habitLinks ?? []).length > 0 && (
-                  <View className="flex-row flex-wrap mt-2">
-                    {(identity.habitLinks ?? [])
-                      .filter((link) => !link.habit?.isArchived)
-                      .slice(0, 5)
-                      .map((link) => (
-                        <View
-                          key={link.habitId}
-                          className="flex-row items-center px-2 py-1 rounded-full mr-1.5 mb-1"
-                          style={{
-                            backgroundColor: colors.surfaceBorder + "80",
-                          }}
-                        >
-                          <Ionicons
-                            name={(link.habit?.icon || "ellipse") as any}
-                            size={11}
-                            color={link.habit?.iconColor || colors.primary}
-                          />
-                          <ApText
-                            size="xs"
-                            color={colors.textSecondary}
-                            className="ml-1"
-                            numberOfLines={1}
-                          >
-                            {link.habit?.title ?? "Habit"}
-                          </ApText>
-                        </View>
-                      ))}
-                  </View>
-                )}
-              </Pressable>
-            );
-          })}
-
+    <View className="flex-1 bg-background">
+      <ApHeader
+        title="Identities"
+        subtitle="Every action is a vote for who you want to become"
+        hasBackButton
+        rightAction={
           <Pressable
             onPress={() => router.push("/create-identity")}
-            className="mb-6 h-12 items-center justify-center rounded-full"
-            style={{ backgroundColor: colors.primary }}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
           >
-            <ApText size="sm" font="bold" color={colors.background}>
-              New Identity
-            </ApText>
+            <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
           </Pressable>
-        </View>
-      </ApScrollView>
-    </ApContainer>
+        }
+      />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
+      >
+        {isInitialLoading ? (
+          <View className="gap-3">
+            <SkeletonCard height={90} />
+            <SkeletonCard height={90} />
+            <SkeletonCard height={90} />
+          </View>
+        ) : activeIdentities.length === 0 ? (
+          <ApEmptyState
+            title="Who do you want to become?"
+            description="Create an identity like Runner, then link habits that prove it."
+            actionLabel="Create identity"
+            onAction={() => router.push("/create-identity")}
+          />
+        ) : (
+          <View className="gap-3">
+            {activeIdentities.map((identity) => {
+              const { points, level, pct } = progressFor(identity);
+              const IconComp = getLucideIcon(identity.icon || "target");
+              const catKey: CategoryKey = getCategoryKeyForId(identity.id);
+              const catTokens = colors.category[catKey];
+
+              return (
+                <Pressable
+                  key={identity.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/edit-identity",
+                      params: { id: identity.id },
+                    })
+                  }
+                >
+                  <Card className="p-4">
+                    <View className="flex-row items-center justify-between mb-3">
+                      <View className="flex-row items-center gap-3 flex-1 mr-2">
+                        <View
+                          className="w-10 h-10 rounded-md items-center justify-center"
+                          style={{ backgroundColor: catTokens.bg }}
+                        >
+                          <IconComp size={20} color={catTokens.ink} strokeWidth={2} />
+                        </View>
+                        <View className="flex-1">
+                          <Text className="text-[15px] font-bold text-ink-primary" numberOfLines={1}>
+                            {identity.title}
+                          </Text>
+                          <Text className="text-[12.5px] font-medium text-ink-secondary">
+                            Level {level} · {identity.levelTitle || "Starting"}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="px-2.5 py-1 rounded-pill bg-accent-soft">
+                        <Text className="text-[12px] font-bold text-accent">
+                          {points} pts
+                        </Text>
+                      </View>
+                    </View>
+
+                    {identity.description ? (
+                      <Text className="text-[13.5px] text-ink-secondary mb-3">
+                        {identity.description}
+                      </Text>
+                    ) : null}
+
+                    <ProgressBar progress={pct} tone="accent" height={4} />
+                  </Card>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

@@ -12,46 +12,101 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // NOTE: Tailwind/NativeWind color classes are resolved at build time and
-        // are NOT theme-reactive. They mirror the DarkTheme palette as a static
-        // fallback. For light/dark-aware styling use inline `style={{ ... }}`
-        // with the `useTheme()` colors, not these classes.
+        // Design System tokens
+        background: {
+          DEFAULT: "#FFFFFF",
+          surface: "#F6F6F2",
+          surface2: "#EFEFE9",
+          elevated: "#FFFFFF",
+          inverse: "#131311",
+        },
+        ink: {
+          primary: "#131311",
+          secondary: "#55554F",
+          tertiary: "#9A9A93",
+          inverse: "#FFFFFF",
+          disabled: "#C7C7C0",
+        },
+        border: {
+          DEFAULT: "#E7E7E0",
+          strong: "#D6D6CE",
+        },
+        accent: {
+          DEFAULT: "#2B6A4D",
+          soft: "#E4EEE8",
+          strong: "#1F4F39",
+        },
+        success: {
+          DEFAULT: "#2B6A4D",
+          soft: "#E4EEE8",
+        },
+        warning: {
+          DEFAULT: "#B8842B",
+          soft: "#FBF2E1",
+        },
+        danger: {
+          DEFAULT: "#C4432E",
+          soft: "#FBEAE6",
+        },
+        category: {
+          rose: { bg: "#F7DEE4", ink: "#C24A70" },
+          amber: { bg: "#FBE4D2", ink: "#D07A2E" },
+          mint: { bg: "#D9F0E8", ink: "#1E8F76" },
+          violet: { bg: "#E7E1F8", ink: "#7259C9" },
+          sky: { bg: "#DEEAF7", ink: "#3373B8" },
+          sand: { bg: "#F2EBDD", ink: "#93773D" },
+        },
+        // Flattened category color tokens for NativeWind / Tailwind class generation
+        "category-rose-bg": "#F7DEE4",
+        "category-rose-ink": "#C24A70",
+        "category-amber-bg": "#FBE4D2",
+        "category-amber-ink": "#D07A2E",
+        "category-mint-bg": "#D9F0E8",
+        "category-mint-ink": "#1E8F76",
+        "category-violet-bg": "#E7E1F8",
+        "category-violet-ink": "#7259C9",
+        "category-sky-bg": "#DEEAF7",
+        "category-sky-ink": "#3373B8",
+        "category-sand-bg": "#F2EBDD",
+        "category-sand-ink": "#93773D",
 
-        // Primary accent color
-        primary: "#10B981",
-
-        // Background colors
-        background: "#0B130E",
-        backgroundLight: "#111F17",
-
-        // Surface colors (cards, containers)
-        surface: "#14251B",
-        surfaceLight: "#1D3527",
-        surfaceBorder: "#1F3A2B",
-        surfaceInactive: "#19271E",
-
-        // Text colors
-        textPrimary: "#F8FAFC",
-        textSecondary: "#94A3B8",
-        textMuted: "#64748B",
-
-        // Status colors
-        success: "#10B981",
-        progress: "#10B981",
-        progressBg: "#112217",
-        warning: "#F59E0B",
-        danger: "#EF4444",
-        accent: "#A78BFA",
-
-        // Toggle inactive
-        toggleInactive: "#2A3E31",
-
-        // Legacy compatibility
-        black: "#020617",
+        // Aliases / compatibility with theme tokens
+        primary: "#2B6A4D",
+        surface: "#F6F6F2",
+        surface2: "#EFEFE9",
+        surfaceBorder: "#E7E7E0",
+        surfaceInactive: "#F6F6F2",
+        surfaceLight: "#F6F6F2",
+        textPrimary: "#131311",
+        textSecondary: "#55554F",
+        textMuted: "#9A9A93",
+        progress: "#2B6A4D",
+        progressBg: "#EFEFE9",
+        toggleInactive: "#EFEFE9",
+        black: "#131311",
         white: "#FFFFFF",
-        muted: "#64748B",
-        border: "#1F3A2B",
-        input: "#14251B",
+        muted: "#9A9A93",
+        input: "#F6F6F2",
+      },
+      borderRadius: {
+        xs: 8,
+        sm: 12,
+        md: 16,
+        lg: 20,
+        xl: 28,
+        pill: 999,
+      },
+      spacing: {
+        1: "4px",
+        2: "8px",
+        3: "12px",
+        4: "16px",
+        5: "20px",
+        6: "24px",
+        8: "32px",
+        10: "40px",
+        12: "48px",
+        16: "64px",
       },
       fontFamily: {
         display: ["Inter"],

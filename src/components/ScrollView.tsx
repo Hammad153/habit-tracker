@@ -12,8 +12,9 @@ export interface IProps extends ScrollViewProps {
 
 export const ApScrollView: React.FC<IProps> = ({
   children,
-  className,
+  className = "",
   contentContainerClassName,
+  contentContainerStyle,
   refreshing = false,
   onRefresh,
   refreshControl,
@@ -29,18 +30,28 @@ export const ApScrollView: React.FC<IProps> = ({
       <RefreshControl
         refreshing={refreshing}
         onRefresh={onRefresh}
-        tintColor={colors.textMuted}
+        tintColor={colors.accent || colors.primary}
         colors={[colors.primary]}
       />
     ) : undefined);
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       {...props}
-      className={`px-4 py-2 ${className ?? ""}`}
-      style={{ backgroundColor: colors.background }}
+      className={`flex-1 ${className}`}
+      style={[{ backgroundColor: colors.background }, props.style]}
+      contentContainerStyle={[
+        {
+          paddingHorizontal: 20,
+          paddingTop: 10,
+          paddingBottom: 96,
+        },
+        contentContainerStyle,
+      ]}
       contentContainerClassName={contentContainerClassName}
-      refreshControl={control}>
+      refreshControl={control}
+    >
       {children}
     </ScrollView>
   );

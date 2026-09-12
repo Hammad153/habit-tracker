@@ -1,14 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, Dimensions } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import {
-  ApLoader,
+  Sparkles,
+  Palette,
+  Leaf,
+  User,
+  Gift,
+  Check,
+  Coins,
+} from "lucide-react-native";
+import {
   ApContainer,
   ApHeader,
   ApScrollView,
   ApText,
   ApEmptyState,
   ApConfirmModal,
+  ApCard,
+  SkeletonCard,
+  SkeletonHabitList,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useRewardsState } from "./context";
@@ -18,12 +28,12 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import * as Haptics from "expo-haptics";
 
 const getItemIcon = (key: string, type: string) => {
-  if (key.includes("golden")) return "color-palette";
-  if (key.includes("focus")) return "leaf";
-  if (type === "THEME" || type === "JOURNAL_THEME") return "color-palette-outline";
-  if (type === "AVATAR") return "person-circle-outline";
-  if (type === "CELEBRATION") return "sparkles";
-  return "gift-outline";
+  if (key.includes("golden")) return Palette;
+  if (key.includes("focus")) return Leaf;
+  if (type === "THEME" || type === "JOURNAL_THEME") return Palette;
+  if (type === "AVATAR") return User;
+  if (type === "CELEBRATION") return Sparkles;
+  return Gift;
 };
 
 const ShopCard = ({
@@ -37,26 +47,19 @@ const ShopCard = ({
 }) => {
   const { colors } = useSettingsState();
   const affordable = balance >= item.cost;
-  const iconName = getItemIcon(item.key, item.type);
+  const IconComp = getItemIcon(item.key, item.type);
 
   return (
-    <View
-      className="rounded-3xl p-4 mb-4"
-      style={{
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.surfaceBorder,
-      }}
-    >
+    <ApCard className="p-4 mb-3">
       <View className="flex-row items-center">
         <View
-          className="w-12 h-12 rounded-2xl items-center justify-center"
-          style={{ backgroundColor: colors.primary + "18" }}
+          className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+          style={{ backgroundColor: colors.accentLight }}
         >
-          <Ionicons name={iconName as any} size={22} color={colors.primary} />
+          <IconComp size={20} color={colors.primary} />
         </View>
-        <View className="flex-1 ml-3.5">
-          <ApText size="base" font="bold" color={colors.textPrimary}>
+        <View className="flex-1 mr-2">
+          <ApText size="base" font="semibold" color={colors.textPrimary}>
             {item.name}
           </ApText>
           {item.description ? (
@@ -65,9 +68,12 @@ const ShopCard = ({
             </ApText>
           ) : null}
         </View>
-        <View className="flex-row items-center px-3 py-1 rounded-full" style={{ backgroundColor: colors.warning + "18" }}>
-          <Ionicons name="diamond" size={14} color={colors.warning} />
-          <ApText size="sm" font="bold" color={colors.warning} className="ml-1">
+        <View
+          className="flex-row items-center px-2.5 py-1 rounded-full"
+          style={{ backgroundColor: colors.accentLight }}
+        >
+          <Coins size={12} color={colors.primary} />
+          <ApText size="xs" font="semibold" color={colors.primary} className="ml-1">
             {item.cost}
           </ApText>
         </View>
@@ -75,9 +81,12 @@ const ShopCard = ({
 
       <View className="mt-3">
         {item.owned ? (
-          <View className="h-11 rounded-full items-center justify-center flex-row gap-1.5" style={{ backgroundColor: colors.success + "1F" }}>
-            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-            <ApText size="sm" font="bold" color={colors.success}>
+          <View
+            className="h-9 rounded-full items-center justify-center flex-row gap-1.5"
+            style={{ backgroundColor: colors.surface2 }}
+          >
+            <Check size={14} color={colors.primary} />
+            <ApText size="xs" font="semibold" color={colors.primary}>
               Unlocked & Owned
             </ApText>
           </View>
@@ -87,19 +96,22 @@ const ShopCard = ({
             accessibilityRole="button"
             accessibilityLabel={`Redeem ${item.name} for ${item.cost} coins`}
             disabled={!affordable}
-            className="h-11 rounded-full items-center justify-center flex-row gap-1.5"
+            className="h-9 rounded-full items-center justify-center"
             style={{
-              backgroundColor: affordable ? colors.primary : colors.surfaceBorder,
-              opacity: affordable ? 1 : 0.6,
+              backgroundColor: affordable ? colors.primary : colors.surfaceInactive,
             }}
           >
-            <ApText size="sm" font="bold" color={affordable ? colors.background : colors.textMuted}>
+            <ApText
+              size="xs"
+              font="semibold"
+              color={affordable ? colors.background : colors.textMuted}
+            >
               {affordable ? "Redeem Reward" : "Insufficient Coins"}
             </ApText>
           </Pressable>
         )}
       </View>
-    </View>
+    </ApCard>
   );
 };
 
@@ -135,57 +147,67 @@ const RewardShopScreen = () => {
 
       confettiRef.current?.start();
 
-      // Apply the redeemed reward immediately
       if (item.key === "theme-golden") {
         setThemeMode("golden");
-        ToastService.Success("🎉 Golden Theme unlocked and applied to app!");
+        ToastService.Success("Golden Theme unlocked and applied");
       } else if (item.key === "theme-focus") {
         setThemeMode("focus");
-        ToastService.Success("🎉 Focus Theme unlocked and applied to app!");
+        ToastService.Success("Focus Theme unlocked and applied");
       } else if (item.key === "theme-journal") {
-        ToastService.Success("📖 Journal Theme unlocked for your reflections!");
+        ToastService.Success("Journal Theme unlocked");
       } else if (item.key === "avatar-frame-golden") {
-        ToastService.Success("✨ Golden Profile Frame unlocked!");
+        ToastService.Success("Golden Profile Frame unlocked");
       } else if (item.key === "pack-celebration") {
-        ToastService.Success("🎉 Celebration Pack activated!");
+        ToastService.Success("Celebration Pack activated");
       } else {
-        ToastService.Success(`🎉 ${item.name} successfully unlocked!`);
+        ToastService.Success(`${item.name} successfully unlocked`);
       }
     }
   };
 
-  if (loading && shopItems.length === 0) return <ApLoader />;
+  const isInitialLoading = loading && shopItems.length === 0;
 
   return (
     <ApContainer>
       <ApHeader title="Reward Shop" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <View
-          className="mx-5 mt-2 rounded-3xl p-4 flex-row items-center justify-between"
-          style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
-        >
-          <View className="flex-row items-center">
-            <View
-              className="w-10 h-10 rounded-2xl items-center justify-center mr-3"
-              style={{ backgroundColor: colors.warning + "20" }}
-            >
-              <Ionicons name="diamond" size={20} color={colors.warning} />
-            </View>
-            <View>
-              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
-                Coin Balance
-              </ApText>
-              <ApText size="xl" font="bold" color={colors.textPrimary}>
-                {balance} <ApText size="sm" color={colors.textMuted}>coins</ApText>
-              </ApText>
-            </View>
-          </View>
+        {/* Coin Balance Card */}
+        <View className="mt-2 mb-4">
+          {isInitialLoading ? (
+            <SkeletonCard height={80} />
+          ) : (
+            <ApCard className="p-4 flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                  style={{ backgroundColor: colors.accentLight }}
+                >
+                  <Coins size={20} color={colors.primary} />
+                </View>
+                <View>
+                  <ApText
+                    size="xs"
+                    font="medium"
+                    color={colors.textMuted}
+                    className="uppercase"
+                    style={{ letterSpacing: 0.8 }}
+                  >
+                    Coin Balance
+                  </ApText>
+                  <ApText size="xl" font="semibold" color={colors.textPrimary}>
+                    {balance} <ApText size="xs" color={colors.textMuted}>coins</ApText>
+                  </ApText>
+                </View>
+              </View>
+            </ApCard>
+          )}
         </View>
 
-        <View className="px-5 mt-5 mb-10">
-          {shopItems.length === 0 ? (
+        <View className="mb-10">
+          {isInitialLoading ? (
+            <SkeletonHabitList count={4} />
+          ) : shopItems.length === 0 ? (
             <ApEmptyState
-              icon="storefront-outline"
               title="The shop is empty"
               subtitle="Earn coins from completing daily habits and check back soon."
             />

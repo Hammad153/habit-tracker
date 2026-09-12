@@ -1,0 +1,24 @@
+{
+  "short_name": "Habit Tracker",
+  "name": "Habit Tracker - Routina",
+  "description": "Daily habit tracker and routine planner",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#F9F8F6",
+  "theme_color": "#2B6A4D",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/"
+}

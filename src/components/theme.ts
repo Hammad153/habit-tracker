@@ -1,152 +1,145 @@
+export const DesignTokens = {
+  background: {
+    DEFAULT: "#FFFFFF",
+    surface: "#F6F6F2",
+    surface2: "#EFEFE9",
+    elevated: "#FFFFFF",
+    inverse: "#131311",
+    overlay: "rgba(19, 19, 17, 0.45)",
+    tabBarActive: "rgba(255, 255, 255, 0.12)",
+  },
+  ink: {
+    primary: "#131311",
+    secondary: "#55554F",
+    tertiary: "#9A9A93",
+    inverse: "#FFFFFF",
+    disabled: "#C7C7C0",
+  },
+  border: {
+    DEFAULT: "#E7E7E0",
+    strong: "#D6D6CE",
+    focus: "#2B6A4D",
+  },
+  accent: {
+    DEFAULT: "#2B6A4D",
+    soft: "#E4EEE8",
+    strong: "#1F4F39",
+  },
+  heatmap: {
+    light: "#C4DEC9",
+    mid: "#72B286",
+  },
+  success: {
+    DEFAULT: "#2B6A4D",
+    soft: "#E4EEE8",
+  },
+  warning: {
+    DEFAULT: "#B8842B",
+    soft: "#FBF2E1",
+  },
+  danger: {
+    DEFAULT: "#C4432E",
+    soft: "#FBEAE6",
+  },
+  category: {
+    rose: { bg: "#F7DEE4", ink: "#C24A70" },
+    amber: { bg: "#FBE4D2", ink: "#D07A2E" },
+    mint: { bg: "#D9F0E8", ink: "#1E8F76" },
+    violet: { bg: "#E7E1F8", ink: "#7259C9" },
+    sky: { bg: "#DEEAF7", ink: "#3373B8" },
+    sand: { bg: "#F2EBDD", ink: "#93773D" },
+  },
+  elevation: {
+    0: { shadowColor: "transparent", shadowOpacity: 0, shadowRadius: 0, elevation: 0 },
+    1: {
+      shadowColor: "#131311",
+      shadowOpacity: 0.04,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 1,
+    },
+    2: {
+      shadowColor: "#131311",
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 4,
+    },
+    3: {
+      shadowColor: "#131311",
+      shadowOpacity: 0.16,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: -8 },
+      elevation: 8,
+    },
+  },
+};
+
 export const LightTheme = {
-  primary: "#10B981",
-  primaryGlow: "#ECFDF5",
-  background: "#F8FAFC",
-  backgroundLight: "#FFFFFF",
-  surface: "#FFFFFF",
-  surfaceLight: "#F1F5F9",
-  surfaceBorder: "#E2E8F0",
-  surfaceInactive: "#F1F5F9",
-  surfaceGlow: "#ECFDF5",
-  surfaceElevated: "#FFFFFF",
+  // Surfaces
+  background: DesignTokens.background.DEFAULT,
+  backgroundLight: DesignTokens.background.DEFAULT,
+  backgroundSurface: DesignTokens.background.surface,
+  backgroundSurface2: DesignTokens.background.surface2,
+  backgroundElevated: DesignTokens.background.elevated,
+  backgroundInverse: DesignTokens.background.inverse,
+  surface: DesignTokens.background.surface,
+  surface2: DesignTokens.background.surface2,
+  surfaceLight: DesignTokens.background.surface2,
+  surfaceBorder: DesignTokens.border.DEFAULT,
+  surfaceInactive: DesignTokens.background.surface2,
+  surfaceGlow: DesignTokens.accent.soft,
+  surfaceElevated: DesignTokens.background.elevated,
+  overlay: DesignTokens.background.overlay,
+  tabBarActive: DesignTokens.background.tabBarActive,
 
   // Text colors
-  textPrimary: "#0F172A",
-  textSecondary: "#475569",
-  textMuted: "#94A3B8",
-  white: "#FFFFFF",
-  black: "#0F172A",
+  textPrimary: DesignTokens.ink.primary,
+  textSecondary: DesignTokens.ink.secondary,
+  textMuted: DesignTokens.ink.tertiary,
+  white: DesignTokens.ink.inverse,
+  black: DesignTokens.ink.primary,
+  inkPrimary: DesignTokens.ink.primary,
+  inkSecondary: DesignTokens.ink.secondary,
+  inkTertiary: DesignTokens.ink.tertiary,
+  inkInverse: DesignTokens.ink.inverse,
+  inkDisabled: DesignTokens.ink.disabled,
 
   // Status & accent colors
-  success: "#10B981",
-  progress: "#10B981",
-  progressBg: "#E2E8F0",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  accent: "#8B5CF6",
+  primary: DesignTokens.accent.DEFAULT,
+  primaryGlow: DesignTokens.accent.soft,
+  accent: DesignTokens.accent.DEFAULT,
+  accentSoft: DesignTokens.accent.soft,
+  accentStrong: DesignTokens.accent.strong,
+  accentLight: DesignTokens.accent.soft,
+  heatmapLight: DesignTokens.heatmap.light,
+  heatmapMid: DesignTokens.heatmap.mid,
+  success: DesignTokens.success.DEFAULT,
+  successSoft: DesignTokens.success.soft,
+  warning: DesignTokens.warning.DEFAULT,
+  warningSoft: DesignTokens.warning.soft,
+  danger: DesignTokens.danger.DEFAULT,
+  dangerSoft: DesignTokens.danger.soft,
+  progress: DesignTokens.accent.DEFAULT,
+  progressBg: DesignTokens.background.surface2,
 
-  // Toggle colors
-  toggleInactive: "#CBD5E1",
+  // Toggle & borders
+  toggleInactive: DesignTokens.background.surface2,
+  border: DesignTokens.border.DEFAULT,
+  borderStrong: DesignTokens.border.strong,
+  muted: DesignTokens.ink.tertiary,
+  input: DesignTokens.background.surface,
+  container: DesignTokens.background.DEFAULT,
 
-  // Legacy compatibility
-  muted: "#94A3B8",
-  border: "#E2E8F0",
-  input: "#FFFFFF",
-  container: "#F8FAFC",
+  // Category palette
+  category: DesignTokens.category,
 };
 
-export const DarkTheme = {
-  primary: "#10B981",
-  primaryGlow: "#064E3B",
-  background: "#0B130E",
-  backgroundLight: "#111F17",
-  surface: "#14251B",
-  surfaceLight: "#1D3527",
-  surfaceBorder: "#1F3A2B",
-  surfaceInactive: "#19271E",
-  surfaceGlow: "#132B1E",
-  surfaceElevated: "#182C20",
-
-  // Text colors
-  textPrimary: "#F8FAFC",
-  textSecondary: "#94A3B8",
-  textMuted: "#64748B",
-  white: "#FFFFFF",
-  black: "#0F172A",
-
-  // Status & accent colors
-  success: "#10B981",
-  progress: "#10B981",
-  progressBg: "#112217",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  accent: "#A78BFA",
-
-  // Toggle colors
-  toggleInactive: "#2A3E31",
-
-  // Legacy compatibility
-  muted: "#64748B",
-  border: "#1F3A2B",
-  input: "#14251B",
-  container: "#0B130E",
-};
-
-export const GoldenTheme = {
-  primary: "#F59E0B",
-  primaryGlow: "#FFFBEB",
-  background: "#0F1419",
-  backgroundLight: "#161D24",
-  surface: "#1D2630",
-  surfaceLight: "#263240",
-  surfaceBorder: "#2E3B4E",
-  surfaceInactive: "#1A222B",
-  surfaceGlow: "#2D200E",
-  surfaceElevated: "#222D3A",
-
-  // Text colors
-  textPrimary: "#FFFBEB",
-  textSecondary: "#D1D5DB",
-  textMuted: "#9CA3AF",
-  white: "#FFFFFF",
-  black: "#0F172A",
-
-  // Status & accent colors
-  success: "#10B981",
-  progress: "#F59E0B",
-  progressBg: "#2B2212",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  accent: "#F59E0B",
-
-  // Toggle colors
-  toggleInactive: "#374151",
-
-  // Legacy compatibility
-  muted: "#9CA3AF",
-  border: "#2E3B4E",
-  input: "#1D2630",
-  container: "#0F1419",
-};
-
-export const FocusTheme = {
-  primary: "#6366F1",
-  primaryGlow: "#EEF2FF",
-  background: "#090D16",
-  backgroundLight: "#0F172A",
-  surface: "#1E293B",
-  surfaceLight: "#334155",
-  surfaceBorder: "#334155",
-  surfaceInactive: "#1E293B",
-  surfaceGlow: "#1E1B4B",
-  surfaceElevated: "#1E293B",
-
-  // Text colors
-  textPrimary: "#F8FAFC",
-  textSecondary: "#CBD5E1",
-  textMuted: "#64748B",
-  white: "#FFFFFF",
-  black: "#0F172A",
-
-  // Status & accent colors
-  success: "#10B981",
-  progress: "#6366F1",
-  progressBg: "#1E1B4B",
-  warning: "#F59E0B",
-  danger: "#EF4444",
-  accent: "#6366F1",
-
-  // Toggle colors
-  toggleInactive: "#334155",
-
-  // Legacy compatibility
-  muted: "#64748B",
-  border: "#334155",
-  input: "#1E293B",
-  container: "#090D16",
-};
+export const DarkTheme = LightTheme;
+export const GoldenTheme = LightTheme;
+export const FocusTheme = LightTheme;
 
 export const ApTheme = {
-  Color: DarkTheme,
+  Color: LightTheme,
+  Tokens: DesignTokens,
 };
-

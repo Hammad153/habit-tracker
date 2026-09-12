@@ -1,73 +1,51 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "./Text";
+import { View, Text } from "react-native";
+import { LucideIcon, Inbox } from "lucide-react-native";
 import { useTheme } from "@/src/modules/settings/context";
+import Button from "./buttons/Button";
 
-interface IProps {
-  icon?: keyof typeof Ionicons.glyphMap;
+export interface ApEmptyStateProps {
+  icon?: any;
   title: string;
+  description?: string;
   subtitle?: string;
   actionLabel?: string;
   onAction?: () => void;
+  className?: string;
 }
 
-export const ApEmptyState: React.FC<IProps> = ({
-  icon = "file-tray-outline",
+export const ApEmptyState: React.FC<ApEmptyStateProps> = ({
+  icon: Icon = Inbox,
   title,
+  description,
   subtitle,
   actionLabel,
   onAction,
+  className = "",
 }) => {
+  const desc = description || subtitle;
   const colors = useTheme();
 
   return (
-    <View className="items-center justify-center py-16 px-8">
-      <View
-        className="w-20 h-20 rounded-full items-center justify-center mb-4"
-        style={{
-          backgroundColor: colors.primary + "12",
-        }}
-      >
-        <Ionicons name={icon} size={36} color={colors.primary} />
+    <View className={`items-center justify-center py-12 px-6 ${className}`}>
+      <View className="w-14 h-14 rounded-pill bg-background-surface items-center justify-center mb-4">
+        <Icon size={28} color={colors.inkTertiary} strokeWidth={2} />
       </View>
-      <ApText
-        size="lg"
-        font="bold"
-        color={colors.textPrimary}
-        style={{ textAlign: "center" }}
-      >
+      <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary text-center">
         {title}
-      </ApText>
-      {subtitle ? (
-        <ApText
-          size="sm"
-          color={colors.textMuted}
-          style={{ textAlign: "center", marginTop: 6 }}
-        >
-          {subtitle}
-        </ApText>
+      </Text>
+      {desc ? (
+        <Text className="text-[15px] leading-[22px] text-ink-secondary text-center mt-1.5 max-w-[280px]">
+          {desc}
+        </Text>
       ) : null}
       {actionLabel && onAction ? (
-        <TouchableOpacity
-          onPress={onAction}
-          accessibilityRole="button"
-          accessibilityLabel={actionLabel}
-          className="mt-6 px-8 py-3.5 rounded-full"
-          style={{
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
-        >
-          <ApText font="bold" color={colors.background}>
-            {actionLabel}
-          </ApText>
-        </TouchableOpacity>
+        <View className="mt-6 w-full max-w-[220px]">
+          <Button label={actionLabel} onPress={onAction} variant="primary" />
+        </View>
       ) : null}
     </View>
   );
 };
+
+export default ApEmptyState;

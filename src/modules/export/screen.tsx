@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Share, Platform } from "react-native";
 import * as XLSX from "xlsx";
-import { Ionicons } from "@expo/vector-icons";
+import { FileSpreadsheet, FileText, FileCode, Download, Table } from "lucide-react-native";
 import {
   ApText,
   ApContainer,
   ApHeader,
   ApScrollView,
   ApLoader,
+  ApCard,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -20,36 +21,31 @@ const EXPORT_OPTIONS: {
   format: ExportFormat;
   title: string;
   subtitle: string;
-  icon: string;
-  colorKey: "primary" | "success" | "accent" | "warning";
+  icon: React.ComponentType<{ size?: number; color?: string }>;
 }[] = [
   {
     format: "excel",
     title: "Excel Spreadsheet",
     subtitle: "Formatted workbook with multiple sheets",
-    icon: "grid",
-    colorKey: "primary",
+    icon: Table,
   },
   {
     format: "csv",
     title: "CSV Spreadsheet",
     subtitle: "Compatible with Excel, Google Sheets",
-    icon: "document-text",
-    colorKey: "success",
+    icon: FileSpreadsheet,
   },
   {
     format: "pdf",
     title: "PDF Report",
     subtitle: "Styled report with summaries",
-    icon: "document",
-    colorKey: "accent",
+    icon: FileText,
   },
   {
     format: "json",
     title: "JSON Backup",
     subtitle: "Full data backup for developers",
-    icon: "code-slash",
-    colorKey: "warning",
+    icon: FileCode,
   },
 ];
 
@@ -230,7 +226,7 @@ const ExportScreen = () => {
         "routina-export.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
-      ToastService.Success("Excel file downloaded!");
+      ToastService.Success("Excel file downloaded");
     } catch (err: any) {
       const msg = err?.message || String(err);
       console.error("Excel export error:", msg, err);
@@ -250,13 +246,13 @@ const ExportScreen = () => {
 
       if (IS_WEB) {
         downloadText(response.data, "routina-export.csv", "text/csv");
-        ToastService.Success("CSV file downloaded!");
+        ToastService.Success("CSV file downloaded");
       } else {
         await Share.share({
           message: response.data,
           title: "Routina Export (CSV)",
         });
-        ToastService.Success("CSV exported successfully!");
+        ToastService.Success("CSV exported successfully");
       }
     } catch (err: any) {
       const msg = err?.message || String(err);
@@ -281,7 +277,7 @@ const ExportScreen = () => {
           "routina-report.html",
           "text/html",
         );
-        ToastService.Success("PDF report downloaded as HTML!");
+        ToastService.Success("PDF report downloaded as HTML");
       } else {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const Print = require("expo-print");
@@ -295,7 +291,7 @@ const ExportScreen = () => {
           mimeType: "application/pdf",
           dialogTitle: "Routina Report",
         });
-        ToastService.Success("PDF report ready!");
+        ToastService.Success("PDF report ready");
       }
     } catch (err: any) {
       const msg = err?.message || String(err);
@@ -319,13 +315,13 @@ const ExportScreen = () => {
           "routina-backup.json",
           "application/json",
         );
-        ToastService.Success("JSON backup downloaded!");
+        ToastService.Success("JSON backup downloaded");
       } else {
         await Share.share({
           message: jsonStr,
           title: "Routina Backup (JSON)",
         });
-        ToastService.Success("JSON backup exported!");
+        ToastService.Success("JSON backup exported");
       }
     } catch (err: any) {
       const msg = err?.message || String(err);
@@ -343,28 +339,15 @@ const ExportScreen = () => {
     json: handleExportJSON,
   };
 
-  const getColor = (key: "primary" | "success" | "accent" | "warning") => {
-    switch (key) {
-      case "primary":
-        return colors.primary;
-      case "success":
-        return colors.success;
-      case "accent":
-        return colors.accent;
-      case "warning":
-        return colors.warning;
-    }
-  };
-
   return (
     <ApContainer>
       <ApHeader title="Export Data" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <View className="px-5 mt-4">
+        <View className="mt-2">
           <ApText
             size="sm"
             color={colors.textSecondary}
-            className="mb-6"
+            className="mb-4"
           >
             Export your habit data for backup or analysis. Your data belongs
             to you.
@@ -372,7 +355,7 @@ const ExportScreen = () => {
 
           {exporting && (
             <View className="items-center mb-4">
-              <ApLoader />
+              <ApLoader size="small" />
               <ApText size="xs" color={colors.textMuted} className="mt-2">
                 Generating {exporting.toUpperCase()} file...
               </ApText>
@@ -380,60 +363,51 @@ const ExportScreen = () => {
           )}
 
           {EXPORT_OPTIONS.map((option) => {
-            const color = getColor(option.colorKey);
+            const IconComp = option.icon;
             const isActive = exporting === option.format;
             return (
-              <TouchableOpacity
+              <ApCard
                 key={option.format}
-                onPress={handlers[option.format]}
-                disabled={!!exporting}
-                className="flex-row items-center p-4 mb-3 rounded-2xl border"
+                className="p-4 mb-3"
                 style={{
-                  backgroundColor: colors.surface,
-                  borderColor: isActive ? color : colors.surfaceBorder,
-                  borderWidth: isActive ? 2 : 1,
+                  borderColor: isActive ? colors.primary : colors.surfaceBorder,
                   opacity: exporting && !isActive ? 0.5 : 1,
                 }}
               >
-                <View
-                  className="w-12 h-12 rounded-xl items-center justify-center"
-                  style={{ backgroundColor: color + "20" }}
+                <TouchableOpacity
+                  onPress={handlers[option.format]}
+                  disabled={!!exporting}
+                  className="flex-row items-center"
                 >
-                  <Ionicons
-                    name={option.icon as any}
-                    size={22}
-                    color={color}
-                  />
-                </View>
-                <View className="flex-1 ml-3">
-                  <ApText
-                    size="base"
-                    font="semibold"
-                    color={colors.textPrimary}
+                  <View
+                    className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+                    style={{ backgroundColor: colors.accentLight }}
                   >
-                    {option.title}
-                  </ApText>
-                  <ApText size="xs" color={colors.textMuted} className="mt-1">
-                    {option.subtitle}
-                  </ApText>
-                </View>
-                {isActive ? (
-                  <ApLoader size="small" />
-                ) : (
-                  <Ionicons
-                    name="download-outline"
-                    size={22}
-                    color={colors.primary}
-                  />
-                )}
-              </TouchableOpacity>
+                    <IconComp size={20} color={colors.primary} />
+                  </View>
+                  <View className="flex-1 mr-2">
+                    <ApText
+                      size="base"
+                      font="semibold"
+                      color={colors.textPrimary}
+                    >
+                      {option.title}
+                    </ApText>
+                    <ApText size="xs" color={colors.textMuted} className="mt-0.5">
+                      {option.subtitle}
+                    </ApText>
+                  </View>
+                  {isActive ? (
+                    <ApLoader size="small" inline />
+                  ) : (
+                    <Download size={18} color={colors.textMuted} />
+                  )}
+                </TouchableOpacity>
+              </ApCard>
             );
           })}
 
-          <View
-            className="mt-4 p-4 rounded-2xl"
-            style={{ backgroundColor: colors.surface }}
-          >
+          <View className="mt-3 p-4 rounded-xl" style={{ backgroundColor: colors.surface2 }}>
             <ApText size="xs" color={colors.textMuted} className="leading-5">
               Excel and CSV exports include all your habits, completions,
               journal entries, finances, identities, daily plans, badges, and

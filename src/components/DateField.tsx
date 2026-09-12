@@ -1,28 +1,23 @@
 import React, { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Pressable, View, Text } from "react-native";
 import { format } from "date-fns";
-import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "./Text";
+import { Calendar } from "lucide-react-native";
 import { ApDatePicker } from "./DatePicker";
 import { useTheme } from "../modules/settings/context";
 import { parseDateKey, toDateKey } from "../utils/date";
 
-const DANGER = "#EF4444";
-
 interface IProps {
   label: string;
-  /** A `YYYY-MM-DD` date key. */
   value?: string;
   onChange: (key: string) => void;
   minDate?: Date;
   maxDate?: Date;
   error?: string;
   placeholder?: string;
-  /** Title of the picker modal. Defaults to the field label. */
   title?: string;
+  className?: string;
 }
 
-/** A tap-to-open date input, so dates are never typed by hand. */
 export const ApDateField: React.FC<IProps> = ({
   label,
   value,
@@ -32,34 +27,39 @@ export const ApDateField: React.FC<IProps> = ({
   error,
   placeholder,
   title,
+  className = "",
 }) => {
   const colors = useTheme();
   const [open, setOpen] = useState(false);
   const selected = value ? parseDateKey(value) : new Date();
 
   return (
-    <View className="mb-4">
-      <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 uppercase">
+    <View className={`w-full mb-4 ${className}`}>
+      <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
         {label}
-      </ApText>
-      <TouchableOpacity
+      </Text>
+      <Pressable
         onPress={() => setOpen(true)}
-        className="flex-row items-center justify-between rounded-2xl border px-4 py-3"
+        className="w-full h-[52px] bg-background-surface rounded-sm px-4 flex-row items-center justify-between"
         style={{
-          backgroundColor: colors.surface,
-          borderColor: error ? DANGER : colors.surfaceBorder,
+          borderWidth: error ? 1.5 : 0,
+          borderColor: error ? colors.danger : "transparent",
         }}
       >
-        <ApText size="sm" color={value ? colors.textPrimary : colors.textMuted}>
+        <Text
+          className={`text-[15px] font-medium ${
+            value ? "text-ink-primary" : "text-ink-tertiary"
+          }`}
+        >
           {value ? format(selected, "EEE, MMM d, yyyy") : placeholder || "Select date"}
-        </ApText>
-        <Ionicons name="calendar-outline" size={18} color={colors.textMuted} />
-      </TouchableOpacity>
-      {error ? (
-        <ApText size="xs" color={DANGER} className="mt-1">
+        </Text>
+        <Calendar size={20} color={colors.inkTertiary} strokeWidth={2} />
+      </Pressable>
+      {error && (
+        <Text className="text-[12px] text-danger mt-1.5 ml-1">
           {error}
-        </ApText>
-      ) : null}
+        </Text>
+      )}
       <ApDatePicker
         visible={open}
         title={title ?? label}
@@ -72,3 +72,5 @@ export const ApDateField: React.FC<IProps> = ({
     </View>
   );
 };
+
+export default ApDateField;

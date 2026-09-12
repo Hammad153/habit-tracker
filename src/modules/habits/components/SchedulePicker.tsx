@@ -1,14 +1,14 @@
 import React from "react";
-import { View, TouchableOpacity, TextInput } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, TouchableOpacity } from "react-native";
+import { Calendar, Repeat, ArrowLeftRight, Plus, Minus } from "lucide-react-native";
 import { ApText } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 
 const SCHEDULE_TYPES = [
-  { id: "daily", label: "Every Day", icon: "calendar" },
-  { id: "specific_days", label: "Specific Days", icon: "calendar-outline" },
-  { id: "times_per_week", label: "X Times/Week", icon: "repeat" },
-  { id: "interval", label: "Every N Days", icon: "swap-horizontal" },
+  { id: "daily", label: "Every Day", icon: Calendar },
+  { id: "specific_days", label: "Specific Days", icon: Calendar },
+  { id: "times_per_week", label: "X Times/Week", icon: Repeat },
+  { id: "interval", label: "Every N Days", icon: ArrowLeftRight },
 ];
 
 const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -56,31 +56,25 @@ const SchedulePicker: React.FC<SchedulePickerProps> = ({
       <View className="flex-row flex-wrap gap-2 mb-3">
         {SCHEDULE_TYPES.map((type) => {
           const isSelected = scheduleType === type.id;
+          const IconComp = type.icon;
           return (
             <TouchableOpacity
               key={type.id}
               onPress={() => onScheduleTypeChange(type.id)}
-              className="flex-row items-center px-3 py-2 rounded-xl"
+              className="flex-row items-center px-3 py-1.5 rounded-full"
               style={{
-                backgroundColor: isSelected
-                  ? colors.primary + "20"
-                  : colors.background,
-                borderWidth: 1,
-                borderColor: isSelected
-                  ? colors.primary
-                  : colors.surfaceBorder,
+                backgroundColor: isSelected ? colors.primary : colors.surface2,
               }}
             >
-              <Ionicons
-                name={type.icon as any}
-                size={16}
-                color={isSelected ? colors.primary : colors.textMuted}
+              <IconComp
+                size={13}
+                color={isSelected ? colors.background : colors.textMuted}
               />
               <ApText
                 size="xs"
-                font={isSelected ? "bold" : "medium"}
-                color={isSelected ? colors.primary : colors.textMuted}
-                className="ml-1"
+                font={isSelected ? "semibold" : "normal"}
+                color={isSelected ? colors.background : colors.textMuted}
+                className="ml-1.5"
               >
                 {type.label}
               </ApText>
@@ -95,10 +89,11 @@ const SchedulePicker: React.FC<SchedulePickerProps> = ({
           <ApText
             size="xs"
             color={colors.textMuted}
-            className="mb-2"
-            font="semibold"
+            className="mb-2 uppercase"
+            font="medium"
+            style={{ letterSpacing: 0.8 }}
           >
-            SELECT DAYS
+            Select Days
           </ApText>
           <View className="flex-row justify-between">
             {DAYS_OF_WEEK.map((day) => {
@@ -107,19 +102,17 @@ const SchedulePicker: React.FC<SchedulePickerProps> = ({
                 <TouchableOpacity
                   key={day}
                   onPress={() => toggleDay(day)}
-                  className="w-10 h-10 rounded-full items-center justify-center"
+                  className="w-9 h-9 rounded-full items-center justify-center"
                   style={{
                     backgroundColor: isSelected
                       ? colors.primary
-                      : colors.background,
-                    borderWidth: isSelected ? 0 : 1,
-                    borderColor: colors.surfaceBorder,
+                      : colors.surface2,
                   }}
                 >
                   <ApText
                     size="xs"
-                    font={isSelected ? "bold" : "medium"}
-                    color={isSelected ? "#FFFFFF" : colors.textMuted}
+                    font={isSelected ? "semibold" : "normal"}
+                    color={isSelected ? colors.background : colors.textMuted}
                   >
                     {day.substring(0, 2)}
                   </ApText>
@@ -140,24 +133,24 @@ const SchedulePicker: React.FC<SchedulePickerProps> = ({
             <TouchableOpacity
               onPress={() => onTimesPerWeekChange(Math.max(1, timesPerWeek - 1))}
               className="w-8 h-8 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.background }}
+              style={{ backgroundColor: colors.surface2 }}
             >
-              <Ionicons name="remove" size={18} color={colors.textMuted} />
+              <Minus size={14} color={colors.textMuted} />
             </TouchableOpacity>
             <ApText
-              size="lg"
-              font="bold"
-              color={colors.primary}
-              className="mx-4"
+              size="base"
+              font="semibold"
+              color={colors.textPrimary}
+              className="mx-3"
             >
               {timesPerWeek}
             </ApText>
             <TouchableOpacity
               onPress={() => onTimesPerWeekChange(Math.min(7, timesPerWeek + 1))}
               className="w-8 h-8 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.background }}
+              style={{ backgroundColor: colors.surface2 }}
             >
-              <Ionicons name="add" size={18} color={colors.textMuted} />
+              <Plus size={14} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>
@@ -173,24 +166,24 @@ const SchedulePicker: React.FC<SchedulePickerProps> = ({
             <TouchableOpacity
               onPress={() => onIntervalDaysChange(Math.max(2, intervalDays - 1))}
               className="w-8 h-8 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.background }}
+              style={{ backgroundColor: colors.surface2 }}
             >
-              <Ionicons name="remove" size={18} color={colors.textMuted} />
+              <Minus size={14} color={colors.textMuted} />
             </TouchableOpacity>
             <ApText
-              size="lg"
-              font="bold"
-              color={colors.primary}
-              className="mx-4"
+              size="base"
+              font="semibold"
+              color={colors.textPrimary}
+              className="mx-3"
             >
               {intervalDays}
             </ApText>
             <TouchableOpacity
               onPress={() => onIntervalDaysChange(Math.min(30, intervalDays + 1))}
               className="w-8 h-8 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.background }}
+              style={{ backgroundColor: colors.surface2 }}
             >
-              <Ionicons name="add" size={18} color={colors.textMuted} />
+              <Plus size={14} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
         </View>

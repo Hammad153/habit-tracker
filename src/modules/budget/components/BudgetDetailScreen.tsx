@@ -1,389 +1,193 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState, useMemo } from "react";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { ArrowLeft, DollarSign, Plus, ChevronRight } from "lucide-react-native";
 import {
-  ApConfirmModal,
-  ApContainer,
-  ApEmptyState,
-  ApHeader,
-  ApLoader,
-  ApScrollView,
-  ApText,
+  ApErrorState,
+  Skeleton,
+  SkeletonCard,
+  SkeletonStatRow,
+  SkeletonHabitList,
 } from "@/src/components";
+import { Card } from "@/src/components/Card";
+import { ProgressBar } from "@/src/components/ProgressBar";
+import { ListRow } from "@/src/components/ListRow";
+import { Button } from "@/src/components/buttons/Button";
 import { useTheme } from "@/src/modules/settings/context";
-import helper from "@/src/helper";
 import { useBudgetState } from "../context";
-import { IBudget } from "../model";
-import {
-  budgetSpent,
-  durationInDays,
-  formatBudgetRange,
-  formatRange,
-  PERIOD_HELPERS,
-  PERIOD_LABELS,
-  spentByCategory,
-  spentInRange,
-  usageColor,
-  usagePercentage,
-} from "../utils";
+import { formatBudgetRange, budgetSpent } from "../utils";
 
-const DANGER = "#EF4444";
-
-const SectionTitle = ({ children }: { children: React.ReactNode }) => {
+export const BudgetDetailScreen = () => {
   const colors = useTheme();
-  return (
-    <ApText size="xs" font="bold" color={colors.textMuted} className="mb-2 mt-5 uppercase">
-      {children}
-    </ApText>
-  );
-};
-
-const Row = ({ label, value, color }: { label: string; value: string; color?: string }) => {
-  const colors = useTheme();
-  return (
-    <View className="flex-row items-center justify-between py-1">
-      <ApText size="sm" color={colors.textSecondary}>
-        {label}
-      </ApText>
-      <ApText size="sm" font="bold" color={color ?? colors.textPrimary}>
-        {value}
-      </ApText>
-    </View>
-  );
-};
-
-const ProgressBar = ({ percentage, color }: { percentage: number; color: string }) => {
-  const colors = useTheme();
-  return (
-    <View className="h-3 overflow-hidden rounded-full" style={{ backgroundColor: colors.background }}>
-      <View
-        className="h-full rounded-full"
-        style={{ width: `${Math.min(percentage, 100)}%`, backgroundColor: color }}
-      />
-    </View>
-  );
-};
-
-const WeeklyBreakdown = ({ budget }: { budget: IBudget }) => {
-  const colors = useTheme();
-  if (!budget.breakdowns?.length) return null;
-
-  return (
-    <>
-      <SectionTitle>Weekly breakdown</SectionTitle>
-      {budget.breakdowns.map((week) => {
-        const start = week.startDate.slice(0, 10);
-        const end = week.endDate.slice(0, 10);
-        const spent = spentInRange(budget, start, end);
-        const percentage = usagePercentage(spent, week.amount);
-        const barColor = usageColor(percentage, colors);
-
-        return (
-          <View
-            key={week.id}
-            className="mb-3 rounded-2xl border p-3"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-center justify-between">
-              <ApText size="sm" font="bold" color={colors.textPrimary}>
-                {week.label}
-              </ApText>
-              <ApText size="xs" color={colors.textMuted}>
-                {formatRange(start, end)}
-              </ApText>
-            </View>
-            <View className="mb-2 mt-2 flex-row items-end justify-between">
-              <ApText size="base" font="bold" color={colors.textPrimary}>
-                {helper.formatCurrency(week.amount)}
-              </ApText>
-              <ApText size="xs" color={barColor}>
-                {helper.formatCurrency(spent)} spent
-              </ApText>
-            </View>
-            <ProgressBar percentage={percentage} color={barColor} />
-            {week.note ? (
-              <ApText size="xs" color={colors.textMuted} className="mt-2">
-                {week.note}
-              </ApText>
-            ) : null}
-          </View>
-        );
-      })}
-    </>
-  );
-};
-
-const CategoryAllocations = ({ budget }: { budget: IBudget }) => {
-  const colors = useTheme();
-  const spentPerCategory = useMemo(() => spentByCategory(budget), [budget]);
-  if (!budget.allocations?.length) return null;
-
-  const allocated = budget.allocations.reduce((sum, item) => sum + item.amount, 0);
-
-  return (
-    <>
-      <SectionTitle>Category breakdown</SectionTitle>
-      {budget.allocations.map((allocation) => {
-        const spent = spentPerCategory[allocation.categoryId] ?? 0;
-        const percentage = usagePercentage(spent, allocation.amount);
-        const barColor = usageColor(percentage, colors);
-        const category = allocation.category;
-
-        return (
-          <View
-            key={allocation.id}
-            className="mb-3 rounded-2xl border p-3"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View className="flex-row items-center">
-              <View
-                className="h-9 w-9 items-center justify-center rounded-xl"
-                style={{ backgroundColor: (category?.color || colors.primary) + "18" }}
-              >
-                <Ionicons
-                  name={(category?.icon as any) || "apps-outline"}
-                  size={16}
-                  color={category?.color || colors.primary}
-                />
-              </View>
-              <ApText size="sm" font="semibold" color={colors.textPrimary} className="ml-2 flex-1">
-                {category?.name || "Category"}
-              </ApText>
-              <ApText size="sm" font="bold" color={colors.textPrimary}>
-                {helper.formatCurrency(allocation.amount)}
-              </ApText>
-            </View>
-            <View className="mt-3">
-              <ProgressBar percentage={percentage} color={barColor} />
-            </View>
-            <ApText size="xs" color={colors.textMuted} className="mt-2">
-              {helper.formatCurrency(spent)} spent • {percentage}% of allocation
-            </ApText>
-          </View>
-        );
-      })}
-      <View className="rounded-2xl p-3" style={{ backgroundColor: colors.surface }}>
-        <Row label="Total allocated" value={helper.formatCurrency(allocated)} />
-        <Row
-          label="Unallocated"
-          value={helper.formatCurrency(Math.max(budget.amount - allocated, 0))}
-          color={colors.textMuted}
-        />
-      </View>
-    </>
-  );
-};
-
-const LinkedExpenses = ({ budget }: { budget: IBudget }) => {
-  const colors = useTheme();
-  const expenses = budget.expenses ?? [];
-
-  return (
-    <>
-      <SectionTitle>Expenses ({expenses.length})</SectionTitle>
-      {!expenses.length ? (
-        <View className="rounded-2xl border p-4" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
-          <ApText size="sm" color={colors.textMuted}>
-            No expenses linked to this budget yet.
-          </ApText>
-        </View>
-      ) : (
-        expenses.map((expense) => (
-          <TouchableOpacity
-            key={expense.id}
-            onPress={() => router.push({ pathname: "/add-expense", params: { id: expense.id } })}
-            className="mb-2 flex-row items-center rounded-2xl border p-3"
-            style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
-          >
-            <View
-              className="h-9 w-9 items-center justify-center rounded-xl"
-              style={{ backgroundColor: (expense.category?.color || colors.primary) + "18" }}
-            >
-              <Ionicons
-                name={(expense.category?.icon as any) || "receipt-outline"}
-                size={16}
-                color={expense.category?.color || colors.primary}
-              />
-            </View>
-            <View className="ml-3 flex-1">
-              <ApText size="sm" font="semibold" color={colors.textPrimary} numberOfLines={1}>
-                {expense.title}
-              </ApText>
-              <ApText size="xs" color={colors.textMuted}>
-                {expense.category?.name || "Uncategorized"} • {expense.expenseDate.slice(0, 10)}
-              </ApText>
-            </View>
-            <ApText size="sm" font="bold" color={colors.warning}>
-              {helper.formatCurrency(expense.amount)}
-            </ApText>
-          </TouchableOpacity>
-        ))
-      )}
-    </>
-  );
-};
-
-const BudgetDetailScreen = () => {
-  const colors = useTheme();
-  const { id } = useLocalSearchParams<{ id?: string }>();
-  const { budgets, fetchBudgets, deleteBudget, loading } = useBudgetState();
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const { budgetId } = useLocalSearchParams<{ budgetId: string }>();
+  const { budgets, fetchBudgets, loading } = useBudgetState();
 
   useEffect(() => {
     fetchBudgets();
   }, []);
 
-  const budget = useMemo(() => budgets.find((item) => item.id === id), [budgets, id]);
+  const budget = useMemo(
+    () => budgets.find((b) => b.id === budgetId),
+    [budgets, budgetId]
+  );
+
+  if (loading && !budget) {
+    return (
+      <View className="flex-1 bg-background">
+        <View className="h-[56px] px-5 flex-row items-center justify-between">
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={8}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+          >
+            <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+          </Pressable>
+          <Text className="text-[18px] font-bold text-ink-primary">
+            Budget details
+          </Text>
+          <View className="w-10" />
+        </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }}
+        >
+          <SkeletonCard height={80} className="my-3" />
+          <SkeletonStatRow className="my-4" />
+          <Skeleton height={6} radius={3} className="my-3" />
+          <SkeletonHabitList count={3} />
+        </ScrollView>
+      </View>
+    );
+  }
 
   if (!budget) {
-    // The list is still in flight on a cold open (e.g. a deep link).
-    if (loading) return <ApLoader />;
     return (
-      <ApContainer>
-        <ApHeader title="Budget" hasBackButton />
-        <ApEmptyState
-          icon="wallet-outline"
-          title="Budget not found"
-          subtitle="It may have been deleted."
-          actionLabel="Back to budgets"
-          onAction={() => router.back()}
-        />
-      </ApContainer>
+      <View className="flex-1 bg-background">
+        <ApErrorState onRetry={fetchBudgets} />
+      </View>
     );
   }
 
   const spent = budgetSpent(budget);
-  const remaining = budget.remainingAmount ?? budget.amount - spent;
-  const percentage = budget.utilisationPercentage ?? usagePercentage(spent, budget.amount);
-  const barColor = usageColor(percentage, colors);
-  const days = durationInDays(budget.startDate.slice(0, 10), budget.endDate.slice(0, 10));
-
-  const confirmDelete = async () => {
-    setConfirmingDelete(false);
-    await deleteBudget(budget.id);
-    router.back();
-  };
+  const total = budget.amount || 1;
+  const remaining = total - spent;
+  const pct = Math.min(1, spent / total);
+  const rangeText = formatBudgetRange(budget.startDate, budget.endDate);
 
   return (
-    <ApContainer>
-      <ApHeader
-        title="Budget Details"
-        hasBackButton
-        right={
-          <View className="flex-row gap-2">
-            <TouchableOpacity
-              onPress={() => router.push({ pathname: "/add-budget", params: { id: budget.id } })}
-              className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.primary + "18" }}
-            >
-              <Ionicons name="create-outline" size={18} color={colors.primary} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setConfirmingDelete(true)}
-              className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: DANGER + "18" }}
-            >
-              <Ionicons name="trash-outline" size={18} color={DANGER} />
-            </TouchableOpacity>
-          </View>
-        }
-      />
-      <ApScrollView contentContainerStyle={{ paddingBottom: 90 }}>
-        <View
-          className="mt-3 rounded-2xl border p-4"
-          style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+    <View className="flex-1 bg-background">
+      {/* Top Navbar */}
+      <View className="h-[56px] px-5 flex-row items-center justify-between">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
         >
-          <View className="flex-row items-start justify-between">
-            <View className="flex-1 pr-3">
-              <ApText size="xl" font="bold" color={colors.textPrimary}>
-                {budget.title}
-              </ApText>
-              <ApText size="xs" color={colors.textMuted} className="mt-1">
-                {formatBudgetRange(budget.startDate, budget.endDate)} • {days}{" "}
-                {days === 1 ? "day" : "days"}
-              </ApText>
-            </View>
-            <View className="rounded-lg px-2 py-1" style={{ backgroundColor: colors.primary + "18" }}>
-              <ApText size="xs" font="bold" color={colors.primary}>
-                {PERIOD_LABELS[budget.periodType]}
-              </ApText>
-            </View>
-          </View>
+          <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+        </Pressable>
+        <Text className="text-[18px] font-bold text-ink-primary">
+          Budget details
+        </Text>
+        <View className="w-10" />
+      </View>
 
-          <ApText size="xs" color={colors.textMuted} className="mt-2">
-            {PERIOD_HELPERS[budget.periodType]}
-          </ApText>
-
-          <View className="mt-4">
-            <ProgressBar percentage={percentage} color={barColor} />
-          </View>
-          <ApText size="xs" font="semibold" color={barColor} className="mt-2">
-            {percentage}% used
-          </ApText>
-
-          <View className="mt-3">
-            <Row label="Planned budget" value={helper.formatCurrency(budget.plannedAmount ?? budget.amount)} />
-            <Row label="Budgeted expenses" value={helper.formatCurrency(spent)} color={colors.warning} />
-            <Row
-              label={remaining < 0 ? "Over budget by" : "Remaining budget"}
-              value={helper.formatCurrency(Math.abs(remaining))}
-              color={remaining < 0 ? DANGER : "#10B981"}
-            />
-            <Row label="Period income" value={helper.formatCurrency(budget.periodIncome ?? 0)} color={colors.primary} />
-            <Row
-              label="Period expenses"
-              value={helper.formatCurrency(budget.totalPeriodExpenses ?? spent)}
-              color={colors.warning}
-            />
-            <Row
-              label="Period net cash flow"
-              value={helper.formatCurrency(budget.netCashFlow ?? 0)}
-              color={(budget.netCashFlow ?? 0) < 0 ? DANGER : "#10B981"}
-            />
-          </View>
-
-          {percentage >= 80 ? (
-            <View className="mt-3 flex-row items-start rounded-xl p-3" style={{ backgroundColor: DANGER + "18" }}>
-              <Ionicons name="alert-circle-outline" size={18} color={DANGER} />
-              <ApText size="sm" color={DANGER} className="ml-2 flex-1">
-                {percentage >= 100
-                  ? "You are above this budget."
-                  : "You are close to this budget's limit."}
-              </ApText>
-            </View>
-          ) : null}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }}
+      >
+        {/* Header */}
+        <View className="my-3">
+          <Text className="text-[22px] font-bold text-ink-primary">
+            {budget.title}
+          </Text>
+          <Text className="text-[12.5px] font-medium text-ink-secondary mt-0.5">
+            {rangeText} · {budget.periodType}
+          </Text>
         </View>
 
-        {budget.note ? (
-          <>
-            <SectionTitle>Note</SectionTitle>
-            <View
-              className="rounded-2xl border p-4"
-              style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}
+        {/* Plain Stats Numbers (Section 4) */}
+        <View className="flex-row items-center justify-between my-4">
+          <View>
+            <Text className="text-[24px] font-bold text-ink-primary">
+              ${total.toLocaleString()}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Limit
+            </Text>
+          </View>
+          <View>
+            <Text className="text-[24px] font-bold text-ink-primary">
+              ${spent.toLocaleString()}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Spent
+            </Text>
+          </View>
+          <View>
+            <Text
+              className={"text-[24px] font-bold " + (remaining < 0 ? "text-danger" : "text-accent")}
             >
-              <ApText size="sm" color={colors.textSecondary}>
-                {budget.note}
-              </ApText>
-            </View>
-          </>
-        ) : null}
+              ${remaining.toLocaleString()}
+            </Text>
+            <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+              Remaining
+            </Text>
+          </View>
+        </View>
 
-        <WeeklyBreakdown budget={budget} />
-        <CategoryAllocations budget={budget} />
-        <LinkedExpenses budget={budget} />
-      </ApScrollView>
+        <ProgressBar
+          progress={pct}
+          tone={pct >= 1 ? "danger" : pct >= 0.8 ? "warning" : "accent"}
+          height={6}
+          className="my-3"
+        />
 
-      <ApConfirmModal
-        visible={confirmingDelete}
-        title="Delete budget?"
-        subTitle={`"${budget.title}" and its breakdown will be removed. Linked expenses are kept.`}
-        confirmText="Delete"
-        destructive
-        onConfirm={confirmDelete}
-        onClose={() => setConfirmingDelete(false)}
-      />
-    </ApContainer>
+        <View className="h-[1px] bg-border my-2" />
+
+        {/* Linked Expenses */}
+        <Text className="text-[12px] font-semibold text-ink-tertiary mt-4 mb-2">
+          Expenses on this budget
+        </Text>
+        {(!budget.expenses || budget.expenses.length === 0) ? (
+          <Text className="text-[13.5px] text-ink-secondary my-4">
+            No expenses linked to this budget yet.
+          </Text>
+        ) : (
+          <View className="bg-background-surface rounded-lg px-4 py-1 mb-4">
+            {budget.expenses.map((exp: any, idx: number) => (
+              <ListRow
+                key={exp.id}
+                title={exp.description || exp.category?.name || "Expense"}
+                subLabel={exp.expenseDate ? exp.expenseDate.slice(0, 10) : ""}
+                trailingControl={
+                  <Text className="text-[15px] font-bold text-ink-primary">
+                    -${exp.amount.toLocaleString()}
+                  </Text>
+                }
+                isLast={idx === (budget.expenses?.length ?? 0) - 1}
+              />
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Pinned Bottom Button */}
+      <View
+        className="absolute bottom-0 left-0 right-0 p-5 bg-background border-t border-border"
+        style={{ paddingBottom: 24 }}
+      >
+        <Button
+          label="Add expense to this budget"
+          onPress={() =>
+            router.push({
+              pathname: "/add-expense",
+              params: { budgetId: budget.id },
+            })
+          }
+          variant="primary"
+        />
+      </View>
+    </View>
   );
 };
 

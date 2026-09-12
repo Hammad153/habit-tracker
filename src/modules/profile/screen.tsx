@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import {
+  Palette,
+  Volume2,
+  Sparkles,
+  Star,
+  Lock,
+  LogOut,
+  Trash2,
+} from "lucide-react-native";
 import { router } from "expo-router";
 import {
-  ApLoader,
   ApScrollView,
   ApContainer,
   ApHeader,
   ApText,
   ApModal,
+  Avatar,
+  ApCard,
+  Skeleton,
+  SkeletonStatRow,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useProfileState } from "./context";
 import { AuthService } from "@/src/modules/auth/api";
 import { ToastService } from "@/src/services";
-import StatCard from "./components/StatCard";
 import SettingsItem from "./components/SettingsItem";
 
 const ProfileScreen = () => {
@@ -52,142 +63,188 @@ const ProfileScreen = () => {
     }
   };
 
-  if (loading) {
-    return <ApLoader />;
-  }
+  const isInitialLoading = loading && !profile;
 
   const appearanceValue =
     themeMode === "system" ? "System" : themeMode === "dark" ? "Dark" : "Light";
   const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
+  const displayName = user?.name || profile?.name || "User";
+  const displayEmail = user?.email || profile?.email || "";
 
   return (
     <ApContainer>
       <ApHeader title="Profile" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <View className="items-center mt-6 mb-8">
-          <View className="relative">
-            <View
-              className="w-28 h-28 rounded-full items-center justify-center overflow-hidden border-2"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.primary,
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.35,
-                shadowRadius: 14,
-                elevation: 8,
-              }}
-            >
-              {user?.avatar || profile?.avatar ? (
-                <Image
-                  source={{ uri: user?.avatar || profile?.avatar }}
-                  className="w-full h-full"
-                />
-              ) : (
-                <ApText size="3xl" font="bold" color={colors.primary}>
-                  {(user?.name || profile?.name)
-                    ?.substring(0, 2)
-                    .toUpperCase() || "HI"}
-                </ApText>
-              )}
+        {/* User plain row (Section 4.8) */}
+        {isInitialLoading ? (
+          <View className="flex-row items-center mt-2 mb-6">
+            <Skeleton width={64} height={64} radius={32} />
+            <View className="ml-4 flex-1">
+              <Skeleton width="45%" height={20} radius={4} className="mb-2" />
+              <Skeleton width="65%" height={12} radius={4} />
             </View>
           </View>
-
-          <ApText
-            size="xl"
-            font="bold"
-            color={colors.textPrimary}
-            className="mt-4"
-          >
-            {user?.name || profile?.name || "User"}
-          </ApText>
-          <ApText size="sm" color={colors.textMuted}>
-            {user?.email || profile?.email || ""}
-          </ApText>
-        </View>
-
-        <View className="px-5 mb-8">
-          <View className="flex-row">
-            <StatCard
-              label="Total Habits"
-              value={profile?.totalHabits?.toString() || "0"}
-            />
-            <StatCard
-              label="Longest Streak"
-              value={profile?.longestStreak?.toString() || "0"}
-            />
-            <StatCard
-              label="Completion"
-              value={`${Math.round((profile?.completionRate || 0) * 100)}%`}
-            />
+        ) : (
+          <View className="flex-row items-center mt-2 mb-6">
+            <Avatar name={displayName} size="xl" />
+            <View className="ml-4 flex-1 min-w-0">
+              <ApText size="lg" font="semibold" color={colors.textPrimary} numberOfLines={1}>
+                {displayName}
+              </ApText>
+              {displayEmail ? (
+                <ApText size="xs" color={colors.textMuted} className="mt-0.5" numberOfLines={1}>
+                  {displayEmail}
+                </ApText>
+              ) : null}
+            </View>
           </View>
-        </View>
+        )}
 
-        <View className="px-5 mb-20 space-y-2">
+        {/* 3 Plain stat pairs side by side */}
+        {isInitialLoading ? (
+          <SkeletonStatRow className="mb-6" />
+        ) : (
+          <View className="flex-row items-center justify-around py-4 mb-6">
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
+                {profile?.currentStreak ?? 0}
+              </ApText>
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Current Streak
+              </ApText>
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
+                {profile?.longestStreak ?? 0}
+              </ApText>
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Best Streak
+              </ApText>
+            </View>
+
+            <View
+              className="w-[1px] h-8 self-center"
+              style={{ backgroundColor: colors.surfaceBorder }}
+            />
+
+            <View className="items-center flex-1">
+              <ApText
+                size="3xl"
+                font="semibold"
+                color={colors.textPrimary}
+                style={{ letterSpacing: -0.5 }}
+              >
+                {profile?.totalHabits ?? 0}
+              </ApText>
+              <ApText
+                size="xs"
+                font="medium"
+                color={colors.textMuted}
+                className="uppercase mt-1"
+                style={{ letterSpacing: 0.8 }}
+              >
+                Habits
+              </ApText>
+            </View>
+          </View>
+        )}
+
+        {/* Sections */}
+        <View className="mb-6">
           <ApText
             size="xs"
-            font="bold"
+            font="semibold"
             color={colors.textMuted}
-            className="mb-2 uppercase tracking-wider"
+            className="uppercase mb-2"
+            style={{ letterSpacing: 0.8, marginTop: 12 }}
           >
             Preferences
           </ApText>
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <ApCard className="overflow-hidden mb-5">
             <SettingsItem
               label="Appearance"
-              icon="color-palette"
+              icon={Palette}
               value={appearanceValue}
               onPress={() => router.push("/settings/appearance")}
             />
             <SettingsItem
               label="Sounds & Haptics"
-              icon="musical-note"
+              icon={Volume2}
               value={soundsValue}
               onPress={() => router.push("/settings/sounds")}
             />
             <SettingsItem
               label="AI Coach"
-              icon="sparkles"
+              icon={Sparkles}
               onPress={() => router.push("/settings/coach")}
             />
-          </View>
+          </ApCard>
 
           <ApText
             size="xs"
-            font="bold"
+            font="semibold"
             color={colors.textMuted}
-            className="mb-2 uppercase tracking-wider"
+            className="uppercase mb-2"
+            style={{ letterSpacing: 0.8, marginTop: 12 }}
           >
             Account & Security
           </ApText>
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <ApCard className="overflow-hidden mb-5">
             <SettingsItem
               label="Subscription"
-              icon="star"
+              icon={Star}
               value="Manage"
               onPress={() => router.push("/subscription")}
             />
             <SettingsItem
               label="Change Password"
-              icon="lock-closed"
+              icon={Lock}
               onPress={() => router.push("/settings/change-password" as any)}
             />
-          </View>
+          </ApCard>
 
-          <View className="rounded-3xl overflow-hidden mb-6 border" style={{ backgroundColor: colors.surface, borderColor: colors.surfaceBorder }}>
+          <ApCard className="overflow-hidden mb-5">
             <SettingsItem
               label="Log Out"
-              icon="log-out"
+              icon={LogOut}
               isDestructive
               onPress={handleLogout}
             />
             <SettingsItem
               label="Delete Account"
-              icon="trash"
+              icon={Trash2}
               isDestructive
               onPress={() => setShowDeleteModal(true)}
             />
-          </View>
+          </ApCard>
         </View>
       </ApScrollView>
 
@@ -197,32 +254,25 @@ const ProfileScreen = () => {
         title="Log Out"
         subTitle="Are you sure you want to log out?"
       >
-        <View className="flex-row gap-x-2 mt-2">
+        <View className="flex-row gap-x-2 mt-3">
           <TouchableOpacity
             onPress={() => setShowLogoutModal(false)}
-            className="flex-1 py-4 rounded-full border items-center"
+            className="flex-1 py-3 rounded-xl border items-center"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
             }}
           >
-            <ApText font="semibold" color={colors.textMuted}>
+            <ApText font="medium" color={colors.textMuted}>
               Cancel
             </ApText>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={confirmLogout}
-            className="flex-1 py-4 rounded-full items-center"
-            style={{
-              backgroundColor: colors.danger,
-              shadowColor: colors.danger,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 4,
-            }}
+            className="flex-1 py-3 rounded-xl items-center"
+            style={{ backgroundColor: colors.danger }}
           >
-            <ApText font="bold" color={colors.white}>
+            <ApText font="semibold" color={colors.background}>
               Log Out
             </ApText>
           </TouchableOpacity>
@@ -233,37 +283,32 @@ const ProfileScreen = () => {
         visible={showDeleteModal}
         onClose={() => !deleting && setShowDeleteModal(false)}
         title="Delete Account"
-        subTitle="This permanently deletes your account and all habits, completions and progress. This cannot be undone."
+        subTitle="This permanently deletes your account and all habits, completions, and progress. This cannot be undone."
       >
-        <View className="flex-row gap-x-2 mt-2">
+        <View className="flex-row gap-x-2 mt-3">
           <TouchableOpacity
             onPress={() => setShowDeleteModal(false)}
             disabled={deleting}
-            className="flex-1 py-4 rounded-full border items-center"
+            className="flex-1 py-3 rounded-xl border items-center"
             style={{
               backgroundColor: colors.surface,
               borderColor: colors.surfaceBorder,
             }}
           >
-            <ApText font="semibold" color={colors.textMuted}>
+            <ApText font="medium" color={colors.textMuted}>
               Cancel
             </ApText>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={confirmDeleteAccount}
             disabled={deleting}
-            className="flex-1 py-4 rounded-full items-center"
+            className="flex-1 py-3 rounded-xl items-center"
             style={{
               backgroundColor: colors.danger,
               opacity: deleting ? 0.6 : 1,
-              shadowColor: colors.danger,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 4,
             }}
           >
-            <ApText font="bold" color={colors.white}>
+            <ApText font="semibold" color={colors.background}>
               {deleting ? "Deleting..." : "Delete"}
             </ApText>
           </TouchableOpacity>

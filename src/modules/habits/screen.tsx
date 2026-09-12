@@ -1,24 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, ScrollView, RefreshControl, Pressable } from "react-native";
+import { Plus, MoreHorizontal } from "lucide-react-native";
 import { router } from "expo-router";
 import {
-  ApScrollView,
-  ApLoader,
-  ApContainer,
-  ApHeader,
   ApEmptyState,
   ApErrorState,
-  ApText,
+  SkeletonHabitList,
 } from "@/src/components";
-import { useSettingsState } from "@/src/modules/settings/context";
+import { Tag } from "@/src/components/Tag";
+import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
 import HabitMetrics from "./components/HabitMetrics";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
-const HabitPageScreen = () => {
-  const { colors } = useSettingsState();
+export const HabitPageScreen = () => {
+  const colors = useTheme();
   const { loading, error, habits, fetchHabits } = useHabitState();
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<"all" | "todo" | "done">("all");
@@ -33,208 +30,154 @@ const HabitPageScreen = () => {
     fetchHabits().finally(() => {
       setRefreshing(false);
     });
-  }, []);
+  }, [fetchHabits]);
 
   const activeHabits = useMemo(() => {
     return habits.filter((h: any) => !h.isArchived);
   }, [habits]);
 
+  const todoCount = useMemo(() => {
+    return activeHabits.filter(
+      (h: any) => !h.completions?.some((c: any) => isSameDateKey(c.date, today) && c.status)
+    ).length;
+  }, [activeHabits, today]);
+
+  const doneCount = activeHabits.length - todoCount;
+
   const filteredHabits = useMemo(() => {
-    return activeHabits.filter((h: any) => {
+    const list = activeHabits.filter((h: any) => {
       const isDone = h.completions?.some(
-        (c: any) => isSameDateKey(c.date, today) && c.status,
+        (c: any) => isSameDateKey(c?.date, today) && c.status
       );
       if (filter === "todo") return !isDone;
       if (filter === "done") return isDone;
       return true;
     });
+
+    return [...list].sort((a: any, b: any) => {
+      const aDone = a.completions?.some((c: any) => isSameDateKey(c?.date, today) && c.status) ? 1 : 0;
+      const bDone = b.completions?.some((c: any) => isSameDateKey(c?.date, today) && c.status) ? 1 : 0;
+      return aDone - bDone;
+    });
   }, [activeHabits, filter, today]);
 
-  if (loading && !refreshing) {
-    return <ApLoader />;
+  const isInitialLoading = loading && !refreshing && habits.length === 0;
+
+  if (error && habits.length === 0 && !isInitialLoading) {
+    return <ApErrorState onRetry={handleRefresh} />;
   }
 
   return (
-    <ApContainer>
-      <View className="flex-1">
-        <ApHeader
-          title="Habits"
-          right={
-            <View className="flex-row items-center gap-3">
-              <TouchableOpacity onPress={() => router.push("/create-habit")}>
-                <View
-                  className="w-10 h-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: colors.primary + "18" }}
-                >
-                  <Ionicons name="add" size={24} color={colors.primary} />
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push("/manage-habits")}>
-                <View
-                  className="w-10 h-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: colors.primary + "18" }}
-                >
-                  <Ionicons
-                    name="settings-outline"
-                    size={20}
-                    color={colors.primary}
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-          }
-        />
-
-        <ApScrollView
-          showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-        >
-          {/* Restored Habit Metrics & Weekly Stats */}
-          <HabitMetrics habits={habits} />
-
-          {/* Full Width Segmented Control Filter Tabs */}
-          {activeHabits.length > 0 && (
-            <View
-              className="flex-row mx-4 mb-4 p-1.5 rounded-2xl"
-              style={{
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: colors.surfaceBorder,
-              }}
+    <View className="flex-1 bg-background">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 10,
+          paddingBottom: 96,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
+        }
+      >
+        {/* Navbar */}
+        <View className="flex-row items-center justify-between py-3 mb-2">
+          <Text className="text-[22px] font-bold text-ink-primary">
+            Habits
+          </Text>
+          <View className="flex-row items-center gap-2">
+            <Pressable
+              onPress={() => router.push("/create-habit")}
+              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Create habit"
             >
-              {[
-                {
-                  id: "all",
-                  title: "All",
-                  count: activeHabits.length,
-                },
-                {
-                  id: "todo",
-                  title: "To Do",
-                  count: activeHabits.filter(
-                    (h: any) =>
-                      !h.completions?.some(
-                        (c: any) => isSameDateKey(c.date, today) && c.status,
-                      ),
-                  ).length,
-                },
-                {
-                  id: "done",
-                  title: "Done",
-                  count: activeHabits.filter((h: any) =>
-                    h.completions?.some(
-                      (c: any) => isSameDateKey(c.date, today) && c.status,
-                    ),
-                  ).length,
-                },
-              ].map((tab) => {
-                const active = filter === tab.id;
-                return (
-                  <TouchableOpacity
-                    key={tab.id}
-                    onPress={() => setFilter(tab.id as any)}
-                    activeOpacity={0.7}
-                    className="flex-1 py-2.5 px-2 rounded-xl flex-row items-center justify-center"
-                    style={{
-                      backgroundColor: active ? colors.primary : "transparent",
-                    }}
-                  >
-                    <ApText
-                      size="xs"
-                      font="bold"
-                      color={active ? colors.background : colors.textSecondary}
-                    >
-                      {tab.title}
-                    </ApText>
-                    <View
-                      className="px-1.5 py-0.5 rounded-full ml-1.5"
-                      style={{
-                        backgroundColor: active
-                          ? colors.background + "30"
-                          : colors.surfaceBorder,
-                      }}
-                    >
-                      <ApText
-                        size="xs"
-                        font="bold"
-                        color={active ? colors.background : colors.textMuted}
-                      >
-                        {tab.count}
-                      </ApText>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
+              <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/manage-habits")}
+              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Manage habits"
+            >
+              <MoreHorizontal size={20} color={colors.inkPrimary} strokeWidth={2} />
+            </Pressable>
+          </View>
+        </View>
 
-          <View className="px-2 pb-12">
-            {error && habits.length === 0 ? (
-              <ApErrorState onRetry={handleRefresh} />
-            ) : filteredHabits.length > 0 ? (
-              filteredHabits.map((habit: any) => (
-                <HabitCard
-                  key={habit.id}
-                  id={habit.id}
-                  title={habit.title}
-                  subtitle={habit.subtitle}
-                  icon={habit.icon}
-                  iconColor={habit.iconColor}
-                  iconBg={habit.iconBg}
-                  isCompleted={habit.completions?.some(
-                    (c: any) => isSameDateKey(c.date, today) && c.status,
-                  )}
-                  selectedDate={today}
-                  variant="toggle"
-                  onRefresh={handleRefresh}
-                  goal={habit.goal}
-                  value={
-                    habit.completions?.find((c: any) =>
-                      isSameDateKey(c.date, today),
-                    )?.value || 0
-                  }
-                  unit={habit.unit}
-                  fullBehavior={habit.fullBehavior}
-                  minimumBehavior={habit.minimumBehavior}
-                  emergencyMinimum={habit.emergencyMinimum}
-                  stackAfterTitle={
-                    habit.stackAfterHabitId
-                      ? habits.find((h: any) => h.id === habit.stackAfterHabitId)
-                          ?.title
-                      : undefined
-                  }
-                />
-              ))
-            ) : (
-              <ApEmptyState
-                icon={filter === "done" ? "checkmark-circle-outline" : "leaf-outline"}
-                title={
-                  filter === "done"
-                    ? "No completed habits yet today"
-                    : filter === "todo"
-                    ? "All caught up for today!"
-                    : "No habits yet"
+        {/* Weekly Metrics and Bar chart */}
+        <HabitMetrics habits={habits} />
+
+        {/* Filter Tags */}
+        <View className="flex-row gap-2 mb-4">
+          <Tag
+            label={"All · " + activeHabits.length}
+            active={filter === "all"}
+            onPress={() => setFilter("all")}
+          />
+          <Tag
+            label={"To do · " + todoCount}
+            active={filter === "todo"}
+            onPress={() => setFilter("todo")}
+          />
+          <Tag
+            label={"Done · " + doneCount}
+            active={filter === "done"}
+            onPress={() => setFilter("done")}
+          />
+        </View>
+
+        {/* Habit List */}
+        {isInitialLoading ? (
+          <SkeletonHabitList count={4} />
+        ) : filteredHabits.length === 0 ? (
+          <ApEmptyState
+            title={activeHabits.length === 0 ? "No habits yet" : "No habits match filter"}
+            description={
+              activeHabits.length === 0
+                ? "Start building your routine with your first habit."
+                : "Try selecting a different filter above."
+            }
+            actionLabel={activeHabits.length === 0 ? "Create habit" : undefined}
+            onAction={activeHabits.length === 0 ? () => router.push("/create-habit") : undefined}
+          />
+        ) : (
+          <View className="bg-background-surface rounded-lg px-4 py-1">
+            {filteredHabits.map((habit, index) => (
+              <HabitCard
+                key={habit.id}
+                id={habit.id}
+                title={habit.title}
+                subtitle={habit.subtitle}
+                icon={habit.icon}
+                iconColor={habit.iconColor}
+                iconBg={habit.iconBg}
+                selectedDate={today}
+                isCompleted={habit.completions?.some(
+                  (c: any) => isSameDateKey(c.date, today) && c.status
+                )}
+                goal={habit.goal}
+                value={
+                  habit.completions?.find((c: any) =>
+                    isSameDateKey(c.date, today)
+                  )?.value || 0
                 }
-                subtitle={
-                  filter === "done"
-                    ? "Check off habits as you complete them."
-                    : filter === "todo"
-                    ? "Great job completing your scheduled habits."
-                    : "Create your first habit to start building your routine."
-                }
-                actionLabel={activeHabits.length === 0 ? "Create Habit" : undefined}
-                onAction={
-                  activeHabits.length === 0
-                    ? () => router.push("/create-habit")
+                unit={habit.unit}
+                fullBehavior={habit.fullBehavior}
+                minimumBehavior={habit.minimumBehavior}
+                emergencyMinimum={habit.emergencyMinimum}
+                stackAfterTitle={
+                  habit.stackAfterHabitId
+                    ? habits.find((h: any) => h.id === habit.stackAfterHabitId)?.title
                     : undefined
                 }
+                isLast={index === filteredHabits.length - 1}
               />
-            )}
+            ))}
           </View>
-        </ApScrollView>
-      </View>
-    </ApContainer>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

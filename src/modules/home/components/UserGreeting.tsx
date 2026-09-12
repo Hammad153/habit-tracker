@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Image, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Pressable } from "react-native";
+import { Bell, Flame } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { ApText } from "@/src/components/Text";
+import { format } from "date-fns";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 
@@ -12,126 +12,59 @@ interface Props {
   onNotificationPress?: () => void;
   onJournalPress?: () => void;
   unreadCount?: number;
+  streak?: number;
 }
 
 const getGreeting = () => {
   const hour = new Date().getHours();
-  if (hour < 12) return { text: "Good Morning", icon: "sunny-outline" };
-  if (hour < 18)
-    return { text: "Good Afternoon", icon: "partly-sunny-outline" };
-  return { text: "Good Evening", icon: "moon-outline" };
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 };
 
-const getInitials = (name: string): string => {
-  const words = name.trim().split(/\s+/);
-  if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase();
-  }
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-};
-
-const UserGreeting: React.FC<Props> = ({
-  avatarUri,
+export const UserGreeting: React.FC<Props> = ({
   onNotificationPress,
-  onJournalPress,
   unreadCount = 0,
+  streak = 0,
 }) => {
   const { user } = useAuthState();
   const colors = useTheme();
   const router = useRouter();
-  const greeting = getGreeting();
+  const greetingText = getGreeting();
+  const dateFormatted = format(new Date(), "EEEE, d MMMM");
+
+  const displayName = user?.name ? `, ${user.name.split(" ")[0]}` : "";
 
   return (
-    <View className="flex-row items-center justify-between w-full py-3">
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => router.push("/profile")}
-        className="flex-row items-center"
-      >
-        <View
-          className="w-10 h-10 rounded-2xl items-center justify-center overflow-hidden"
-          style={{
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-          }}
-        >
-          {avatarUri ? (
-            <Image
-              source={{ uri: avatarUri }}
-              className="w-full h-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <ApText size="xl" font="bold" color={colors.background}>
-              {getInitials(user?.name || "HT")}
-            </ApText>
-          )}
-        </View>
-
-        <View className="ml-4">
-          <View className="flex-row items-center mb-0.5">
-            <Ionicons
-              name={greeting.icon as any}
-              size={12}
-              color={colors.primary}
-              style={{ marginRight: 4 }}
-            />
-            <ApText
-              size="xs"
-              font="bold"
-              color={colors.primary}
-              style={{ letterSpacing: 1 }}
-            >
-              {greeting.text.toUpperCase()}
-            </ApText>
+    <View className="flex-row items-center justify-between w-full pt-2 pb-4">
+      <View className="flex-1 mr-3">
+        <Text className="text-[12px] font-semibold text-ink-tertiary">
+          {dateFormatted}
+        </Text>
+        <Text className="text-[22px] font-bold text-ink-primary mt-0.5">
+          {greetingText}{displayName}
+        </Text>
+        {streak > 0 && (
+          <View className="flex-row items-center gap-1.5 mt-1">
+            <Flame size={14} color={colors.accent} strokeWidth={2.5} />
+            <Text className="text-[14px] font-bold text-accent">
+              {streak} day streak
+            </Text>
           </View>
-          <ApText size="xl" font="bold" color={colors.textPrimary}>
-            {user?.name || "Routina"}
-          </ApText>
-        </View>
-      </TouchableOpacity>
-
-      <View className="flex-row items-center">
-        <TouchableOpacity
-          onPress={onJournalPress}
-          activeOpacity={0.7}
-          className="w-11 h-11 rounded-2xl items-center justify-center border mr-2.5"
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
-          }}
-        >
-          <Ionicons name="journal" size={22} color={colors.primary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={onNotificationPress}
-          activeOpacity={0.7}
-          className="w-11 h-11 rounded-2xl items-center justify-center border"
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
-          }}
-        >
-          <Ionicons name="notifications" size={22} color={colors.primary} />
-          {unreadCount > 0 && (
-            <View
-              className="absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full border-2 items-center justify-center px-1"
-              style={{
-                backgroundColor: colors.danger,
-                borderColor: colors.surface,
-              }}
-            >
-              <ApText size="xs" font="bold" color="#FFFFFF">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </ApText>
-            </View>
-          )}
-        </TouchableOpacity>
+        )}
       </View>
+
+      <Pressable
+        onPress={onNotificationPress || (() => router.push("/notifications"))}
+        className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center relative active:opacity-80"
+        accessibilityRole="button"
+        accessibilityLabel="Notifications"
+      >
+        <Bell size={20} color={colors.inkPrimary} strokeWidth={2} />
+        {unreadCount > 0 && (
+          <View className="w-2 h-2 rounded-full bg-accent absolute top-2.5 right-2.5" />
+        )}
+      </Pressable>
     </View>
   );
 };
