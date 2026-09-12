@@ -1,8 +1,8 @@
 import React from "react";
-import MoreScreen from "@/src/modules/more/screen";
+import ProfileScreen from "@/src/modules/profile/screen";
 
 const More = () => {
-  return <MoreScreen />;
+  return <ProfileScreen />;
 };
 
 export default More;

@@ -58,7 +58,10 @@ export const IdentitiesProvider: React.FC<IProps> = ({ children }) => {
         setIdentities([]);
         return;
       }
-      if (!options?.silent) setLoading(true);
+      if (!options?.silent) {
+        setIdentities([]);
+        setLoading(true);
+      }
       try {
         // Client-local day key so "evidence today" matches the user's clock.
         const today = new Date();

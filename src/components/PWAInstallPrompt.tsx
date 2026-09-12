@@ -22,6 +22,8 @@ import {
   Flame,
 } from "lucide-react-native";
 import { useTheme } from "@/src/modules/settings/context";
+import { useFeedback } from "@/src/utils/feedback";
+import { ToastService } from "@/src/services";
 
 type DeviceType = "ios" | "android" | "desktop";
 
@@ -36,6 +38,9 @@ export const PWAInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<DeviceType>("ios");
   const [detectedDevice, setDetectedDevice] = useState<DeviceType>("desktop");
+  const [highlightInstructions, setHighlightInstructions] = useState(false);
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const { triggerHaptic, triggerSuccess } = useFeedback();
 
   useEffect(() => {
     if (Platform.OS !== "web") return;
@@ -49,6 +54,19 @@ export const PWAInstallPrompt: React.FC = () => {
 
     if (isStandalone) {
       return;
+    }
+
+    // Check if dismissed in this session
+    const isDismissed =
+      typeof sessionStorage !== "undefined" &&
+      sessionStorage.getItem("pwa_prompt_dismissed") === "true";
+    if (isDismissed) {
+      return;
+    }
+
+    // Check early-captured beforeinstallprompt event
+    if (typeof window !== "undefined" && (window as any).__deferredInstallPrompt) {
+      setDeferredPrompt((window as any).__deferredInstallPrompt);
     }
 
     // Detect device platform from userAgent
@@ -66,12 +84,15 @@ export const PWAInstallPrompt: React.FC = () => {
     // Listen for beforeinstallprompt event (Android / Chromium)
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
+      if (typeof window !== "undefined") {
+        (window as any).__deferredInstallPrompt = e;
+      }
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
 
-    // Show immediately when opening the page
+    // Show prompt after a slight delay
     const timer = setTimeout(() => {
       setVisible(true);
     }, 400);
@@ -83,20 +104,51 @@ export const PWAInstallPrompt: React.FC = () => {
   }, []);
 
   const handleInstallClick = useCallback(async () => {
-    if (deferredPrompt) {
+    triggerHaptic();
+
+    const activePrompt =
+      deferredPrompt ||
+      (typeof window !== "undefined" ? (window as any).__deferredInstallPrompt : null);
+
+    if (activePrompt) {
       try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
+        await activePrompt.prompt();
+        const choice = await activePrompt.userChoice;
+        if (choice && choice.outcome === "accepted") {
+          triggerSuccess();
+          ToastService.Success("Habit Tracker installed!");
           setVisible(false);
         }
+        setDeferredPrompt(null);
+        if (typeof window !== "undefined") {
+          (window as any).__deferredInstallPrompt = null;
+        }
+        return;
       } catch (err) {
         console.log("Install prompt error:", err);
       }
     }
-  }, [deferredPrompt]);
+
+    // Fallback when browser does not permit programmatic 1-tap install:
+    // Light up instructions and smoothly guide the user
+    setHighlightInstructions(true);
+    setTimeout(() => setHighlightInstructions(false), 3000);
+
+    if (selectedDevice === "ios") {
+      ToastService.Success("Tap Share (⎙) at bottom, then 'Add to Home Screen'");
+    } else if (selectedDevice === "android") {
+      ToastService.Success("Tap Chrome menu (⋮) in top-right, then 'Install app'");
+    } else {
+      ToastService.Success("Click the install icon in your browser's address bar");
+    }
+
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [deferredPrompt, selectedDevice, triggerHaptic, triggerSuccess]);
 
   const handleDismiss = useCallback(() => {
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("pwa_prompt_dismissed", "true");
+    }
     setVisible(false);
   }, []);
 
@@ -144,6 +196,7 @@ export const PWAInstallPrompt: React.FC = () => {
           </View>
 
           <ScrollView
+            ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 16 }}
           >
@@ -264,7 +317,7 @@ export const PWAInstallPrompt: React.FC = () => {
             {/* 1-Tap Install Button */}
             <Pressable
               onPress={handleInstallClick}
-              className="w-full h-12 rounded-full flex-row items-center justify-center mb-4 active:opacity-90"
+              className="w-full h-12 rounded-full flex-row items-center justify-center mb-4 active:opacity-90 active:scale-[0.99]"
               style={{
                 backgroundColor: colors.accent,
                 shadowColor: colors.accent,
@@ -276,7 +329,7 @@ export const PWAInstallPrompt: React.FC = () => {
             >
               <Zap size={18} color={colors.white} strokeWidth={2.5} />
               <Text className="text-[15px] font-semibold text-white ml-2">
-                1-Tap Instant Install
+                {deferredPrompt ? "1-Tap Instant Install" : "Install App (Follow Steps Below)"}
               </Text>
             </Pressable>
 
@@ -414,7 +467,8 @@ export const PWAInstallPrompt: React.FC = () => {
             <View
               className="p-3.5 rounded-xl border mb-3 flex-col gap-2.5"
               style={{
-                borderColor: colors.border,
+                borderColor: highlightInstructions ? colors.accent : colors.border,
+                borderWidth: highlightInstructions ? 2 : 1,
                 backgroundColor: colors.backgroundSurface,
               }}
             >

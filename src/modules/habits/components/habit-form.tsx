@@ -5,12 +5,19 @@ import {
   Pressable,
   ScrollView,
   Platform,
-  Switch,
   KeyboardAvoidingView,
 } from "react-native";
-import { X, ChevronDown, Check, Clock, Calendar, Sparkles, Grid, Minus, Plus } from "lucide-react-native";
+import { X, ChevronDown, Check, Clock, Calendar, Sparkles, Minus, Plus } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { ApTextInput, Button, Dropdown, Skeleton } from "@/src/components";
+import {
+  ApTextInput,
+  ApTimeField,
+  ApDatePicker,
+  SwitchButton,
+  Button,
+  Dropdown,
+  Skeleton,
+} from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -21,7 +28,6 @@ import { DAYS_OF_WEEK, IReminder } from "@/src/modules/reminders/model";
 import { ReminderApiService } from "@/src/modules/reminders/api";
 import { HabitService } from "@/src/modules/habits/api";
 import { useNotificationsState } from "@/src/modules/notifications/context";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import type { IHabitTemplate } from "@/src/modules/templates/model";
 import { LUCIDE_HABIT_ICONS, getLucideIcon, CATEGORY_CYCLE } from "@/src/utils/icons";
 import { CategoryKey } from "@/src/components/ListRow";
@@ -394,22 +400,6 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
               </View>
             ) : (
               <>
-                {/* Browse Templates link in create mode */}
-              {!isEditMode && (
-                <Pressable
-                  onPress={() => router.push("/templates")}
-                  className="flex-row items-center justify-between p-3.5 mb-4 rounded-sm bg-background-surface active:opacity-80"
-                >
-                  <View className="flex-row items-center">
-                    <Grid size={18} color={colors.accent} strokeWidth={2} />
-                    <Text className="text-[14px] font-semibold text-accent ml-2">
-                      Browse habit templates
-                    </Text>
-                  </View>
-                  <Text className="text-[12px] font-semibold text-ink-tertiary">→</Text>
-                </Pressable>
-              )}
-
               {/* Habit Name & Subtitle */}
               <ApTextInput
                 label="Habit name"
@@ -661,25 +651,22 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                     Receive a push notification
                   </Text>
                 </View>
-                <Switch
+                <SwitchButton
                   value={reminderEnabled}
                   onValueChange={(val) => {
                     setReminderEnabled(val);
-                    triggerSelection();
                   }}
-                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
-                  thumbColor={colors.white}
                 />
               </View>
 
               {reminderEnabled && (
                 <View className="mb-4 bg-background-surface rounded-md p-3.5">
-                  <ApTextInput
+                  <ApTimeField
                     label="Reminder time"
                     placeholder="08:00"
                     value={reminderTime}
-                    onChangeText={setReminderTime}
-                    containerClassName="mb-3"
+                    onChange={setReminderTime}
+                    className="mb-3"
                   />
                   <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
                     Reminder days
@@ -715,24 +702,21 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                     Cue, small versions & habit stacking
                   </Text>
                 </View>
-                <Switch
+                <SwitchButton
                   value={showBehavioral}
                   onValueChange={(val) => {
                     setShowBehavioral(val);
-                    triggerSelection();
                   }}
-                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
-                  thumbColor={colors.white}
                 />
               </View>
 
               {showBehavioral && (
                 <View className="mb-4 bg-background-surface rounded-md p-3.5 gap-3">
-                  <ApTextInput
+                  <ApTimeField
                     label="Cue time"
-                    placeholder="e.g. 07:30"
+                    placeholder="07:30"
                     value={scheduledTime}
-                    onChangeText={setScheduledTime}
+                    onChange={setScheduledTime}
                   />
                   <ApTextInput
                     label="Location (optional)"
@@ -778,14 +762,11 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                     Set a start and end date
                   </Text>
                 </View>
-                <Switch
+                <SwitchButton
                   value={hasDateRange}
                   onValueChange={(val) => {
                     setHasDateRange(val);
-                    triggerSelection();
                   }}
-                  trackColor={{ false: colors.backgroundSurface2, true: colors.accent }}
-                  thumbColor={colors.white}
                 />
               </View>
 
@@ -793,7 +774,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                 <View className="mb-4 bg-background-surface rounded-md p-3.5 gap-2">
                   <Pressable
                     onPress={() => setShowStartPicker(true)}
-                    className="flex-row items-center justify-between py-2 border-b border-border"
+                    className="flex-row items-center justify-between py-2 border-b border-border active:opacity-75"
                   >
                     <Text className="text-[14px] text-ink-primary">Start Date</Text>
                     <Text className="text-[14px] font-semibold text-accent">
@@ -802,7 +783,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                   </Pressable>
                   <Pressable
                     onPress={() => setShowEndPicker(true)}
-                    className="flex-row items-center justify-between py-2"
+                    className="flex-row items-center justify-between py-2 active:opacity-75"
                   >
                     <Text className="text-[14px] text-ink-primary">End Date</Text>
                     <Text className="text-[14px] font-semibold text-accent">
@@ -810,26 +791,27 @@ export const HabitForm: React.FC<HabitFormProps> = ({ habitId: propHabitId }) =>
                     </Text>
                   </Pressable>
 
-                  {showStartPicker && (
-                    <DateTimePicker
-                      value={startDate || new Date()}
-                      mode="date"
-                      onChange={(_, d) => {
-                        setShowStartPicker(false);
-                        if (d) setStartDate(d);
-                      }}
-                    />
-                  )}
-                  {showEndPicker && (
-                    <DateTimePicker
-                      value={endDate || startDate || new Date()}
-                      mode="date"
-                      onChange={(_, d) => {
-                        setShowEndPicker(false);
-                        if (d) setEndDate(d);
-                      }}
-                    />
-                  )}
+                  <ApDatePicker
+                    visible={showStartPicker}
+                    title="Select Start Date"
+                    selectedDate={startDate || new Date()}
+                    onClose={() => setShowStartPicker(false)}
+                    onSelect={(d) => {
+                      setStartDate(d);
+                      setShowStartPicker(false);
+                    }}
+                  />
+                  <ApDatePicker
+                    visible={showEndPicker}
+                    title="Select End Date"
+                    selectedDate={endDate || startDate || new Date()}
+                    minDate={startDate || undefined}
+                    onClose={() => setShowEndPicker(false)}
+                    onSelect={(d) => {
+                      setEndDate(d);
+                      setShowEndPicker(false);
+                    }}
+                  />
                 </View>
               )}
 

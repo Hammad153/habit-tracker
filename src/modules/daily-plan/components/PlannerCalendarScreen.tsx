@@ -5,6 +5,7 @@ import { MapPin, Calendar, ChevronRight } from "lucide-react-native";
 import {
   ApHeader,
   ApEmptyState,
+  SkeletonCard,
 } from "@/src/components";
 import { Card } from "@/src/components/Card";
 import { ProgressBar } from "@/src/components/ProgressBar";
@@ -23,7 +24,7 @@ const formatTime = (value?: string) => {
 
 export const PlannerCalendarScreen = () => {
   const colors = useTheme();
-  const { plans, fetchPlans } = useDailyPlanState();
+  const { plans, loading, fetchPlans } = useDailyPlanState();
 
   useEffect(() => {
     const start = new Date();
@@ -41,7 +42,13 @@ export const PlannerCalendarScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
       >
-        {plans.length === 0 ? (
+        {loading && plans.length === 0 ? (
+          <View className="gap-3">
+            <SkeletonCard height={90} />
+            <SkeletonCard height={90} />
+            <SkeletonCard height={90} />
+          </View>
+        ) : plans.length === 0 ? (
           <ApEmptyState
             title="No plans yet"
             description="Create daily schedules from the Plan tab to view them here."

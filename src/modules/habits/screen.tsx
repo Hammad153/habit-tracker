@@ -9,6 +9,7 @@ import {
 } from "@/src/components";
 import { Tag } from "@/src/components/Tag";
 import { useTheme } from "@/src/modules/settings/context";
+import { useAuthState } from "@/src/modules/auth/context";
 import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
 import HabitMetrics from "./components/HabitMetrics";
@@ -16,6 +17,7 @@ import { isSameDateKey, toDateKey } from "@/src/utils/date";
 
 export const HabitPageScreen = () => {
   const colors = useTheme();
+  const { user } = useAuthState();
   const { loading, error, habits, fetchHabits } = useHabitState();
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<"all" | "todo" | "done">("all");
@@ -23,7 +25,7 @@ export const HabitPageScreen = () => {
 
   useEffect(() => {
     fetchHabits();
-  }, []);
+  }, [user?.id]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);

@@ -23,10 +23,15 @@ export default function RootHtml({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-title" content="Habit Tracker" />
         <link rel="apple-touch-icon" href="/icon-512.png" />
 
-        {/* Service Worker Registration */}
+        {/* Service Worker & Early PWA Install Event Capture */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              window.__deferredInstallPrompt = null;
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                window.__deferredInstallPrompt = e;
+              });
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').catch((err) => {

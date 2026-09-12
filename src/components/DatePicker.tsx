@@ -35,13 +35,13 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
   onClose,
   onSelect,
   selectedDate,
-  maxDate = new Date(),
+  maxDate,
   minDate,
   title = "Select Date",
 }) => {
   const colors = useTheme();
   const today = startOfDay(new Date());
-  const max = startOfDay(maxDate);
+  const max = maxDate ? startOfDay(maxDate) : undefined;
   const min = minDate ? startOfDay(minDate) : undefined;
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 

@@ -1,5 +1,6 @@
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import {
   IFreezeResult,
   IRedeemResult,
@@ -38,6 +39,7 @@ export const useRewardsState = () => {
 };
 
 export const RewardsProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [balance, setBalance] = useState(0);
   const [shopItems, setShopItems] = useState<IShopListItem[]>([]);
   const [transactions, setTransactions] = useState<IRewardTransaction[]>([]);
@@ -80,6 +82,18 @@ export const RewardsProvider: React.FC<IProps> = ({ children }) => {
         return undefined;
       });
   }, []);
+
+  useEffect(() => {
+    setBalance(0);
+    setShopItems([]);
+    setTransactions([]);
+    if (user?.id) {
+      void fetchShop();
+      void fetchBalance();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id, fetchShop, fetchBalance]);
 
   /** Server is the source of truth; remainingCoins refreshes the local cache. */
   const redeem = useCallback((itemId: string) => {

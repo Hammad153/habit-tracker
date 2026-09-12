@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 import {
+  User,
+  Star,
+  Lock,
+  Sliders,
+  Flag,
+  Layers,
+  Calendar,
+  BookOpen,
+  BarChart2,
+  Clock,
+  Download,
   Palette,
   Volume2,
   Sparkles,
-  Star,
-  Lock,
+  Bell,
+  Gift,
   LogOut,
   Trash2,
 } from "lucide-react-native";
@@ -13,13 +24,9 @@ import { router } from "expo-router";
 import {
   ApScrollView,
   ApContainer,
-  ApHeader,
   ApText,
   ApModal,
-  Avatar,
-  ApCard,
   Skeleton,
-  SkeletonStatRow,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
@@ -27,6 +34,21 @@ import { useProfileState } from "./context";
 import { AuthService } from "@/src/modules/auth/api";
 import { ToastService } from "@/src/services";
 import SettingsItem from "./components/SettingsItem";
+
+interface ProfileMenuItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
+  route?: string;
+  value?: string;
+  onPress?: () => void;
+  isDestructive?: boolean;
+}
+
+interface ProfileSection {
+  title: string;
+  items: ProfileMenuItem[];
+}
 
 const ProfileScreen = () => {
   const { user, signOut } = useAuthState();
@@ -38,7 +60,7 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [user?.id]);
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -63,191 +85,248 @@ const ProfileScreen = () => {
     }
   };
 
-  const isInitialLoading = loading && !profile;
+  const isInitialLoading = loading || !profile?.id;
 
   const appearanceValue =
     themeMode === "system" ? "System" : themeMode === "dark" ? "Dark" : "Light";
   const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
   const displayName = user?.name || profile?.name || "User";
   const displayEmail = user?.email || profile?.email || "";
+  const displaySubtitle =
+    displayEmail || `${profile?.currentStreak ?? 0} day streak · Level ${profile?.level ?? 1}`;
+
+  const SECTIONS: ProfileSection[] = [
+    {
+      title: "Account",
+      items: [
+        {
+          id: "subscription",
+          label: "Subscription",
+          icon: Star,
+          route: "/subscription",
+          value: "Manage",
+        },
+        {
+          id: "change-password",
+          label: "Change password",
+          icon: Lock,
+          route: "/settings/change-password",
+        },
+      ],
+    },
+    {
+      title: "Goals & Tracking",
+      items: [
+        {
+          id: "manage-habits",
+          label: "Manage habits",
+          icon: Sliders,
+          route: "/manage-habits",
+        },
+        {
+          id: "identities",
+          label: "Identity goals",
+          icon: Flag,
+          route: "/identities",
+        },
+        {
+          id: "templates",
+          label: "Habit templates",
+          icon: Layers,
+          route: "/templates",
+        },
+        {
+          id: "planner-calendar",
+          label: "Planner calendar",
+          icon: Calendar,
+          route: "/planner-calendar",
+        },
+        {
+          id: "journal",
+          label: "Journal & reflections",
+          icon: BookOpen,
+          route: "/journal",
+        },
+      ],
+    },
+    {
+      title: "Insights & Data",
+      items: [
+        {
+          id: "analytics",
+          label: "Advanced analytics",
+          icon: BarChart2,
+          route: "/analytics",
+        },
+        {
+          id: "timeline",
+          label: "Habit timeline",
+          icon: Clock,
+          route: "/timeline",
+        },
+        {
+          id: "export",
+          label: "Export data",
+          icon: Download,
+          route: "/export",
+        },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        {
+          id: "appearance",
+          label: "Appearance & theme",
+          icon: Palette,
+          route: "/settings/appearance",
+          value: appearanceValue,
+        },
+        {
+          id: "sounds",
+          label: "Sounds & haptics",
+          icon: Volume2,
+          route: "/settings/sounds",
+          value: soundsValue,
+        },
+        {
+          id: "coach",
+          label: "AI Coach preferences",
+          icon: Sparkles,
+          route: "/settings/coach",
+        },
+        {
+          id: "notifications",
+          label: "Notifications feed",
+          icon: Bell,
+          route: "/notifications",
+        },
+        {
+          id: "reward-shop",
+          label: "Reward shop",
+          icon: Gift,
+          route: "/reward-shop",
+        },
+      ],
+    },
+    {
+      title: "Session",
+      items: [
+        {
+          id: "logout",
+          label: "Log out",
+          icon: LogOut,
+          isDestructive: true,
+          onPress: handleLogout,
+        },
+        {
+          id: "delete-account",
+          label: "Delete account",
+          icon: Trash2,
+          isDestructive: true,
+          onPress: () => setShowDeleteModal(true),
+        },
+      ],
+    },
+  ];
 
   return (
     <ApContainer>
-      <ApHeader title="Profile" hasBackButton />
-      <ApScrollView showsVerticalScrollIndicator={false}>
-        {/* User plain row (Section 4.8) */}
+      <ApScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 16 }}
+      >
+        {/* Screen Title (matching reference design) */}
+        <View className="pt-3 pb-4">
+          <ApText size="3xl" font="bold" color={colors.textPrimary}>
+            Profile
+          </ApText>
+        </View>
+
+        {/* User Card */}
         {isInitialLoading ? (
-          <View className="flex-row items-center mt-2 mb-6">
-            <Skeleton width={64} height={64} radius={32} />
-            <View className="ml-4 flex-1">
-              <Skeleton width="45%" height={20} radius={4} className="mb-2" />
-              <Skeleton width="65%" height={12} radius={4} />
+          <View
+            className="rounded-2xl p-4 flex-row items-center border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <Skeleton width={48} height={48} radius={24} />
+            <View className="ml-3.5 flex-1">
+              <Skeleton width="45%" height={18} radius={4} className="mb-2" />
+              <Skeleton width="60%" height={12} radius={4} />
             </View>
           </View>
         ) : (
-          <View className="flex-row items-center mt-2 mb-6">
-            <Avatar name={displayName} size="xl" />
-            <View className="ml-4 flex-1 min-w-0">
-              <ApText size="lg" font="semibold" color={colors.textPrimary} numberOfLines={1}>
+          <View
+            className="rounded-2xl p-4 flex-row items-center border"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
+            <View
+              className="w-12 h-12 rounded-full items-center justify-center mr-3.5 border"
+              style={{
+                backgroundColor: colors.surface2 || colors.background,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <User size={22} color={colors.textPrimary} strokeWidth={1.8} />
+            </View>
+            <View className="flex-1 min-w-0">
+              <ApText size="base" font="bold" color={colors.textPrimary} numberOfLines={1}>
                 {displayName}
               </ApText>
-              {displayEmail ? (
-                <ApText size="xs" color={colors.textMuted} className="mt-0.5" numberOfLines={1}>
-                  {displayEmail}
-                </ApText>
-              ) : null}
-            </View>
-          </View>
-        )}
-
-        {/* 3 Plain stat pairs side by side */}
-        {isInitialLoading ? (
-          <SkeletonStatRow className="mb-6" />
-        ) : (
-          <View className="flex-row items-center justify-around py-4 mb-6">
-            <View className="items-center flex-1">
-              <ApText
-                size="3xl"
-                font="semibold"
-                color={colors.textPrimary}
-                style={{ letterSpacing: -0.5 }}
-              >
-                {profile?.currentStreak ?? 0}
-              </ApText>
-              <ApText
-                size="xs"
-                font="medium"
-                color={colors.textMuted}
-                className="uppercase mt-1"
-                style={{ letterSpacing: 0.8 }}
-              >
-                Current Streak
-              </ApText>
-            </View>
-
-            <View
-              className="w-[1px] h-8 self-center"
-              style={{ backgroundColor: colors.surfaceBorder }}
-            />
-
-            <View className="items-center flex-1">
-              <ApText
-                size="3xl"
-                font="semibold"
-                color={colors.textPrimary}
-                style={{ letterSpacing: -0.5 }}
-              >
-                {profile?.longestStreak ?? 0}
-              </ApText>
-              <ApText
-                size="xs"
-                font="medium"
-                color={colors.textMuted}
-                className="uppercase mt-1"
-                style={{ letterSpacing: 0.8 }}
-              >
-                Best Streak
-              </ApText>
-            </View>
-
-            <View
-              className="w-[1px] h-8 self-center"
-              style={{ backgroundColor: colors.surfaceBorder }}
-            />
-
-            <View className="items-center flex-1">
-              <ApText
-                size="3xl"
-                font="semibold"
-                color={colors.textPrimary}
-                style={{ letterSpacing: -0.5 }}
-              >
-                {profile?.totalHabits ?? 0}
-              </ApText>
-              <ApText
-                size="xs"
-                font="medium"
-                color={colors.textMuted}
-                className="uppercase mt-1"
-                style={{ letterSpacing: 0.8 }}
-              >
-                Habits
+              <ApText size="xs" color={colors.textMuted} numberOfLines={1} className="mt-0.5">
+                {displaySubtitle}
               </ApText>
             </View>
           </View>
         )}
 
-        {/* Sections */}
-        <View className="mb-6">
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textMuted}
-            className="uppercase mb-2"
-            style={{ letterSpacing: 0.8, marginTop: 12 }}
-          >
-            Preferences
-          </ApText>
-          <ApCard className="overflow-hidden mb-5">
-            <SettingsItem
-              label="Appearance"
-              icon={Palette}
-              value={appearanceValue}
-              onPress={() => router.push("/settings/appearance")}
-            />
-            <SettingsItem
-              label="Sounds & Haptics"
-              icon={Volume2}
-              value={soundsValue}
-              onPress={() => router.push("/settings/sounds")}
-            />
-            <SettingsItem
-              label="AI Coach"
-              icon={Sparkles}
-              onPress={() => router.push("/settings/coach")}
-            />
-          </ApCard>
-
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textMuted}
-            className="uppercase mb-2"
-            style={{ letterSpacing: 0.8, marginTop: 12 }}
-          >
-            Account & Security
-          </ApText>
-          <ApCard className="overflow-hidden mb-5">
-            <SettingsItem
-              label="Subscription"
-              icon={Star}
-              value="Manage"
-              onPress={() => router.push("/subscription")}
-            />
-            <SettingsItem
-              label="Change Password"
-              icon={Lock}
-              onPress={() => router.push("/settings/change-password" as any)}
-            />
-          </ApCard>
-
-          <ApCard className="overflow-hidden mb-5">
-            <SettingsItem
-              label="Log Out"
-              icon={LogOut}
-              isDestructive
-              onPress={handleLogout}
-            />
-            <SettingsItem
-              label="Delete Account"
-              icon={Trash2}
-              isDestructive
-              onPress={() => setShowDeleteModal(true)}
-            />
-          </ApCard>
-        </View>
+        {/* Categorized List Sections */}
+        {SECTIONS.map((section) => (
+          <View key={section.title} className="mt-6">
+            <ApText
+              size="sm"
+              font="medium"
+              color={colors.textSecondary}
+              className="mb-2.5 px-1"
+            >
+              {section.title}
+            </ApText>
+            <View
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              {section.items.map((item, index) => (
+                <SettingsItem
+                  key={item.id}
+                  label={item.label}
+                  icon={item.icon}
+                  value={item.value}
+                  isDestructive={item.isDestructive}
+                  showBorderBottom={index < section.items.length - 1}
+                  onPress={() => {
+                    if (item.onPress) {
+                      item.onPress();
+                    } else if (item.route) {
+                      router.push(item.route as any);
+                    }
+                  }}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
       </ApScrollView>
 
+      {/* Logout Modal */}
       <ApModal
         visible={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
@@ -272,13 +351,14 @@ const ProfileScreen = () => {
             className="flex-1 py-3 rounded-xl items-center"
             style={{ backgroundColor: colors.danger }}
           >
-            <ApText font="semibold" color={colors.background}>
+            <ApText font="semibold" color={colors.inkInverse}>
               Log Out
             </ApText>
           </TouchableOpacity>
         </View>
       </ApModal>
 
+      {/* Delete Account Modal */}
       <ApModal
         visible={showDeleteModal}
         onClose={() => !deleting && setShowDeleteModal(false)}
@@ -308,7 +388,7 @@ const ProfileScreen = () => {
               opacity: deleting ? 0.6 : 1,
             }}
           >
-            <ApText font="semibold" color={colors.background}>
+            <ApText font="semibold" color={colors.inkInverse}>
               {deleting ? "Deleting..." : "Delete"}
             </ApText>
           </TouchableOpacity>

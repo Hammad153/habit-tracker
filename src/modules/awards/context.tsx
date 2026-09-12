@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ToastService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
 import { IBadge, IUserBadge } from "./model";
@@ -51,8 +51,9 @@ export const AwardsProvider: React.FC<IProps> = ({ children }) => {
   };
 
   const fetchUserBadges = () => {
+    if (!user?.id) return Promise.resolve();
     setLoading(true);
-    return AwardsService.getUserBadges(user!.id)
+    return AwardsService.getUserBadges(user.id)
       .then((data) => {
         if (data) {
           setUserBadges(data);
@@ -65,6 +66,17 @@ export const AwardsProvider: React.FC<IProps> = ({ children }) => {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    setBadges([]);
+    setUserBadges([]);
+    if (user?.id) {
+      void fetchBadges();
+      void fetchUserBadges();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   return (
     <AwardsContext.Provider

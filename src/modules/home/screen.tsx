@@ -111,10 +111,11 @@ const HomeScreen: React.FC = () => {
     fetchHabits,
   } = useHabitState();
   const { notifications, unreadCount, addNotification } = useNotificationsState();
-  const { selectedPlan } = useDailyPlanState();
+  const { selectedPlan, fetchPlans } = useDailyPlanState();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const dateStr = useMemo(() => toDateKey(selectedDate), [selectedDate]);
   const analytics = useMemo(() => buildAnalytics(habits), [habits]);
@@ -123,14 +124,20 @@ const HomeScreen: React.FC = () => {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([fetchHabits(), fetchProfile()]);
+    await Promise.all([fetchHabits(), fetchProfile(), fetchPlans({ date: dateStr })]);
     setRefreshing(false);
-  }, [fetchHabits, fetchProfile]);
+  }, [fetchHabits, fetchProfile, fetchPlans, dateStr]);
 
   useEffect(() => {
-    fetchHabits();
-    fetchProfile();
-  }, []);
+    let isMounted = true;
+    setInitialLoading(true);
+    Promise.all([fetchHabits(), fetchProfile(), fetchPlans({ date: dateStr })]).finally(() => {
+      if (isMounted) setInitialLoading(false);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id, dateStr]);
 
   const scheduledHabits = useMemo(() => {
     if (!habits) return [];
@@ -149,14 +156,16 @@ const HomeScreen: React.FC = () => {
 
   // Daily plan tasks for selected date
   const todayTasks = useMemo(() => {
-    const dailyTasks = selectedPlan?.tasks ?? []; if (!dailyTasks.length) return [];
+    if (!selectedPlan || !isSameDateKey(selectedPlan.planDate ?? "", dateStr)) return [];
+    const dailyTasks = (selectedPlan.items ?? selectedPlan.tasks ?? []) as any[];
+    if (!dailyTasks.length) return [];
     return dailyTasks.filter(
-      (t: any) => isSameDateKey(t.date || t.dueDate || t.planDate, dateStr)
+      (t: any) => !t.planDate || isSameDateKey(t.planDate, dateStr)
     );
   }, [selectedPlan, dateStr]);
 
   const isInitialLoading =
-    (loadingHabits || loadingProfile) && !refreshing && habits.length === 0;
+    (initialLoading || loadingHabits || loadingProfile) && !refreshing && habits.length === 0;
 
   if (habitsError && habits.length === 0 && !isInitialLoading) {
     return <ApErrorState onRetry={handleRefresh} />;
@@ -254,6 +263,7 @@ const HomeScreen: React.FC = () => {
                   selectedDate={dateStr}
                   onRefresh={fetchHabits}
                   goal={habit.goal}
+                  unit={habit.unit}
                   value={
                     habit.completions?.find((c: any) =>
                       isSameDateKey(c.date, dateStr)

@@ -129,8 +129,9 @@ export const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
         <Pressable className="flex-1" onPress={() => router.back()} />
 
         <View
-          className="bg-background-elevated rounded-t-xl max-h-[92%] px-5 pt-3 pb-8"
+          className="bg-background-elevated rounded-t-2xl max-h-[90%] px-5 pt-3 pb-8"
           style={{
+            flexShrink: 1,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.16,
             shadowRadius: 24,
@@ -138,7 +139,10 @@ export const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
             elevation: 8,
           }}
         >
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flexShrink: 1, maxHeight: "100%" }}
+          >
             <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-3" />
 
             <View className="flex-row items-center justify-between mb-4">
@@ -154,7 +158,13 @@ export const IdentityFormScreen = ({ identity }: IdentityFormProps) => {
               </Pressable>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 40 }}
+              style={{ flexShrink: 1 }}
+            >
               <ApTextInput
                 label="Identity title"
                 placeholder="e.g. Runner, Writer, Mindful person"

@@ -47,6 +47,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   goal = 1,
   value = 0,
   unit = "times",
+  fullBehavior,
+  minimumBehavior,
+  emergencyMinimum,
   stackAfterTitle,
   isLast = false,
 }) => {
@@ -58,7 +61,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   const handleToggle = () => {
     triggerHaptic();
-    if (goal > 1) {
+    if (isCompleted) {
+      toggleHabit(id, selectedDate, 0);
+    } else if (goal > 1) {
       setModalVisible(true);
     } else {
       toggleHabit(id, selectedDate);
@@ -137,6 +142,12 @@ export const HabitCard: React.FC<HabitCardProps> = ({
           currentValue={value}
           unit={unit}
           selectedDate={selectedDate}
+          fullBehavior={fullBehavior}
+          minimumBehavior={minimumBehavior}
+          emergencyMinimum={emergencyMinimum}
+          onSave={(loggedVal, loggedKind) => {
+            toggleHabit(id, selectedDate, loggedVal, loggedKind);
+          }}
         />
       )}
 

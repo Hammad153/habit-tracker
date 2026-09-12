@@ -1,15 +1,15 @@
 import React from "react";
 import { View, Pressable } from "react-native";
-import { ChevronRight } from "lucide-react-native";
 import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
 
 interface SettingsItemProps {
   label: string;
-  icon?: React.ComponentType<{ size?: number; color?: string }>;
+  icon?: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   value?: string;
   onPress?: () => void;
   isDestructive?: boolean;
+  showBorderBottom?: boolean;
 }
 
 const SettingsItem: React.FC<SettingsItemProps> = ({
@@ -18,43 +18,45 @@ const SettingsItem: React.FC<SettingsItemProps> = ({
   value,
   onPress,
   isDestructive = false,
+  showBorderBottom = true,
 }) => {
   const colors = useTheme();
+  const itemColor = isDestructive ? colors.danger : colors.textPrimary;
 
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center py-3.5 px-4"
+      accessibilityRole="button"
+      className="flex-row items-center py-3.5 px-4 active:opacity-75"
       style={{
-        borderBottomWidth: 1,
+        borderBottomWidth: showBorderBottom ? 1 : 0,
         borderBottomColor: colors.surfaceBorder,
       }}
     >
       {IconComponent && (
-        <View className="mr-3">
+        <View className="w-7 items-center justify-center mr-3.5">
           <IconComponent
-            size={18}
-            color={isDestructive ? colors.danger : colors.textMuted}
+            size={20}
+            color={itemColor}
+            strokeWidth={1.9}
           />
         </View>
       )}
-      <View className="flex-1">
+      <View className="flex-1 min-w-0">
         <ApText
-          size="sm"
+          size="base"
           font="medium"
-          color={isDestructive ? colors.danger : colors.textPrimary}
+          color={itemColor}
+          numberOfLines={1}
         >
           {label}
         </ApText>
       </View>
-      {value && (
-        <ApText size="xs" color={colors.textMuted} className="mr-2">
+      {value ? (
+        <ApText size="xs" color={colors.textMuted} font="medium">
           {value}
         </ApText>
-      )}
-      {!isDestructive && (
-        <ChevronRight size={16} color={colors.textMuted} />
-      )}
+      ) : null}
     </Pressable>
   );
 };

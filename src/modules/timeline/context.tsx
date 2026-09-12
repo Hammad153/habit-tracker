@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ToastService } from "@/src/services";
 import { useAuthState } from "@/src/modules/auth/context";
 import { ICompletion } from "@/src/modules/habits/model";
@@ -34,8 +34,9 @@ export const TimelineProvider: React.FC<IProps> = ({ children }) => {
   const [timeline, setTimeline] = useState<ICompletion[]>([]);
 
   const fetchTimeline = () => {
+    if (!user?.id) return Promise.resolve();
     setLoading(true);
-    return TimelineService.get(user!.id)
+    return TimelineService.get(user.id)
       .then((data) => {
         if (data) {
           setTimeline(data);
@@ -48,6 +49,15 @@ export const TimelineProvider: React.FC<IProps> = ({ children }) => {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    setTimeline([]);
+    if (user?.id) {
+      void fetchTimeline();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   return (
     <TimelineContext.Provider

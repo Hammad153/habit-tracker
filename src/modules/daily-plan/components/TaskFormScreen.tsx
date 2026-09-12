@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { X } from "lucide-react-native";
 import {
   ApTextInput,
+  ApTimeField,
   Button,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
@@ -27,7 +28,7 @@ export const TaskFormScreen = () => {
 
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
-  const [startTime, setStartTime] = useState("");
+  const [startTime, setStartTime] = useState("09:00");
   const [durationMinutes, setDurationMinutes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -45,6 +46,7 @@ export const TaskFormScreen = () => {
     try {
       const existingItems = (plan?.items ?? plan?.tasks ?? []) as any[];
       const newItem = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         title: taskTitle.trim(),
         description: taskDesc.trim() || undefined,
         startTime: startTime.trim() || undefined,
@@ -80,8 +82,9 @@ export const TaskFormScreen = () => {
         <Pressable className="flex-1" onPress={() => router.back()} />
 
         <View
-          className="bg-background-elevated rounded-t-xl max-h-[90%] px-5 pt-3 pb-8"
+          className="bg-background-elevated rounded-t-2xl max-h-[90%] px-5 pt-3 pb-8"
           style={{
+            flexShrink: 1,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.16,
             shadowRadius: 24,
@@ -89,7 +92,10 @@ export const TaskFormScreen = () => {
             elevation: 8,
           }}
         >
-          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flexShrink: 1, maxHeight: "100%" }}
+          >
             <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-3" />
 
             <View className="flex-row items-center justify-between mb-4">
@@ -105,7 +111,11 @@ export const TaskFormScreen = () => {
               </Pressable>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 24 }}
+              style={{ flexShrink: 1 }}
+            >
               <ApTextInput
                 label="Activity title"
                 placeholder="e.g. Morning run, Team standup, Deep work"
@@ -124,11 +134,11 @@ export const TaskFormScreen = () => {
 
               <View className="flex-row gap-3 mb-4">
                 <View className="flex-1">
-                  <ApTextInput
+                  <ApTimeField
                     label="Start time"
                     placeholder="09:00"
                     value={startTime}
-                    onChangeText={setStartTime}
+                    onChange={setStartTime}
                   />
                 </View>
                 <View className="flex-1">

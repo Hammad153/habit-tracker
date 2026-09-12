@@ -52,54 +52,67 @@ export const ListRow: React.FC<ListRowProps> = ({
   const bgStyle = iconBg ? { backgroundColor: iconBg } : undefined;
   const computedIconColor = iconColor || categoryTokens.ink;
 
-  const content = (
+  const middleContent = (
+    <View className="flex-1 justify-center">
+      <Text
+        className={`text-[15px] leading-[22px] font-medium ${
+          isCompleted ? "line-through text-ink-tertiary" : "text-ink-primary"
+        }`}
+        style={isCompleted ? { textDecorationLine: "line-through" } : undefined}
+        numberOfLines={1}
+      >
+        {title}
+      </Text>
+      {displaySubtitle ? (
+        <Text
+          className={`text-[13.5px] leading-[20px] font-medium mt-0.5 ${
+            isCompleted ? "text-ink-disabled" : "text-ink-secondary"
+          }`}
+          numberOfLines={1}
+        >
+          {displaySubtitle}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  return (
     <View
       className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"} ${className}`}
       style={style}
       {...props}
     >
-      {left ? left : Icon ? (
-        <View
-          className={`w-10 h-10 rounded-md items-center justify-center bg-category-${categoryKey}-bg ${isCompleted ? "opacity-60" : ""}`}
-          style={bgStyle}
+      {onPress ? (
+        <Pressable
+          onPress={onPress}
+          className="flex-row items-center gap-3 flex-1 mr-1 active:opacity-75"
         >
-          <Icon size={20} color={computedIconColor} strokeWidth={2} />
-        </View>
-      ) : null}
-      <View className="flex-1 justify-center">
-        <Text
-          className={`text-[15px] leading-[22px] font-medium ${
-            isCompleted ? "line-through text-ink-tertiary" : "text-ink-primary"
-          }`}
-          style={isCompleted ? { textDecorationLine: "line-through" } : undefined}
-          numberOfLines={1}
-        >
-          {title}
-        </Text>
-        {displaySubtitle ? (
-          <Text
-            className={`text-[13.5px] leading-[20px] font-medium mt-0.5 ${
-              isCompleted ? "text-ink-disabled" : "text-ink-secondary"
-            }`}
-            numberOfLines={1}
-          >
-            {displaySubtitle}
-          </Text>
-        ) : null}
-      </View>
-      {trailing}
+          {left ? left : Icon ? (
+            <View
+              className={`w-10 h-10 rounded-md items-center justify-center bg-category-${categoryKey}-bg ${isCompleted ? "opacity-60" : ""}`}
+              style={bgStyle}
+            >
+              <Icon size={20} color={computedIconColor} strokeWidth={2} />
+            </View>
+          ) : null}
+          {middleContent}
+        </Pressable>
+      ) : (
+        <>
+          {left ? left : Icon ? (
+            <View
+              className={`w-10 h-10 rounded-md items-center justify-center bg-category-${categoryKey}-bg ${isCompleted ? "opacity-60" : ""}`}
+              style={bgStyle}
+            >
+              <Icon size={20} color={computedIconColor} strokeWidth={2} />
+            </View>
+          ) : null}
+          {middleContent}
+        </>
+      )}
+      {trailing ? <View className="items-center justify-center">{trailing}</View> : null}
     </View>
   );
-
-  if (onPress) {
-    return (
-      <Pressable onPress={onPress}>
-        {content}
-      </Pressable>
-    );
-  }
-
-  return content;
 };
 
 export default ListRow;

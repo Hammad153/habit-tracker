@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Switch, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { MessageSquare, Sparkles, FileText, Check } from "lucide-react-native";
 import {
   ApContainer,
@@ -9,6 +9,7 @@ import {
   ApCard,
   ApScrollView,
   SkeletonCard,
+  SwitchButton,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { ToastService } from "@/src/services";
@@ -70,12 +71,10 @@ const ToggleRow = ({
           </ApText>
         </View>
       </View>
-      <Switch
+      <SwitchButton
         value={value}
         disabled={disabled}
         onValueChange={onChange}
-        trackColor={{ false: colors.surfaceInactive, true: colors.primary }}
-        thumbColor={colors.background}
       />
     </View>
   );

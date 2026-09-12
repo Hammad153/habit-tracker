@@ -12,6 +12,7 @@ import { Button } from "@/src/components/buttons/Button";
 import { ListRow } from "@/src/components/ListRow";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
+import LogValueModal from "./LogValueModal";
 import { ToastService } from "@/src/services";
 import { getScheduleLabel, getCurrentStreak } from "@/src/utils/schedule";
 import { HabitService } from "@/src/modules/habits/api";
@@ -120,9 +121,14 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
     isSameDateKey(c.date, today)
   );
   const isCompletedToday = Boolean(todayCompletion?.status);
+  const [showLogModal, setShowLogModal] = useState(false);
 
   const handleMarkComplete = useCallback(() => {
     if (!habit || isCompletedToday) return;
+    if (habit.goal > 1) {
+      setShowLogModal(true);
+      return;
+    }
     setCompleting(true);
     toggleHabit(habit.id, today)
       .then((rewards) => {
@@ -352,6 +358,36 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
             variant={isCompletedToday ? "secondary" : "primary"}
           />
         </View>
+
+        {habit && habit.goal > 1 && (
+          <LogValueModal
+            isVisible={showLogModal}
+            onClose={() => setShowLogModal(false)}
+            habitId={habit.id}
+            habitTitle={habit.title}
+            goal={habit.goal}
+            currentValue={todayCompletion?.value || 0}
+            unit={habit.unit}
+            selectedDate={today}
+            fullBehavior={habit.fullBehavior}
+            minimumBehavior={habit.minimumBehavior}
+            emergencyMinimum={habit.emergencyMinimum}
+            onSave={(loggedVal, loggedKind) => {
+              setCompleting(true);
+              toggleHabit(habit.id, today, loggedVal, loggedKind)
+                .then((rewards) => {
+                  if (rewards && typeof rewards.coinsAwarded === "number") {
+                    ToastService.Success("+" + rewards.coinsAwarded + " coins earned!");
+                  } else {
+                    ToastService.Success("Habit logged for today!");
+                  }
+                  load();
+                })
+                .catch((err) => ToastService.ApiError(err))
+                .finally(() => setCompleting(false));
+            }}
+          />
+        )}
       </>
     )}
   </View>

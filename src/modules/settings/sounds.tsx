@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Switch } from "react-native";
+import { View } from "react-native";
 import { Fingerprint, Volume2 } from "lucide-react-native";
-import { ApText, ApContainer, ApHeader, ApCard, ApScrollView } from "@/src/components";
+import { ApText, ApContainer, ApHeader, ApCard, ApScrollView, SwitchButton } from "@/src/components";
 import { useSettingsState } from "./context";
 
 const SoundsScreen = () => {
@@ -80,14 +80,9 @@ const SoundsScreen = () => {
                       </ApText>
                     </View>
                   </View>
-                  <Switch
+                  <SwitchButton
                     value={item.value}
                     onValueChange={item.onToggle}
-                    trackColor={{
-                      false: colors.surfaceInactive,
-                      true: colors.primary,
-                    }}
-                    thumbColor={colors.background}
                   />
                 </View>
               </View>

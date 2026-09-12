@@ -30,15 +30,15 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="more"
+        name="profile"
         options={{
-          title: "More",
+          title: "Profile",
         }}
       />
 
       {/* Hidden tabs */}
+      <Tabs.Screen name="more" options={{ href: null }} />
       <Tabs.Screen name="habits" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="journal" options={{ href: null }} />
       <Tabs.Screen name="budget" options={{ href: null }} />
       <Tabs.Screen name="awards" options={{ href: null }} />

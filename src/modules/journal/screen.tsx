@@ -32,6 +32,7 @@ import {
   ApCard,
   BottomSheet,
   ListRow,
+  SkeletonHabitList,
 } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
 import { useJournalState } from "./context";
@@ -260,7 +261,7 @@ const EntryFormSheet = ({
 
 const JournalScreen = () => {
   const colors = useTheme();
-  const { entries, deleteEntry, toggleFavorite, togglePinned } =
+  const { entries, loading, deleteEntry, toggleFavorite, togglePinned } =
     useJournalState();
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -458,7 +459,9 @@ const JournalScreen = () => {
             </ApText>
           </View>
 
-          {filteredEntries.length === 0 ? (
+          {loading && filteredEntries.length === 0 ? (
+            <SkeletonHabitList count={3} />
+          ) : filteredEntries.length === 0 ? (
             <ApEmptyState
               title="No journal entries"
               subtitle="Choose a template or create a blank entry to begin."

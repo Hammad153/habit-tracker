@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { Plus } from "lucide-react-native";
+import { Plus, ArrowLeft } from "lucide-react-native";
 import {
-  ApHeader,
   ApEmptyState,
   SkeletonCard,
 } from "@/src/components";
@@ -30,19 +29,36 @@ export const IdentityScreen = () => {
 
   return (
     <View className="flex-1 bg-background">
-      <ApHeader
-        title="Identities"
-        subtitle="Every action is a vote for who you want to become"
-        hasBackButton
-        rightAction={
-          <Pressable
-            onPress={() => router.push("/create-identity")}
-            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
-          >
-            <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
-          </Pressable>
-        }
-      />
+      {/* Navigation Bar */}
+      <View className="px-5 pt-3 pb-2 flex-row items-center justify-between">
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+        </Pressable>
+        <Pressable
+          onPress={() => router.push("/create-identity")}
+          className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel="Create identity"
+        >
+          <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
+        </Pressable>
+      </View>
+
+      {/* Title & Subtitle Header */}
+      <View className="px-5 pt-1 pb-3">
+        <Text className="text-[26px] font-bold text-ink-primary tracking-tight">
+          Identities
+        </Text>
+        <Text className="text-[13.5px] leading-[19px] text-ink-secondary mt-1">
+          Every action is a vote for who you want to become
+        </Text>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}

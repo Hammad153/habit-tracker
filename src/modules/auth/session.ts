@@ -41,6 +41,8 @@ export const clearStoredAuthSession = async () => {
     ApStorageService.removeItemAsync(ApStorageKeys.AccessToken),
     ApStorageService.removeItemAsync(ApStorageKeys.RefreshToken),
     ApStorageService.removeItemAsync(ApStorageKeys.User),
+    ApStorageService.removeItemAsync(ApStorageKeys.OfflineRequestCache),
+    ApStorageService.removeItemAsync(ApStorageKeys.OfflineMutationQueue),
   ]);
 };
 
@@ -56,6 +58,7 @@ export const replaceAuthTokens = async (tokens: Partial<IAuthTokens>) => {
 export const persistAuthSession = async (tokens: IAuthTokens, user: IAuthUser) => {
   await replaceAuthTokens(tokens);
   await ApStorageService.setItemAsync(ApStorageKeys.User, user);
+  await ApStorageService.removeItemAsync(ApStorageKeys.OfflineRequestCache);
   resetAuthLifecycle();
 };
 

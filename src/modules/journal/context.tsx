@@ -111,6 +111,7 @@ export const JournalProvider: React.FC<IProps> = ({ children }) => {
       setEntries([]);
       return;
     }
+    setEntries([]);
     setLoading(true);
     try {
       if (migratedFor.current !== user.id) {

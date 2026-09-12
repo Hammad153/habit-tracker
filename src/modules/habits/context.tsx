@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import {
@@ -167,6 +168,17 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
         }
       });
   };
+
+  useEffect(() => {
+    if (!user?.id) {
+      setHabits([]);
+      setHabit({} as IHabit);
+      setLoading(false);
+      return;
+    }
+    setHabits([]);
+    void fetchHabits();
+  }, [user?.id]);
 
   const fetchOneHabit = (id: string) => {
     setLoading(true);

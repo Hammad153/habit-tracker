@@ -15,11 +15,12 @@ import { Button } from "@/src/components/buttons/Button";
 import { Checkbox } from "@/src/components/Checkbox";
 import { ListRow } from "@/src/components/ListRow";
 import { useTheme } from "@/src/modules/settings/context";
-import { normalizeDateKey, parseDateKey, toDateKey } from "@/src/utils/date";
+import { isSameDateKey, normalizeDateKey, parseDateKey, toDateKey } from "@/src/utils/date";
 import { useDailyPlanState } from "./context";
 import { useNotificationsState } from "@/src/modules/notifications/context";
 import { IDailyPlanTask } from "./model";
 import { format } from "date-fns";
+import { useFeedback } from "@/src/utils/feedback";
 
 const formatTime = (value?: string) => {
   if (!value) return "";
@@ -32,11 +33,13 @@ const formatTime = (value?: string) => {
 
 export const DailyPlanScreen = () => {
   const colors = useTheme();
+  const { triggerSelection } = useFeedback();
   const today = toDateKey(new Date());
   const [selectedDate, setSelectedDate] = useState(today);
   const [note, setNote] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [deleteActivity, setDeleteActivity] = useState<IDailyPlanTask | null>(null);
+  const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, "COMPLETED" | "PENDING">>({});
 
   const {
     loading,
@@ -50,10 +53,16 @@ export const DailyPlanScreen = () => {
     deleteTask,
   } = useDailyPlanState();
 
-  const load = useCallback(
-    () => Promise.all([fetchPlans({ date: selectedDate }), fetchSummary(selectedDate)]),
-    [selectedDate]
-  );
+  const [fetchingDate, setFetchingDate] = useState(true);
+
+  const load = useCallback(async () => {
+    setFetchingDate(true);
+    try {
+      await Promise.all([fetchPlans({ date: selectedDate }), fetchSummary(selectedDate)]);
+    } finally {
+      setFetchingDate(false);
+    }
+  }, [selectedDate]);
 
   useEffect(() => {
     load();
@@ -73,22 +82,70 @@ export const DailyPlanScreen = () => {
     });
   }, []);
 
-  const activities = useMemo(() => {
-    const items = (selectedPlan?.items ?? selectedPlan?.tasks ?? []) as IDailyPlanTask[];
-    return [...items].sort((a, b) => {
-      const aDone = a.status === "COMPLETED" ? 1 : 0;
-      const bDone = b.status === "COMPLETED" ? 1 : 0;
-      if (aDone !== bDone) return aDone - bDone;
-      const orderA = a.order ?? a.sortOrder ?? 0;
-      const orderB = b.order ?? b.sortOrder ?? 0;
-      if (orderA !== orderB) return orderA - orderB;
-      return (a.startTime ?? "").localeCompare(b.startTime ?? "");
-    });
-  }, [selectedPlan]);
+  const isPlanForCurrentDate = Boolean(
+    selectedPlan?.planDate && isSameDateKey(selectedPlan.planDate, selectedDate)
+  );
 
-  const toggleTaskStatus = async (task: IDailyPlanTask) => {
-    const newStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
-    await updateTask(task.id, { status: newStatus });
+  const activities = useMemo(() => {
+    if (selectedPlan?.planDate && !isSameDateKey(selectedPlan.planDate, selectedDate)) {
+      return [];
+    }
+    const items = (selectedPlan?.items ?? selectedPlan?.tasks ?? []) as IDailyPlanTask[];
+    return [...items]
+      .map((item, idx) => {
+        const key = item.id || `${item.title}-${item.startTime || idx}`;
+        const overriddenStatus = optimisticOverrides[key];
+        return overriddenStatus ? { ...item, status: overriddenStatus } : item;
+      })
+      .sort((a, b) => {
+        const aDone = a.status === "COMPLETED" ? 1 : 0;
+        const bDone = b.status === "COMPLETED" ? 1 : 0;
+        if (aDone !== bDone) return aDone - bDone;
+        const orderA = a.order ?? a.sortOrder ?? 0;
+        const orderB = b.order ?? b.sortOrder ?? 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.startTime ?? "").localeCompare(b.startTime ?? "");
+      });
+  }, [selectedPlan, optimisticOverrides, selectedDate]);
+
+  const toggleTaskStatus = async (task: IDailyPlanTask, index: number) => {
+    triggerSelection();
+    const key = task.id || `${task.title}-${task.startTime || index}`;
+    const currentStatus = optimisticOverrides[key] || task.status;
+    const newStatus: IDailyPlanTask["status"] = currentStatus === "COMPLETED" ? "PENDING" : "COMPLETED";
+
+    setOptimisticOverrides((prev) => ({ ...prev, [key]: newStatus }));
+
+    let updatedViaApi = false;
+    if (task.id) {
+      try {
+        await updateTask(task.id, { status: newStatus });
+        updatedViaApi = true;
+      } catch {
+        // Fallback to updatePlan below
+      }
+    }
+
+    if (!updatedViaApi && selectedPlan?.id) {
+      try {
+        const rawItems = (selectedPlan.items ?? selectedPlan.tasks ?? []) as IDailyPlanTask[];
+        const updatedItems = rawItems.map((item, idx) => {
+          const isMatch =
+            (task.id && item.id === task.id) ||
+            idx === index ||
+            (item.title === task.title && item.startTime === task.startTime);
+          return isMatch ? { ...item, status: newStatus } : item;
+        });
+        await updatePlan(selectedPlan.id, { items: updatedItems });
+      } catch {
+        setOptimisticOverrides((prev) => {
+          const copy = { ...prev };
+          delete copy[key];
+          return copy;
+        });
+      }
+    }
+
     load();
   };
 
@@ -100,7 +157,8 @@ export const DailyPlanScreen = () => {
 
   const completedCount = activities.filter((a) => a.status === "COMPLETED").length;
 
-  const isInitialLoading = loading && !refreshing && activities.length === 0;
+  const isInitialLoading =
+    (loading || fetchingDate) && !refreshing && (!isPlanForCurrentDate || activities.length === 0);
 
   return (
     <View className="flex-1 bg-background">
@@ -261,7 +319,7 @@ export const DailyPlanScreen = () => {
                     trailingControl={
                       <Checkbox
                         checked={isDone}
-                        onPress={() => toggleTaskStatus(act)}
+                        onPress={() => toggleTaskStatus(act, idx)}
                       />
                     }
                     onPress={() =>
