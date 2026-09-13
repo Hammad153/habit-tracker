@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Routina",
+    "name": "Ember",
     "slug": "habit-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -47,7 +47,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Routina to access your photos"
+          "photosPermission": "Allow Ember to access your photos"
         }
       ],
       [

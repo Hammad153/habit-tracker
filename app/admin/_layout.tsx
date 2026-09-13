@@ -60,7 +60,7 @@ export default function AdminLayout() {
         <View className="flex-row items-center justify-between">
           <View>
             <ApText size="xl" font="bold" color={colors.textPrimary}>
-              Routina Admin
+              Ember Admin
             </ApText>
             <ApText size="xs" color={colors.textMuted} className="mt-1">
               {user.name} · Administrator

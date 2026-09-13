@@ -55,8 +55,8 @@ const UpgradeModal = () => {
     <ApModal
       visible={showUpgradeModal}
       onClose={() => setShowUpgradeModal(false)}
-      title="Become a Routina member"
-      subTitle="Choose a plan to continue using Routina with unlimited access"
+      title="Become an Ember member"
+      subTitle="Choose a plan to continue using Ember with unlimited access"
     >
       {loading && plans.length === 0 ? (
         <ApLoader />
@@ -131,7 +131,9 @@ const UpgradeModal = () => {
                       font="bold"
                       color={isCurrent ? colors.textMuted : "#FFFFFF"}
                     >
-                      {isCurrent ? "Current Plan" : `Choose ${plan.displayName}`}
+                      {isCurrent
+                        ? "Current Plan"
+                        : `Choose ${plan.displayName}`}
                     </ApText>
                   </TouchableOpacity>
                 </LinearGradient>

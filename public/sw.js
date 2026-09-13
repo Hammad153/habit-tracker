@@ -1,4 +1,4 @@
-const CACHE_NAME = "routina-web-v2";
+const CACHE_NAME = "ember-web-v2";
 const APP_SHELL = [
   "/",
   "/offline.html",

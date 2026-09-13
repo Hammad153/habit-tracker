@@ -29,7 +29,7 @@ export default function AdminDashboard() {
   return (
     <AdminPage
       title="Dashboard"
-      description="A privacy-aware overview of Routina activity and platform health."
+      description="A privacy-aware overview of Ember activity and platform health."
     >
       {error ? (
         <ErrorState onRetry={load} />

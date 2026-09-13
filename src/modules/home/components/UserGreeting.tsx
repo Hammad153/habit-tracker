@@ -89,7 +89,7 @@ const UserGreeting: React.FC<Props> = ({
             </ApText>
           </View>
           <ApText size="xl" font="bold" color={colors.textPrimary}>
-            {user?.name || "Routina"}
+            {user?.name || "Ember"}
           </ApText>
         </View>
       </TouchableOpacity>

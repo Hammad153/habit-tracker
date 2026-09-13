@@ -71,11 +71,7 @@ function downloadText(content: string, filename: string, mimeType: string) {
   downloadBlob(blob, filename);
 }
 
-function downloadBase64(
-  base64: string,
-  filename: string,
-  mimeType: string,
-) {
+function downloadBase64(base64: string, filename: string, mimeType: string) {
   const byteString = atob(base64);
   const ab = new ArrayBuffer(byteString.length);
   const ia = new Uint8Array(ab);
@@ -227,7 +223,7 @@ const ExportScreen = () => {
 
       downloadBase64(
         base64,
-        "routina-export.xlsx",
+        "ember-export.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
       ToastService.Success("Excel file downloaded!");
@@ -249,12 +245,12 @@ const ExportScreen = () => {
       });
 
       if (IS_WEB) {
-        downloadText(response.data, "routina-export.csv", "text/csv");
+        downloadText(response.data, "ember-export.csv", "text/csv");
         ToastService.Success("CSV file downloaded!");
       } else {
         await Share.share({
           message: response.data,
-          title: "Routina Export (CSV)",
+          title: "Ember Export (CSV)",
         });
         ToastService.Success("CSV exported successfully!");
       }
@@ -276,11 +272,7 @@ const ExportScreen = () => {
       });
 
       if (IS_WEB) {
-        downloadText(
-          response.data,
-          "routina-report.html",
-          "text/html",
-        );
+        downloadText(response.data, "ember-report.html", "text/html");
         ToastService.Success("PDF report downloaded as HTML!");
       } else {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -293,7 +285,7 @@ const ExportScreen = () => {
         });
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
-          dialogTitle: "Routina Report",
+          dialogTitle: "Ember Report",
         });
         ToastService.Success("PDF report ready!");
       }
@@ -314,16 +306,12 @@ const ExportScreen = () => {
       const jsonStr = JSON.stringify(response.data, null, 2);
 
       if (IS_WEB) {
-        downloadText(
-          jsonStr,
-          "routina-backup.json",
-          "application/json",
-        );
+        downloadText(jsonStr, "ember-backup.json", "application/json");
         ToastService.Success("JSON backup downloaded!");
       } else {
         await Share.share({
           message: jsonStr,
-          title: "Routina Backup (JSON)",
+          title: "Ember Backup (JSON)",
         });
         ToastService.Success("JSON backup exported!");
       }
@@ -361,13 +349,9 @@ const ExportScreen = () => {
       <ApHeader title="Export Data" hasBackButton />
       <ApScrollView showsVerticalScrollIndicator={false}>
         <View className="px-5 mt-4">
-          <ApText
-            size="sm"
-            color={colors.textSecondary}
-            className="mb-6"
-          >
-            Export your habit data for backup or analysis. Your data belongs
-            to you.
+          <ApText size="sm" color={colors.textSecondary} className="mb-6">
+            Export your habit data for backup or analysis. Your data belongs to
+            you.
           </ApText>
 
           {exporting && (
@@ -399,11 +383,7 @@ const ExportScreen = () => {
                   className="w-12 h-12 rounded-xl items-center justify-center"
                   style={{ backgroundColor: color + "20" }}
                 >
-                  <Ionicons
-                    name={option.icon as any}
-                    size={22}
-                    color={color}
-                  />
+                  <Ionicons name={option.icon as any} size={22} color={color} />
                 </View>
                 <View className="flex-1 ml-3">
                   <ApText
