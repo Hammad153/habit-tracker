@@ -26,7 +26,11 @@ body {
   background: #000;
 }
 
-@media (max-width: 430px) {
+/* Phone browsers can have a CSS viewport wider than the app's 430px frame
+   (for example when browser UI or display scaling is involved). Keep phones
+   full-bleed through the standard phone breakpoint; tablets and desktops keep
+   the centered mobile-app frame above it. */
+@media (max-width: 767px) {
   body {
     background: transparent;
   }
