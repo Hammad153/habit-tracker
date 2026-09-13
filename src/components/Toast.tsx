@@ -125,7 +125,8 @@ export const ToastProvider: React.FC<Props> = ({ children }) => {
             styles.container,
             animatedStyle,
             {
-              top: insets.top + 8,
+              top: Platform.OS === "web" ? 16 : insets.top + 8,
+              zIndex: 99999,
             },
           ]}
           pointerEvents="box-none"

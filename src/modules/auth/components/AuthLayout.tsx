@@ -28,7 +28,9 @@ const AuthLayout: React.FC<IProps> = ({
   children,
   footer,
 }) => {
-  const colors = useTheme();
+  const themeData = useTheme();
+  const isDark = themeData.isDark;
+  const colors = themeData;
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -77,13 +79,13 @@ const AuthLayout: React.FC<IProps> = ({
                 </View>
                 <Text
                   className="text-2xl font-bold"
-                  style={{ color: "#FFFFFF" }}
+                  style={{ color: colors.isDark ? "#FFFFFF" : "#1F2937" }}
                 >
                   Build habits that stick
                 </Text>
                 <Text
                   className="text-base mt-1"
-                  style={{ color: "rgba(255,255,255,0.7)" }}
+                  style={{ color: colors.isDark ? "rgba(255,255,255,0.7)" : "rgba(31,41,55,0.7)" }}
                 >
                   Small steps, every single day.
                 </Text>

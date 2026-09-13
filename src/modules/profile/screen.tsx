@@ -12,6 +12,7 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useAuthState } from "@/src/modules/auth/context";
 import { useProfileState } from "./context";
+import { useRewardsState } from "@/src/modules/rewards/context";
 import { AuthService } from "@/src/modules/auth/api";
 import { ToastService } from "@/src/services";
 import StatCard from "./components/StatCard";
@@ -21,6 +22,7 @@ const ProfileScreen = () => {
   const { user, signOut, enterAdminMode, isAdminMode, exitAdminMode } =
     useAuthState();
   const { profile, loading, fetchProfile } = useProfileState();
+  const { shopItems, fetchShop } = useRewardsState();
   const { themeMode, soundEnabled, hapticEnabled, colors } = useSettingsState();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -28,6 +30,7 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     fetchProfile();
+    fetchShop();
   }, []);
 
   const handleLogout = () => {
@@ -73,6 +76,49 @@ const ProfileScreen = () => {
     router.push("/admin");
   };
 
+  // Determine avatar glow effect based on owned avatar frames
+  const getAvatarGlowStyle = () => {
+    const goldenFrameOwned = shopItems.some(
+      (item) => item.key === "avatar-frame-golden" && item.owned,
+    );
+    const purpleFrameOwned = shopItems.some(
+      (item) => item.key === "avatar-frame-purple" && item.owned,
+    );
+    const neonFrameOwned = shopItems.some(
+      (item) => item.key === "avatar-frame-neon" && item.owned,
+    );
+
+    if (neonFrameOwned) {
+      return {
+        shadowColor: "#00FF88",
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        borderColor: "#00FF88",
+      };
+    } else if (goldenFrameOwned) {
+      return {
+        shadowColor: "#FFD700",
+        shadowOpacity: 0.5,
+        shadowRadius: 16,
+        borderColor: "#FFD700",
+      };
+    } else if (purpleFrameOwned) {
+      return {
+        shadowColor: "#A78BFA",
+        shadowOpacity: 0.5,
+        shadowRadius: 16,
+        borderColor: "#A78BFA",
+      };
+    }
+    // Default glow
+    return {
+      shadowColor: colors.primary,
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
+      borderColor: colors.primary,
+    };
+  };
+
   return (
     <ApContainer>
       <ApHeader title="Profile" hasBackButton />
@@ -83,11 +129,8 @@ const ProfileScreen = () => {
               className="w-28 h-28 rounded-full items-center justify-center overflow-hidden border-2"
               style={{
                 backgroundColor: colors.surface,
-                borderColor: colors.primary,
-                shadowColor: colors.primary,
+                ...getAvatarGlowStyle(),
                 shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.35,
-                shadowRadius: 14,
                 elevation: 8,
               }}
             >

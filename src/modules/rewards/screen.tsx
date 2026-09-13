@@ -20,7 +20,8 @@ import * as Haptics from "expo-haptics";
 const getItemIcon = (key: string, type: string) => {
   if (key.includes("golden")) return "color-palette";
   if (key.includes("focus")) return "leaf";
-  if (type === "THEME" || type === "JOURNAL_THEME") return "color-palette-outline";
+  if (type === "THEME" || type === "JOURNAL_THEME")
+    return "color-palette-outline";
   if (type === "AVATAR") return "person-circle-outline";
   if (type === "CELEBRATION") return "sparkles";
   return "gift-outline";
@@ -60,12 +61,20 @@ const ShopCard = ({
             {item.name}
           </ApText>
           {item.description ? (
-            <ApText size="xs" color={colors.textMuted} className="mt-0.5" numberOfLines={2}>
+            <ApText
+              size="xs"
+              color={colors.textMuted}
+              className="mt-0.5"
+              numberOfLines={2}
+            >
               {item.description}
             </ApText>
           ) : null}
         </View>
-        <View className="flex-row items-center px-3 py-1 rounded-full" style={{ backgroundColor: colors.warning + "18" }}>
+        <View
+          className="flex-row items-center px-3 py-1 rounded-full"
+          style={{ backgroundColor: colors.warning + "18" }}
+        >
           <Ionicons name="diamond" size={14} color={colors.warning} />
           <ApText size="sm" font="bold" color={colors.warning} className="ml-1">
             {item.cost}
@@ -75,8 +84,15 @@ const ShopCard = ({
 
       <View className="mt-3">
         {item.owned ? (
-          <View className="h-11 rounded-full items-center justify-center flex-row gap-1.5" style={{ backgroundColor: colors.success + "1F" }}>
-            <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+          <View
+            className="h-11 rounded-full items-center justify-center flex-row gap-1.5"
+            style={{ backgroundColor: colors.success + "1F" }}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={16}
+              color={colors.success}
+            />
             <ApText size="sm" font="bold" color={colors.success}>
               Unlocked & Owned
             </ApText>
@@ -89,11 +105,17 @@ const ShopCard = ({
             disabled={!affordable}
             className="h-11 rounded-full items-center justify-center flex-row gap-1.5"
             style={{
-              backgroundColor: affordable ? colors.primary : colors.surfaceBorder,
+              backgroundColor: affordable
+                ? colors.primary
+                : colors.surfaceBorder,
               opacity: affordable ? 1 : 0.6,
             }}
           >
-            <ApText size="sm" font="bold" color={affordable ? colors.background : colors.textMuted}>
+            <ApText
+              size="sm"
+              font="bold"
+              color={affordable ? colors.background : colors.textMuted}
+            >
               {affordable ? "Redeem Reward" : "Insufficient Coins"}
             </ApText>
           </Pressable>
@@ -105,14 +127,8 @@ const ShopCard = ({
 
 const RewardShopScreen = () => {
   const { colors, setThemeMode } = useSettingsState();
-  const {
-    loading,
-    balance,
-    shopItems,
-    fetchShop,
-    fetchBalance,
-    redeem,
-  } = useRewardsState();
+  const { loading, balance, shopItems, fetchShop, fetchBalance, redeem } =
+    useRewardsState();
 
   const [selectedItem, setSelectedItem] = useState<IShopListItem | null>(null);
   const confettiRef = useRef<any>(null);
@@ -162,7 +178,11 @@ const RewardShopScreen = () => {
       <ApScrollView showsVerticalScrollIndicator={false}>
         <View
           className="mx-5 mt-2 rounded-3xl p-4 flex-row items-center justify-between"
-          style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder }}
+          style={{
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.surfaceBorder,
+          }}
         >
           <View className="flex-row items-center">
             <View
@@ -172,11 +192,19 @@ const RewardShopScreen = () => {
               <Ionicons name="diamond" size={20} color={colors.warning} />
             </View>
             <View>
-              <ApText size="xs" font="bold" color={colors.textMuted} className="uppercase">
+              <ApText
+                size="xs"
+                font="bold"
+                color={colors.textMuted}
+                className="uppercase"
+              >
                 Coin Balance
               </ApText>
               <ApText size="xl" font="bold" color={colors.textPrimary}>
-                {balance} <ApText size="sm" color={colors.textMuted}>coins</ApText>
+                {balance}{" "}
+                <ApText size="sm" color={colors.textMuted}>
+                  coins
+                </ApText>
               </ApText>
             </View>
           </View>
@@ -212,13 +240,13 @@ const RewardShopScreen = () => {
       />
 
       <ConfettiCannon
-        count={200}
+        count={300}
         origin={{ x: Dimensions.get("window").width / 2, y: 0 }}
         autoStart={false}
         ref={confettiRef}
         fadeOut
-        fallSpeed={1800}
-        explosionSpeed={400}
+        fallSpeed={2800}
+        explosionSpeed={480}
         autoStartDelay={0}
       />
     </ApContainer>

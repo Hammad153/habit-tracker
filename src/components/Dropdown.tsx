@@ -75,11 +75,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             {selectedOption?.label || placeholder}
           </ApText>
         </View>
-        <Ionicons
-          name="chevron-down"
-          size={18}
-          color={colors.textMuted}
-        />
+        <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
       </TouchableOpacity>
 
       <Modal
@@ -91,11 +87,23 @@ export const Dropdown: React.FC<DropdownProps> = ({
         <TouchableWithoutFeedback onPress={() => setIsOpen(false)}>
           <View
             className="flex-1 justify-center items-center bg-black/60 px-6"
+            style={
+              Platform.OS === "web" ? { position: "fixed", zIndex: 9999 } : {}
+            }
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                className="w-full max-h-80"
+                behavior={
+                  Platform.OS === "ios"
+                    ? "padding"
+                    : Platform.OS === "web"
+                      ? undefined
+                      : "height"
+                }
+                className="w-full max-w-md max-h-80"
+                style={
+                  Platform.OS === "web" ? { zIndex: 10000, maxWidth: 400 } : {}
+                }
               >
                 <View
                   className="rounded-2xl p-2 border"
@@ -105,11 +113,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   }}
                 >
                   <View className="flex-row justify-between items-center px-3 py-2 mb-2">
-                    <ApText size="base" font="semibold" color={colors.textPrimary}>
+                    <ApText
+                      size="base"
+                      font="semibold"
+                      color={colors.textPrimary}
+                    >
                       {label || "Select Option"}
                     </ApText>
                     <TouchableOpacity onPress={() => setIsOpen(false)}>
-                      <Ionicons name="close" size={20} color={colors.textMuted} />
+                      <Ionicons
+                        name="close"
+                        size={20}
+                        color={colors.textMuted}
+                      />
                     </TouchableOpacity>
                   </View>
                   <ScrollView showsVerticalScrollIndicator={false}>
