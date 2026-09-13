@@ -16,8 +16,10 @@ function resolveApiUrl(): string {
     return `http://${host}:${API_PORT}${API_BASE_PATH}`;
   }
 
+  // For web development, always use localhost:3000 for the backend
+  // since the frontend runs on a different port (8081)
   if (typeof window !== "undefined") {
-    return `${window.location.origin}${API_BASE_PATH}`;
+    return `http://localhost:${API_PORT}${API_BASE_PATH}`;
   }
 
   return `http://localhost:${API_PORT}${API_BASE_PATH}`;
