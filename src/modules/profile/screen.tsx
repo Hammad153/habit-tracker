@@ -366,6 +366,7 @@ const ProfileScreen = () => {
         onClose={() => setShowLogoutModal(false)}
         title="Log Out"
         subTitle="Are you sure you want to log out?"
+        scrollable={false}
       >
         <View className="flex-row gap-x-2 mt-3">
           <TouchableOpacity
@@ -398,6 +399,7 @@ const ProfileScreen = () => {
         onClose={() => !deleting && setShowDeleteModal(false)}
         title="Delete Account"
         subTitle="This permanently deletes your account and all habits, completions, and progress. This cannot be undone."
+        scrollable={false}
       >
         <View className="flex-row gap-x-2 mt-3">
           <TouchableOpacity

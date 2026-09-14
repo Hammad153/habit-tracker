@@ -146,11 +146,49 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
     onClose();
   };
 
+  const footerContent = (
+    <View className="flex-row gap-2">
+      <TouchableOpacity
+        onPress={onClose}
+        activeOpacity={0.8}
+        className="flex-1 py-3 rounded-xl border items-center justify-center"
+        style={{
+          backgroundColor: colors.surface,
+          borderColor: colors.surfaceBorder,
+        }}
+      >
+        <ApText font="medium" color={colors.textMuted}>
+          Cancel
+        </ApText>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={handleSave}
+        activeOpacity={0.8}
+        className="flex-1 py-3 rounded-xl items-center justify-center"
+        style={{ backgroundColor: colors.primary }}
+      >
+        <ApText font="semibold" color={colors.inkInverse}>
+          {kind === "FULL"
+            ? isTargetMet
+              ? "Complete Habit"
+              : "Save Progress"
+            : `Log ${selectedVersion?.label || "Version"}`}
+        </ApText>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <ApModal visible={isVisible} onClose={onClose} title={`Log ${habitName}`}>
+    <ApModal
+      visible={isVisible}
+      onClose={onClose}
+      title={`Log ${habitName}`}
+      footer={footerContent}
+      scrollable={true}
+    >
       {/* Version selector (only shown if habit defines minimum or emergency behaviors) */}
       {hasMultipleVersions && (
-        <View className="flex-row mb-4 gap-2">
+        <View className="flex-row mb-2.5 gap-2">
           {versions.map((option) => {
             const active = kind === option.kind;
             const IconComp = option.icon;
@@ -158,21 +196,21 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
               <TouchableOpacity
                 key={option.kind}
                 onPress={() => setKind(option.kind)}
-                className="flex-1 items-center py-2.5 rounded-xl border"
+                className="flex-1 items-center py-2 rounded-xl border"
                 style={{
                   backgroundColor: active ? colors.accentLight : colors.surface,
                   borderColor: active ? colors.primary : colors.surfaceBorder,
                 }}
               >
                 <IconComp
-                  size={16}
+                  size={15}
                   color={active ? colors.primary : colors.textMuted}
                 />
                 <ApText
                   size="xs"
                   font={active ? "semibold" : "normal"}
                   color={active ? colors.primary : colors.textSecondary}
-                  className="mt-1"
+                  className="mt-0.5"
                 >
                   {option.label}
                 </ApText>
@@ -184,7 +222,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
 
       {selectedVersion?.description && (
         <View
-          className="mb-4 p-3 rounded-xl"
+          className="mb-2.5 p-2.5 rounded-xl"
           style={{ backgroundColor: colors.surface2 }}
         >
           <ApText size="xs" color={colors.textSecondary}>
@@ -194,10 +232,10 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       )}
 
       {kind === "FULL" ? (
-        <View className="mb-5">
+        <View className="mb-1">
           {/* Progress summary bar */}
-          <View className="mb-4">
-            <View className="flex-row items-center justify-between mb-1.5">
+          <View className="mb-2.5">
+            <View className="flex-row items-center justify-between mb-1">
               <ApText size="xs" font="medium" color={colors.textSecondary}>
                 Progress
               </ApText>
@@ -220,25 +258,25 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
           </View>
 
           {/* Stepper controls */}
-          <View className="flex-row items-center justify-center gap-3 my-2">
+          <View className="flex-row items-center justify-center gap-3 my-1.5">
             {/* Minus button */}
             <TouchableOpacity
               onPress={() => handleStep(-stepSize)}
               disabled={numValue <= 0}
               activeOpacity={0.7}
-              className="w-12 h-12 rounded-2xl border items-center justify-center"
+              className="w-11 h-11 rounded-xl border items-center justify-center"
               style={{
                 backgroundColor: colors.surface,
                 borderColor: colors.surfaceBorder,
                 opacity: numValue <= 0 ? 0.4 : 1,
               }}
             >
-              <Minus size={20} color={colors.textPrimary} strokeWidth={2.4} />
+              <Minus size={18} color={colors.textPrimary} strokeWidth={2.4} />
             </TouchableOpacity>
 
             {/* Value Input Box */}
             <View
-              className="flex-1 max-w-[160px] h-14 rounded-2xl border flex-row items-center justify-center px-3"
+              className="flex-1 max-w-[150px] h-12 rounded-xl border flex-row items-center justify-center px-3"
               style={{
                 backgroundColor: colors.surface,
                 borderColor: colors.surfaceBorder,
@@ -261,18 +299,18 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
             <TouchableOpacity
               onPress={() => handleStep(stepSize)}
               activeOpacity={0.7}
-              className="w-12 h-12 rounded-2xl border items-center justify-center"
+              className="w-11 h-11 rounded-xl border items-center justify-center"
               style={{
                 backgroundColor: colors.surface,
                 borderColor: colors.surfaceBorder,
               }}
             >
-              <Plus size={20} color={colors.textPrimary} strokeWidth={2.4} />
+              <Plus size={18} color={colors.textPrimary} strokeWidth={2.4} />
             </TouchableOpacity>
           </View>
 
           {/* Quick Increment Pills */}
-          <View className="flex-row flex-wrap items-center justify-center gap-2 mt-3">
+          <View className="flex-row flex-wrap items-center justify-center gap-1.5 mt-2">
             {quickIncrements.map((inc) => (
               <TouchableOpacity
                 key={inc}
@@ -323,33 +361,6 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
           </View>
         </View>
       )}
-
-      {/* Action buttons */}
-      <View className="flex-row gap-2 mt-2">
-        <TouchableOpacity
-          onPress={onClose}
-          activeOpacity={0.8}
-          className="flex-1 py-3 rounded-xl border items-center justify-center"
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
-          }}
-        >
-          <ApText font="medium" color={colors.textMuted}>
-            Cancel
-          </ApText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleSave}
-          activeOpacity={0.8}
-          className="flex-1 py-3 rounded-xl items-center justify-center"
-          style={{ backgroundColor: colors.primary }}
-        >
-          <ApText font="semibold" color={colors.inkInverse}>
-            {isTargetMet ? "Complete Habit" : "Save Progress"}
-          </ApText>
-        </TouchableOpacity>
-      </View>
     </ApModal>
   );
 };

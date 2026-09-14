@@ -20,6 +20,9 @@ export interface ListRowProps extends ViewProps {
   isLast?: boolean;
   className?: string;
   isCompleted?: boolean;
+  progress?: number; // 0 to 1
+  progressColor?: string;
+  progressTrackColor?: string;
 }
 
 export const ListRow: React.FC<ListRowProps> = ({
@@ -37,6 +40,9 @@ export const ListRow: React.FC<ListRowProps> = ({
   isLast = false,
   className = "",
   isCompleted = false,
+  progress,
+  progressColor,
+  progressTrackColor,
   style,
   ...props
 }) => {
@@ -72,6 +78,20 @@ export const ListRow: React.FC<ListRowProps> = ({
         >
           {displaySubtitle}
         </Text>
+      ) : null}
+      {typeof progress === "number" && progress > 0 && !isCompleted ? (
+        <View
+          className="w-full h-1.5 rounded-pill overflow-hidden mt-1.5"
+          style={{ backgroundColor: progressTrackColor || categoryTokens.bg || colors.surface2 }}
+        >
+          <View
+            className="h-full rounded-pill"
+            style={{
+              width: `${Math.min(100, Math.max(3, Math.round(progress * 100)))}%`,
+              backgroundColor: progressColor || computedIconColor || categoryTokens.ink,
+            }}
+          />
+        </View>
       ) : null}
     </View>
   );

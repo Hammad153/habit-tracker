@@ -20,6 +20,8 @@ export interface ApModalProps {
   subtitle?: string;
   subTitle?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
+  scrollable?: boolean;
   className?: string;
   wrapperClassName?: string;
   modalClassName?: string;
@@ -35,6 +37,8 @@ export const ApModal: React.FC<ApModalProps> = ({
   subtitle,
   subTitle,
   children,
+  footer,
+  scrollable = true,
   className = "",
   wrapperClassName = "",
   modalClassName = "",
@@ -82,10 +86,10 @@ export const ApModal: React.FC<ApModalProps> = ({
           }
           className={`w-full max-w-[380px] ${modalClassName}`}
           pointerEvents="box-none"
-          style={Platform.OS === "web" ? ({ zIndex: 2, maxWidth: 440 } as any) : {}}
+          style={Platform.OS === "web" ? ({ zIndex: 2, maxWidth: 440, maxHeight: "90vh" } as any) : { maxHeight: "90%" }}
         >
           <View
-            className={`w-full rounded-lg p-5 max-h-[85%] ${className}`}
+            className={`w-full rounded-2xl p-5 flex-col ${className}`}
             style={[
               {
                 backgroundColor:
@@ -95,12 +99,13 @@ export const ApModal: React.FC<ApModalProps> = ({
                 shadowRadius: 24,
                 shadowOffset: { width: 0, height: 12 },
                 elevation: 8,
+                maxHeight: Platform.OS === "web" ? ("88vh" as any) : "88%",
               },
               height ? { height } : {},
             ]}
           >
             {(title || showCloseButton) && (
-              <View className="flex-row items-center justify-between mb-4">
+              <View className="flex-row items-center justify-between mb-3 flex-shrink-0">
                 <View className="flex-1 mr-2">
                   {title ? (
                     <Text
@@ -131,9 +136,19 @@ export const ApModal: React.FC<ApModalProps> = ({
                 )}
               </View>
             )}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {children}
-            </ScrollView>
+            {scrollable ? (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                style={{ flexShrink: 1 }}
+                contentContainerStyle={{ flexGrow: 0 }}
+              >
+                {children}
+              </ScrollView>
+            ) : (
+              <View style={{ flexShrink: 1 }}>{children}</View>
+            )}
+            {footer && <View className="mt-3 pt-1 flex-shrink-0">{footer}</View>}
           </View>
         </KeyboardAvoidingView>
       </View>

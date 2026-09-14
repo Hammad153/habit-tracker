@@ -7,16 +7,22 @@ export interface ProgressRingProps {
   progress: number; // 0 to 1
   size?: number;
   strokeWidth?: number;
+  strokeColor?: string;
+  trackColor?: string;
   centerText?: string;
   centerSubText?: string;
+  children?: React.ReactNode;
 }
 
 export const ProgressRing: React.FC<ProgressRingProps> = ({
   progress = 0,
   size = 96,
   strokeWidth = 8,
+  strokeColor,
+  trackColor,
   centerText,
   centerSubText,
+  children,
 }) => {
   const colors = useTheme();
   const clampedProgress = Math.min(1, Math.max(0, progress));
@@ -34,7 +40,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colors.backgroundSurface2}
+          stroke={trackColor || colors.backgroundSurface2}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -42,7 +48,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={colors.accent}
+          stroke={strokeColor || colors.accent}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
@@ -51,7 +57,11 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      {(centerText || centerSubText) && (
+      {children ? (
+        <View className="absolute inset-0 items-center justify-center">
+          {children}
+        </View>
+      ) : (centerText || centerSubText) ? (
         <View className="absolute inset-0 items-center justify-center">
           {centerText ? (
             <Text className="text-[19px] font-extrabold text-ink-primary">
@@ -64,7 +74,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
             </Text>
           ) : null}
         </View>
-      )}
+      ) : null}
     </View>
   );
 };

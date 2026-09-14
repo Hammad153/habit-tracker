@@ -41,6 +41,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   subtitle,
   description,
   icon,
+  iconColor,
+  iconBg,
   variant = "toggle",
   isCompleted = false,
   selectedDate,
@@ -86,12 +88,27 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
   const IconComponent = getLucideIcon(icon);
   const categoryKey: CategoryKey = getCategoryKeyForId(id);
+  const categoryTokens = colors.category?.[categoryKey] || {
+    bg: colors.accentSoft,
+    ink: colors.accent,
+  };
+  const habitColor = iconColor || categoryTokens.ink;
+  const habitBg = iconBg || categoryTokens.bg;
+
+  const hasUnits = goal > 1;
+  const hasProgress = hasUnits && value > 0 && !isCompleted;
+  const progressRatio = hasProgress ? Math.min(1, Math.max(0, value / goal)) : 0;
+  const progressPercent = Math.round(progressRatio * 100);
 
   // Determine sublabel
   let subLabel = subtitle || description;
   if (!subLabel) {
     if (goal > 1) {
-      subLabel = `${value} of ${goal} ${unit}`;
+      if (hasProgress) {
+        subLabel = `${value} of ${goal} ${unit} (${progressPercent}%)`;
+      } else {
+        subLabel = `${value} of ${goal} ${unit}`;
+      }
     } else if (stackAfterTitle) {
       subLabel = `After ${stackAfterTitle}`;
     } else {
@@ -102,7 +119,13 @@ export const HabitCard: React.FC<HabitCardProps> = ({
   let trailingControl = null;
   if (variant === "toggle") {
     trailingControl = (
-      <Checkbox checked={isCompleted} onPress={handleToggle} />
+      <Checkbox
+        checked={isCompleted}
+        onPress={handleToggle}
+        progress={hasProgress ? progressRatio : undefined}
+        color={habitColor}
+        trackColor={habitBg}
+      />
     );
   } else if (variant === "edit") {
     trailingControl = (
@@ -126,10 +149,15 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         subLabel={subLabel}
         icon={IconComponent}
         categoryKey={categoryKey}
+        iconColor={iconColor}
+        iconBg={iconBg}
         trailingControl={trailingControl}
         onPress={handlePress}
         isLast={isLast}
         isCompleted={isCompleted}
+        progress={hasProgress ? progressRatio : undefined}
+        progressColor={habitColor}
+        progressTrackColor={habitBg}
       />
 
       {goal > 1 && (
