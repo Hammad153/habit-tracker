@@ -23,6 +23,7 @@ interface IProps {
 
 type TSubscriptionContext = {
   loading: boolean;
+  plansLoading: boolean;
   subscription: ISubscriptionInfo | null;
   subscriptionLoaded: boolean;
   accessGranted: boolean;
@@ -60,6 +61,7 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
     useState<ISubscriptionInfo | null>(null);
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [plans, setPlans] = useState<IPlan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
   const [plansCurrency, setPlansCurrency] = useState("NGN");
   const [trialDurationDays, setTrialDurationDays] = useState(7);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -67,6 +69,7 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
 
   /** Central pricing always renders FROM the backend — never hardcoded here. */
   const fetchPlans = useCallback(() => {
+    setPlansLoading(true);
     return SubscriptionApiService.getPlans()
       .then((data: IPlansResponse) => {
         setPlans(data.plans ?? []);
@@ -74,14 +77,16 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
         setTrialDurationDays(data.trialDurationDays ?? 7);
       })
       .catch((err) => {
-        // Pricing is non-critical on boot; the screen retries via pull/retry.
+        setPlans([]);
         ToastService.ApiError(err);
-      });
+      })
+      .finally(() => setPlansLoading(false));
   }, []);
 
   useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
+    if (user?.id) void fetchPlans();
+    else setPlans([]);
+  }, [fetchPlans, user?.id]);
 
   const fetchSubscription = useCallback(() => {
     if (!user?.id) {
@@ -118,6 +123,18 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
       checkoutInFlightRef.current = true;
       setLoading(true);
       try {
+        const displayedPlan = plans.find((plan) => plan.id === planId);
+        const latest = await SubscriptionApiService.getPlans();
+        setPlans(latest.plans);
+        setPlansCurrency(latest.currency);
+        const latestPlan = latest.plans.find((plan) => plan.id === planId);
+        if (!displayedPlan || !latestPlan ||
+            displayedPlan.amount !== latestPlan.amount ||
+            displayedPlan.currency !== latestPlan.currency ||
+            displayedPlan.billingInterval !== latestPlan.billingInterval) {
+          ToastService.Error("Plan pricing has changed. Review the updated price and choose again.");
+          return false;
+        }
         const init = await SubscriptionApiService.checkout(planId);
         // Send the user to Paystack's hosted checkout (plan-backed → their
         // billing stays on-subscription). Returns when the browser closes.
@@ -145,7 +162,7 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
         setLoading(false);
       }
     },
-    [],
+    [plans],
   );
 
   const cancelSubscription = useCallback(async () => {
@@ -186,6 +203,7 @@ export const SubscriptionProvider: React.FC<IProps> = ({ children }) => {
     <SubscriptionContext.Provider
       value={{
         loading,
+        plansLoading,
         subscription,
         subscriptionLoaded,
         accessGranted: subscription?.accessGranted ?? false,

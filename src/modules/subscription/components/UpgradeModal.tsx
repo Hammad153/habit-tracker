@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Crown, Star } from "lucide-react-native";
-import { ApText, ApModal, ApCard, SkeletonCard } from "@/src/components";
+import { ApText, ApModal, ApCard, ApEmptyState, SkeletonCard } from "@/src/components";
 import { router } from "expo-router";
 import { useTheme } from "@/src/modules/settings/context";
 import { useSubscriptionState } from "../context";
@@ -18,8 +18,14 @@ const UpgradeModal = () => {
     plans,
     plansCurrency,
     loading,
+    plansLoading,
+    fetchPlans,
     startCheckout,
   } = useSubscriptionState();
+
+  useEffect(() => {
+    if (showUpgradeModal) void fetchPlans();
+  }, [showUpgradeModal, fetchPlans]);
 
   const CURRENCY = plansCurrency || subscription?.currency || "NGN";
   const formatAmount = (amount: number | null | undefined) =>
@@ -46,11 +52,14 @@ const UpgradeModal = () => {
       title="Become an Ember Member"
       subTitle="Choose a plan to continue with unlimited access"
     >
-      {loading && plans.length === 0 ? (
+      {plansLoading ? (
         <View className="py-2 gap-3">
           <SkeletonCard style={{ height: 110 }} />
           <SkeletonCard style={{ height: 110 }} />
         </View>
+      ) : plans.length === 0 ? (
+        <ApEmptyState title="Prices unavailable" subtitle="Connect to the internet and retry."
+          actionLabel="Retry" onAction={() => fetchPlans()} />
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}

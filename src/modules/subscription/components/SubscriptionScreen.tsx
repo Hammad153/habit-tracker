@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Crown, Star, Hourglass, Check } from "lucide-react-native";
 import {
@@ -11,7 +11,7 @@ import {
   Skeleton,
   SkeletonCard,
 } from "@/src/components";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useTheme } from "@/src/modules/settings/context";
 import { useSubscriptionState } from "../context";
 import { IPlan, SubscriptionTier, TIER_FEATURES } from "../model";
@@ -28,6 +28,7 @@ const SubscriptionScreen = () => {
   const {
     subscription,
     loading,
+    plansLoading,
     plans,
     plansCurrency,
     fetchSubscription,
@@ -37,11 +38,10 @@ const SubscriptionScreen = () => {
     resumeSubscription,
   } = useSubscriptionState();
 
-  useEffect(() => {
-    fetchSubscription();
-    if (plans.length === 0) fetchPlans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useFocusEffect(useCallback(() => {
+    void fetchSubscription();
+    void fetchPlans();
+  }, [fetchSubscription, fetchPlans]));
 
   const tier: SubscriptionTier = subscription?.tier || "TRIAL";
   const status = subscription?.status || "TRIALING";
@@ -163,10 +163,12 @@ const SubscriptionScreen = () => {
             Choose a Plan
           </ApText>
 
-          {plans.length === 0 ? (
+          {plansLoading ? (
+            <SkeletonCard style={{ height: 160 }} />
+          ) : plans.length === 0 ? (
             <ApEmptyState
               title="Plans aren't available yet"
-              subtitle="Pull to retry, or check your connection."
+              subtitle="Connect to the internet and retry to see current prices."
               actionLabel="Retry"
               onAction={() => fetchPlans()}
             />

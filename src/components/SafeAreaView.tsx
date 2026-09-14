@@ -1,5 +1,5 @@
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { vars } from "nativewind";
@@ -11,6 +11,7 @@ export const ApSafeAreaView: React.FC<{
   className?: string;
 }> = ({ children, className = "" }) => {
   const colors = useTheme();
+  const { width } = useWindowDimensions();
 
   return (
     <SafeAreaView
@@ -19,6 +20,7 @@ export const ApSafeAreaView: React.FC<{
         vars(getThemeVars(colors)),
         { backgroundColor: colors.background },
         Platform.OS === "web" ? webViewportStyle : undefined,
+        Platform.OS === "web" && width <= 767 ? { maxWidth: "100%" } : undefined,
       ]}
       edges={["top"]}
     >

@@ -20,7 +20,10 @@ export class SubscriptionApiService {
     axiosInstance.get("/subscription").then((res) => res.data);
 
   static getPlans = (): Promise<IPlansResponse> =>
-    axiosInstance.get("/subscription/plans").then((res) => res.data);
+    axiosInstance.get("/subscription/plans", {
+      // Avoid reusing an HTTP-cached price list, including older deployments.
+      params: { _fresh: Date.now() },
+    }).then((res) => res.data);
 
   static checkout = (planId: string): Promise<ICheckoutResponse> =>
     axiosInstance
