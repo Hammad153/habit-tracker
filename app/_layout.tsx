@@ -21,10 +21,14 @@ const RootLayout = () => {
     }
 
     const register = () => {
-      void navigator.serviceWorker.register("/sw.js");
+      void navigator.serviceWorker
+        .register("/sw.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch((error) => console.warn("Service worker update failed", error));
     };
 
-    window.addEventListener("load", register);
+    if (document.readyState === "complete") register();
+    else window.addEventListener("load", register);
     return () => window.removeEventListener("load", register);
   }, []);
 

@@ -2,7 +2,7 @@
 
 ## Current Implementation
 
-- Expo Router exports the authenticated app to static web files with `npx expo export --platform web`.
+- `pnpm build:web` performs a clean Expo Router static export and stamps a unique service-worker cache and `version.json` with the source commit and build time.
 - `EXPO_PUBLIC_API_URL` is the production API contract. It must include `/api/v1` and is normalized to avoid duplicate trailing slashes.
 - Browser builds fall back to the current origin plus `/api/v1` when no public API URL is supplied. This supports serving the API and web app behind one domain, but production should set the variable explicitly.
 - `public/manifest.webmanifest` provides install metadata and Android maskable icons.
@@ -15,7 +15,7 @@
 2. Confirm the backend deployment is running the current all-origins CORS configuration. `CORS_ORIGINS` is retained for compatibility but is not required.
 3. Create a separate static hosting project for the Expo repository. Because the connected GitHub repository is already the `hbt-app` project, leave Vercel's Root Directory blank or set it to `.`. Only use `hbt-app` as the Root Directory if deploying from a parent monorepo that contains this repository as a folder.
 4. Set `EXPO_PUBLIC_API_URL` to `https://<api-domain>/api/v1` in the web host's production environment.
-5. Use `npx expo export --platform web` as the build command and `dist` as the output directory.
+5. Use `pnpm build:web` as the build command and `dist` as the output directory. This runs the cache/version stamping step as well as Expo export. Confirm the production branch is `main` and dashboard overrides do not bypass this command. Do not deploy the checked-in `dist` without rebuilding it.
 6. Attach the web domain, enable HTTPS, and verify `/manifest.webmanifest` and `/sw.js` return `200`.
 7. Test login, token refresh, logout, uploads, Paystack redirects, deep links, and offline behavior on desktop and mobile browsers.
 8. Deploy `hbt-web` separately if the marketing/download site should remain at the public root. Link its download CTA to the app web domain or the APK as appropriate.
@@ -53,7 +53,7 @@ Completed in this change: manifest, icons, HTTPS requirement, service-worker reg
 
 - Add Lighthouse PWA checks and Playwright coverage for manifest, service-worker registration, and deep links.
 - Add error monitoring for web builds.
-- Add cache versioning and a user-visible update flow when a new service worker is available.
+- Cache versioning is generated per web build. A user-visible update prompt for already-open tabs remains follow-up work; refresh or reopen the app to load the new application code.
 - Generate dedicated 192px and 512px icons if store/install audits require them.
 
 ## Verification Commands
@@ -61,9 +61,19 @@ Completed in this change: manifest, icons, HTTPS requirement, service-worker reg
 ```bash
 cd hbt-app
 pnpm exec tsc --noEmit
-npx expo export --platform web
+pnpm build:web
 test -f dist/manifest.webmanifest
 test -f dist/sw.js
+cat dist/version.json
 ```
 
 The current export is static. It emits route HTML for Expo Router paths, so the hosting platform must serve the generated `dist` directory and preserve those files on direct navigation.
+
+## Investigating missing updates
+
+- Production app: `https://embermate.vercel.app`.
+- On September 14, 2026, the public CSS matched the local export, including the latest `767px` phone breakpoint. This confirms that change reached the host; it does not establish what an existing browser has cached.
+- The previous worker used the fixed `ember-web-v2` cache and served every cached asset without checking for changes. Builds now generate a unique cache, revalidate mutable assets, and remove only older Ember caches. HTML is fetched with revalidation and API requests remain uncached.
+- After deploying this fix, open `/version.json` and compare `commit` with the intended Git commit. If they differ, check Vercel's project, production branch, deployment commit, and the domain's production assignment.
+- A successful EAS Update workflow updates installed native apps; it does not publish this Vercel website.
+- For an affected browser, close and reopen the app after deployment. To diagnose persistent stale assets, use browser developer tools to unregister the site's service worker and delete only its `ember-web-*` Cache Storage entries, then reload. Avoid clearing all site data, which may remove the login session.
