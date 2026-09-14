@@ -2,8 +2,10 @@ const CACHE_NAME = "ember-web-v2";
 const APP_SHELL = [
   "/",
   "/offline.html",
+  "/manifest.json",
   "/manifest.webmanifest",
-  "/favicon.ico",
+  "/favicon.png",
+  "/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -46,8 +48,10 @@ self.addEventListener("fetch", (event) => {
   const isStaticAsset =
     requestUrl.pathname.startsWith("/_expo/") ||
     requestUrl.pathname.startsWith("/assets/") ||
+    requestUrl.pathname === "/manifest.json" ||
     requestUrl.pathname === "/manifest.webmanifest" ||
-    requestUrl.pathname === "/favicon.ico";
+    requestUrl.pathname === "/favicon.png" ||
+    requestUrl.pathname === "/icon-512.png";
   if (!isStaticAsset) return;
 
   event.respondWith(

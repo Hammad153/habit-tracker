@@ -1,12 +1,14 @@
+import { View } from 'react-native';
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
+import { Text } from "react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
 import { AuthService } from "./api";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
+import Button from "@/src/components/buttons/Button";
 
 const SignupScreen = () => {
   const [name, setName] = useState("");
@@ -47,72 +49,52 @@ const SignupScreen = () => {
 
   return (
     <AuthLayout
-      title="Create Account"
+      title="Create account"
       subtitle="Join us and start tracking your habits"
       footer={
-        <>
-          <Text style={{ color: colors.textSecondary }}>
-            Already have an account?{" "}
-          </Text>
+        <Text className="text-[13.5px] text-ink-secondary">
+          Already have an account?{" "}
           <Link href="/login" asChild>
-            <TouchableOpacity>
-              <Text className="font-bold" style={{ color: colors.primary }}>
-                Sign In
-              </Text>
-            </TouchableOpacity>
+            <Text className="font-bold text-accent">Sign in</Text>
           </Link>
-        </>
+        </Text>
       }
     >
       <AuthInput
-        label="Full Name"
-        icon="person-outline"
+        label="Full name"
+        icon="user"
+        placeholder="Alex Smith"
         value={name}
         onChangeText={setName}
-        placeholder="Enter your name"
-        autoComplete="name"
       />
 
       <AuthInput
-        label="Email Address"
-        icon="mail-outline"
+        label="Email address"
+        icon="mail"
+        placeholder="alex@gmail.com"
         value={email}
         onChangeText={setEmail}
-        placeholder="Enter your email"
-        keyboardType="email-address"
         autoCapitalize="none"
-        autoComplete="email"
+        keyboardType="email-address"
       />
 
       <AuthInput
         label="Password"
-        icon="lock-closed-outline"
+        icon="lock"
+        placeholder="••••••••"
         value={password}
         onChangeText={setPassword}
-        placeholder="Create a password"
         secure
-        autoCapitalize="none"
       />
 
-      <TouchableOpacity
-        onPress={handleSignup}
-        disabled={loading}
-        activeOpacity={0.85}
-        className="py-4 rounded-full mt-5 items-center"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading ? 0.75 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          elevation: 6,
-        }}
-      >
-        <Text className="font-bold text-lg" style={{ color: colors.background }}>
-          {loading ? "Creating Account..." : "Create Account"}
-        </Text>
-      </TouchableOpacity>
+      <View className="mt-2">
+        <Button
+          label="Sign up"
+          onPress={handleSignup}
+          loading={loading}
+          variant="primary"
+        />
+      </View>
     </AuthLayout>
   );
 };

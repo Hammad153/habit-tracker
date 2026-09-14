@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, Text, Pressable } from "react-native";
 import {
   format,
   addDays,
@@ -8,115 +8,60 @@ import {
   isAfter,
   startOfDay,
 } from "date-fns";
-import { Ionicons } from "@expo/vector-icons";
-import { ApText } from "@/src/components/Text";
 import { useTheme } from "@/src/modules/settings/context";
-import { ApScrollView, ApDatePicker } from "@/src/components";
 
 interface HorizontalDatePickerProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
 }
 
-const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
+export const HorizontalDatePicker: React.FC<HorizontalDatePickerProps> = ({
   selectedDate,
   onDateChange,
 }) => {
   const colors = useTheme();
-  const [showPicker, setShowPicker] = useState(false);
   const today = startOfDay(new Date());
 
+  // Show the current week
   const startDate = startOfWeek(new Date(), { weekStartsOn: 0 });
-  const weekDates = Array.from({ length: 7 })
-    .map((_, i) => addDays(startDate, i))
-    .filter((date) => !isAfter(startOfDay(date), today));
-
-  const handlePickerSelect = (date: Date) => {
-    onDateChange(date);
-  };
+  const weekDates = Array.from({ length: 7 }).map((_, i) => addDays(startDate, i));
 
   return (
-    <View className="mt-3 mb-1 px-1">
-      <ApScrollView horizontal className="px-0">
-        {weekDates.map((date, index) => {
-          const isSelected = isSameDay(date, selectedDate);
-          const isToday = isSameDay(date, new Date());
-          const dayName = format(date, "EEE");
-          const dayNumber = format(date, "d");
+    <View className="flex-row items-center justify-between py-2">
+      {weekDates.map((date) => {
+        const isSelected = isSameDay(date, selectedDate);
+        const isFuture = isAfter(startOfDay(date), today);
+        const dayName = format(date, "EEE").slice(0, 2);
+        const dayNum = format(date, "d");
 
-          return (
-            <TouchableOpacity
-              key={index}
-              onPress={() => onDateChange(date)}
-              className={`items-center justify-center w-14 h-14 mr-2 rounded-2xl ${
-                isSelected ? "" : "bg-surface"
+        return (
+          <Pressable
+            key={date.toISOString()}
+            disabled={isFuture}
+            onPress={() => onDateChange(date)}
+            className={`w-[44px] py-2 rounded-md items-center justify-center ${
+              isSelected
+                ? "bg-background-inverse"
+                : "bg-background-surface"
+            } ${isFuture ? "opacity-30" : ""}`}
+          >
+            <Text
+              className={`text-[11px] font-semibold ${
+                isSelected ? "text-ink-inverse opacity-70" : "text-ink-secondary"
               }`}
-              style={
-                isSelected
-                  ? {
-                      backgroundColor: colors.primary,
-                      shadowColor: colors.primary,
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                    }
-                  : {
-                      backgroundColor: colors.surface,
-                    }
-              }
             >
-              <ApText
-                size="xs"
-                font="semibold"
-                color={isSelected ? colors.background : colors.textMuted}
-                className="uppercase"
-              >
-                {dayName}
-              </ApText>
-              <ApText
-                size="lg"
-                font="bold"
-                color={isSelected ? colors.background : colors.textPrimary}
-              >
-                {dayNumber}
-              </ApText>
-              {isToday && !isSelected && (
-                <View
-                  className="w-1 h-1 rounded-full absolute bottom-2"
-                  style={{ backgroundColor: colors.primary }}
-                />
-              )}
-            </TouchableOpacity>
-          );
-        })}
-
-        <TouchableOpacity
-          onPress={() => setShowPicker(true)}
-          className="items-center justify-center w-14 h-14 rounded-2xl"
-          style={{
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.surfaceBorder,
-            borderStyle: "dashed",
-          }}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={22}
-            color={colors.textMuted}
-          />
-          <ApText size="xs" font="medium" color={colors.textMuted}>
-            Filter
-          </ApText>
-        </TouchableOpacity>
-      </ApScrollView>
-
-      <ApDatePicker
-        visible={showPicker}
-        onClose={() => setShowPicker(false)}
-        onSelect={handlePickerSelect}
-        selectedDate={selectedDate}
-      />
+              {dayName}
+            </Text>
+            <Text
+              className={`text-[15px] font-bold mt-0.5 ${
+                isSelected ? "text-ink-inverse" : "text-ink-primary"
+              }`}
+            >
+              {dayNum}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 };

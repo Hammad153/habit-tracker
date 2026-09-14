@@ -1,72 +1,74 @@
 import React from "react";
 import {
   View,
+  Text,
   Modal,
-  ModalProps,
   Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  KeyboardAvoidingView,
+  ScrollView,
   Platform,
+  StyleSheet,
+  KeyboardAvoidingView,
+  DimensionValue,
 } from "react-native";
-import { ApText } from "./Text";
-import { useTheme } from "../modules/settings/context";
-import { Ionicons } from "@expo/vector-icons";
+import { X } from "lucide-react-native";
+import { useTheme } from "@/src/modules/settings/context";
 
-interface IProps extends ModalProps {
+export interface ApModalProps {
+  visible: boolean;
+  onClose: () => void;
   title?: string;
+  subtitle?: string;
   subTitle?: string;
+  children: React.ReactNode;
+  className?: string;
   wrapperClassName?: string;
   modalClassName?: string;
-  className?: string;
-  height?: number;
-  onClose: () => void;
-  showCloseButton?: boolean;
   dismissOnBackdrop?: boolean;
+  showCloseButton?: boolean;
+  height?: DimensionValue;
 }
 
-export const ApModal: React.FC<IProps> = ({
-  title,
-  subTitle,
-  wrapperClassName,
-  modalClassName,
-  className,
-  height,
+export const ApModal: React.FC<ApModalProps> = ({
+  visible,
   onClose,
-  showCloseButton = true,
-  dismissOnBackdrop = true,
+  title,
+  subtitle,
+  subTitle,
   children,
-  ...modalProps
+  className = "",
+  wrapperClassName = "",
+  modalClassName = "",
+  dismissOnBackdrop = true,
+  showCloseButton = true,
+  height,
 }) => {
+  const sub = subtitle || subTitle;
   const colors = useTheme();
-
-  const handleBackdropPress = () => {
-    if (dismissOnBackdrop) {
-      onClose();
-    }
-  };
 
   return (
     <Modal
+      visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      {...modalProps}
     >
       <View
-        className={`flex-1 justify-center items-center bg-black/60 px-6 ${wrapperClassName || ""}`}
-        style={Platform.OS === "web" ? { position: "fixed", zIndex: 9999 } : {}}
+        className={`flex-1 items-center justify-center px-5 ${wrapperClassName}`}
+        style={[
+          { backgroundColor: colors.overlay },
+          Platform.OS === "web"
+            ? ({ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } as any)
+            : {},
+        ]}
       >
-        {/* Backdrop layer sits BEHIND the card: outside taps dismiss, while
-            inputs inside the card receive their own touches (typing works). */}
         {dismissOnBackdrop && (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Close modal"
-            onPress={handleBackdropPress}
+            onPress={onClose}
             style={[
               StyleSheet.absoluteFill,
-              Platform.OS === "web" ? { zIndex: 1 } : {},
+              Platform.OS === "web" ? ({ zIndex: 1 } as any) : {},
             ]}
           />
         )}
@@ -78,49 +80,65 @@ export const ApModal: React.FC<IProps> = ({
                 ? undefined
                 : "height"
           }
-          className={`w-full max-w-md ${modalClassName || ""}`}
+          className={`w-full max-w-[380px] ${modalClassName}`}
           pointerEvents="box-none"
-          style={Platform.OS === "web" ? { zIndex: 2, maxWidth: 500 } : {}}
+          style={Platform.OS === "web" ? ({ zIndex: 2, maxWidth: 440 } as any) : {}}
         >
           <View
-            className={`rounded-3xl p-6 border ${className || ""}`}
+            className={`w-full rounded-lg p-5 max-h-[85%] ${className}`}
             style={[
               {
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
+                backgroundColor:
+                  colors.surfaceElevated || colors.backgroundElevated,
+                shadowColor: colors.inkPrimary,
+                shadowOpacity: 0.16,
+                shadowRadius: 24,
+                shadowOffset: { width: 0, height: 12 },
+                elevation: 8,
               },
               height ? { height } : {},
             ]}
           >
             {(title || showCloseButton) && (
-              <View className="flex-row justify-between items-center mb-4">
+              <View className="flex-row items-center justify-between mb-4">
                 <View className="flex-1 mr-2">
-                  {title && (
-                    <ApText size="xl" font="bold" color={colors.textPrimary}>
-                      {title}
-                    </ApText>
-                  )}
-                  {subTitle && (
-                    <ApText
-                      size="sm"
-                      color={colors.textSecondary}
-                      className="mt-1"
+                  {title ? (
+                    <Text
+                      className="text-[18px] leading-[24px] font-semibold"
+                      style={{ color: colors.inkPrimary }}
                     >
-                      {subTitle}
-                    </ApText>
-                  )}
+                      {title}
+                    </Text>
+                  ) : null}
+                  {sub ? (
+                    <Text
+                      className="text-[13px] mt-0.5"
+                      style={{ color: colors.inkSecondary }}
+                    >
+                      {sub}
+                    </Text>
+                  ) : null}
                 </View>
                 {showCloseButton && (
-                  <TouchableOpacity onPress={onClose}>
-                    <Ionicons name="close" size={24} color={colors.textMuted} />
-                  </TouchableOpacity>
+                  <Pressable
+                    onPress={onClose}
+                    hitSlop={8}
+                    className="w-8 h-8 rounded-pill items-center justify-center"
+                    style={{ backgroundColor: colors.surface }}
+                  >
+                    <X size={16} color={colors.inkPrimary} strokeWidth={2} />
+                  </Pressable>
                 )}
               </View>
             )}
-            {children}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {children}
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
   );
 };
+
+export default ApModal;

@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { Link, router, useLocalSearchParams } from "expo-router";
-import { Text, TouchableOpacity } from "react-native";
+import { Text, View } from "react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { AuthService } from "./api";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
+import Button from "@/src/components/buttons/Button";
 
 const getParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
@@ -56,69 +57,43 @@ const ResetPasswordScreen = () => {
 
   return (
     <AuthLayout
-      title="Reset Password"
-      subtitle={
-        token
-          ? "Create a new password for your account"
-          : "This reset link is missing a token"
-      }
+      title="Reset password"
+      subtitle="Choose a new secure password"
       footer={
-        <>
-          <Text style={{ color: colors.textSecondary }}>Need a new link? </Text>
-          <Link href="/forgot-password" asChild>
-            <TouchableOpacity>
-              <Text className="font-bold" style={{ color: colors.primary }}>
-                Request Reset
-              </Text>
-            </TouchableOpacity>
+        <Text className="text-[13.5px] text-ink-secondary">
+          Remember your password?{" "}
+          <Link href="/login" asChild>
+            <Text className="font-bold text-accent">Sign in</Text>
           </Link>
-        </>
+        </Text>
       }
     >
       <AuthInput
-        label="New Password"
-        icon="lock-closed-outline"
+        label="New password"
+        icon="lock"
+        placeholder="••••••••"
         value={newPassword}
         onChangeText={setNewPassword}
-        placeholder="Create a new password"
-        autoCapitalize="none"
-        autoComplete="new-password"
         secure
       />
 
       <AuthInput
-        label="Confirm Password"
-        icon="lock-closed-outline"
+        label="Confirm password"
+        icon="lock"
+        placeholder="••••••••"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        placeholder="Confirm your new password"
-        autoCapitalize="none"
-        autoComplete="new-password"
         secure
       />
 
-      <TouchableOpacity
-        onPress={handleResetPassword}
-        disabled={loading || !token}
-        activeOpacity={0.85}
-        className="py-4 rounded-full mt-5 items-center"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading || !token ? 0.75 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.3,
-          shadowRadius: 10,
-          elevation: 6,
-        }}
-      >
-        <Text
-          className="font-bold text-lg"
-          style={{ color: colors.background }}
-        >
-          {loading ? "Updating..." : "Update Password"}
-        </Text>
-      </TouchableOpacity>
+      <View className="mt-2">
+        <Button
+          label="Save new password"
+          onPress={handleResetPassword}
+          loading={loading}
+          variant="primary"
+        />
+      </View>
     </AuthLayout>
   );
 };

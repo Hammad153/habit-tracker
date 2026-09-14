@@ -5,8 +5,8 @@ import {
   TextInputProps,
   StyleProp,
   ViewStyle,
+  Text,
 } from "react-native";
-import { ApText } from "./Text";
 import { useTheme } from "@/src/modules/settings/context";
 
 export interface ApTextInputProps extends TextInputProps {
@@ -21,8 +21,8 @@ export const ApTextInput: React.FC<ApTextInputProps> = ({
   label,
   error,
   containerStyle,
-  containerClassName,
-  inputClassName,
+  containerClassName = "",
+  inputClassName = "",
   onFocus,
   onBlur,
   ...props
@@ -40,53 +40,49 @@ export const ApTextInput: React.FC<ApTextInputProps> = ({
     onBlur?.(e);
   };
 
+  const borderColor = error
+    ? colors.danger
+    : isFocused
+    ? colors.accent
+    : "transparent";
+
   return (
-    <View style={containerStyle} className={`w-full ${containerClassName || ""}`}>
+    <View style={containerStyle} className={`w-full ${containerClassName}`}>
       {label && (
-        <ApText
-          size="xs"
-          font="semibold"
-          color={colors.textSecondary}
-          className="mb-1.5 uppercase"
-          style={{ letterSpacing: 1 }}
+        <Text
+          className="text-[12px] font-semibold mb-2"
+          style={{ color: colors.inkTertiary }}
         >
           {label}
-        </ApText>
+        </Text>
       )}
       <View
-        className={`w-full flex-row items-center rounded-2xl overflow-hidden`}
+        className="w-full flex-row items-center rounded-sm h-[52px] px-4"
         style={{
-          backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: isFocused ? colors.primary : colors.surfaceBorder,
-          shadowColor: isFocused ? colors.primary : "transparent",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isFocused ? 0.1 : 0,
-          shadowRadius: 8,
-          elevation: isFocused ? 3 : 0,
+          backgroundColor: colors.surface || colors.input,
+          borderWidth: isFocused || error ? 1.5 : 0,
+          borderColor,
         }}
       >
         <TextInput
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.inkTertiary}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`flex-1 px-4 py-4 ${inputClassName || ""}`}
-          style={[
-            {
-              color: colors.textPrimary,
-              fontSize: 16,
-              fontFamily: "Inter-Medium",
-            },
-            props.style,
-          ]}
+          className={`flex-1 text-[15px] font-medium h-full ${inputClassName}`}
+          style={[{ color: colors.inkPrimary }, props.style]}
           {...props}
         />
       </View>
       {error && (
-        <ApText size="xs" color={colors.danger} className="mt-1.5 ml-1">
+        <Text
+          className="text-[12px] mt-1.5 ml-1"
+          style={{ color: colors.danger }}
+        >
           {error}
-        </ApText>
+        </Text>
       )}
     </View>
   );
 };
+
+export default ApTextInput;

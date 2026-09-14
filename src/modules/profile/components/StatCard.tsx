@@ -12,22 +12,22 @@ const StatCard: React.FC<StatCardProps> = ({ label, value }) => {
   const colors = useTheme();
 
   return (
-    <View
-      className="flex-1 m-1.5 p-4 rounded-2xl items-center justify-center"
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.surfaceBorder,
-        borderWidth: 1,
-        minHeight: 88,
-      }}>
+    <View className="items-center flex-1">
       <ApText
-        size="2xl"
-        font="extrabold"
-        color={colors.primary}
-        className="mb-1">
+        size="3xl"
+        font="semibold"
+        color={colors.textPrimary}
+        style={{ letterSpacing: -0.5 }}
+      >
         {value}
       </ApText>
-      <ApText size="xs" color={colors.textMuted} textAlign="center" font="medium">
+      <ApText
+        size="xs"
+        font="medium"
+        color={colors.textMuted}
+        className="uppercase mt-1"
+        style={{ letterSpacing: 0.8 }}
+      >
         {label}
       </ApText>
     </View>

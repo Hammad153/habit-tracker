@@ -55,20 +55,11 @@ const ApLoader: React.FC<IProps> = ({
     </View>
   );
 
-  if (inline) {
-    return inner;
-  }
-
-  return (
-    <Modal transparent visible animationType="fade" statusBarTranslucent>
-      <View style={[styles.modalOverlay, { backgroundColor: "rgba(0, 0, 0, 0.45)" }]}>
-        {inner}
-      </View>
-    </Modal>
-  );
+  return inner;
 };
 
 const OrbitLoader: React.FC<ILoaderProps> = ({ dim, color }) => {
+  const colors = useTheme();
   const spin1 = useRef(new Animated.Value(0)).current;
   const spin2 = useRef(new Animated.Value(0)).current;
 
@@ -165,10 +156,10 @@ const OrbitLoader: React.FC<ILoaderProps> = ({ dim, color }) => {
             width: dot * 0.7,
             height: dot * 0.7,
             borderRadius: (dot * 0.7) / 2,
-            backgroundColor: "#ffffff",
+            backgroundColor: colors.surface,
             top: -(dot * 0.7) / 2,
             left: dim * 0.31 - (dot * 0.7) / 2,
-            shadowColor: "#fff",
+            shadowColor: colors.surfaceBorder,
             shadowOpacity: 0.9,
             shadowRadius: 4,
             elevation: 4,

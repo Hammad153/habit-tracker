@@ -40,6 +40,151 @@ body {
   }
 }
 
+@layer base {
+  :root, .theme-light {
+    --background: #FFFFFF;
+    --background-surface: #F6F6F2;
+    --background-surface2: #EFEFE9;
+    --background-elevated: #FFFFFF;
+    --background-inverse: #131311;
+    --ink-primary: #131311;
+    --ink-secondary: #55554F;
+    --ink-tertiary: #9A9A93;
+    --ink-inverse: #FFFFFF;
+    --ink-disabled: #C7C7C0;
+    --border: #E7E7E0;
+    --border-strong: #D6D6CE;
+    --accent: #2B6A4D;
+    --accent-soft: #E4EEE8;
+    --accent-strong: #1F4F39;
+    --success: #2B6A4D;
+    --success-soft: #E4EEE8;
+    --warning: #B8842B;
+    --warning-soft: #FBF2E1;
+    --danger: #C4432E;
+    --danger-soft: #FBEAE6;
+    --category-rose-bg: #F7DEE4;
+    --category-rose-ink: #C24A70;
+    --category-amber-bg: #FBE4D2;
+    --category-amber-ink: #D07A2E;
+    --category-mint-bg: #D9F0E8;
+    --category-mint-ink: #1E8F76;
+    --category-violet-bg: #E7E1F8;
+    --category-violet-ink: #7259C9;
+    --category-sky-bg: #DEEAF7;
+    --category-sky-ink: #3373B8;
+    --category-sand-bg: #F2EBDD;
+    --category-sand-ink: #93773D;
+  }
+
+  .theme-dark, .dark {
+    --background: #121212;
+    --background-surface: #1E1E1C;
+    --background-surface2: #282825;
+    --background-elevated: #242421;
+    --background-inverse: #F6F6F2;
+    --ink-primary: #F6F6F2;
+    --ink-secondary: #A8A8A1;
+    --ink-tertiary: #70706B;
+    --ink-inverse: #131311;
+    --ink-disabled: #4A4A46;
+    --border: #2E2E2A;
+    --border-strong: #3E3E38;
+    --accent: #388E65;
+    --accent-soft: #1A3326;
+    --accent-strong: #2B6A4D;
+    --success: #388E65;
+    --success-soft: #1A3326;
+    --warning: #D49B37;
+    --warning-soft: #382A12;
+    --danger: #E0533C;
+    --danger-soft: #3A1813;
+    --category-rose-bg: #361B24;
+    --category-rose-ink: #F2789B;
+    --category-amber-bg: #382313;
+    --category-amber-ink: #F7A250;
+    --category-mint-bg: #163328;
+    --category-mint-ink: #44D4A4;
+    --category-violet-bg: #2B2144;
+    --category-violet-ink: #A28CF0;
+    --category-sky-bg: #1A2B42;
+    --category-sky-ink: #5EA1EB;
+    --category-sand-bg: #332A18;
+    --category-sand-ink: #D4B160;
+  }
+
+  .theme-golden {
+    --background: #17140F;
+    --background-surface: #241E16;
+    --background-surface2: #32291E;
+    --background-elevated: #2B2319;
+    --background-inverse: #E5B842;
+    --ink-primary: #FAF4E8;
+    --ink-secondary: #C7BAA3;
+    --ink-tertiary: #8A7E6B;
+    --ink-inverse: #17140F;
+    --ink-disabled: #544C3E;
+    --border: #3D3121;
+    --border-strong: #52412C;
+    --accent: #E5B842;
+    --accent-soft: #3B2E10;
+    --accent-strong: #C99E30;
+    --success: #4EAA78;
+    --success-soft: #183324;
+    --warning: #E5B842;
+    --warning-soft: #3D2E10;
+    --danger: #E0533C;
+    --danger-soft: #3B1A14;
+    --category-rose-bg: #3A1C25;
+    --category-rose-ink: #F587A7;
+    --category-amber-bg: #3D2811;
+    --category-amber-ink: #F7B252;
+    --category-mint-bg: #163527;
+    --category-mint-ink: #46D6A6;
+    --category-violet-bg: #2E2148;
+    --category-violet-ink: #AB96F5;
+    --category-sky-bg: #192B44;
+    --category-sky-ink: #61A5ED;
+    --category-sand-bg: #3B2E17;
+    --category-sand-ink: #E5B842;
+  }
+
+  .theme-focus {
+    --background: #0F1713;
+    --background-surface: #18251F;
+    --background-surface2: #22332B;
+    --background-elevated: #1E2F27;
+    --background-inverse: #48A97A;
+    --ink-primary: #EDF6F1;
+    --ink-secondary: #A4BFB2;
+    --ink-tertiary: #6E897C;
+    --ink-inverse: #0A150F;
+    --ink-disabled: #43554C;
+    --border: #273C32;
+    --border-strong: #354F42;
+    --accent: #48A97A;
+    --accent-soft: #173628;
+    --accent-strong: #378760;
+    --success: #48A97A;
+    --success-soft: #173628;
+    --warning: #D69E3A;
+    --warning-soft: #382A12;
+    --danger: #E0533C;
+    --danger-soft: #381A16;
+    --category-rose-bg: #361E27;
+    --category-rose-ink: #F0829F;
+    --category-amber-bg: #382817;
+    --category-amber-ink: #EAA654;
+    --category-mint-bg: #173628;
+    --category-mint-ink: #48A97A;
+    --category-violet-bg: #282442;
+    --category-violet-ink: #A296E8;
+    --category-sky-bg: #192D3F;
+    --category-sky-ink: #5DA5E8;
+    --category-sand-bg: #322E1F;
+    --category-sand-ink: #CEBD80;
+  }
+}
 /* Remove browser focus ring/outline on web inputs */
 input, textarea, select {
   outline: none !important;
@@ -50,4 +195,17 @@ input:focus, textarea:focus, select:focus {
   outline: none !important;
   outline-width: 0 !important;
   box-shadow: none !important;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }

@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { ApText } from "../../../components/Text";
 import { ApTheme } from "../../../components/theme";
+import { useTheme } from "@/src/modules/settings/context";
 import { authService } from "../../../services/auth.service";
 
 interface ChangePasswordModalProps {
@@ -24,6 +25,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   isVisible,
   onClose,
 }) => {
+  const colors = useTheme();
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -196,9 +198,9 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               onPress={handleSave}
               disabled={isLoading}>
               {isLoading ? (
-                <ActivityIndicator color="black" />
+                <ActivityIndicator color={colors.background} />
               ) : (
-                <ApText font="bold" color="black" size="lg">
+                <ApText font="bold" color={colors.background} size="lg">
                   Update Password
                 </ApText>
               )}
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: ApTheme.Color.overlay,
   },
   keyboardView: {
     width: "100%",
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    color: "white",
+    color: ApTheme.Color.textPrimary,
     fontSize: 16,
   },
   eyeIcon: {

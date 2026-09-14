@@ -8,50 +8,106 @@ module.exports = {
     "./features/**/*.{js,jsx,ts,tsx}",
     "./modules/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: "class",
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
       colors: {
-        // NOTE: Tailwind/NativeWind color classes are resolved at build time and
-        // are NOT theme-reactive. They mirror the DarkTheme palette as a static
-        // fallback. For light/dark-aware styling use inline `style={{ ... }}`
-        // with the `useTheme()` colors, not these classes.
+        // Design System tokens driven by theme CSS variables
+        background: {
+          DEFAULT: "var(--background, #FFFFFF)",
+          surface: "var(--background-surface, #F6F6F2)",
+          surface2: "var(--background-surface2, #EFEFE9)",
+          elevated: "var(--background-elevated, #FFFFFF)",
+          inverse: "var(--background-inverse, #131311)",
+        },
+        ink: {
+          primary: "var(--ink-primary, #131311)",
+          secondary: "var(--ink-secondary, #55554F)",
+          tertiary: "var(--ink-tertiary, #9A9A93)",
+          inverse: "var(--ink-inverse, #FFFFFF)",
+          disabled: "var(--ink-disabled, #C7C7C0)",
+        },
+        border: {
+          DEFAULT: "var(--border, #E7E7E0)",
+          strong: "var(--border-strong, #D6D6CE)",
+        },
+        accent: {
+          DEFAULT: "var(--accent, #2B6A4D)",
+          soft: "var(--accent-soft, #E4EEE8)",
+          strong: "var(--accent-strong, #1F4F39)",
+        },
+        success: {
+          DEFAULT: "var(--success, #2B6A4D)",
+          soft: "var(--success-soft, #E4EEE8)",
+        },
+        warning: {
+          DEFAULT: "var(--warning, #B8842B)",
+          soft: "var(--warning-soft, #FBF2E1)",
+        },
+        danger: {
+          DEFAULT: "var(--danger, #C4432E)",
+          soft: "var(--danger-soft, #FBEAE6)",
+        },
+        category: {
+          rose: { bg: "var(--category-rose-bg, #F7DEE4)", ink: "var(--category-rose-ink, #C24A70)" },
+          amber: { bg: "var(--category-amber-bg, #FBE4D2)", ink: "var(--category-amber-ink, #D07A2E)" },
+          mint: { bg: "var(--category-mint-bg, #D9F0E8)", ink: "var(--category-mint-ink, #1E8F76)" },
+          violet: { bg: "var(--category-violet-bg, #E7E1F8)", ink: "var(--category-violet-ink, #7259C9)" },
+          sky: { bg: "var(--category-sky-bg, #DEEAF7)", ink: "var(--category-sky-ink, #3373B8)" },
+          sand: { bg: "var(--category-sand-bg, #F2EBDD)", ink: "var(--category-sand-ink, #93773D)" },
+        },
+        // Flattened category color tokens for NativeWind / Tailwind class generation
+        "category-rose-bg": "var(--category-rose-bg, #F7DEE4)",
+        "category-rose-ink": "var(--category-rose-ink, #C24A70)",
+        "category-amber-bg": "var(--category-amber-bg, #FBE4D2)",
+        "category-amber-ink": "var(--category-amber-ink, #D07A2E)",
+        "category-mint-bg": "var(--category-mint-bg, #D9F0E8)",
+        "category-mint-ink": "var(--category-mint-ink, #1E8F76)",
+        "category-violet-bg": "var(--category-violet-bg, #E7E1F8)",
+        "category-violet-ink": "var(--category-violet-ink, #7259C9)",
+        "category-sky-bg": "var(--category-sky-bg, #DEEAF7)",
+        "category-sky-ink": "var(--category-sky-ink, #3373B8)",
+        "category-sand-bg": "var(--category-sand-bg, #F2EBDD)",
+        "category-sand-ink": "var(--category-sand-ink, #93773D)",
 
-        // Primary accent color
-        primary: "#10B981",
-
-        // Background colors
-        background: "#0B130E",
-        backgroundLight: "#111F17",
-
-        // Surface colors (cards, containers)
-        surface: "#14251B",
-        surfaceLight: "#1D3527",
-        surfaceBorder: "#1F3A2B",
-        surfaceInactive: "#19271E",
-
-        // Text colors
-        textPrimary: "#F8FAFC",
-        textSecondary: "#94A3B8",
-        textMuted: "#64748B",
-
-        // Status colors
-        success: "#10B981",
-        progress: "#10B981",
-        progressBg: "#112217",
-        warning: "#F59E0B",
-        danger: "#EF4444",
-        accent: "#A78BFA",
-
-        // Toggle inactive
-        toggleInactive: "#2A3E31",
-
-        // Legacy compatibility
-        black: "#020617",
-        white: "#FFFFFF",
-        muted: "#64748B",
-        border: "#1F3A2B",
-        input: "#14251B",
+        // Aliases / compatibility with theme tokens
+        primary: "var(--accent, #2B6A4D)",
+        surface: "var(--background-surface, #F6F6F2)",
+        surface2: "var(--background-surface2, #EFEFE9)",
+        surfaceBorder: "var(--border, #E7E7E0)",
+        surfaceInactive: "var(--background-surface2, #EFEFE9)",
+        surfaceLight: "var(--background-surface, #F6F6F2)",
+        textPrimary: "var(--ink-primary, #131311)",
+        textSecondary: "var(--ink-secondary, #55554F)",
+        textMuted: "var(--ink-tertiary, #9A9A93)",
+        progress: "var(--accent, #2B6A4D)",
+        progressBg: "var(--background-surface2, #EFEFE9)",
+        toggleInactive: "var(--background-surface2, #EFEFE9)",
+        black: "var(--ink-primary, #131311)",
+        white: "var(--ink-inverse, #FFFFFF)",
+        muted: "var(--ink-tertiary, #9A9A93)",
+        input: "var(--background-surface, #F6F6F2)",
+      },
+      borderRadius: {
+        xs: 8,
+        sm: 12,
+        md: 16,
+        lg: 20,
+        xl: 28,
+        pill: 999,
+      },
+      spacing: {
+        1: "4px",
+        2: "8px",
+        3: "12px",
+        4: "16px",
+        5: "20px",
+        6: "24px",
+        8: "32px",
+        10: "40px",
+        12: "48px",
+        16: "64px",
       },
       fontFamily: {
         display: ["Inter"],

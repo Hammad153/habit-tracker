@@ -14,7 +14,22 @@ import { DailyPlanProvider } from "@/src/modules/daily-plan/context";
 import { IdentitiesProvider } from "@/src/modules/identities/context";
 import { OfflineSyncProvider } from "@/src/services";
 
+import { useAuthState } from "@/src/modules/auth/context";
+
 type ContextProvider = FC<{ children: React.ReactNode }>;
+
+const KeyedUserBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};
+
+const UserScopeBoundary: ContextProvider = ({ children }) => {
+  const { user } = useAuthState();
+  return (
+    <KeyedUserBoundary key={user?.id ?? "unauthenticated"}>
+      {children}
+    </KeyedUserBoundary>
+  );
+};
 
 export const combineContext = (
   ...components: ContextProvider[]
@@ -38,6 +53,7 @@ const providers: ContextProvider[] = [
   OfflineSyncProvider,
   SettingsProvider,
   AuthProvider,
+  UserScopeBoundary,
   ProfileProvider,
   SubscriptionProvider,
   HabitProvider,

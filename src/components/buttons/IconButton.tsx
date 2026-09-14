@@ -1,21 +1,39 @@
 import React from "react";
-import { Pressable } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { ApText } from "../Text";
+import { Pressable, View } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 
-type Props = {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  label: string;
-  onPress: () => void;
-};
+export interface IconButtonProps {
+  icon?: React.ComponentType<{ size: number; color: string; strokeWidth?: number }>;
+  onPress?: () => void;
+  size?: number;
+  accessibilityLabel?: string;
+  className?: string;
+  children?: React.ReactNode;
+  iconColor?: string;
+}
 
-export default function ApIconButton({ icon, label, onPress }: Props) {
+export const ApIconButton: React.FC<IconButtonProps> = ({
+  icon: Icon,
+  onPress,
+  size = 20,
+  accessibilityLabel,
+  className = "",
+  children,
+  iconColor,
+}) => {
   const colors = useTheme();
+
   return (
-    <Pressable onPress={onPress}>
-      <MaterialIcons name={icon} size={24} color={colors.primary} />
-      <ApText color={colors.textPrimary}>{label}</ApText>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      className={`w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80 ${className}`}
+    >
+      {Icon && <Icon size={size} color={iconColor || colors.inkPrimary} strokeWidth={2} />}
+      {children}
     </Pressable>
   );
-}
+};
+
+export default ApIconButton;

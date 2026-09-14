@@ -1,5 +1,6 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import { DailyPlanService } from "./api";
 import { IDailyPlan, IDailyPlanSummary, IDailyPlanTask } from "./model";
 
@@ -33,11 +34,19 @@ export const useDailyPlanState = () => {
 };
 
 export const DailyPlanProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [plans, setPlans] = useState<IDailyPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<IDailyPlan | null>(null);
   const [summary, setSummary] = useState<IDailyPlanSummary | null>(null);
+
+  useEffect(() => {
+    setPlans([]);
+    setSelectedPlan(null);
+    setSummary(null);
+    setLoading(false);
+  }, [user?.id]);
 
   const run = async <T,>(work: () => Promise<T>, success?: string) => {
     setLoading(true);

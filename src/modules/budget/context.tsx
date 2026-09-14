@@ -1,5 +1,6 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { ToastService } from "@/src/services";
+import { useAuthState } from "@/src/modules/auth/context";
 import { BudgetService } from "./api";
 import {
   IBudget,
@@ -49,6 +50,7 @@ export const useBudgetState = () => {
 };
 
 export const BudgetProvider: React.FC<IProps> = ({ children }) => {
+  const { user } = useAuthState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [budgets, setBudgets] = useState<IBudget[]>([]);
@@ -56,6 +58,15 @@ export const BudgetProvider: React.FC<IProps> = ({ children }) => {
   const [incomes, setIncomes] = useState<IIncome[]>([]);
   const [categories, setCategories] = useState<IExpenseCategory[]>([]);
   const [summary, setSummary] = useState<IBudgetSummary | null>(null);
+
+  useEffect(() => {
+    setBudgets([]);
+    setExpenses([]);
+    setIncomes([]);
+    setCategories([]);
+    setSummary(null);
+    setLoading(false);
+  }, [user?.id]);
 
   /**
    * Returns whether the work succeeded, so callers (forms) can avoid navigating

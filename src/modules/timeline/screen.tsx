@@ -1,30 +1,21 @@
 import React, { useEffect } from "react";
-import { View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, ScrollView } from "react-native";
 import { format } from "date-fns";
 import {
-  ApLoader,
-  ApText,
-  ApContainer,
   ApHeader,
-  ApScrollView,
   ApEmptyState,
+  Skeleton,
+  SkeletonHabitList,
 } from "@/src/components";
+import { ListRow } from "@/src/components/ListRow";
 import { useTheme } from "@/src/modules/settings/context";
 import { useProfileState } from "@/src/modules/profile/context";
 import { useTimelineState } from "./context";
+import { CheckCircle } from "lucide-react-native";
 
-const TimelineScreen = () => {
-  const {
-    timeline,
-    loading: isLoadingTimeline,
-    fetchTimeline,
-  } = useTimelineState();
-  const {
-    profile,
-    loading: isLoadingProfile,
-    fetchProfile,
-  } = useProfileState();
+export const TimelineScreen = () => {
+  const { timeline, loading: isLoadingTimeline, fetchTimeline } = useTimelineState();
+  const { profile, loading: isLoadingProfile, fetchProfile } = useProfileState();
   const colors = useTheme();
 
   useEffect(() => {
@@ -34,144 +25,91 @@ const TimelineScreen = () => {
 
   const isLoading = isLoadingTimeline || isLoadingProfile;
 
-  if (isLoading) {
-    return <ApLoader />;
-  }
-
   const completionPercentage = profile?.completionRate
     ? Math.round(profile.completionRate * 100)
     : 0;
-  const currentMonthYear = format(new Date(), "MMMM yyyy").toUpperCase();
 
   return (
-    <ApContainer>
+    <View className="flex-1 bg-background">
       <ApHeader
-        title="Your Journey"
-        subheader={currentMonthYear}
+        title="Your journey"
+        subtitle={format(new Date(), "MMMM yyyy")}
         hasBackButton
       />
-      <ApScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
+
+      <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
       >
-        <View className="flex-row px-5 space-x-3 mb-8 mt-4">
-          <View
-            className="flex-1 rounded-2xl p-4 items-center justify-center space-y-2"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-              borderWidth: 1,
-            }}
-          >
-            <View className="w-10 h-10 rounded-full items-center justify-center bg-green-500/20 mb-1">
-              <Ionicons name="flame" size={20} color={colors.primary} />
+        {isLoading && (!timeline || timeline.length === 0) ? (
+          <View>
+            <View className="flex-row items-center justify-between my-4">
+              <View className="gap-2">
+                <Skeleton width={50} height={28} />
+                <Skeleton width={70} height={14} />
+              </View>
+              <View className="gap-2 items-end">
+                <Skeleton width={60} height={28} />
+                <Skeleton width={90} height={14} />
+              </View>
             </View>
-            <ApText size="3xl" font="bold" color={colors.textPrimary}>
-              {profile?.currentStreak || 0}
-            </ApText>
-            <ApText
-              size="xs"
-              color={colors.textSecondary}
-              style={{ letterSpacing: 0.5 }}
-            >
-              DAY STREAK
-            </ApText>
+            <View className="h-[1px] bg-border my-3" />
+            <Skeleton width={120} height={16} style={{ marginBottom: 12 }} />
+            <SkeletonHabitList count={5} />
           </View>
-
-          <View
-            className="flex-1 rounded-2xl p-4 items-center justify-center space-y-2"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
-              borderWidth: 1,
-            }}
-          >
-            <View className="w-10 h-10 rounded-full items-center justify-center bg-blue-500/20 mb-1">
-              <Ionicons name="pie-chart" size={20} color={colors.accent} />
+        ) : (
+          <>
+            {/* Plain stats numbers per Section 4 */}
+            <View className="flex-row items-center justify-between my-4">
+              <View>
+                <Text className="text-[24px] font-bold text-ink-primary">
+                  {profile?.currentStreak || 0}
+                </Text>
+                <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+                  Day streak
+                </Text>
+              </View>
+              <View>
+                <Text className="text-[24px] font-bold text-accent">
+                  {completionPercentage}%
+                </Text>
+                <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
+                  Completion rate
+                </Text>
+              </View>
             </View>
-            <ApText size="3xl" font="bold" color={colors.textPrimary}>
-              {completionPercentage}%
-            </ApText>
-            <ApText
-              size="xs"
-              color={colors.textSecondary}
-              style={{ letterSpacing: 0.5 }}
-            >
-              COMPLETION
-            </ApText>
-          </View>
-        </View>
 
-        <View className="px-5">
-          {!timeline || timeline.length === 0 ? (
-            <ApEmptyState
-              icon="time-outline"
-              title="No activity yet"
-              subtitle="When you complete habits, your journey will appear here."
-            />
-          ) : (
-            timeline.map((item, index) => {
-              const isLast = index === timeline.length - 1;
-              return (
-                <View key={item.id} className="flex-row relative">
-                  {!isLast && (
-                    <View
-                      className="absolute left-[24px] top-[50px] bottom-[-20px] w-[2px] z-0"
-                      style={{ backgroundColor: colors.surfaceBorder }}
-                    />
-                  )}
+            <View className="h-[1px] bg-border my-3" />
 
-                  <View className="mr-4 items-center z-10">
-                    <View
-                      className="w-12 h-12 rounded-full items-center justify-center border-4 border-transparent"
-                      style={{
-                        backgroundColor:
-                          item.habit?.iconBg || colors.surfaceInactive,
-                      }}
-                    >
-                      <Ionicons
-                        name={(item.habit?.icon as any) || "checkmark"}
-                        size={24}
-                        color={item.habit?.iconColor || "#fff"}
-                      />
-                    </View>
-                  </View>
+            {/* Timeline list */}
+            <Text className="text-[12px] font-semibold text-ink-tertiary mb-3">
+              Timeline history
+            </Text>
 
-                  <View
-                    className="flex-1 mb-5 rounded-2xl p-4 border"
-                    style={{
-                      backgroundColor: colors.surface,
-                      borderColor: colors.surfaceBorder,
-                    }}
-                  >
-                    <View className="flex-row justify-between items-start mb-1">
-                      <ApText size="lg" font="bold" color={colors.textPrimary}>
-                        {item.habit?.title}
-                      </ApText>
-                      <ApText
-                        size="xs"
-                        color={colors.textMuted}
-                        className="pt-1"
-                      >
-                        {format(new Date(item.date), "MMM d, yyyy")}
-                      </ApText>
-                    </View>
-
-                    <ApText
-                      size="base"
-                      color={colors.textSecondary}
-                      className="mb-3"
-                    >
-                      {item.habit?.subtitle || "Habit completed!"}
-                    </ApText>
-                  </View>
-                </View>
-              );
-            })
-          )}
-        </View>
-      </ApScrollView>
-    </ApContainer>
+            {!timeline || timeline.length === 0 ? (
+              <ApEmptyState
+                title="No history logged yet"
+                description="Complete your habits to build your personal timeline."
+              />
+            ) : (
+              <View className="bg-background-surface rounded-lg px-4 py-1">
+                {timeline.map((event: any, idx: number) => (
+                  <ListRow
+                    key={event.id || idx}
+                    title={event.title || event.habitTitle || "Habit activity"}
+                    subLabel={event.date ? format(new Date(event.date), "MMM d, yyyy · h:mm a") : (event.description || "Completed")}
+                    icon={CheckCircle}
+                    iconBg={colors.accentSoft}
+                    iconColor={colors.accent}
+                    isLast={idx === timeline.length - 1}
+                  />
+                ))}
+              </View>
+            )}
+          </>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

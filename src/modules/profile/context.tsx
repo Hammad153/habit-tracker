@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import { ToastService } from "@/src/services";
@@ -40,8 +41,9 @@ export const ProfileProvider: React.FC<IProps> = ({ children }) => {
   const [profile, setProfile] = useState<IProfile>({} as IProfile);
 
   const fetchProfile = () => {
+    if (!user?.id) return Promise.resolve();
     setLoading(true);
-    return ProfileService.get(user!.id)
+    return ProfileService.get(user.id)
       .then((data) => {
         if (data) {
           setProfile(data);
@@ -54,6 +56,15 @@ export const ProfileProvider: React.FC<IProps> = ({ children }) => {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    setProfile({} as IProfile);
+    if (user?.id) {
+      void fetchProfile();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   const updateProfile = (id: string, data: Partial<IProfile>) => {
     setLoading(true);

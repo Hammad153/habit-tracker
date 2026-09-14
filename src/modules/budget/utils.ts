@@ -1,3 +1,4 @@
+import { DesignTokens } from "@/src/components/theme";
 import { toDateKey } from "@/src/utils/date";
 import {
   addDays,
@@ -153,7 +154,7 @@ export const usageColor = (
   percentage: number,
   palette: { primary: string; warning: string },
 ) => {
-  if (percentage >= 100) return "#EF4444";
+  if (percentage >= 100) return DesignTokens.danger.DEFAULT;
   if (percentage >= 80) return palette.warning;
   return palette.primary;
 };
