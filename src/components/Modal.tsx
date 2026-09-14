@@ -38,7 +38,7 @@ export const ApModal: React.FC<ApModalProps> = ({
   subTitle,
   children,
   footer,
-  scrollable = true,
+  scrollable = false,
   className = "",
   wrapperClassName = "",
   modalClassName = "",
@@ -57,23 +57,21 @@ export const ApModal: React.FC<ApModalProps> = ({
       onRequestClose={onClose}
     >
       <View
-        className={`flex-1 items-center justify-center px-5 ${wrapperClassName}`}
-        style={[
-          { backgroundColor: colors.overlay },
-          Platform.OS === "web"
-            ? ({ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } as any)
-            : {},
-        ]}
+        className={`flex-1 items-center justify-center p-4 ${wrapperClassName}`}
+        style={{
+          backgroundColor: colors.overlay,
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         {dismissOnBackdrop && (
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Close modal"
             onPress={onClose}
-            style={[
-              StyleSheet.absoluteFill,
-              Platform.OS === "web" ? ({ zIndex: 1 } as any) : {},
-            ]}
+            style={StyleSheet.absoluteFill}
           />
         )}
         <KeyboardAvoidingView
@@ -84,9 +82,15 @@ export const ApModal: React.FC<ApModalProps> = ({
                 ? undefined
                 : "height"
           }
-          className={`w-full max-w-[380px] ${modalClassName}`}
+          className={`w-full max-w-[360px] mx-auto ${modalClassName}`}
           pointerEvents="box-none"
-          style={Platform.OS === "web" ? ({ zIndex: 2, maxWidth: 440, maxHeight: "90vh" } as any) : { maxHeight: "90%" }}
+          style={{
+            width: "100%",
+            maxWidth: 360,
+            maxHeight: "85%",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <View
             className={`w-full rounded-2xl p-5 flex-col ${className}`}
@@ -99,7 +103,8 @@ export const ApModal: React.FC<ApModalProps> = ({
                 shadowRadius: 24,
                 shadowOffset: { width: 0, height: 12 },
                 elevation: 8,
-                maxHeight: Platform.OS === "web" ? ("88vh" as any) : "88%",
+                width: "100%",
+                maxWidth: 360,
               },
               height ? { height } : {},
             ]}
@@ -146,7 +151,7 @@ export const ApModal: React.FC<ApModalProps> = ({
                 {children}
               </ScrollView>
             ) : (
-              <View style={{ flexShrink: 1 }}>{children}</View>
+              <View>{children}</View>
             )}
             {footer && <View className="mt-3 pt-1 flex-shrink-0">{footer}</View>}
           </View>

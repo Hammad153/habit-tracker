@@ -184,7 +184,7 @@ const LogValueModal: React.FC<LogValueModalProps> = ({
       onClose={onClose}
       title={`Log ${habitName}`}
       footer={footerContent}
-      scrollable={true}
+      scrollable={false}
     >
       {/* Version selector (only shown if habit defines minimum or emergency behaviors) */}
       {hasMultipleVersions && (
