@@ -64,34 +64,51 @@ const NotificationsScreen = () => {
               subtitle="Habit reminders, insights, and journal nudges will appear here."
             />
           ) : (
-            notifications.map((notification) => {
-              const IconComponent = getNotificationIcon(notification.type);
-              return (
-                <View key={notification.id} className="mb-2">
-                  <ListRow
-                    left={
-                      <View
-                        className="w-9 h-9 rounded-xl items-center justify-center"
-                        style={{ backgroundColor: colors.accentLight }}
-                      >
-                        <IconComponent size={18} color={colors.primary} />
-                      </View>
-                    }
-                    title={notification.title}
-                    subtitle={`${notification.body} · ${formatTime(notification.createdAt)}`}
-                    right={
-                      !notification.read ? (
+            <View
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              {notifications.map((notification, index) => {
+                const IconComponent = getNotificationIcon(notification.type);
+                const showBorder = index < notifications.length - 1;
+                return (
+                  <View
+                    key={notification.id}
+                    className="px-4"
+                    style={{
+                      borderBottomWidth: showBorder ? 1 : 0,
+                      borderBottomColor: colors.surfaceBorder,
+                    }}
+                  >
+                    <ListRow
+                      isLast
+                      left={
                         <View
-                          className="w-2 h-2 rounded-full self-center"
-                          style={{ backgroundColor: colors.primary }}
-                        />
-                      ) : undefined
-                    }
-                    onPress={() => handlePress(notification)}
-                  />
-                </View>
-              );
-            })
+                          className="w-9 h-9 rounded-xl items-center justify-center"
+                          style={{ backgroundColor: colors.accentLight }}
+                        >
+                          <IconComponent size={18} color={colors.primary} />
+                        </View>
+                      }
+                      title={notification.title}
+                      subtitle={`${notification.body} · ${formatTime(notification.createdAt)}`}
+                      right={
+                        !notification.read ? (
+                          <View
+                            className="w-2 h-2 rounded-full self-center"
+                            style={{ backgroundColor: colors.primary }}
+                          />
+                        ) : undefined
+                      }
+                      onPress={() => handlePress(notification)}
+                    />
+                  </View>
+                );
+              })}
+            </View>
           )}
         </View>
       </ApScrollView>

@@ -6,7 +6,6 @@ import {
   ApErrorState,
   ApHeader,
   ApText,
-  ApCard,
   ApScrollView,
   SkeletonCard,
   SwitchButton,
@@ -61,6 +60,7 @@ const ToggleRow = ({
   value,
   onChange,
   disabled,
+  showBorderBottom = true,
 }: {
   icon: React.ComponentType<{ size?: number; color?: string }>;
   title: string;
@@ -68,12 +68,16 @@ const ToggleRow = ({
   value: boolean;
   onChange: (v: boolean) => void;
   disabled?: boolean;
+  showBorderBottom?: boolean;
 }) => {
   const colors = useTheme();
   return (
     <View
-      className="flex-row items-center justify-between p-4"
-      style={{ borderBottomWidth: 1, borderBottomColor: colors.surfaceBorder }}
+      className="flex-row items-center justify-between px-4 py-3.5"
+      style={{
+        borderBottomWidth: showBorderBottom ? 1 : 0,
+        borderBottomColor: colors.surfaceBorder,
+      }}
     >
       <View className="flex-row items-center flex-1 mr-3">
         <View
@@ -82,7 +86,7 @@ const ToggleRow = ({
         >
           <IconComponent size={18} color={colors.primary} />
         </View>
-        <View className="flex-1">
+        <View className="flex-1 justify-center">
           <ApText size="sm" font="medium" color={colors.textPrimary}>
             {title}
           </ApText>
@@ -105,11 +109,13 @@ const OptionRow = ({
   hint,
   selected,
   onPress,
+  showBorderBottom = true,
 }: {
   label: string;
   hint: string;
   selected: boolean;
   onPress: () => void;
+  showBorderBottom?: boolean;
 }) => {
   const colors = useTheme();
   return (
@@ -117,12 +123,14 @@ const OptionRow = ({
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      className="flex-row items-center justify-between p-3.5"
+      className="flex-row items-center justify-between px-4 py-3.5"
       style={{
         backgroundColor: selected ? colors.accentLight : "transparent",
+        borderBottomWidth: showBorderBottom ? 1 : 0,
+        borderBottomColor: colors.surfaceBorder,
       }}
     >
-      <View className="flex-1">
+      <View className="flex-1 justify-center">
         <ApText size="sm" font={selected ? "semibold" : "medium"} color={colors.textPrimary}>
           {label}
         </ApText>
@@ -130,7 +138,7 @@ const OptionRow = ({
           {hint}
         </ApText>
       </View>
-      {selected && <Check size={16} color={colors.primary} />}
+      {selected && <Check size={16} color={colors.primary} strokeWidth={2.5} />}
     </Pressable>
   );
 };
@@ -188,7 +196,13 @@ const CoachSettingsScreen = () => {
         </ApScrollView>
       ) : (
         <ApScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-          <ApCard className="overflow-hidden mb-5">
+          <View
+            className="rounded-2xl border overflow-hidden mb-5"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             <ToggleRow
               icon={MessageSquare}
               title="AI Coach"
@@ -222,70 +236,71 @@ const CoachSettingsScreen = () => {
                 update({ reengagementEnabled: v }, "reengagementEnabled")
               }
               disabled={!prefs.coachEnabled}
+              showBorderBottom={false}
             />
-          </ApCard>
+          </View>
 
           <ApText
             size="xs"
             font="semibold"
             color={colors.textMuted}
-            className="uppercase mb-2"
+            className="uppercase mb-2 px-1"
             style={{ letterSpacing: 0.8 }}
           >
             Tone
           </ApText>
-          <ApCard className="overflow-hidden mb-5">
+          <View
+            className="rounded-2xl border overflow-hidden mb-5"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             {TONES.map((t, index) => (
-              <View
+              <OptionRow
                 key={t.value}
-                style={{
-                  borderTopWidth: index > 0 ? 1 : 0,
-                  borderTopColor: colors.surfaceBorder,
-                }}
-              >
-                <OptionRow
-                  label={t.label}
-                  hint={t.hint}
-                  selected={prefs.coachTone === t.value}
-                  onPress={() =>
-                    prefs.coachTone !== t.value &&
-                    update({ coachTone: t.value }, `tone-${t.value}`)
-                  }
-                />
-              </View>
+                label={t.label}
+                hint={t.hint}
+                selected={prefs.coachTone === t.value}
+                showBorderBottom={index < TONES.length - 1}
+                onPress={() =>
+                  prefs.coachTone !== t.value &&
+                  update({ coachTone: t.value }, `tone-${t.value}`)
+                }
+              />
             ))}
-          </ApCard>
+          </View>
 
           <ApText
             size="xs"
             font="semibold"
             color={colors.textMuted}
-            className="uppercase mb-2"
+            className="uppercase mb-2 px-1"
             style={{ letterSpacing: 0.8 }}
           >
             Frequency
           </ApText>
-          <ApCard className="overflow-hidden mb-8">
+          <View
+            className="rounded-2xl border overflow-hidden mb-8"
+            style={{
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            }}
+          >
             {FREQUENCIES.map((f, index) => (
-              <View
+              <OptionRow
                 key={f.value}
-                style={{
-                  borderTopWidth: index > 0 ? 1 : 0,
-                  borderTopColor: colors.surfaceBorder,
-                }}
-              >
-                <OptionRow
-                  label={f.label}
-                  hint={f.hint}
-                  selected={prefs.coachFrequency === f.value}
-                  onPress={() =>
-                    prefs.coachFrequency !== f.value &&
-                    update({ coachFrequency: f.value }, `freq-${f.value}`)
-                  }
-                />
-              </View>
+                label={f.label}
+                hint={f.hint}
+                selected={prefs.coachFrequency === f.value}
+                showBorderBottom={index < FREQUENCIES.length - 1}
+                onPress={() =>
+                  prefs.coachFrequency !== f.value &&
+                  update({ coachFrequency: f.value }, `freq-${f.value}`)
+                }
+              />
             ))}
-          </ApCard>
+          </View>
 
           {savingKey && (
             <ApText size="xs" color={colors.textMuted} className="text-center mb-4">

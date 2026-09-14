@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { Fingerprint, Volume2 } from "lucide-react-native";
-import { ApText, ApContainer, ApHeader, ApCard, ApScrollView, SwitchButton } from "@/src/components";
+import { ApText, ApContainer, ApHeader, ApScrollView, SwitchButton } from "@/src/components";
 import { useSettingsState } from "./context";
 
 const SoundsScreen = () => {
@@ -47,16 +47,23 @@ const SoundsScreen = () => {
         >
           Feedback
         </ApText>
-        <ApCard className="overflow-hidden mb-4">
+        <View
+          className="rounded-2xl border overflow-hidden mb-4"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.surfaceBorder,
+          }}
+        >
           {settings.map((item, index) => {
             const IconComp = item.icon;
+            const showBorder = index < settings.length - 1;
             return (
               <View
                 key={item.id}
-                className="p-4"
+                className="px-4 py-3.5"
                 style={{
-                  borderTopWidth: index > 0 ? 1 : 0,
-                  borderTopColor: colors.surfaceBorder,
+                  borderBottomWidth: showBorder ? 1 : 0,
+                  borderBottomColor: colors.surfaceBorder,
                 }}
               >
                 <View className="flex-row items-center justify-between">
@@ -67,7 +74,7 @@ const SoundsScreen = () => {
                     >
                       <IconComp size={18} color={colors.primary} />
                     </View>
-                    <View className="flex-1">
+                    <View className="flex-1 justify-center">
                       <ApText
                         size="sm"
                         color={colors.textPrimary}
@@ -88,7 +95,7 @@ const SoundsScreen = () => {
               </View>
             );
           })}
-        </ApCard>
+        </View>
       </ApScrollView>
     </ApContainer>
   );

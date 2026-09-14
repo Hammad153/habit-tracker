@@ -1,12 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshControl, ScrollView, Text, Pressable, View } from "react-native";
-import { Plus, Calendar, Clock, Check } from "lucide-react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  Text,
+  Pressable,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { Plus, Calendar, Clock, Check, Edit3, Trash2 } from "lucide-react-native";
 import { router } from "expo-router";
 import {
   ApEmptyState,
   ApErrorState,
   ApConfirmModal,
-  ApTextInput,
   Skeleton,
   SkeletonHabitList,
 } from "@/src/components";
@@ -21,6 +28,7 @@ import { useNotificationsState } from "@/src/modules/notifications/context";
 import { IDailyPlanTask } from "./model";
 import { format } from "date-fns";
 import { useFeedback } from "@/src/utils/feedback";
+import { ToastService } from "@/src/services";
 
 const formatTime = (value?: string) => {
   if (!value) return "";
@@ -36,7 +44,10 @@ export const DailyPlanScreen = () => {
   const { triggerSelection } = useFeedback();
   const today = toDateKey(new Date());
   const [selectedDate, setSelectedDate] = useState(today);
-  const [note, setNote] = useState("");
+  const [noteText, setNoteText] = useState("");
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [isAddingEntry, setIsAddingEntry] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [deleteActivity, setDeleteActivity] = useState<IDailyPlanTask | null>(null);
   const [optimisticOverrides, setOptimisticOverrides] = useState<Record<string, "COMPLETED" | "PENDING">>({});
@@ -48,6 +59,7 @@ export const DailyPlanScreen = () => {
     summary,
     fetchPlans,
     fetchSummary,
+    createPlan,
     updatePlan,
     updateTask,
     deleteTask,
@@ -69,8 +81,10 @@ export const DailyPlanScreen = () => {
   }, [load]);
 
   useEffect(() => {
-    setNote(selectedPlan?.note ?? "");
-  }, [selectedPlan?.id, selectedPlan?.note]);
+    setNoteText("");
+    setEditingIndex(null);
+    setIsAddingEntry(false);
+  }, [selectedDate]);
 
   // Generate 7 days around selected date
   const days = useMemo(() => {
@@ -127,31 +141,75 @@ export const DailyPlanScreen = () => {
     }
 
     if (!updatedViaApi && selectedPlan?.id) {
-      try {
-        const rawItems = (selectedPlan.items ?? selectedPlan.tasks ?? []) as IDailyPlanTask[];
-        const updatedItems = rawItems.map((item, idx) => {
-          const isMatch =
-            (task.id && item.id === task.id) ||
-            idx === index ||
-            (item.title === task.title && item.startTime === task.startTime);
-          return isMatch ? { ...item, status: newStatus } : item;
-        });
-        await updatePlan(selectedPlan.id, { items: updatedItems });
-      } catch {
-        setOptimisticOverrides((prev) => {
-          const copy = { ...prev };
-          delete copy[key];
-          return copy;
-        });
-      }
+      const updatedTasks = activities.map((t) => (t.id === task.id ? { ...t, status: newStatus } : t));
+      await updatePlan(selectedPlan.id, { tasks: updatedTasks });
     }
-
-    load();
   };
 
-  const handleSaveNote = async () => {
-    if (selectedPlan?.id) {
-      await updatePlan(selectedPlan.id, { note });
+  // Parse entries from selectedPlan?.note
+  const noteEntries = useMemo(() => {
+    const raw = selectedPlan?.note?.trim() || "";
+    if (!raw) return [];
+    if (raw.includes("\n\n---\n\n")) {
+      return raw.split("\n\n---\n\n").map((s) => s.trim()).filter(Boolean);
+    }
+    const parts = raw.split(/\n{2,}/).map((s) => s.trim()).filter(Boolean);
+    return parts.length > 0 ? parts : [raw];
+  }, [selectedPlan?.note]);
+
+  const handleSaveNoteEntry = async () => {
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
+    setSavingNote(true);
+    try {
+      let updatedEntries: string[];
+      if (editingIndex !== null && editingIndex >= 0 && editingIndex < noteEntries.length) {
+        updatedEntries = [...noteEntries];
+        updatedEntries[editingIndex] = trimmed;
+      } else {
+        updatedEntries = [...noteEntries, trimmed];
+      }
+      const combinedNote = updatedEntries.join("\n\n---\n\n");
+      if (selectedPlan?.id) {
+        await updatePlan(selectedPlan.id, { note: combinedNote });
+      } else {
+        await createPlan({ planDate: selectedDate, note: combinedNote });
+      }
+      setNoteText("");
+      setEditingIndex(null);
+      setIsAddingEntry(false);
+      ToastService.Success("Note saved");
+    } catch (err) {
+      ToastService.ApiError(err);
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const handleEditEntry = (index: number) => {
+    setEditingIndex(index);
+    setNoteText(noteEntries[index]);
+    setIsAddingEntry(true);
+  };
+
+  const handleDeleteEntry = async (index: number) => {
+    setSavingNote(true);
+    try {
+      const updatedEntries = noteEntries.filter((_, i) => i !== index);
+      const combinedNote = updatedEntries.join("\n\n---\n\n");
+      if (selectedPlan?.id) {
+        await updatePlan(selectedPlan.id, { note: combinedNote });
+      }
+      if (editingIndex === index) {
+        setEditingIndex(null);
+        setNoteText("");
+        setIsAddingEntry(false);
+      }
+      ToastService.Success("Note removed");
+    } catch (err) {
+      ToastService.ApiError(err);
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -179,144 +237,173 @@ export const DailyPlanScreen = () => {
             <Text className="text-[22px] font-bold text-ink-primary">
               Daily plan
             </Text>
-            <Text className="text-[12.5px] text-ink-secondary mt-0.5">
-              {format(parseDateKey(selectedDate), "EEEE, MMMM d")}
+            <Text className="text-[13px] text-ink-secondary mt-0.5">
+              {format(parseDateKey(selectedDate), "MMMM d, yyyy")}
             </Text>
           </View>
-          <View className="flex-row items-center gap-2">
-            <Pressable
-              onPress={() => router.push("/planner-calendar")}
-              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
-              accessibilityRole="button"
-              accessibilityLabel="Calendar"
-            >
-              <Calendar size={20} color={colors.inkPrimary} strokeWidth={2} />
-            </Pressable>
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/add-plan-task",
-                  params: { date: selectedDate },
-                })
-              }
-              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
-              accessibilityRole="button"
-              accessibilityLabel="Add activity"
-            >
-              <Plus size={20} color={colors.inkPrimary} strokeWidth={2} />
-            </Pressable>
-          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/planner-calendar")}
+            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-75 border"
+            style={{ borderColor: colors.surfaceBorder }}
+            accessibilityRole="button"
+            accessibilityLabel="View calendar"
+          >
+            <Calendar size={18} color={colors.inkPrimary} strokeWidth={2} />
+          </TouchableOpacity>
         </View>
 
-        {/* Date Strip */}
-        <View className="flex-row items-center justify-between py-2 mb-4">
-          {days.map((d) => {
-            const key = toDateKey(d);
-            const isSelected = key === selectedDate;
-            const dayName = format(d, "EEE").slice(0, 2);
-            const dayNum = format(d, "d");
+        {/* Date Selector Row */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="flex-row mb-5"
+          contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+        >
+          {days.map((dateObj) => {
+            const dateStr = toDateKey(dateObj);
+            const isSelected = dateStr === selectedDate;
+            const isToday = dateStr === today;
+            const dayLetter = format(dateObj, "EEE")[0];
+            const dayNumber = format(dateObj, "d");
 
             return (
               <Pressable
-                key={key}
-                onPress={() => setSelectedDate(key)}
-                className={"w-[44px] py-2 rounded-md items-center justify-center " + (isSelected ? "bg-background-inverse" : "bg-background-surface")}
+                key={dateStr}
+                onPress={() => setSelectedDate(dateStr)}
+                className={`items-center justify-center w-12 py-2.5 rounded-full border ${
+                  isSelected
+                    ? "bg-background-inverse border-background-inverse"
+                    : "bg-background-surface border-transparent"
+                }`}
+                style={{
+                  borderColor: isSelected
+                    ? colors.inkPrimary
+                    : isToday
+                    ? colors.accent
+                    : colors.surfaceBorder,
+                  backgroundColor: isSelected ? colors.inkPrimary : colors.surface,
+                }}
               >
                 <Text
-                  className={"text-[11px] font-semibold " + (isSelected ? "text-ink-inverse opacity-70" : "text-ink-secondary")}
+                  className="text-[11px] font-semibold"
+                  style={{
+                    color: isSelected
+                      ? colors.inkInverse
+                      : isToday
+                      ? colors.accent
+                      : colors.inkTertiary,
+                  }}
                 >
-                  {dayName}
+                  {dayLetter}
                 </Text>
                 <Text
-                  className={"text-[15px] font-bold mt-0.5 " + (isSelected ? "text-ink-inverse" : "text-ink-primary")}
+                  className="text-[14px] font-bold mt-0.5"
+                  style={{
+                    color: isSelected ? colors.inkInverse : colors.inkPrimary,
+                  }}
                 >
-                  {dayNum}
+                  {dayNumber}
                 </Text>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
 
-        {/* Stats Row */}
-        <View className="flex-row items-center justify-between mb-4">
-          {isInitialLoading ? (
-            <Skeleton width={160} height={28} radius={6} />
-          ) : (
-            <View>
-              <Text className="text-[24px] font-bold text-ink-primary">
-                {completedCount} of {activities.length}
+        {/* Progress Card */}
+        {isInitialLoading ? (
+          <View className="mb-5">
+            <Skeleton width="100%" height={88} radius={16} />
+          </View>
+        ) : (
+          <Card className="mb-5 p-4">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-[14px] font-semibold text-ink-primary">
+                Today&apos;s Progress
               </Text>
-              <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
-                Activities completed
+              <Text className="text-[13px] font-bold text-accent">
+                {activities.length > 0
+                  ? `${Math.round((completedCount / activities.length) * 100)}%`
+                  : "0%"}
               </Text>
             </View>
-          )}
-          {!isInitialLoading && activities.length > 0 && (
-            <View className="items-end">
-              <Text className="text-[24px] font-bold text-accent">
-                {Math.round((completedCount / activities.length) * 100)}%
-              </Text>
-              <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
-                Progress
-              </Text>
+            <View
+              className="w-full h-2 rounded-full overflow-hidden"
+              style={{ backgroundColor: colors.surface2 }}
+            >
+              <View
+                className="h-full rounded-full"
+                style={{
+                  backgroundColor: colors.accent,
+                  width: activities.length > 0 ? `${(completedCount / activities.length) * 100}%` : "0%",
+                }}
+              />
             </View>
-          )}
-        </View>
-
-        <View className="h-[1px] bg-border my-2" />
-
-        {/* Activities List */}
-        <View className="mt-4">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-[12px] font-semibold text-ink-tertiary">
-              Schedule
+            <Text className="text-[12px] text-ink-tertiary mt-2">
+              {completedCount} of {activities.length} activities completed
             </Text>
-            {!isInitialLoading && activities.length > 0 && (
-              <Pressable
-                onPress={() =>
-                  router.push({
-                    pathname: "/add-plan-task",
-                    params: { date: selectedDate },
-                  })
-                }
-              >
-                <Text className="text-[12px] font-semibold text-accent">
-                  + Add task
-                </Text>
-              </Pressable>
-            )}
+          </Card>
+        )}
+
+        {/* Activities Section */}
+        <View className="mb-5">
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-[16px] font-bold text-ink-primary">
+              Activities
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                router.push({
+                  pathname: "/add-plan-task",
+                  params: { planId: selectedPlan?.id, date: selectedDate },
+                })
+              }
+              className="flex-row items-center gap-1 active:opacity-75"
+            >
+              <Plus size={16} color={colors.accent} strokeWidth={2.5} />
+              <Text className="text-[13px] font-semibold text-accent">
+                Add activity
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {isInitialLoading ? (
             <SkeletonHabitList count={3} />
           ) : activities.length === 0 ? (
-            <ApEmptyState
-              title="No activities planned"
-              description="Map out your routine for today to protect your time."
-              actionLabel="Add activity"
-              onAction={() =>
-                router.push({
-                  pathname: "/add-plan-task",
-                  params: { date: selectedDate },
-                })
-              }
-            />
+            <Card className="items-center justify-center py-8 px-4 border border-dashed border-border bg-transparent">
+              <Clock size={28} color={colors.inkTertiary} strokeWidth={1.5} />
+              <Text className="text-[14px] font-medium text-ink-secondary mt-2 text-center">
+                No activities planned for this day
+              </Text>
+              <Button
+                variant="secondary"
+                label="Plan an activity"
+                className="mt-3"
+                onPress={() =>
+                  router.push({
+                    pathname: "/add-plan-task",
+                    params: { planId: selectedPlan?.id, date: selectedDate },
+                  })
+                }
+              />
+            </Card>
           ) : (
-            <View className="bg-background-surface rounded-lg px-4 py-1 mb-6">
+            <View
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
               {activities.map((act, idx) => {
                 const isDone = act.status === "COMPLETED";
-                const timeText = act.startTime ? formatTime(act.startTime) : "";
-                const sub = timeText ? (act.durationMinutes ? `${timeText} · ${act.durationMinutes}m` : timeText) : (act.description || "Planned task");
-
+                const timeStr = [act.startTime, act.endTime].filter(Boolean).map(formatTime).join(" – ");
                 return (
                   <ListRow
-                    key={act.id}
+                    key={act.id || `${act.title}-${idx}`}
                     title={act.title}
-                    subLabel={sub}
-                    icon={Clock}
-                    iconBg={colors.backgroundSurface2}
-                    iconColor={colors.inkSecondary}
-                    trailingControl={
+                    subtitle={timeStr || act.description}
+                    categoryKey="mint"
+                    left={
                       <Checkbox
                         checked={isDone}
                         onPress={() => toggleTaskStatus(act, idx)}
@@ -337,19 +424,183 @@ export const DailyPlanScreen = () => {
           )}
         </View>
 
-        {/* Day Notes */}
-        <View className="mt-4">
-          <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
-            Day notes
-          </Text>
-          <ApTextInput
-            placeholder="Reflections, intentions, or notes for today..."
-            value={note}
-            onChangeText={setNote}
-            onBlur={handleSaveNote}
-            multiline
-            numberOfLines={3}
-          />
+        {/* Day Notes Section */}
+        <View className="mt-2 mb-6">
+          <View className="flex-row items-center justify-between mb-2.5">
+            <Text
+              className="text-[13px] font-semibold"
+              style={{ color: colors.inkTertiary }}
+            >
+              Day notes
+            </Text>
+            {noteEntries.length > 0 && !isAddingEntry && (
+              <TouchableOpacity
+                onPress={() => {
+                  setEditingIndex(null);
+                  setNoteText("");
+                  setIsAddingEntry(true);
+                }}
+                className="flex-row items-center active:opacity-75"
+                hitSlop={8}
+              >
+                <Plus size={14} color={colors.primary} strokeWidth={2.5} />
+                <Text
+                  className="text-[13px] font-semibold ml-1"
+                  style={{ color: colors.primary }}
+                >
+                  New entry
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Saved Entries List */}
+          {noteEntries.length > 0 && (
+            <View className="mb-3 gap-2.5">
+              {noteEntries.map((entry, idx) => (
+                <View
+                  key={idx}
+                  className="rounded-2xl border p-4"
+                  style={{
+                    backgroundColor: colors.surface,
+                    borderColor: colors.surfaceBorder,
+                  }}
+                >
+                  <View className="flex-row items-center justify-between mb-2">
+                    <View
+                      className="px-2.5 py-0.5 rounded-full"
+                      style={{ backgroundColor: colors.surface2 }}
+                    >
+                      <Text
+                        className="text-[11px] font-semibold uppercase tracking-wider"
+                        style={{ color: colors.inkTertiary }}
+                      >
+                        Entry {idx + 1}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-3">
+                      <TouchableOpacity
+                        onPress={() => handleEditEntry(idx)}
+                        hitSlop={8}
+                        accessibilityLabel="Edit note"
+                      >
+                        <Edit3 size={15} color={colors.inkTertiary} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleDeleteEntry(idx)}
+                        hitSlop={8}
+                        accessibilityLabel="Delete note"
+                      >
+                        <Trash2 size={15} color={colors.danger} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <Text
+                    className="text-[14.5px] leading-[22px] font-normal"
+                    style={{ color: colors.inkPrimary }}
+                  >
+                    {entry}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* New / Edit Note Input Box */}
+          {(isAddingEntry || noteEntries.length === 0) && (
+            <View
+              className="rounded-2xl border p-3.5 mb-2"
+              style={{
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              }}
+            >
+              <TextInput
+                placeholder="Reflections, intentions, or notes for today..."
+                placeholderTextColor={colors.inkDisabled || colors.inkTertiary}
+                value={noteText}
+                onChangeText={setNoteText}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                className="text-[14.5px] leading-[22px] min-h-[80px] p-1"
+                style={{ color: colors.inkPrimary }}
+              />
+
+              <View
+                className="flex-row items-center justify-between mt-3 pt-2.5 border-t"
+                style={{ borderTopColor: colors.surfaceBorder }}
+              >
+                {noteEntries.length > 0 ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsAddingEntry(false);
+                      setEditingIndex(null);
+                      setNoteText("");
+                    }}
+                    className="py-1.5 px-3 rounded-full"
+                  >
+                    <Text
+                      className="text-[13px] font-medium"
+                      style={{ color: colors.inkTertiary }}
+                    >
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View />
+                )}
+
+                <TouchableOpacity
+                  onPress={handleSaveNoteEntry}
+                  disabled={!noteText.trim() || savingNote}
+                  className="flex-row items-center px-4 py-2 rounded-full active:opacity-85"
+                  style={{
+                    backgroundColor: noteText.trim() ? colors.primary : colors.surfaceInactive,
+                    opacity: savingNote ? 0.6 : 1,
+                  }}
+                >
+                  <Check
+                    size={15}
+                    color={noteText.trim() ? colors.background : colors.textMuted}
+                    strokeWidth={2.5}
+                  />
+                  <Text
+                    className="text-[13px] font-semibold ml-1.5"
+                    style={{
+                      color: noteText.trim() ? colors.background : colors.textMuted,
+                    }}
+                  >
+                    {savingNote ? "Saving..." : editingIndex !== null ? "Update Entry" : "Save Note"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Button to start another entry when input is collapsed */}
+          {noteEntries.length > 0 && !isAddingEntry && (
+            <TouchableOpacity
+              onPress={() => {
+                setEditingIndex(null);
+                setNoteText("");
+                setIsAddingEntry(true);
+              }}
+              className="flex-row items-center justify-center py-3 px-4 rounded-2xl border border-dashed active:opacity-75 mt-1"
+              style={{
+                borderColor: colors.surfaceBorder,
+                backgroundColor: colors.surface,
+              }}
+            >
+              <Plus size={16} color={colors.primary} />
+              <Text
+                className="text-[14px] font-semibold ml-2"
+                style={{ color: colors.primary }}
+              >
+                Add another entry
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
