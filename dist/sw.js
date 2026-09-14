@@ -1,10 +1,12 @@
 // Replaced with a unique cache name by scripts/stamp-web-build.cjs.
-const CACHE_NAME = "ember-web-55c28e83-a237-4edc-accc-a82d6b3926c7";
+const CACHE_NAME = "ember-web-15e34008-cf85-4301-8f22-2c03ed5d54b8";
 const APP_SHELL = [
   "/",
   "/offline.html",
+  "/manifest.json",
   "/manifest.webmanifest",
-  "/favicon.ico",
+  "/favicon.png",
+  "/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -47,8 +49,10 @@ self.addEventListener("fetch", (event) => {
   const isStaticAsset =
     requestUrl.pathname.startsWith("/_expo/") ||
     requestUrl.pathname.startsWith("/assets/") ||
+    requestUrl.pathname === "/manifest.json" ||
     requestUrl.pathname === "/manifest.webmanifest" ||
-    requestUrl.pathname === "/favicon.ico";
+    requestUrl.pathname === "/favicon.png" ||
+    requestUrl.pathname === "/icon-512.png";
   if (!isStaticAsset) return;
 
   const responsePromise = (async () => {
