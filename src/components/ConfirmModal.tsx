@@ -13,6 +13,7 @@ export interface ApConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   isDestructive?: boolean;
+  destructive?: boolean;
 }
 
 export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
@@ -25,10 +26,12 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
   subtitle,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  isDestructive = true,
+  isDestructive = false,
+  destructive = false,
 }) => {
   const desc = description || subTitle || subtitle;
   const colors = useTheme();
+  const isDestruct = isDestructive || destructive;
 
   return (
     <Modal
@@ -42,7 +45,7 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
         style={{ backgroundColor: colors.overlay }}
       >
         <View
-          className="w-full max-w-[320px] rounded-lg p-5"
+          className="w-full max-w-[340px] rounded-2xl p-5"
           style={{
             backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             shadowColor: colors.inkPrimary,
@@ -71,11 +74,12 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
           <View className="flex-row gap-3">
             <Pressable
               onPress={onClose}
-              className="flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80"
+              className="flex-1 h-[44px] rounded-pill items-center justify-center px-2 active:opacity-80"
               style={{ backgroundColor: colors.surface }}
             >
               <Text
-                className="text-[15px] font-semibold"
+                className="text-[14px] font-semibold text-center"
+                numberOfLines={1}
                 style={{ color: colors.inkPrimary }}
               >
                 {cancelText}
@@ -83,17 +87,20 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
             </Pressable>
             <Pressable
               onPress={onConfirm}
-              className="flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80"
+              className="flex-1 h-[44px] rounded-pill items-center justify-center px-2 active:opacity-80"
               style={{
-                backgroundColor: isDestructive
-                  ? colors.dangerSoft
+                backgroundColor: isDestruct
+                  ? colors.danger
                   : colors.backgroundInverse,
               }}
             >
               <Text
-                className="text-[15px] font-semibold"
+                className="text-[14px] font-semibold text-center"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
                 style={{
-                  color: isDestructive ? colors.danger : colors.inkInverse,
+                  color: isDestruct ? colors.white : colors.inkInverse,
                 }}
               >
                 {confirmText}
