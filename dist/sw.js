@@ -1,5 +1,9 @@
 // Replaced with a unique cache name by scripts/stamp-web-build.cjs.
+<<<<<<< HEAD
 const CACHE_NAME = "ember-web-e9a3cb73-0909-4cb4-b78d-f1e6af79c3b5";
+=======
+const CACHE_NAME = "ember-web-48843239-e7fe-42ac-93f3-0fb7432a3947";
+>>>>>>> origin/main
 const APP_SHELL = [
   "/",
   "/offline.html",
