@@ -1,4 +1,4 @@
-# Habit Tracker — Design System
+# Ember — Design System
 
 Version 1.0 · Light mode default · Built for Expo (React Native) + Tailwind (NativeWind)
 

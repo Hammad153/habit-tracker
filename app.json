@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Routina",
+    "name": "Ember",
     "slug": "habit-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "habittracker",
+    "scheme": "ember",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "runtimeVersion": {
@@ -18,10 +18,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.habittracker.app"
+      "bundleIdentifier": "com.ember.app"
     },
     "android": {
-      "package": "com.habittracker.app",
+      "package": "com.ember.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -47,7 +47,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Routina to access your photos"
+          "photosPermission": "Allow Ember to access your photos"
         }
       ],
       [
