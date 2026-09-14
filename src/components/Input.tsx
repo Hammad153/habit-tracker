@@ -49,13 +49,17 @@ export const ApTextInput: React.FC<ApTextInputProps> = ({
   return (
     <View style={containerStyle} className={`w-full ${containerClassName}`}>
       {label && (
-        <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+        <Text
+          className="text-[12px] font-semibold mb-2"
+          style={{ color: colors.inkTertiary }}
+        >
           {label}
         </Text>
       )}
       <View
-        className="w-full flex-row items-center bg-background-surface rounded-sm h-[52px] px-4"
+        className="w-full flex-row items-center rounded-sm h-[52px] px-4"
         style={{
+          backgroundColor: colors.surface || colors.input,
           borderWidth: isFocused || error ? 1.5 : 0,
           borderColor,
         }}
@@ -64,13 +68,16 @@ export const ApTextInput: React.FC<ApTextInputProps> = ({
           placeholderTextColor={colors.inkTertiary}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`flex-1 text-[15px] font-medium text-ink-primary h-full ${inputClassName}`}
-          style={props.style}
+          className={`flex-1 text-[15px] font-medium h-full ${inputClassName}`}
+          style={[{ color: colors.inkPrimary }, props.style]}
           {...props}
         />
       </View>
       {error && (
-        <Text className="text-[12px] text-danger mt-1.5 ml-1">
+        <Text
+          className="text-[12px] mt-1.5 ml-1"
+          style={{ color: colors.danger }}
+        >
           {error}
         </Text>
       )}

@@ -46,18 +46,23 @@ export const Dropdown: React.FC<DropdownProps> = ({
   return (
     <View className={`w-full ${className}`}>
       {label && (
-        <Text className="text-[12px] font-semibold text-ink-tertiary mb-2">
+        <Text
+          className="text-[12px] font-semibold mb-2"
+          style={{ color: colors.inkTertiary }}
+        >
           {label}
         </Text>
       )}
       <Pressable
         onPress={() => setIsOpen(true)}
-        className="w-full h-[52px] bg-background-surface rounded-sm px-4 flex-row items-center justify-between"
+        className="w-full h-[52px] rounded-sm px-4 flex-row items-center justify-between"
+        style={{ backgroundColor: colors.surface }}
       >
         <Text
-          className={`text-[15px] font-medium ${
-            selectedOption ? "text-ink-primary" : "text-ink-tertiary"
-          }`}
+          className="text-[15px] font-medium"
+          style={{
+            color: selectedOption ? colors.inkPrimary : colors.inkTertiary,
+          }}
         >
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
@@ -78,8 +83,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
           >
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
               <View
-                className="bg-background-elevated rounded-t-xl px-5 pb-8 pt-3 max-h-[70%]"
+                className="rounded-t-xl px-5 pb-8 pt-3 max-h-[70%]"
                 style={{
+                  backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
                   shadowColor: colors.inkPrimary,
                   shadowOpacity: 0.16,
                   shadowRadius: 24,
@@ -87,8 +93,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   elevation: 8,
                 }}
               >
-                <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-4" />
-                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary mb-3">
+                <View
+                  className="w-9 h-1 rounded-pill self-center mb-4"
+                  style={{ backgroundColor: colors.borderStrong }}
+                />
+                <Text
+                  className="text-[18px] leading-[24px] font-semibold mb-3"
+                  style={{ color: colors.inkPrimary }}
+                >
                   {label || "Select option"}
                 </Text>
                 <ScrollView showsVerticalScrollIndicator={false}>
@@ -99,14 +111,20 @@ export const Dropdown: React.FC<DropdownProps> = ({
                       <Pressable
                         key={opt.value}
                         onPress={() => handleSelect(opt.value)}
-                        className={`flex-row items-center justify-between py-3.5 ${
-                          isLast ? "" : "border-b border-border"
-                        }`}
+                        className="flex-row items-center justify-between py-3.5"
+                        style={
+                          isLast
+                            ? undefined
+                            : { borderBottomWidth: 1, borderBottomColor: colors.border }
+                        }
                       >
                         <Text
-                          className={`text-[15px] leading-[22px] font-medium ${
-                            isSelected ? "text-ink-primary" : "text-ink-secondary"
-                          }`}
+                          className="text-[15px] leading-[22px] font-medium"
+                          style={{
+                            color: isSelected
+                              ? colors.inkPrimary
+                              : colors.inkSecondary,
+                          }}
                         >
                           {opt.label}
                         </Text>

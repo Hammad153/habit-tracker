@@ -55,19 +55,19 @@ export const ListRow: React.FC<ListRowProps> = ({
   const middleContent = (
     <View className="flex-1 justify-center">
       <Text
-        className={`text-[15px] leading-[22px] font-medium ${
-          isCompleted ? "line-through text-ink-tertiary" : "text-ink-primary"
-        }`}
-        style={isCompleted ? { textDecorationLine: "line-through" } : undefined}
+        className="text-[15px] leading-[22px] font-medium"
+        style={[
+          { color: isCompleted ? colors.inkTertiary : colors.inkPrimary },
+          isCompleted ? { textDecorationLine: "line-through" } : undefined,
+        ]}
         numberOfLines={1}
       >
         {title}
       </Text>
       {displaySubtitle ? (
         <Text
-          className={`text-[13.5px] leading-[20px] font-medium mt-0.5 ${
-            isCompleted ? "text-ink-disabled" : "text-ink-secondary"
-          }`}
+          className="text-[13.5px] leading-[20px] font-medium mt-0.5"
+          style={{ color: isCompleted ? colors.inkDisabled : colors.inkSecondary }}
           numberOfLines={1}
         >
           {displaySubtitle}
@@ -78,8 +78,11 @@ export const ListRow: React.FC<ListRowProps> = ({
 
   return (
     <View
-      className={`flex-row items-center gap-3 py-3 ${isLast ? "" : "border-b border-border"} ${className}`}
-      style={style}
+      className={`flex-row items-center gap-3 py-3 ${className}`}
+      style={[
+        isLast ? undefined : { borderBottomWidth: 1, borderBottomColor: colors.border },
+        style,
+      ]}
       {...props}
     >
       {onPress ? (

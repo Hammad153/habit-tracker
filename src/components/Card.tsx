@@ -20,9 +20,10 @@ export const Card: React.FC<CardProps> = ({
   if (elevated) {
     return (
       <View
-        className={`bg-background-elevated rounded-lg p-4 ${className}`}
+        className={`rounded-lg p-4 ${className}`}
         style={[
           {
+            backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.04,
             shadowRadius: 8,
@@ -40,8 +41,8 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <View
-      className={`bg-background-surface rounded-lg p-4 ${className}`}
-      style={style}
+      className={`rounded-lg p-4 ${className}`}
+      style={[{ backgroundColor: colors.surface }, style]}
       {...props}
     >
       {children}

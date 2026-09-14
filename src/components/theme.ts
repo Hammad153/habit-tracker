@@ -135,11 +135,247 @@ export const LightTheme = {
   category: DesignTokens.category,
 };
 
-export const DarkTheme = LightTheme;
-export const GoldenTheme = LightTheme;
-export const FocusTheme = LightTheme;
+export type ThemeColors = typeof LightTheme;
+
+export const DarkTheme: ThemeColors = {
+  // Surfaces
+  background: "#121212",
+  backgroundLight: "#181816",
+  backgroundSurface: "#1E1E1C",
+  backgroundSurface2: "#282825",
+  backgroundElevated: "#242421",
+  backgroundInverse: "#F6F6F2",
+  surface: "#1E1E1C",
+  surface2: "#282825",
+  surfaceLight: "#282825",
+  surfaceBorder: "#2E2E2A",
+  surfaceInactive: "#282825",
+  surfaceGlow: "#1B3629",
+  surfaceElevated: "#242421",
+  overlay: "rgba(0, 0, 0, 0.70)",
+  tabBarActive: "rgba(255, 255, 255, 0.16)",
+
+  // Text colors
+  textPrimary: "#F6F6F2",
+  textSecondary: "#A8A8A1",
+  textMuted: "#70706B",
+  white: "#FFFFFF",
+  black: "#121212",
+  inkPrimary: "#F6F6F2",
+  inkSecondary: "#A8A8A1",
+  inkTertiary: "#70706B",
+  inkInverse: "#131311",
+  inkDisabled: "#4A4A46",
+
+  // Status & accent colors
+  primary: "#388E65",
+  primaryGlow: "#1B3629",
+  accent: "#388E65",
+  accentSoft: "#1A3326",
+  accentStrong: "#2B6A4D",
+  accentLight: "#1A3326",
+  heatmapLight: "#1F4230",
+  heatmapMid: "#2B6A4D",
+  success: "#388E65",
+  successSoft: "#1A3326",
+  warning: "#D49B37",
+  warningSoft: "#382A12",
+  danger: "#E0533C",
+  dangerSoft: "#3A1813",
+  progress: "#388E65",
+  progressBg: "#282825",
+
+  // Toggle & borders
+  toggleInactive: "#282825",
+  border: "#2E2E2A",
+  borderStrong: "#3E3E38",
+  muted: "#70706B",
+  input: "#1E1E1C",
+  container: "#121212",
+
+  // Category palette
+  category: {
+    rose: { bg: "#361B24", ink: "#F2789B" },
+    amber: { bg: "#382313", ink: "#F7A250" },
+    mint: { bg: "#163328", ink: "#44D4A4" },
+    violet: { bg: "#2B2144", ink: "#A28CF0" },
+    sky: { bg: "#1A2B42", ink: "#5EA1EB" },
+    sand: { bg: "#332A18", ink: "#D4B160" },
+  },
+};
+
+export const GoldenTheme: ThemeColors = {
+  // Surfaces
+  background: "#17140F",
+  backgroundLight: "#1E1A14",
+  backgroundSurface: "#241E16",
+  backgroundSurface2: "#32291E",
+  backgroundElevated: "#2B2319",
+  backgroundInverse: "#E5B842",
+  surface: "#241E16",
+  surface2: "#32291E",
+  surfaceLight: "#32291E",
+  surfaceBorder: "#3D3121",
+  surfaceInactive: "#32291E",
+  surfaceGlow: "#3D2E12",
+  surfaceElevated: "#2B2319",
+  overlay: "rgba(15, 12, 8, 0.75)",
+  tabBarActive: "rgba(229, 184, 66, 0.18)",
+
+  // Text colors
+  textPrimary: "#FAF4E8",
+  textSecondary: "#C7BAA3",
+  textMuted: "#8A7E6B",
+  white: "#FFFFFF",
+  black: "#17140F",
+  inkPrimary: "#FAF4E8",
+  inkSecondary: "#C7BAA3",
+  inkTertiary: "#8A7E6B",
+  inkInverse: "#17140F",
+  inkDisabled: "#544C3E",
+
+  // Status & accent colors
+  primary: "#E5B842",
+  primaryGlow: "#3D2E12",
+  accent: "#E5B842",
+  accentSoft: "#3B2E10",
+  accentStrong: "#C99E30",
+  accentLight: "#3B2E10",
+  heatmapLight: "#473815",
+  heatmapMid: "#A68226",
+  success: "#4EAA78",
+  successSoft: "#183324",
+  warning: "#E5B842",
+  warningSoft: "#3D2E10",
+  danger: "#E0533C",
+  dangerSoft: "#3B1A14",
+  progress: "#E5B842",
+  progressBg: "#32291E",
+
+  // Toggle & borders
+  toggleInactive: "#32291E",
+  border: "#3D3121",
+  borderStrong: "#52412C",
+  muted: "#8A7E6B",
+  input: "#241E16",
+  container: "#17140F",
+
+  // Category palette
+  category: {
+    rose: { bg: "#3A1C25", ink: "#F587A7" },
+    amber: { bg: "#3D2811", ink: "#F7B252" },
+    mint: { bg: "#163527", ink: "#46D6A6" },
+    violet: { bg: "#2E2148", ink: "#AB96F5" },
+    sky: { bg: "#192B44", ink: "#61A5ED" },
+    sand: { bg: "#3B2E17", ink: "#E5B842" },
+  },
+};
+
+export const FocusTheme: ThemeColors = {
+  // Surfaces
+  background: "#0F1713",
+  backgroundLight: "#14201B",
+  backgroundSurface: "#18251F",
+  backgroundSurface2: "#22332B",
+  backgroundElevated: "#1E2F27",
+  backgroundInverse: "#48A97A",
+  surface: "#18251F",
+  surface2: "#22332B",
+  surfaceLight: "#22332B",
+  surfaceBorder: "#273C32",
+  surfaceInactive: "#22332B",
+  surfaceGlow: "#163828",
+  surfaceElevated: "#1E2F27",
+  overlay: "rgba(10, 18, 14, 0.75)",
+  tabBarActive: "rgba(72, 169, 122, 0.18)",
+
+  // Text colors
+  textPrimary: "#EDF6F1",
+  textSecondary: "#A4BFB2",
+  textMuted: "#6E897C",
+  white: "#FFFFFF",
+  black: "#0F1713",
+  inkPrimary: "#EDF6F1",
+  inkSecondary: "#A4BFB2",
+  inkTertiary: "#6E897C",
+  inkInverse: "#0A150F",
+  inkDisabled: "#43554C",
+
+  // Status & accent colors
+  primary: "#48A97A",
+  primaryGlow: "#163828",
+  accent: "#48A97A",
+  accentSoft: "#173628",
+  accentStrong: "#378760",
+  accentLight: "#173628",
+  heatmapLight: "#1E4734",
+  heatmapMid: "#388A62",
+  success: "#48A97A",
+  successSoft: "#173628",
+  warning: "#D69E3A",
+  warningSoft: "#382A12",
+  danger: "#E0533C",
+  dangerSoft: "#381A16",
+  progress: "#48A97A",
+  progressBg: "#22332B",
+
+  // Toggle & borders
+  toggleInactive: "#22332B",
+  border: "#273C32",
+  borderStrong: "#354F42",
+  muted: "#6E897C",
+  input: "#18251F",
+  container: "#0F1713",
+
+  // Category palette
+  category: {
+    rose: { bg: "#361E27", ink: "#F0829F" },
+    amber: { bg: "#382817", ink: "#EAA654" },
+    mint: { bg: "#173628", ink: "#48A97A" },
+    violet: { bg: "#282442", ink: "#A296E8" },
+    sky: { bg: "#192D3F", ink: "#5DA5E8" },
+    sand: { bg: "#322E1F", ink: "#CEBD80" },
+  },
+};
+
+export const getThemeVars = (colors: ThemeColors) => ({
+  "--background": colors.background,
+  "--background-surface": colors.surface,
+  "--background-surface2": colors.surface2,
+  "--background-elevated": colors.surfaceElevated,
+  "--background-inverse": colors.backgroundInverse,
+  "--ink-primary": colors.inkPrimary,
+  "--ink-secondary": colors.inkSecondary,
+  "--ink-tertiary": colors.inkTertiary,
+  "--ink-inverse": colors.inkInverse,
+  "--ink-disabled": colors.inkDisabled,
+  "--border": colors.border,
+  "--border-strong": colors.borderStrong,
+  "--accent": colors.accent,
+  "--accent-soft": colors.accentSoft,
+  "--accent-strong": colors.accentStrong,
+  "--success": colors.success,
+  "--success-soft": colors.successSoft,
+  "--warning": colors.warning,
+  "--warning-soft": colors.warningSoft,
+  "--danger": colors.danger,
+  "--danger-soft": colors.dangerSoft,
+  "--category-rose-bg": colors.category.rose.bg,
+  "--category-rose-ink": colors.category.rose.ink,
+  "--category-amber-bg": colors.category.amber.bg,
+  "--category-amber-ink": colors.category.amber.ink,
+  "--category-mint-bg": colors.category.mint.bg,
+  "--category-mint-ink": colors.category.mint.ink,
+  "--category-violet-bg": colors.category.violet.bg,
+  "--category-violet-ink": colors.category.violet.ink,
+  "--category-sky-bg": colors.category.sky.bg,
+  "--category-sky-ink": colors.category.sky.ink,
+  "--category-sand-bg": colors.category.sand.bg,
+  "--category-sand-ink": colors.category.sand.ink,
+});
 
 export const ApTheme = {
   Color: LightTheme,
   Tokens: DesignTokens,
 };
+

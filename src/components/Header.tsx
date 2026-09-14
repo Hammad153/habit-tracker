@@ -49,7 +49,8 @@ export const ApHeader: React.FC<ApHeaderProps> = ({
           <Pressable
             onPress={handleBack}
             hitSlop={8}
-            className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center mr-3 active:opacity-80"
+            className="w-10 h-10 rounded-pill items-center justify-center mr-3 active:opacity-80"
+            style={{ backgroundColor: colors.surface }}
           >
             <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
           </Pressable>
@@ -57,13 +58,17 @@ export const ApHeader: React.FC<ApHeaderProps> = ({
         {title ? (
           <View className="flex-1">
             <Text
-              className="text-[22px] leading-[28px] font-bold text-ink-primary text-left"
+              className="text-[22px] leading-[28px] font-bold text-left"
+              style={{ color: colors.inkPrimary }}
               numberOfLines={1}
             >
               {title}
             </Text>
             {subText ? (
-              <Text className="text-[12px] font-semibold text-ink-tertiary">
+              <Text
+                className="text-[12px] font-semibold"
+                style={{ color: colors.inkTertiary }}
+              >
                 {subText}
               </Text>
             ) : null}

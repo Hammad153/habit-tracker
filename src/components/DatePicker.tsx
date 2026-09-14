@@ -85,8 +85,9 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
         >
           <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
             <View
-              className="w-full max-w-[340px] bg-background-elevated rounded-lg p-5"
+              className="w-full max-w-[340px] rounded-lg p-5"
               style={{
+                backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
                 shadowColor: colors.inkPrimary,
                 shadowOpacity: 0.16,
                 shadowRadius: 24,
@@ -96,13 +97,17 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
             >
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                <Text
+                  className="text-[18px] leading-[24px] font-semibold"
+                  style={{ color: colors.inkPrimary }}
+                >
                   {title}
                 </Text>
                 <Pressable
                   onPress={onClose}
                   hitSlop={8}
-                  className="w-8 h-8 rounded-pill bg-background-surface items-center justify-center"
+                  className="w-8 h-8 rounded-pill items-center justify-center"
+                  style={{ backgroundColor: colors.surface }}
                 >
                   <X size={16} color={colors.inkPrimary} strokeWidth={2} />
                 </Pressable>
@@ -112,16 +117,21 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
               <View className="flex-row items-center justify-between mb-4">
                 <Pressable
                   onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="w-9 h-9 rounded-pill bg-background-surface items-center justify-center"
+                  className="w-9 h-9 rounded-pill items-center justify-center"
+                  style={{ backgroundColor: colors.surface }}
                 >
                   <ChevronLeft size={18} color={colors.inkPrimary} strokeWidth={2} />
                 </Pressable>
-                <Text className="text-[15px] font-semibold text-ink-primary">
+                <Text
+                  className="text-[15px] font-semibold"
+                  style={{ color: colors.inkPrimary }}
+                >
                   {format(currentMonth, "MMMM yyyy")}
                 </Text>
                 <Pressable
                   onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="w-9 h-9 rounded-pill bg-background-surface items-center justify-center"
+                  className="w-9 h-9 rounded-pill items-center justify-center"
+                  style={{ backgroundColor: colors.surface }}
                 >
                   <ChevronRight size={18} color={colors.inkPrimary} strokeWidth={2} />
                 </Pressable>
@@ -131,7 +141,10 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
               <View className="flex-row justify-between mb-2">
                 {WEEKDAYS.map((wd) => (
                   <View key={wd} className="w-10 items-center">
-                    <Text className="text-[12px] font-semibold text-ink-tertiary">
+                    <Text
+                      className="text-[12px] font-semibold"
+                      style={{ color: colors.inkTertiary }}
+                    >
                       {wd}
                     </Text>
                   </View>
@@ -148,21 +161,19 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
                     (max && isAfter(startOfDay(d), max)) ||
                     (min && isBefore(startOfDay(d), min));
 
-                  let bgClass = "bg-transparent";
-                  let textClass = "text-ink-primary";
+                  let cellBg = "transparent";
+                  let cellTextColor = colors.inkPrimary;
+                  let isBold = false;
 
                   if (isSelected) {
-                    bgClass = "bg-background-inverse";
-                    textClass = "text-ink-inverse";
+                    cellBg = colors.backgroundInverse;
+                    cellTextColor = colors.inkInverse;
                   } else if (isToday) {
-                    bgClass = "bg-background-surface";
-                    textClass = "text-accent font-bold";
-                  } else if (!isCurrentMonth) {
-                    textClass = "text-ink-disabled";
-                  }
-
-                  if (isDisabled) {
-                    textClass = "text-ink-disabled";
+                    cellBg = colors.surface;
+                    cellTextColor = colors.accent;
+                    isBold = true;
+                  } else if (!isCurrentMonth || isDisabled) {
+                    cellTextColor = colors.inkDisabled;
                   }
 
                   return (
@@ -170,9 +181,16 @@ export const ApDatePicker: React.FC<ApDatePickerProps> = ({
                       key={index}
                       disabled={isDisabled}
                       onPress={() => handleSelectDay(d)}
-                      className={`w-10 h-10 rounded-pill items-center justify-center my-0.5 ${bgClass}`}
+                      className="w-10 h-10 rounded-pill items-center justify-center my-0.5"
+                      style={{ backgroundColor: cellBg }}
                     >
-                      <Text className={`text-[13.5px] font-medium ${textClass}`}>
+                      <Text
+                        className="text-[13.5px]"
+                        style={{
+                          color: cellTextColor,
+                          fontWeight: isBold || isSelected ? "700" : "500",
+                        }}
+                      >
                         {format(d, "d")}
                       </Text>
                     </Pressable>

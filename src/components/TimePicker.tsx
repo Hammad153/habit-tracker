@@ -71,8 +71,9 @@ export const ApTimePicker: React.FC<ApTimePickerProps> = ({
         >
           <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
             <View
-              className="w-full max-w-[340px] bg-background-elevated rounded-2xl p-5"
+              className="w-full max-w-[340px] rounded-2xl p-5"
               style={{
+                backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
                 shadowColor: colors.inkPrimary,
                 shadowOpacity: 0.16,
                 shadowRadius: 24,
@@ -82,13 +83,17 @@ export const ApTimePicker: React.FC<ApTimePickerProps> = ({
             >
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-[18px] font-bold text-ink-primary">
+                <Text
+                  className="text-[18px] font-bold"
+                  style={{ color: colors.inkPrimary }}
+                >
                   {title}
                 </Text>
                 <Pressable
                   onPress={onClose}
                   hitSlop={8}
-                  className="w-8 h-8 rounded-pill bg-background-surface items-center justify-center active:opacity-70"
+                  className="w-8 h-8 rounded-pill items-center justify-center active:opacity-70"
+                  style={{ backgroundColor: colors.surface }}
                 >
                   <X size={18} color={colors.inkPrimary} strokeWidth={2} />
                 </Pressable>
@@ -114,7 +119,10 @@ export const ApTimePicker: React.FC<ApTimePickerProps> = ({
               <View className="flex-row gap-2.5 mb-5">
                 {/* Column 1: Hour */}
                 <View className="flex-1">
-                  <Text className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider mb-1.5 text-center">
+                  <Text
+                    className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-center"
+                    style={{ color: colors.inkTertiary }}
+                  >
                     Hour
                   </Text>
                   <View
@@ -159,7 +167,10 @@ export const ApTimePicker: React.FC<ApTimePickerProps> = ({
 
                 {/* Column 2: Minute */}
                 <View className="flex-1">
-                  <Text className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider mb-1.5 text-center">
+                  <Text
+                    className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-center"
+                    style={{ color: colors.inkTertiary }}
+                  >
                     Minute
                   </Text>
                   <View
@@ -204,7 +215,10 @@ export const ApTimePicker: React.FC<ApTimePickerProps> = ({
 
                 {/* Column 3: AM / PM */}
                 <View className="w-16">
-                  <Text className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider mb-1.5 text-center">
+                  <Text
+                    className="text-[11px] font-semibold uppercase tracking-wider mb-1.5 text-center"
+                    style={{ color: colors.inkTertiary }}
+                  >
                     Period
                   </Text>
                   <View

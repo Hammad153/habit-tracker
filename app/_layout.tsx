@@ -1,6 +1,5 @@
 import React from "react";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PaperProvider } from "react-native-paper";
 import {
@@ -13,31 +12,22 @@ import {
 } from "@expo-google-fonts/inter";
 import "../global.css";
 import { ApSafeAreaView, ToastProvider, PWAInstallPrompt } from "@/src/components";
+import { useTheme } from "@/src/modules/settings/context";
 import ApProvider from "@/src/provider";
 import ApRouteAuthGuard from "@/src/guard";
 
-const RootLayout = () => {
-  const [fontsLoaded] = useFonts({
-    Inter: Inter_400Regular,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
+const RootNavigator = () => {
+  const { colors } = useTheme();
 
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <ApProvider>
-          <ToastProvider>
-            <ApRouteAuthGuard>
-              <ApSafeAreaView>
-                <Stack>
+    <ToastProvider>
+      <ApRouteAuthGuard>
+        <ApSafeAreaView>
+          <Stack
+            screenOptions={{
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          >
                   <Stack.Screen
                     name="(tabs)"
                     options={{ headerShown: false }}
@@ -259,11 +249,31 @@ const RootLayout = () => {
                     }}
                   />
                 </Stack>
-                <StatusBar style="auto" />
-                <PWAInstallPrompt />
-              </ApSafeAreaView>
-            </ApRouteAuthGuard>
-          </ToastProvider>
+        <PWAInstallPrompt />
+      </ApSafeAreaView>
+    </ApRouteAuthGuard>
+  </ToastProvider>
+  );
+};
+
+const RootLayout = () => {
+  const [fontsLoaded] = useFonts({
+    Inter: Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  return (
+    <SafeAreaProvider>
+      <PaperProvider>
+        <ApProvider>
+          <RootNavigator />
         </ApProvider>
       </PaperProvider>
     </SafeAreaProvider>

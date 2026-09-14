@@ -46,8 +46,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           onPress={onClose}
         />
         <View
-          className="bg-background-elevated rounded-t-xl px-5 pb-8 pt-3"
+          className="rounded-t-xl px-5 pb-8 pt-3"
           style={{
+            backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             maxHeight,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.16,
@@ -57,18 +58,25 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           }}
         >
           {/* Drag Handle */}
-          <View className="w-9 h-1 rounded-pill bg-border-strong self-center mb-4" />
+          <View
+            className="w-9 h-1 rounded-pill self-center mb-4"
+            style={{ backgroundColor: colors.borderStrong }}
+          />
 
           {/* Header */}
           {title ? (
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+              <Text
+                className="text-[18px] leading-[24px] font-semibold"
+                style={{ color: colors.inkPrimary }}
+              >
                 {title}
               </Text>
               <Pressable
                 onPress={onClose}
                 hitSlop={8}
-                className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center"
+                className="w-10 h-10 rounded-pill items-center justify-center"
+                style={{ backgroundColor: colors.surface }}
               >
                 <X size={20} color={colors.inkPrimary} strokeWidth={2} />
               </Pressable>

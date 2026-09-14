@@ -42,8 +42,9 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
         style={{ backgroundColor: colors.overlay }}
       >
         <View
-          className="w-full max-w-[320px] bg-background-elevated rounded-lg p-5"
+          className="w-full max-w-[320px] rounded-lg p-5"
           style={{
+            backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.16,
             shadowRadius: 24,
@@ -51,11 +52,17 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
             elevation: 8,
           }}
         >
-          <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary mb-2">
+          <Text
+            className="text-[18px] leading-[24px] font-semibold mb-2"
+            style={{ color: colors.inkPrimary }}
+          >
             {title}
           </Text>
           {desc ? (
-            <Text className="text-[15px] leading-[22px] text-ink-secondary mb-6">
+            <Text
+              className="text-[15px] leading-[22px] mb-6"
+              style={{ color: colors.inkSecondary }}
+            >
               {desc}
             </Text>
           ) : (
@@ -64,22 +71,30 @@ export const ApConfirmModal: React.FC<ApConfirmModalProps> = ({
           <View className="flex-row gap-3">
             <Pressable
               onPress={onClose}
-              className="flex-1 h-[44px] rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+              className="flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80"
+              style={{ backgroundColor: colors.surface }}
             >
-              <Text className="text-[15px] font-semibold text-ink-primary">
+              <Text
+                className="text-[15px] font-semibold"
+                style={{ color: colors.inkPrimary }}
+              >
                 {cancelText}
               </Text>
             </Pressable>
             <Pressable
               onPress={onConfirm}
-              className={`flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80 ${
-                isDestructive ? "bg-danger-soft" : "bg-background-inverse"
-              }`}
+              className="flex-1 h-[44px] rounded-pill items-center justify-center active:opacity-80"
+              style={{
+                backgroundColor: isDestructive
+                  ? colors.dangerSoft
+                  : colors.backgroundInverse,
+              }}
             >
               <Text
-                className={`text-[15px] font-semibold ${
-                  isDestructive ? "text-danger" : "text-ink-inverse"
-                }`}
+                className="text-[15px] font-semibold"
+                style={{
+                  color: isDestructive ? colors.danger : colors.inkInverse,
+                }}
               >
                 {confirmText}
               </Text>

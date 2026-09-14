@@ -37,8 +37,9 @@ export const ApModal: React.FC<ApModalProps> = ({
         style={{ backgroundColor: colors.overlay }}
       >
         <View
-          className={`w-full max-w-[340px] bg-background-elevated rounded-lg p-5 max-h-[85%] ${className}`}
+          className={`w-full max-w-[340px] rounded-lg p-5 max-h-[85%] ${className}`}
           style={{
+            backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             shadowColor: colors.inkPrimary,
             shadowOpacity: 0.16,
             shadowRadius: 24,
@@ -49,11 +50,17 @@ export const ApModal: React.FC<ApModalProps> = ({
           {title ? (
             <View className="flex-row items-center justify-between mb-4">
               <View className="flex-1 mr-2">
-                <Text className="text-[18px] leading-[24px] font-semibold text-ink-primary">
+                <Text
+                  className="text-[18px] leading-[24px] font-semibold"
+                  style={{ color: colors.inkPrimary }}
+                >
                   {title}
                 </Text>
                 {sub ? (
-                  <Text className="text-[13px] text-ink-secondary mt-0.5">
+                  <Text
+                    className="text-[13px] mt-0.5"
+                    style={{ color: colors.inkSecondary }}
+                  >
                     {sub}
                   </Text>
                 ) : null}
@@ -61,7 +68,8 @@ export const ApModal: React.FC<ApModalProps> = ({
               <Pressable
                 onPress={onClose}
                 hitSlop={8}
-                className="w-8 h-8 rounded-pill bg-background-surface items-center justify-center"
+                className="w-8 h-8 rounded-pill items-center justify-center"
+                style={{ backgroundColor: colors.surface }}
               >
                 <X size={16} color={colors.inkPrimary} strokeWidth={2} />
               </Pressable>
