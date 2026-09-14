@@ -97,8 +97,9 @@ export const FloatingTabBar: React.FC<BottomTabBarProps> = ({
         className="absolute left-4 right-4 flex-row items-center justify-between"
         style={{
           bottom: bottomOffset,
+          opacity: isMenuOpen ? 0 : 1,
         }}
-        pointerEvents="box-none"
+        pointerEvents={isMenuOpen ? "none" : "box-none"}
       >
         {/* 4-Tab Pill Bar */}
         <View
@@ -227,13 +228,17 @@ export const FloatingTabBar: React.FC<BottomTabBarProps> = ({
             flex: 1,
             backgroundColor: colors.overlay,
             justifyContent: "flex-end",
+            alignItems: "center",
           }}
           onPress={handleCloseMenu}
         >
           <View
             style={{
+              width: "100%",
+              maxWidth: 440,
               paddingBottom: bottomOffset,
               paddingHorizontal: 16,
+              alignSelf: "center",
             }}
             pointerEvents="box-none"
           >

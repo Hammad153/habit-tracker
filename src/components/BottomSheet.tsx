@@ -38,7 +38,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        className="flex-1 justify-end"
+        className="flex-1 justify-end items-center"
       >
         <Pressable
           className="absolute inset-0"
@@ -46,7 +46,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           onPress={onClose}
         />
         <View
-          className="rounded-t-xl px-5 pb-8 pt-3"
+          className="w-full max-w-[440px] rounded-t-xl px-5 pb-8 pt-3"
           style={{
             backgroundColor: colors.surfaceElevated || colors.backgroundElevated,
             maxHeight,

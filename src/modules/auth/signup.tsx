@@ -1,7 +1,7 @@
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { Text } from "react-native";
+import { AlertCircle } from "lucide-react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
@@ -14,14 +14,18 @@ const SignupScreen = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuthState();
   const router = useRouter();
   const colors = useTheme();
 
   const handleSignup = () => {
+    setErrorMessage("");
     if (!name || !email || !password) {
-      ToastService.Error("Please fill in all fields");
+      const msg = "Please fill in all fields";
+      setErrorMessage(msg);
+      ToastService.Error(msg);
       return;
     }
 
@@ -40,7 +44,14 @@ const SignupScreen = () => {
         });
       })
       .catch((error: any) => {
-        ToastService.Error(error.response?.data?.message || "Signup failed");
+        const raw =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Signup failed. Please try again.";
+        const msg = Array.isArray(raw) ? raw.join(". ") : String(raw);
+        setErrorMessage(msg);
+        ToastService.Error(msg);
       })
       .finally(() => {
         setLoading(false);
@@ -60,12 +71,33 @@ const SignupScreen = () => {
         </Text>
       }
     >
+      {errorMessage ? (
+        <View
+          className="mb-5 p-3.5 rounded-xl flex-row items-center border"
+          style={{
+            backgroundColor: colors.dangerSoft,
+            borderColor: colors.danger,
+          }}
+        >
+          <AlertCircle size={18} color={colors.danger} strokeWidth={2} />
+          <Text
+            className="flex-1 ml-2.5 text-[13.5px] font-medium leading-[19px]"
+            style={{ color: colors.danger }}
+          >
+            {errorMessage}
+          </Text>
+        </View>
+      ) : null}
+
       <AuthInput
         label="Full name"
         icon="user"
         placeholder="Alex Smith"
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => {
+          setName(text);
+          if (errorMessage) setErrorMessage("");
+        }}
       />
 
       <AuthInput

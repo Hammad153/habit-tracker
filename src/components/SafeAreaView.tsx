@@ -1,5 +1,5 @@
-import React from "react";
-import { Platform } from "react-native";
+import React, { useMemo } from "react";
+import { Platform, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { vars } from "nativewind";
@@ -11,6 +11,32 @@ export const ApSafeAreaView: React.FC<{
   className?: string;
 }> = ({ children, className = "" }) => {
   const colors = useTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = Platform.OS === "web" && width > 768;
+
+  const viewportStyle = useMemo(() => {
+    if (Platform.OS !== "web") return undefined;
+    if (isDesktop) {
+      return {
+        width: "100%" as const,
+        maxWidth: 440,
+        height: "100%" as const,
+        maxHeight: 920,
+        alignSelf: "center" as const,
+        borderRadius: 28,
+        overflow: "hidden" as const,
+        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.08)",
+        flex: 1,
+      };
+    }
+    return {
+      width: "100%" as const,
+      maxWidth: "100%" as const,
+      height: "100%" as const,
+      alignSelf: "stretch" as const,
+      flex: 1,
+    };
+  }, [isDesktop]);
 
   return (
     <SafeAreaView
@@ -18,7 +44,7 @@ export const ApSafeAreaView: React.FC<{
       style={[
         vars(getThemeVars(colors)),
         { backgroundColor: colors.background },
-        Platform.OS === "web" ? webViewportStyle : undefined,
+        viewportStyle,
       ]}
       edges={["top"]}
     >
@@ -26,12 +52,4 @@ export const ApSafeAreaView: React.FC<{
       {children}
     </SafeAreaView>
   );
-};
-
-const webViewportStyle = {
-  width: "100%" as const,
-  maxWidth: 430,
-  height: "100%" as const,
-  alignSelf: "center" as const,
-  overflow: "hidden" as const,
 };

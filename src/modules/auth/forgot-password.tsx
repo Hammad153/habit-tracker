@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
 import { Text, View } from "react-native";
+import { AlertCircle } from "lucide-react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { AuthService } from "./api";
@@ -10,14 +11,18 @@ import Button from "@/src/components/buttons/Button";
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
   const colors = useTheme();
 
   const handleResetPassword = () => {
+    setErrorMessage("");
     if (!email) {
-      ToastService.Error("Please enter your email address");
+      const msg = "Please enter your email address";
+      setErrorMessage(msg);
+      ToastService.Error(msg);
       return;
     }
 
@@ -28,9 +33,14 @@ const ForgotPasswordScreen = () => {
         ToastService.Success("Password reset email sent! Check your inbox.");
       })
       .catch((error: any) => {
-        ToastService.Error(
-          error.response?.data?.message || "Failed to send reset email",
-        );
+        const raw =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Failed to send reset email. Please try again.";
+        const msg = Array.isArray(raw) ? raw.join(". ") : String(raw);
+        setErrorMessage(msg);
+        ToastService.Error(msg);
       })
       .finally(() => {
         setLoading(false);
@@ -74,12 +84,33 @@ const ForgotPasswordScreen = () => {
         </Text>
       }
     >
+      {errorMessage ? (
+        <View
+          className="mb-5 p-3.5 rounded-xl flex-row items-center border"
+          style={{
+            backgroundColor: colors.dangerSoft,
+            borderColor: colors.danger,
+          }}
+        >
+          <AlertCircle size={18} color={colors.danger} strokeWidth={2} />
+          <Text
+            className="flex-1 ml-2.5 text-[13.5px] font-medium leading-[19px]"
+            style={{ color: colors.danger }}
+          >
+            {errorMessage}
+          </Text>
+        </View>
+      ) : null}
+
       <AuthInput
         label="Email address"
         icon="mail"
         placeholder="alex@gmail.com"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => {
+          setEmail(text);
+          if (errorMessage) setErrorMessage("");
+        }}
         autoCapitalize="none"
         keyboardType="email-address"
       />

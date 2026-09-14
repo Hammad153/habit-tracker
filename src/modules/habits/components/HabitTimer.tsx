@@ -185,11 +185,11 @@ const HabitTimer: React.FC<HabitTimerProps> = ({
       onRequestClose={handleClose}
     >
       <View
-        className="flex-1 justify-end"
+        className="flex-1 justify-end items-center"
         style={{ backgroundColor: colors.overlay }}
       >
         <View
-          className="rounded-t-3xl px-6 pt-5 pb-10"
+          className="w-full max-w-[440px] rounded-t-3xl px-6 pt-5 pb-10"
           style={{
             backgroundColor: colors.surface,
             borderTopWidth: 1,

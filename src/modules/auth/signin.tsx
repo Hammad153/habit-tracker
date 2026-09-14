@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useRouter } from "expo-router";
 import { Text, Pressable, View } from "react-native";
+import { AlertCircle } from "lucide-react-native";
 import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
@@ -12,14 +13,18 @@ import Button from "@/src/components/buttons/Button";
 const SigninScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuthState();
   const router = useRouter();
   const colors = useTheme();
 
   const handleLogin = () => {
+    setErrorMessage("");
     if (!email || !password) {
-      ToastService.Error("Please fill in all fields");
+      const msg = "Please enter both your email and password";
+      setErrorMessage(msg);
+      ToastService.Error(msg);
       return;
     }
 
@@ -38,7 +43,14 @@ const SigninScreen = () => {
         });
       })
       .catch((error: any) => {
-        ToastService.Error(error.response?.data?.message || "Login failed");
+        const raw =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "Invalid email or password. Please check your credentials and try again.";
+        const msg = Array.isArray(raw) ? raw.join(". ") : String(raw);
+        setErrorMessage(msg);
+        ToastService.Error(msg);
       })
       .finally(() => {
         setLoading(false);
@@ -58,12 +70,33 @@ const SigninScreen = () => {
         </Text>
       }
     >
+      {errorMessage ? (
+        <View
+          className="mb-5 p-3.5 rounded-xl flex-row items-center border"
+          style={{
+            backgroundColor: colors.dangerSoft,
+            borderColor: colors.danger,
+          }}
+        >
+          <AlertCircle size={18} color={colors.danger} strokeWidth={2} />
+          <Text
+            className="flex-1 ml-2.5 text-[13.5px] font-medium leading-[19px]"
+            style={{ color: colors.danger }}
+          >
+            {errorMessage}
+          </Text>
+        </View>
+      ) : null}
+
       <AuthInput
         label="Email address"
         icon="mail"
         placeholder="alex@gmail.com"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => {
+          setEmail(text);
+          if (errorMessage) setErrorMessage("");
+        }}
         autoCapitalize="none"
         keyboardType="email-address"
       />
@@ -73,7 +106,10 @@ const SigninScreen = () => {
         icon="lock"
         placeholder="••••••••"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          setPassword(text);
+          if (errorMessage) setErrorMessage("");
+        }}
         secure
       />
 

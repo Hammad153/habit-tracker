@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, createContext, useContext } from "react";
-import { Text, Animated, View, StyleSheet } from "react-native";
+import { Text, Animated, View, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CheckCircle2, AlertCircle, Info } from "lucide-react-native";
 import { useTheme } from "@/src/modules/settings/context";
@@ -111,7 +111,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ showToast, hideToast }}>
       <View style={{ flex: 1 }}>
         {children}
-        <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View
+          pointerEvents="box-none"
+          style={[
+            StyleSheet.absoluteFill,
+            { zIndex: 99999 },
+          ]}
+        >
           {toast && (
             <Animated.View
               pointerEvents="none"
@@ -146,7 +152,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                   style={{ color: colors.inkPrimary }}
                   numberOfLines={2}
                 >
-                  {toast.message}
+                  {String(toast.message)}
                 </Text>
               </View>
             </Animated.View>

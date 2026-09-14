@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, RefreshControl, Pressable } from "react-native";
-import { Plus, MoreHorizontal } from "lucide-react-native";
+import { Plus, MoreHorizontal, ArrowLeft } from "lucide-react-native";
 import { router } from "expo-router";
 import {
   ApEmptyState,
@@ -84,9 +84,20 @@ export const HabitPageScreen = () => {
       >
         {/* Navbar */}
         <View className="flex-row items-center justify-between py-3 mb-2">
-          <Text className="text-[22px] font-bold text-ink-primary">
-            Habits
-          </Text>
+          <View className="flex-row items-center gap-2.5">
+            <Pressable
+              onPress={() => (router.canGoBack() ? router.back() : router.replace("/(tabs)"))}
+              hitSlop={8}
+              className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+            >
+              <ArrowLeft size={20} color={colors.inkPrimary} strokeWidth={2} />
+            </Pressable>
+            <Text className="text-[22px] font-bold text-ink-primary">
+              Habits
+            </Text>
+          </View>
           <View className="flex-row items-center gap-2">
             <Pressable
               onPress={() => router.push("/create-habit")}
