@@ -1,3 +1,4 @@
+/* global __dirname */
 const { execFileSync } = require("node:child_process");
 const { readFileSync, writeFileSync } = require("node:fs");
 const { randomUUID } = require("node:crypto");
