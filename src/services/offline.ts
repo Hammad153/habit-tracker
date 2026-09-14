@@ -66,6 +66,12 @@ const stableStringify = (value: unknown): string => {
 const requestMethod = (config: AxiosRequestConfig) =>
   (config.method ?? "get").toLowerCase();
 
+// Billing must use live responses, never cached prices or queued payments.
+export const isSubscriptionRequest = (url?: string) => {
+  const path = new URL(url || "", "https://offline.invalid").pathname;
+  return /(?:^|\/)subscription(?:\/|$)/.test(path);
+};
+
 const isAuthRequest = (url?: string) => {
   if (!url) return false;
   try {
@@ -99,7 +105,7 @@ export const isLikelyOfflineError = (error: AxiosError) => {
 };
 
 export const cacheGetResponse = async (response: AxiosResponse) => {
-  if (requestMethod(response.config) !== "get") return;
+  if (requestMethod(response.config) !== "get" || isSubscriptionRequest(response.config.url)) return;
 
   try {
     const cache = await readRecord<CachedResponse>(ApStorageKeys.OfflineRequestCache);
@@ -115,7 +121,7 @@ export const cacheGetResponse = async (response: AxiosResponse) => {
 };
 
 export const getCachedResponse = async (config: InternalAxiosRequestConfig) => {
-  if (requestMethod(config) !== "get") return null;
+  if (requestMethod(config) !== "get" || isSubscriptionRequest(config.url)) return null;
 
   const cache = await readRecord<CachedResponse>(ApStorageKeys.OfflineRequestCache);
   const cached = cache[requestCacheKey(config)];
@@ -136,6 +142,7 @@ export const enqueueOfflineMutation = async (config: OfflineRequestConfig) => {
     !MUTATION_METHODS.has(method) ||
     !config.url ||
     config.__skipOfflineQueue ||
+    isSubscriptionRequest(config.url) ||
     isAuthRequest(config.url)
   ) {
     return null;
