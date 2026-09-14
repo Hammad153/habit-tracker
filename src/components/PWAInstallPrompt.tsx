@@ -116,7 +116,7 @@ export const PWAInstallPrompt: React.FC = () => {
         const choice = await activePrompt.userChoice;
         if (choice && choice.outcome === "accepted") {
           triggerSuccess();
-          ToastService.Success("Habit Tracker installed!");
+          ToastService.Success("Ember installed!");
           setVisible(false);
         }
         setDeferredPrompt(null);
@@ -275,10 +275,10 @@ export const PWAInstallPrompt: React.FC = () => {
               App Experience Available
             </Text>
             <Text className="text-[20px] leading-[26px] font-bold text-center text-ink-primary mb-1.5">
-              Install Habit Tracker
+              Install Ember
             </Text>
             <Text className="text-[13px] leading-[19px] text-center text-ink-secondary mb-4 px-2">
-              Add Habit Tracker to your home screen for the same fast, full-screen offline experience.
+              Add Ember to your home screen for the same fast, full-screen offline experience.
             </Text>
 
             {/* 3 Benefit Pills matching reference design */}

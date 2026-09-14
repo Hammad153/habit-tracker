@@ -223,7 +223,7 @@ const ExportScreen = () => {
 
       downloadBase64(
         base64,
-        "routina-export.xlsx",
+        "ember-export.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
       ToastService.Success("Excel file downloaded");
@@ -245,12 +245,12 @@ const ExportScreen = () => {
       });
 
       if (IS_WEB) {
-        downloadText(response.data, "routina-export.csv", "text/csv");
+        downloadText(response.data, "ember-export.csv", "text/csv");
         ToastService.Success("CSV file downloaded");
       } else {
         await Share.share({
           message: response.data,
-          title: "Routina Export (CSV)",
+          title: "Ember Export (CSV)",
         });
         ToastService.Success("CSV exported successfully");
       }
@@ -274,7 +274,7 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           response.data,
-          "routina-report.html",
+          "ember-report.html",
           "text/html",
         );
         ToastService.Success("PDF report downloaded as HTML");
@@ -289,7 +289,7 @@ const ExportScreen = () => {
         });
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
-          dialogTitle: "Routina Report",
+          dialogTitle: "Ember Report",
         });
         ToastService.Success("PDF report ready");
       }
@@ -312,14 +312,14 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           jsonStr,
-          "routina-backup.json",
+          "ember-backup.json",
           "application/json",
         );
         ToastService.Success("JSON backup downloaded");
       } else {
         await Share.share({
           message: jsonStr,
-          title: "Routina Backup (JSON)",
+          title: "Ember Backup (JSON)",
         });
         ToastService.Success("JSON backup exported");
       }

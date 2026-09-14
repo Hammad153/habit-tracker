@@ -43,7 +43,7 @@ const UpgradeModal = () => {
     <ApModal
       visible={showUpgradeModal}
       onClose={() => setShowUpgradeModal(false)}
-      title="Become a Routina Member"
+      title="Become an Ember Member"
       subTitle="Choose a plan to continue with unlimited access"
     >
       {loading && plans.length === 0 ? (
