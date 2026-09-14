@@ -29,235 +29,235 @@ const RootNavigator = () => {
               contentStyle: { backgroundColor: colors.background },
             }}
           >
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="login" options={{ headerShown: false }} />
-                  <Stack.Screen
-                    name="signup"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="forgot-password"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="reset-password"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="+not-found" />
-                  <Stack.Screen
-                    name="admin"
-                    options={{ headerShown: false, presentation: "card" }}
-                  />
-                  <Stack.Screen
-                    name="timeline"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="manage-habits"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="create-habit"
-                    options={{
-                      headerShown: false,
-                      presentation: "transparentModal",
-                      animation: "slide_from_bottom",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="edit-habit"
-                    options={{
-                      headerShown: false,
-                      presentation: "transparentModal",
-                      animation: "slide_from_bottom",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="habit-detail"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/appearance"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/sounds"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/change-password"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="subscription"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="templates"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="export"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="analytics"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="notifications"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="weekly-review"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="settings/coach"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="create-identity"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="edit-identity"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="identities"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="reward-shop"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="add-budget"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="add-expense"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="add-income"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="budgets"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="budget-detail"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="expense-history"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="category-breakdown"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="add-plan-task"
-                    options={{
-                      headerShown: false,
-                      presentation: "modal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="planner-calendar"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="journal"
-                    options={{
-                      headerShown: false,
-                      presentation: "card",
-                    }}
-                  />
-                </Stack>
-        <PWAInstallPrompt />
-      </ApSafeAreaView>
-    </ApRouteAuthGuard>
-  </ToastProvider>
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="signup"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="forgot-password"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="reset-password"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="+not-found" />
+            <Stack.Screen
+              name="admin"
+              options={{ headerShown: false, presentation: "card" }}
+            />
+            <Stack.Screen
+              name="timeline"
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="manage-habits"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="create-habit"
+              options={{
+                headerShown: false,
+                presentation: "transparentModal",
+                animation: "slide_from_bottom",
+              }}
+            />
+            <Stack.Screen
+              name="edit-habit"
+              options={{
+                headerShown: false,
+                presentation: "transparentModal",
+                animation: "slide_from_bottom",
+              }}
+            />
+            <Stack.Screen
+              name="habit-detail"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="settings/appearance"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="settings/sounds"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="settings/change-password"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="subscription"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="templates"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="export"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="analytics"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="notifications"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="weekly-review"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="settings/coach"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="create-identity"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="edit-identity"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="identities"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="reward-shop"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="add-budget"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="add-expense"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="add-income"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="budgets"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="budget-detail"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="expense-history"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="category-breakdown"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="add-plan-task"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="planner-calendar"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+            <Stack.Screen
+              name="journal"
+              options={{
+                headerShown: false,
+                presentation: "card",
+              }}
+            />
+          </Stack>
+          <PWAInstallPrompt />
+        </ApSafeAreaView>
+      </ApRouteAuthGuard>
+    </ToastProvider>
   );
 };
 
@@ -280,10 +280,14 @@ const RootLayout = () => {
     }
 
     const register = () => {
-      void navigator.serviceWorker.register("/sw.js");
+      void navigator.serviceWorker
+        .register("/sw.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch((error) => console.warn("Service worker update failed", error));
     };
 
-    window.addEventListener("load", register);
+    if (document.readyState === "complete") register();
+    else window.addEventListener("load", register);
     return () => window.removeEventListener("load", register);
   }, []);
 
