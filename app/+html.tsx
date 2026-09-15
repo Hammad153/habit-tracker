@@ -13,14 +13,14 @@ export default function RootHtml({ children }: PropsWithChildren) {
           content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"
         />
         <meta name="theme-color" content="#2B6A4D" />
-        <meta name="description" content="Ember - Build lasting habits" />
+        <meta name="description" content="Embermate - Build lasting habits" />
 
         {/* PWA Settings */}
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Ember" />
+        <meta name="apple-mobile-web-app-title" content="Embermate" />
         <link rel="apple-touch-icon" href="/icon-512.png" />
 
         {/* Service Worker & Early PWA Install Event Capture */}

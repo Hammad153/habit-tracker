@@ -116,7 +116,7 @@ export const PWAInstallPrompt: React.FC = () => {
         const choice = await activePrompt.userChoice;
         if (choice && choice.outcome === "accepted") {
           triggerSuccess();
-          ToastService.Success("Ember installed!");
+          ToastService.Success("Embermate installed!");
           setVisible(false);
         }
         setDeferredPrompt(null);
@@ -275,10 +275,10 @@ export const PWAInstallPrompt: React.FC = () => {
               App Experience Available
             </Text>
             <Text className="text-[20px] leading-[26px] font-bold text-center text-ink-primary mb-1.5">
-              Install Ember
+              Install Embermate
             </Text>
             <Text className="text-[13px] leading-[19px] text-center text-ink-secondary mb-4 px-2">
-              Add Ember to your home screen for the same fast, full-screen offline experience.
+              Add Embermate to your home screen for the same fast, full-screen offline experience.
             </Text>
 
             {/* 3 Benefit Pills matching reference design */}

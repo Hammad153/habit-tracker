@@ -219,7 +219,7 @@ const ExportScreen = () => {
 
       downloadBase64(
         base64,
-        "ember-export.xlsx",
+        "embermate-export.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
       ToastService.Success("Excel file downloaded");
@@ -241,12 +241,12 @@ const ExportScreen = () => {
       });
 
       if (IS_WEB) {
-        downloadText(response.data, "ember-export.csv", "text/csv");
+        downloadText(response.data, "embermate-export.csv", "text/csv");
         ToastService.Success("CSV file downloaded");
       } else {
         await Share.share({
           message: response.data,
-          title: "Ember Export (CSV)",
+          title: "Embermate Export (CSV)",
         });
         ToastService.Success("CSV exported successfully");
       }
@@ -270,7 +270,7 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           response.data,
-          "ember-report.html",
+          "embermate-report.html",
           "text/html",
         );
         ToastService.Success("PDF report downloaded as HTML");
@@ -285,7 +285,7 @@ const ExportScreen = () => {
         });
         await Sharing.shareAsync(uri, {
           mimeType: "application/pdf",
-          dialogTitle: "Ember Report",
+          dialogTitle: "Embermate Report",
         });
         ToastService.Success("PDF report ready");
       }
@@ -308,14 +308,14 @@ const ExportScreen = () => {
       if (IS_WEB) {
         downloadText(
           jsonStr,
-          "ember-backup.json",
+          "embermate-backup.json",
           "application/json",
         );
         ToastService.Success("JSON backup downloaded");
       } else {
         await Share.share({
           message: jsonStr,
-          title: "Ember Backup (JSON)",
+          title: "Embermate Backup (JSON)",
         });
         ToastService.Success("JSON backup exported");
       }

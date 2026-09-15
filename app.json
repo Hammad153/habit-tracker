@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Ember",
+    "name": "Embermate",
     "slug": "habit-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "ember",
+    "scheme": "embermate",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "runtimeVersion": {
@@ -47,7 +47,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Ember to access your photos"
+          "photosPermission": "Allow Embermate to access your photos"
         }
       ],
       [
