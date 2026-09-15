@@ -173,18 +173,21 @@ body {
   }
 
   .theme-golden {
-    --background: #FDF5E6;
+    --bg-gradient-start: #F59E0B;
+    --bg-gradient-mid: #FDE68A;
+    --bg-gradient-end: #FFFDF7;
+    --background: transparent;
     --background-surface: #FFFFFF;
     --background-surface2: #F8ECD5;
     --background-elevated: #FFFFFF;
-    --background-inverse: #C87A1E;
-    --ink-primary: #3D2B15;
-    --ink-secondary: #785D3B;
-    --ink-tertiary: #A48967;
+    --background-inverse: #D97706;
+    --ink-primary: #3B230E;
+    --ink-secondary: #755024;
+    --ink-tertiary: #9C7748;
     --ink-inverse: #FFFFFF;
-    --ink-disabled: #CDB596;
-    --border: #F0DCB8;
-    --border-strong: #DFC496;
+    --ink-disabled: #CCA77B;
+    --border: #F0D8AF;
+    --border-strong: #E0BC85;
     --accent: #D97706;
     --accent-soft: #FEF3C7;
     --accent-strong: #B45309;
@@ -206,6 +209,7 @@ body {
     --category-sky-ink: #0369A1;
     --category-sand-bg: #FBF3DE;
     --category-sand-ink: #926B1E;
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 38%, var(--bg-gradient-end) 100%) !important;
   }
 
   .theme-focus {

@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
-import { Platform, useWindowDimensions } from "react-native";
+import { Platform, useWindowDimensions, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { vars } from "nativewind";
+import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/src/modules/settings/context";
 import { getThemeVars } from "@/src/components/theme";
 
@@ -43,11 +44,19 @@ export const ApSafeAreaView: React.FC<{
       className={`flex-1 ${colors.themeClass} ${colors.isDark ? "dark" : ""} ${className}`}
       style={[
         vars(getThemeVars(colors)),
-        { backgroundColor: colors.background },
+        { backgroundColor: colors.isGradient ? "transparent" : colors.background },
         viewportStyle,
       ]}
       edges={["top"]}
     >
+      {colors.isGradient && (
+        <LinearGradient
+          colors={[colors.bgGradientStart, colors.bgGradientMid, colors.bgGradientEnd]}
+          locations={[0, 0.38, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      )}
       <StatusBar style={colors.isDark ? "light" : "dark"} />
       {children}
     </SafeAreaView>

@@ -133,6 +133,12 @@ export const LightTheme = {
 
   // Category palette
   category: DesignTokens.category,
+
+  // Gradient tokens
+  isGradient: false,
+  bgGradientStart: DesignTokens.background.DEFAULT,
+  bgGradientMid: DesignTokens.background.surface,
+  bgGradientEnd: DesignTokens.background.surface,
 };
 
 export type ThemeColors = typeof LightTheme;
@@ -202,6 +208,12 @@ export const DarkTheme: ThemeColors = {
     sky: { bg: "#1A2B42", ink: "#5EA1EB" },
     sand: { bg: "#332A18", ink: "#D4B160" },
   },
+
+  // Gradient tokens
+  isGradient: false,
+  bgGradientStart: "#121212",
+  bgGradientMid: "#121212",
+  bgGradientEnd: "#121212",
 };
 
 export const GoldenTheme: ThemeColors = {
@@ -211,28 +223,28 @@ export const GoldenTheme: ThemeColors = {
   backgroundSurface: "#FFFFFF",
   backgroundSurface2: "#F8ECD5",
   backgroundElevated: "#FFFFFF",
-  backgroundInverse: "#C87A1E",
+  backgroundInverse: "#D97706",
   surface: "#FFFFFF",
   surface2: "#F8ECD5",
   surfaceLight: "#FFFBF5",
-  surfaceBorder: "#F0DCB8",
+  surfaceBorder: "#F0D8AF",
   surfaceInactive: "#F4E5CB",
   surfaceGlow: "#FDE6BA",
   surfaceElevated: "#FFFFFF",
-  overlay: "rgba(61, 43, 21, 0.45)",
+  overlay: "rgba(59, 35, 14, 0.45)",
   tabBarActive: "rgba(217, 119, 6, 0.14)",
 
   // Text colors
-  textPrimary: "#3D2B15",
-  textSecondary: "#785D3B",
-  textMuted: "#A48967",
+  textPrimary: "#3B230E",
+  textSecondary: "#755024",
+  textMuted: "#9C7748",
   white: "#FFFFFF",
-  black: "#24180A",
-  inkPrimary: "#3D2B15",
-  inkSecondary: "#785D3B",
-  inkTertiary: "#A48967",
+  black: "#241508",
+  inkPrimary: "#3B230E",
+  inkSecondary: "#755024",
+  inkTertiary: "#9C7748",
   inkInverse: "#FFFFFF",
-  inkDisabled: "#CDB596",
+  inkDisabled: "#CCA77B",
 
   // Status & accent colors
   primary: "#D97706",
@@ -254,9 +266,9 @@ export const GoldenTheme: ThemeColors = {
 
   // Toggle & borders
   toggleInactive: "#F4E5CB",
-  border: "#F0DCB8",
-  borderStrong: "#DFC496",
-  muted: "#A48967",
+  border: "#F0D8AF",
+  borderStrong: "#E0BC85",
+  muted: "#9C7748",
   input: "#FFFFFF",
   container: "#FDF5E6",
 
@@ -269,6 +281,12 @@ export const GoldenTheme: ThemeColors = {
     sky: { bg: "#E0F2FE", ink: "#0369A1" },
     sand: { bg: "#FBF3DE", ink: "#926B1E" },
   },
+
+  // Gradient tokens
+  isGradient: true,
+  bgGradientStart: "#F59E0B",
+  bgGradientMid: "#FDE68A",
+  bgGradientEnd: "#FFFDF7",
 };
 
 export const FocusTheme: ThemeColors = {
@@ -336,9 +354,18 @@ export const FocusTheme: ThemeColors = {
     sky: { bg: "#192D3F", ink: "#5DA5E8" },
     sand: { bg: "#322E1F", ink: "#CEBD80" },
   },
+
+  // Gradient tokens
+  isGradient: false,
+  bgGradientStart: "#0F1713",
+  bgGradientMid: "#14201B",
+  bgGradientEnd: "#0F1713",
 };
 
 export const getThemeVars = (colors: ThemeColors) => ({
+  "--bg-gradient-start": colors.bgGradientStart,
+  "--bg-gradient-mid": colors.bgGradientMid,
+  "--bg-gradient-end": colors.bgGradientEnd,
   "--background": colors.background,
   "--background-surface": colors.surface,
   "--background-surface2": colors.surface2,
