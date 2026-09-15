@@ -1,4 +1,4 @@
-# Ember Web and PWA Plan
+# Embermate Web and PWA Plan
 
 ## Current Implementation
 
@@ -75,7 +75,7 @@ Vercel must keep `cleanUrls: true` in `vercel.json`. Expo exports pages such as 
 
 - Production app: `https://embermate.vercel.app`.
 - On September 14, 2026, the public CSS matched the local export, including the latest `767px` phone breakpoint. This confirms that change reached the host; it does not establish what an existing browser has cached.
-- The previous worker used the fixed `ember-web-v2` cache and served every cached asset without checking for changes. Builds now generate a unique cache, revalidate mutable assets, and remove only older Ember caches. HTML is fetched with revalidation and API requests remain uncached.
+- The previous worker used the fixed `ember-web-v2` cache and served every cached asset without checking for changes. Builds now generate a unique cache, revalidate mutable assets, and remove only older Embermate caches. HTML is fetched with revalidation and API requests remain uncached.
 - After deploying this fix, open `/version.json` and compare `commit` with the intended Git commit. If they differ, check Vercel's project, production branch, deployment commit, and the domain's production assignment.
 - A successful EAS Update workflow updates installed native apps; it does not publish this Vercel website.
 - For an affected browser, close and reopen the app after deployment. To diagnose persistent stale assets, use browser developer tools to unregister the site's service worker and delete only its `ember-web-*` Cache Storage entries, then reload. Avoid clearing all site data, which may remove the login session.
