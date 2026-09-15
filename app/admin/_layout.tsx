@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Pressable, ScrollView, View, useWindowDimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Pressable, ScrollView, View } from "react-native";
 import { Slot, usePathname, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ApContainer, ApText } from "@/src/components";
@@ -30,8 +30,9 @@ export default function AdminLayout() {
   const router = useRouter();
   const colors = useTheme();
   const { user, isAdminMode, exitAdminMode } = useAuthState();
-  const { width } = useWindowDimensions();
-  const desktop = width >= 768;
+  // The web app can be framed inside a much wider browser window.
+  const [contentWidth, setContentWidth] = useState(0);
+  const desktop = contentWidth >= 768;
 
   useEffect(() => {
     if (user?.role !== "ADMIN" || !isAdminMode) {
@@ -58,7 +59,7 @@ export default function AdminLayout() {
         }}
       >
         <View className="flex-row items-center justify-between">
-          <View>
+          <View style={{ flex: 1, minWidth: 0, marginRight: 12 }}>
             <ApText size="xl" font="bold" color={colors.textPrimary}>
               Ember Admin
             </ApText>
@@ -69,7 +70,7 @@ export default function AdminLayout() {
           <Pressable
             onPress={exit}
             className="rounded-xl px-3 py-2"
-            style={{ backgroundColor: colors.surfaceLight }}
+            style={{ backgroundColor: colors.surfaceLight, flexShrink: 0 }}
             accessibilityRole="button"
             accessibilityLabel="Exit admin mode"
           >
@@ -79,16 +80,22 @@ export default function AdminLayout() {
           </Pressable>
         </View>
       </View>
-      <View className="flex-1 flex-row">
+      <View
+        onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}
+        style={{ flex: 1, minHeight: 0, flexDirection: desktop ? "row" : "column" }}
+      >
         <ScrollView
           horizontal={!desktop}
           showsHorizontalScrollIndicator={false}
           className={
-            desktop ? "w-56 border-r" : "absolute z-10 w-full border-b"
+            desktop ? "border-r" : "border-b"
           }
           style={{
             backgroundColor: colors.surface,
             borderColor: colors.surfaceBorder,
+            flexGrow: 0,
+            flexShrink: 0,
+            ...(desktop ? { width: 224 } : { width: "100%" }),
           }}
           contentContainerClassName={
             desktop ? "gap-y-2 p-3" : "gap-x-2 px-3 py-2"
@@ -108,6 +115,7 @@ export default function AdminLayout() {
                     : "flex-row items-center rounded-xl px-3 py-2"
                 }
                 style={{
+                  flexShrink: 0,
                   backgroundColor: active
                     ? colors.primary
                     : colors.surfaceLight,
@@ -132,7 +140,7 @@ export default function AdminLayout() {
             );
           })}
         </ScrollView>
-        <View className={desktop ? "flex-1" : "mt-14 flex-1"}>
+        <View style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
           <Slot />
         </View>
       </View>
