@@ -4,6 +4,12 @@
                 e.preventDefault();
                 window.__deferredInstallPrompt = e;
               });
+              window.addEventListener('appinstalled', () => {
+                window.__deferredInstallPrompt = null;
+                try {
+                  localStorage.setItem('pwa_installed', 'true');
+                } catch (err) {}
+              });
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').catch((err) => {
@@ -341,5 +347,9 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 @keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
 @keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
 @keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+<<<<<<< HEAD
 @keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="preload" href="/_expo/static/css/web-c50c1edd88b2f44b56bcf6a395a88fee.css" as="style"><link rel="stylesheet" href="/_expo/static/css/web-c50c1edd88b2f44b56bcf6a395a88fee.css"><link rel="icon" href="/favicon.ico" /></head><body><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><!--/$--></div></div><script src="/_expo/static/js/web/entry-41154c5d9b9bc1f496be0bac29bec3e8.js" defer></script>
+=======
+@keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script><link rel="preload" href="/_expo/static/css/web-66b348ea6f9befa3fd1ca9c9f97b6a0c.css" as="style"><link rel="stylesheet" href="/_expo/static/css/web-66b348ea6f9befa3fd1ca9c9f97b6a0c.css"><link rel="icon" href="/favicon.ico" /></head><body><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><!--/$--></div></div><script src="/_expo/static/js/web/entry-9fd8abe96db8b8704203d538b003af43.js" defer></script>
+>>>>>>> development
 </body></html>

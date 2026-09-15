@@ -12,6 +12,8 @@ export enum ApStorageKeys {
   AppNotifications = "app_notifications",
   OfflineRequestCache = "offline_request_cache",
   OfflineMutationQueue = "offline_mutation_queue",
+  PwaInstalled = "pwa_installed",
+  PwaDismissedUntil = "pwa_prompt_dismissed_until",
 }
 
 const isWeb = Platform.OS === "web";

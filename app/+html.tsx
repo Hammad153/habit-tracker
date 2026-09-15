@@ -32,6 +32,12 @@ export default function RootHtml({ children }: PropsWithChildren) {
                 e.preventDefault();
                 window.__deferredInstallPrompt = e;
               });
+              window.addEventListener('appinstalled', () => {
+                window.__deferredInstallPrompt = null;
+                try {
+                  localStorage.setItem('pwa_installed', 'true');
+                } catch (err) {}
+              });
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').catch((err) => {
