@@ -1,5 +1,11 @@
 {
+<<<<<<< HEAD
   "id": "b42a7935-315f-4adf-8abb-7e27aeeabc68",
   "commit": "f079e8a1a30d502628c5c969cdaf5069375e48df",
   "builtAt": "2026-09-15T01:00:27.676Z"
+=======
+  "id": "afb7b131-0fcc-4fa8-8f87-3e6ec0c752c8",
+  "commit": "d74de2720396ffd887b12d97f1ba60d163cf58fc",
+  "builtAt": "2026-09-15T01:05:19.084Z"
+>>>>>>> 247f6db5 (fix: upgrade react-native-css-interop to 0.2.7 to fix native export crash on box-shadow and rebuild web)
 }

@@ -1,5 +1,9 @@
 // Replaced with a unique cache name by scripts/stamp-web-build.cjs.
+<<<<<<< HEAD
 const CACHE_NAME = "ember-web-b42a7935-315f-4adf-8abb-7e27aeeabc68";
+=======
+const CACHE_NAME = "ember-web-afb7b131-0fcc-4fa8-8f87-3e6ec0c752c8";
+>>>>>>> 247f6db5 (fix: upgrade react-native-css-interop to 0.2.7 to fix native export crash on box-shadow and rebuild web)
 const APP_SHELL = [
   "/",
   "/offline.html",
