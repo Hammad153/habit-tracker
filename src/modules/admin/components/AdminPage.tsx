@@ -17,8 +17,8 @@ export default function AdminPage({
   const colors = useTheme();
   return (
     <ApScrollView contentContainerClassName="px-1 pb-12">
-      <View className="mb-6 flex-row items-start justify-between">
-        <View className="flex-1">
+      <View className="mb-6 flex-row flex-wrap items-start justify-between gap-3">
+        <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 240, minWidth: 0 }}>
           <ApText size="2xl" font="bold" color={colors.textPrimary}>
             {title}
           </ApText>

@@ -69,6 +69,8 @@ cat dist/version.json
 
 The current export is static. It emits route HTML for Expo Router paths, so the hosting platform must serve the generated `dist` directory and preserve those files on direct navigation.
 
+Vercel must keep `cleanUrls: true` in `vercel.json`. Expo exports pages such as `subscription.html`, while in-app links use `/subscription`. Without clean URLs, client navigation works but refreshing or opening that URL directly returns Vercel's 404. After deploying, verify direct loads and refreshes of `/subscription`, `/login`, `/admin`, and `/settings/appearance`.
+
 ## Investigating missing updates
 
 - Production app: `https://embermate.vercel.app`.

@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "buildCommand": "pnpm build:web",
   "outputDirectory": "dist",
   "installCommand": "pnpm install --frozen-lockfile",
