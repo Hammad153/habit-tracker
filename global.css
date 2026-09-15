@@ -173,39 +173,39 @@ body {
   }
 
   .theme-golden {
-    --background: #17140F;
-    --background-surface: #241E16;
-    --background-surface2: #32291E;
-    --background-elevated: #2B2319;
-    --background-inverse: #E5B842;
-    --ink-primary: #FAF4E8;
-    --ink-secondary: #C7BAA3;
-    --ink-tertiary: #8A7E6B;
-    --ink-inverse: #17140F;
-    --ink-disabled: #544C3E;
-    --border: #3D3121;
-    --border-strong: #52412C;
-    --accent: #E5B842;
-    --accent-soft: #3B2E10;
-    --accent-strong: #C99E30;
-    --success: #4EAA78;
-    --success-soft: #183324;
-    --warning: #E5B842;
-    --warning-soft: #3D2E10;
-    --danger: #E0533C;
-    --danger-soft: #3B1A14;
-    --category-rose-bg: #3A1C25;
-    --category-rose-ink: #F587A7;
-    --category-amber-bg: #3D2811;
-    --category-amber-ink: #F7B252;
-    --category-mint-bg: #163527;
-    --category-mint-ink: #46D6A6;
-    --category-violet-bg: #2E2148;
-    --category-violet-ink: #AB96F5;
-    --category-sky-bg: #192B44;
-    --category-sky-ink: #61A5ED;
-    --category-sand-bg: #3B2E17;
-    --category-sand-ink: #E5B842;
+    --background: #FDF5E6;
+    --background-surface: #FFFFFF;
+    --background-surface2: #F8ECD5;
+    --background-elevated: #FFFFFF;
+    --background-inverse: #C87A1E;
+    --ink-primary: #3D2B15;
+    --ink-secondary: #785D3B;
+    --ink-tertiary: #A48967;
+    --ink-inverse: #FFFFFF;
+    --ink-disabled: #CDB596;
+    --border: #F0DCB8;
+    --border-strong: #DFC496;
+    --accent: #D97706;
+    --accent-soft: #FEF3C7;
+    --accent-strong: #B45309;
+    --success: #2D8A58;
+    --success-soft: #E0F4EA;
+    --warning: #D97706;
+    --warning-soft: #FEF3C7;
+    --danger: #D43825;
+    --danger-soft: #FCEBE8;
+    --category-rose-bg: #FCE7EC;
+    --category-rose-ink: #BE2A56;
+    --category-amber-bg: #FEF3C7;
+    --category-amber-ink: #B45309;
+    --category-mint-bg: #DCFCE7;
+    --category-mint-ink: #15803D;
+    --category-violet-bg: #EDE9FE;
+    --category-violet-ink: #6D28D9;
+    --category-sky-bg: #E0F2FE;
+    --category-sky-ink: #0369A1;
+    --category-sand-bg: #FBF3DE;
+    --category-sand-ink: #926B1E;
   }
 
   .theme-focus {

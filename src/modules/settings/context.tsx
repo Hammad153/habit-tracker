@@ -83,8 +83,10 @@ export const SettingsProvider: React.FC<IProps> = ({ children }) => {
   };
 
   const isDark =
-    themeMode === "golden" || themeMode === "focus" || themeMode === "dark"
+    themeMode === "focus" || themeMode === "dark"
       ? true
+      : themeMode === "golden"
+      ? false
       : themeMode === "system"
       ? systemColorScheme === "dark"
       : false;
