@@ -93,7 +93,15 @@ const ProfileScreen = () => {
   const isInitialLoading = loading || !profile?.id;
 
   const appearanceValue =
-    themeMode === "system" ? "System" : themeMode === "dark" ? "Dark" : "Light";
+    themeMode === "system"
+      ? "System"
+      : themeMode === "dark"
+      ? "Dark"
+      : themeMode === "golden"
+      ? "Golden"
+      : themeMode === "focus"
+      ? "Focus"
+      : "Light";
   const soundsValue = soundEnabled || hapticEnabled ? "On" : "Off";
   const isAdmin = user?.role === "ADMIN";
 
