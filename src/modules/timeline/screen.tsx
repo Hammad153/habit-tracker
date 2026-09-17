@@ -1,113 +1,45 @@
-import React, { useEffect } from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { format } from "date-fns";
-import {
-  ApHeader,
-  ApEmptyState,
-  Skeleton,
-  SkeletonHabitList,
-} from "@/src/components";
-import { ListRow } from "@/src/components/ListRow";
+import { ApEmptyState, ApHeader, SkeletonCard } from "@/src/components";
 import { useTheme } from "@/src/modules/settings/context";
+import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
-import { useTimelineState } from "./context";
-import { CheckCircle } from "lucide-react-native";
+import { toDateKey } from "@/src/utils/date";
+import { CalendarEventCard } from "./components/CalendarEventCard";
+import { MonthCalendar } from "./components/MonthCalendar";
+import { getEventsForDate } from "./calendar-utils";
 
 export const TimelineScreen = () => {
-  const { timeline, loading: isLoadingTimeline, fetchTimeline } = useTimelineState();
-  const { profile, loading: isLoadingProfile, fetchProfile } = useProfileState();
   const colors = useTheme();
+  const { habits, loading: habitsLoading, fetchHabits, toggleHabit } = useHabitState();
+  const { profile, fetchProfile } = useProfileState();
+  const today = useMemo(() => new Date(), []);
+  const [month, setMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selectedDate, setSelectedDate] = useState(today);
+  const events = useMemo(() => getEventsForDate(habits, selectedDate), [habits, selectedDate]);
 
-  useEffect(() => {
-    fetchTimeline();
-    fetchProfile();
-  }, []);
+  useEffect(() => { void fetchHabits(); void fetchProfile(); }, []);
 
-  const isLoading = isLoadingTimeline || isLoadingProfile;
-
-  const completionPercentage = profile?.completionRate
-    ? Math.round(profile.completionRate * 100)
-    : 0;
+  const selectDate = (date: Date) => {
+    setSelectedDate(date);
+    if (date.getMonth() !== month.getMonth() || date.getFullYear() !== month.getFullYear()) setMonth(new Date(date.getFullYear(), date.getMonth(), 1));
+  };
 
   return (
     <View className="flex-1 bg-background">
-      <ApHeader
-        title="Your journey"
-        subtitle={format(new Date(), "MMMM yyyy")}
-        hasBackButton
-      />
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 60 }}
-      >
-        {isLoading && (!timeline || timeline.length === 0) ? (
-          <View>
-            <View className="flex-row items-center justify-between my-4">
-              <View className="gap-2">
-                <Skeleton width={50} height={28} />
-                <Skeleton width={70} height={14} />
-              </View>
-              <View className="gap-2 items-end">
-                <Skeleton width={60} height={28} />
-                <Skeleton width={90} height={14} />
-              </View>
-            </View>
-            <View className="h-[1px] bg-border my-3" />
-            <Skeleton width={120} height={16} style={{ marginBottom: 12 }} />
-            <SkeletonHabitList count={5} />
-          </View>
-        ) : (
-          <>
-            {/* Plain stats numbers per Section 4 */}
-            <View className="flex-row items-center justify-between my-4">
-              <View>
-                <Text className="text-[24px] font-bold text-ink-primary">
-                  {profile?.currentStreak || 0}
-                </Text>
-                <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
-                  Day streak
-                </Text>
-              </View>
-              <View>
-                <Text className="text-[24px] font-bold text-accent">
-                  {completionPercentage}%
-                </Text>
-                <Text className="text-[11.5px] font-medium text-ink-secondary mt-0.5">
-                  Completion rate
-                </Text>
-              </View>
-            </View>
-
-            <View className="h-[1px] bg-border my-3" />
-
-            {/* Timeline list */}
-            <Text className="text-[12px] font-semibold text-ink-tertiary mb-3">
-              Timeline history
-            </Text>
-
-            {!timeline || timeline.length === 0 ? (
-              <ApEmptyState
-                title="No history logged yet"
-                description="Complete your habits to build your personal timeline."
-              />
-            ) : (
-              <View className="bg-background-surface rounded-lg px-4 py-1">
-                {timeline.map((event: any, idx: number) => (
-                  <ListRow
-                    key={event.id || idx}
-                    title={event.title || event.habitTitle || "Habit activity"}
-                    subLabel={event.date ? format(new Date(event.date), "MMM d, yyyy · h:mm a") : (event.description || "Completed")}
-                    icon={CheckCircle}
-                    iconBg={colors.accentSoft}
-                    iconColor={colors.accent}
-                    isLast={idx === timeline.length - 1}
-                  />
-                ))}
-              </View>
-            )}
-          </>
-        )}
+      <ApHeader title="Your journey" subtitle="Calendar" hasBackButton />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 4, paddingBottom: 60 }}>
+        <View className="flex-row items-end justify-between py-4">
+          <View><Text className="text-[26px] font-bold" style={{ color: colors.inkPrimary }}>{profile?.currentStreak ?? 0}</Text><Text className="text-[12px]" style={{ color: colors.inkSecondary }}>day streak</Text></View>
+          <View className="items-end"><Text className="text-[26px] font-bold" style={{ color: colors.accent }}>{Math.round((profile?.completionRate ?? 0) * 100)}%</Text><Text className="text-[12px]" style={{ color: colors.inkSecondary }}>completion rate</Text></View>
+        </View>
+        <MonthCalendar month={month} selectedDate={selectedDate} today={today} habits={habits} onMonthChange={(offset) => setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1))} onDateChange={selectDate} />
+        <View className="flex-row items-center justify-between mt-6 mb-3">
+          <View><Text className="text-[18px] font-bold" style={{ color: colors.inkPrimary }}>{format(selectedDate, "EEEE, MMM d")}</Text><Text className="text-[12px] mt-1" style={{ color: colors.inkSecondary }}>{events.length ? `${events.length} scheduled ${events.length === 1 ? "event" : "events"}` : "Nothing scheduled"}</Text></View>
+          {toDateKey(selectedDate) === toDateKey(today) && <View className="rounded-full px-3 py-1.5" style={{ backgroundColor: colors.accentSoft }}><Text className="text-[11px] font-bold" style={{ color: colors.accent }}>TODAY</Text></View>}
+        </View>
+        {habitsLoading && !habits.length ? <View className="gap-3"><SkeletonCard height={82} /><SkeletonCard height={82} /></View> : events.length ? <View className="gap-3">{events.map((event) => <CalendarEventCard key={`${event.habit.id}-${event.dateKey}`} event={event} onToggle={() => { if (event.status !== "upcoming") void toggleHabit(event.habit.id, event.dateKey); }} />)}</View> : <ApEmptyState title="No habits for this day" description="Choose another date or create a habit with a schedule for this day." />}
       </ScrollView>
     </View>
   );
