@@ -13,13 +13,16 @@ import {
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
+import { useAwardsState } from "@/src/modules/awards/context";
 import { IHabit } from "@/src/modules/habits/model";
 import { PERIOD_DAYS } from "@/src/constants";
 import TimeFilterTabs from "./components/TimeFilterTabs";
-import OverviewStats from "./components/OverviewStats";
 import CompletionChart from "./components/CompletionChart";
 import HabitBreakdownCard from "./components/HabitBreakdownCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
+import { ProgressHighlights } from "./components/ProgressHighlights";
+import { ConsistencyCard } from "./components/ConsistencyCard";
+import { GoalSnapshotCard } from "./components/GoalSnapshotCard";
 import { normalizeDateKey, toDateKey } from "@/src/utils/date";
 
 const getCompletionPercentage = (habit: IHabit, periodDays: number): number => {
@@ -62,10 +65,12 @@ const ProgressScreen = () => {
     loading: isLoadingProfile,
     fetchProfile,
   } = useProfileState();
+  const { userBadges, fetchUserBadges } = useAwardsState();
 
   useEffect(() => {
     fetchHabits();
     fetchProfile();
+    fetchUserBadges();
   }, []);
 
   const habitBreakdown = useMemo(() => {
@@ -107,18 +112,22 @@ const ProgressScreen = () => {
         }
       />
       <ApScrollView showsVerticalScrollIndicator={false}>
-        <TimeFilterTabs
-          selectedTab={selectedTab}
-          onSelectTab={setSelectedTab}
-        />
-        <OverviewStats
+        <ProgressHighlights
           streak={profile?.currentStreak ?? 0}
-          totalDone={allCompletions.filter((c) => c.status).length}
+          badges={userBadges.length}
+          completionRate={Math.round((profile?.completionRate ?? 0) * 100)}
         />
+        <ConsistencyCard
+          habits={habits ?? []}
+          completionRate={Math.round((profile?.completionRate ?? 0) * 100)}
+        />
+        <TimeFilterTabs selectedTab={selectedTab} onSelectTab={setSelectedTab} />
         <CompletionChart
           habits={habits ?? []}
           periodDays={PERIOD_DAYS[selectedTab]}
         />
+
+        <GoalSnapshotCard goals={habitBreakdown} />
 
         <View className="mb-6">
           <ApText
