@@ -7,7 +7,6 @@ import {
   Pressable,
 } from "react-native";
 import { router } from "expo-router";
-import { subDays } from "date-fns";
 import {
   ApEmptyState,
   ApErrorState,
@@ -29,77 +28,6 @@ import HabitCard from "@/src/modules/habits/components/HabitCard";
 import TrialBanner from "@/src/modules/subscription/components/TrialBanner";
 import { isSameDateKey, toDateKey, isHabitEligibleForDate } from "@/src/utils/date";
 
-const percent = (value: number, total: number) =>
-  total <= 0 ? 0 : Math.round((value / total) * 100);
-
-const getCompletionValue = (habit: any, date: string) =>
-  habit?.completions?.find((completion: any) =>
-    isSameDateKey(completion?.date, date)
-  );
-
-const buildAnalytics = (habits: any[]) => {
-  const activeHabits = habits.filter((habit) => !habit.isArchived);
-  const todayKey = toDateKey(new Date());
-  const todayScheduled = activeHabits.filter((habit) =>
-    isHabitScheduledForDate(habit, new Date())
-  );
-  const habitsCompletedToday = todayScheduled.filter(
-    (habit) => getCompletionValue(habit, todayKey)?.status
-  ).length;
-  const habitsMissedToday = Math.max(todayScheduled.length - habitsCompletedToday, 0);
-
-  const windowDays = Array.from({ length: 30 }, (_, index) =>
-    subDays(new Date(), 29 - index)
-  );
-  const daily = windowDays.map((date) => {
-    const key = toDateKey(date);
-    const eligibleHabits = activeHabits.filter((habit) =>
-      isHabitEligibleForDate(habit, date)
-    );
-    const scheduled = eligibleHabits.filter((habit) =>
-      isHabitScheduledForDate(habit, date)
-    );
-    const completed = scheduled.filter(
-      (habit) => getCompletionValue(habit, key)?.status
-    ).length;
-    return {
-      date: key,
-      completed,
-      total: scheduled.length,
-      rate: percent(completed, scheduled.length),
-    };
-  });
-
-  const totals = daily.reduce(
-    (acc, day) => ({
-      completed: acc.completed + day.completed,
-      total: acc.total + day.total,
-    }),
-    { completed: 0, total: 0 }
-  );
-
-  let currentStreak = 0;
-  for (let i = daily.length - 1; i >= 0; i--) {
-    if (daily[i].total === 0) continue;
-    if (daily[i].completed > 0) {
-      currentStreak++;
-    } else if (i === daily.length - 1) {
-      continue;
-    } else {
-      break;
-    }
-  }
-
-  return {
-    totalHabits: activeHabits.length,
-    activeHabits,
-    habitsCompletedToday,
-    habitsMissedToday,
-    currentStreak,
-    overallRate: percent(totals.completed, totals.total),
-  };
-};
-
 const HomeScreen: React.FC = () => {
   const colors = useTheme();
   const { user } = useAuthState();
@@ -110,7 +38,7 @@ const HomeScreen: React.FC = () => {
     error: habitsError,
     fetchHabits,
   } = useHabitState();
-  const { notifications, unreadCount, addNotification } = useNotificationsState();
+  const { unreadCount } = useNotificationsState();
   const { selectedPlan, fetchPlans } = useDailyPlanState();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -118,9 +46,10 @@ const HomeScreen: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
 
   const dateStr = useMemo(() => toDateKey(selectedDate), [selectedDate]);
-  const analytics = useMemo(() => buildAnalytics(habits), [habits]);
-
-  const streakValue = profile?.currentStreak ?? analytics.currentStreak;
+  // Streak is calculated and returned by the authenticated profile endpoint.
+  // Do not fall back to a client approximation, which can disagree with the BE
+  // around schedule gaps, archived habits, and timezone boundaries.
+  const streakValue = profile?.currentStreak ?? 0;
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

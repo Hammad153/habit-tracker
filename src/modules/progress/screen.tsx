@@ -7,52 +7,20 @@ import {
   ApContainer,
   ApScrollView,
   ApText,
-  ApEmptyState,
   SkeletonHabitList,
 } from "@/src/components";
 import { useSettingsState } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import { useProfileState } from "@/src/modules/profile/context";
 import { useAwardsState } from "@/src/modules/awards/context";
-import { IHabit } from "@/src/modules/habits/model";
 import { PERIOD_DAYS } from "@/src/constants";
 import TimeFilterTabs from "./components/TimeFilterTabs";
 import CompletionChart from "./components/CompletionChart";
-import HabitBreakdownCard from "./components/HabitBreakdownCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import { ProgressHighlights } from "./components/ProgressHighlights";
 import { ConsistencyCard } from "./components/ConsistencyCard";
 import { GoalSnapshotCard } from "./components/GoalSnapshotCard";
-import { normalizeDateKey, toDateKey } from "@/src/utils/date";
-
-const getCompletionPercentage = (habit: IHabit, periodDays: number): number => {
-  const completions = habit.completions ?? [];
-  if (completions.length === 0) return 0;
-
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - periodDays + 1);
-  const startStr = toDateKey(startDate);
-
-  const completedInPeriod = completions.filter(
-    (c) => normalizeDateKey(c.date) >= startStr && c.status,
-  ).length;
-
-  let eligibleDaysInPeriod = periodDays;
-  if (habit.createdAt) {
-    const createdDate = new Date(habit.createdAt);
-    const createdMidnight = new Date(createdDate.getFullYear(), createdDate.getMonth(), createdDate.getDate());
-    const startMidnight = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-    if (createdMidnight > startMidnight) {
-      const diffTime = Math.abs(today.getTime() - createdMidnight.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-      eligibleDaysInPeriod = Math.min(periodDays, diffDays);
-    }
-  }
-
-  if (eligibleDaysInPeriod <= 0) return 0;
-  return Math.round((completedInPeriod / eligibleDaysInPeriod) * 100);
-};
+import { getCompletionPercentage as getHabitCompletionPercentage } from "./progress-utils";
 
 const ProgressScreen = () => {
   const { colors } = useSettingsState();
@@ -82,18 +50,13 @@ const ProgressScreen = () => {
         id: habit.id,
         title: habit.title,
         category: habit.category ?? "General",
-        percentage: getCompletionPercentage(habit, days),
+        percentage: getHabitCompletionPercentage(habit, days),
         icon: habit.icon,
         iconBg: habit.iconBg,
         iconColor: habit.iconColor,
         completions: habit.completions ?? [],
       }));
   }, [habits, selectedTab]);
-
-  const allCompletions = useMemo(() => {
-    if (!habits) return [];
-    return habits.flatMap((h) => h.completions ?? []);
-  }, [habits]);
 
   const isLoading = isLoadingHabits || isLoadingProfile;
 
@@ -125,44 +88,10 @@ const ProgressScreen = () => {
         <CompletionChart
           habits={habits ?? []}
           periodDays={PERIOD_DAYS[selectedTab]}
+          periodLabel={selectedTab === "Week" ? "this week" : selectedTab === "Month" ? "this month" : "this year"}
         />
 
-        <GoalSnapshotCard goals={habitBreakdown} />
-
-        <View className="mb-6">
-          <ApText
-            size="xs"
-            font="semibold"
-            color={colors.textMuted}
-            className="uppercase mb-3"
-            style={{ letterSpacing: 0.8 }}
-          >
-            Habit Breakdown
-          </ApText>
-          {isLoading ? (
-            <SkeletonHabitList count={3} />
-          ) : habitBreakdown.length === 0 ? (
-            <ApEmptyState
-              title="No progress yet"
-              subtitle="Create a habit and start tracking — your consistency will show up here."
-              actionLabel="Create Habit"
-              onAction={() => router.push("/create-habit")}
-            />
-          ) : (
-            habitBreakdown.map((habit) => (
-              <HabitBreakdownCard
-                key={habit.id}
-                title={habit.title}
-                category={habit.category}
-                percentage={habit.percentage}
-                icon={habit.icon}
-                iconBg={habit.iconBg}
-                iconColor={habit.iconColor}
-                completions={habit.completions}
-              />
-            ))
-          )}
-        </View>
+        {isLoading ? <SkeletonHabitList count={3} /> : <GoalSnapshotCard goals={habitBreakdown} />}
 
         <View className="mb-6">
           <ApText
@@ -174,7 +103,7 @@ const ProgressScreen = () => {
           >
             Activity Heatmap
           </ApText>
-          <ActivityHeatmap completions={allCompletions} />
+        <ActivityHeatmap habits={habits ?? []} />
         </View>
       </ApScrollView>
     </ApContainer>

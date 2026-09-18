@@ -1,37 +1,31 @@
 import React from "react";
-import { Habit } from "@/src/types";
+import { IHabit } from "@/src/modules/habits/model";
 import { subDays, format } from "date-fns";
 import { View } from "react-native";
 import { useTheme } from "@/src/modules/settings/context";
 import { ApText } from "@/src/components/Text";
 import { ApCard } from "@/src/components/Card";
 import Svg, { Path, Defs, LinearGradient, Stop, Line } from "react-native-svg";
-import { isSameDateKey, isHabitEligibleForDate } from "@/src/utils/date";
+import { getCompletionRatioForDate } from "../progress-utils";
 
 interface CompletionChartProps {
-  habits: Habit[];
+  habits: IHabit[];
   periodDays: number;
+  periodLabel: string;
 }
 
 const CompletionChart: React.FC<CompletionChartProps> = ({
   habits,
   periodDays,
+  periodLabel,
 }) => {
   const colors = useTheme();
   const today = new Date();
 
   const chartData = Array.from({ length: 7 }).map((_, i) => {
-    const date = subDays(today, 6 - i);
-    const dateStr = format(date, "yyyy-MM-dd");
-
-    const eligibleHabits = habits.filter((h) => !h.isArchived && isHabitEligibleForDate(h, date));
-    if (eligibleHabits.length === 0) return 0;
-
-    const completedCount = eligibleHabits.filter((h) =>
-      h.completions?.some((c) => isSameDateKey(c.date, dateStr) && c.status),
-    ).length;
-
-    return (completedCount / eligibleHabits.length) * 100;
+    const dayOffset = Math.round(((periodDays - 1) * (6 - i)) / 6);
+    const date = subDays(today, dayOffset);
+    return getCompletionRatioForDate(habits, date) * 100;
   });
 
   const overallCompletion = Math.round(
@@ -39,7 +33,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
   );
 
   const lastThree = chartData.slice(4).reduce((a, b) => a + b, 0) / 3;
-  const prevThree = chartData.slice(1, 4).reduce((a, b) => a + b, 0) / 3;
+  const prevThree = chartData.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
   const trend = Math.round(lastThree - prevThree);
 
   // Generate SVG path for a 100x100 viewBox
@@ -49,9 +43,10 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
   const linePath = `M ${points}`;
   const areaPath = `${linePath} L 100,100 L 0,100 Z`;
 
-  const labels = Array.from({ length: 7 }).map((_, i) =>
-    format(subDays(today, 6 - i), "EEE"),
-  );
+  const labels = Array.from({ length: 7 }).map((_, i) => {
+    const dayOffset = Math.round(((periodDays - 1) * (6 - i)) / 6);
+    return format(subDays(today, dayOffset), periodDays <= 7 ? "EEE" : periodDays <= 31 ? "MMM d" : "MMM");
+  });
 
   return (
     <ApCard className="p-4 mb-6 relative overflow-hidden" style={{ minHeight: 220 }}>
@@ -82,7 +77,7 @@ const CompletionChart: React.FC<CompletionChartProps> = ({
                 font="medium"
                 color={trend > 0 ? colors.success : colors.danger}
               >
-                {trend > 0 ? `+${trend}%` : `${trend}%`} this week
+                {trend > 0 ? `+${trend}%` : `${trend}%`} {periodLabel}
               </ApText>
             )}
           </View>

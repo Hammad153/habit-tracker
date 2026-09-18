@@ -2,9 +2,7 @@ import React from "react";
 import { View, Text, Pressable } from "react-native";
 import { Bell, Flame } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { format } from "date-fns";
 import { useTheme } from "@/src/modules/settings/context";
-import { useAuthState } from "@/src/modules/auth/context";
 
 interface Props {
   userName?: string;
@@ -15,25 +13,13 @@ interface Props {
   streak?: number;
 }
 
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-};
-
 export const UserGreeting: React.FC<Props> = ({
   onNotificationPress,
   unreadCount = 0,
   streak = 0,
 }) => {
-  const { user } = useAuthState();
   const colors = useTheme();
   const router = useRouter();
-  const greetingText = getGreeting();
-  const dateFormatted = format(new Date(), "EEEE, d MMMM");
-
-  const displayName = user?.name ? `, ${user.name.split(" ")[0]}` : "";
 
   return (
     <View className="flex-row items-center justify-between w-full pt-2 pb-4">
@@ -42,13 +28,13 @@ export const UserGreeting: React.FC<Props> = ({
           className="text-[12px] font-semibold"
           style={{ color: colors.inkTertiary }}
         >
-          {dateFormatted}
+          Embermate
         </Text>
         <Text
           className="text-[22px] font-bold mt-0.5"
           style={{ color: colors.inkPrimary }}
         >
-          {greetingText}{displayName}
+          Your daily habits
         </Text>
         {streak > 0 && (
           <View className="flex-row items-center gap-1.5 mt-1">
