@@ -6,6 +6,7 @@ import { ToastService } from "@/src/services";
 import { useTheme } from "@/src/modules/settings/context";
 import { useAuthState } from "./context";
 import { AuthService } from "./api";
+import { ApStorageKeys, ApStorageService } from "@/src/services/storage";
 import AuthLayout from "./components/AuthLayout";
 import AuthInput from "./components/AuthInput";
 import Button from "@/src/components/buttons/Button";
@@ -30,7 +31,7 @@ const SignupScreen = () => {
     }
 
     setLoading(true);
-    AuthService.signup({ name, email, password })
+    ApStorageService.getRawItemAsync(ApStorageKeys.OnboardingAnonymousId).then((anonymousId) => AuthService.signup({ name, email, password, anonymousId: anonymousId ?? undefined }))
       .then((data) => {
         return signIn(
           {

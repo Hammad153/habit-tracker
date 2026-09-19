@@ -26,6 +26,7 @@ const ApRouteAuthGuard: React.FC<IProps> = ({ children }) => {
       "signup",
       "forgot-password",
       "reset-password",
+      "onboarding",
     ];
     const route = segments[0] ?? "";
     const inAuthGroup = publicRoutes.includes(route);

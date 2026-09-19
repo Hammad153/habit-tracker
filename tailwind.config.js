@@ -112,6 +112,14 @@ module.exports = {
       fontFamily: {
         display: ["Inter"],
       },
+      fontSize: {
+        "title-lg": ["28px", { lineHeight: "34px", fontWeight: "700" }],
+        subtitle: ["17px", { lineHeight: "24px", fontWeight: "600" }],
+        body: ["15px", { lineHeight: "22px", fontWeight: "400" }],
+        "body-sm": ["13.5px", { lineHeight: "20px", fontWeight: "500" }],
+        caption: ["12px", { lineHeight: "16px", fontWeight: "500" }],
+        stat: ["32px", { lineHeight: "38px", fontWeight: "700" }],
+      },
     },
   },
   plugins: [],
