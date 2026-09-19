@@ -14,6 +14,9 @@ export enum ApStorageKeys {
   OfflineMutationQueue = "offline_mutation_queue",
   PwaInstalled = "pwa_installed",
   PwaDismissedUntil = "pwa_prompt_dismissed_until",
+  OnboardingAnonymousId = "onboarding_anonymous_id",
+  OnboardingSession = "onboarding_session",
+  OnboardingMutationQueue = "onboarding_mutation_queue",
 }
 
 const isWeb = Platform.OS === "web";

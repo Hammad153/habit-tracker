@@ -1,13 +1,13 @@
 import axiosInstance from "@/src/libs/axios";
 
 export class AuthService {
-  static login = (email: string, password: string) => {
+  static login = (email: string, password: string, anonymousId?: string) => {
     return axiosInstance
-      .post("/auth/login", { email, password })
+      .post("/auth/login", { email, password, anonymousId })
       .then((res) => res.data);
   };
 
-  static signup = (data: { name: string; email: string; password: string }) => {
+  static signup = (data: { name: string; email: string; password: string; anonymousId?: string }) => {
     return axiosInstance.post("/auth/signup", data).then((res) => res.data);
   };
 
