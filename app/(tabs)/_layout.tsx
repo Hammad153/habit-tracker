@@ -24,6 +24,12 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="graveyard"
+        options={{
+          title: "Graveyard",
+        }}
+      />
+      <Tabs.Screen
         name="daily-plan"
         options={{
           title: "Daily Plan",

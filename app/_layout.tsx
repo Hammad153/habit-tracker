@@ -86,13 +86,6 @@ const RootNavigator = () => {
               }}
             />
             <Stack.Screen
-              name="graveyard"
-              options={{
-                headerShown: false,
-                presentation: "card",
-              }}
-            />
-            <Stack.Screen
               name="settings/appearance"
               options={{
                 headerShown: false,

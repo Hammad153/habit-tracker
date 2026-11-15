@@ -29,20 +29,27 @@ export const ShareTombstoneScreen: React.FC<ShareTombstoneProps> = ({ burialId }
 
     try {
       if (Platform.OS === "web") {
-        const text = `RIP — ${burial.title}\nLived: ${lifespanLabel(
-          Math.max(
-            1,
-            Math.round(
-              (new Date(burial.buriedAt).getTime() -
-                new Date(burial.habitCreatedAt).getTime()) /
-                86_400_000,
-            ),
-          ),
-        )}\n"${burial.epitaph}"\n\nShared from Habit Graveyard`;
-        await (globalThis as any).navigator?.share?.({
-          text,
-          title: `Tombstone: ${burial.title}`,
+        const { default: domtoimage } = await import("dom-to-image");
+        const node = document.querySelector("[data-tombstone-capture]");
+        if (!node) throw new Error("Tombstone capture target not found");
+
+        const dataUrl = await domtoimage.toPng(node, {
+          width: 600,
+          height: 1000,
+          style: {
+            transform: "scale(1)",
+            transformOrigin: "center",
+          },
         });
+
+        const link = document.createElement("a");
+        link.download = `tombstone-${burial.title.replace(/\s+/g, "-").toLowerCase()}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        ToastService.Success("Tombstone image saved");
       } else {
         const uri = await (viewShotRef.current as any)?.capture?.();
         if (uri) {
@@ -77,6 +84,7 @@ export const ShareTombstoneScreen: React.FC<ShareTombstoneProps> = ({ burialId }
       <View className="flex-1 p-4">
         <ViewShot ref={viewShotRef} style={{ width }}>
           <View
+            data-tombstone-capture={Platform.OS === "web" ? "true" : undefined}
             className="w-full rounded-3xl p-6 text-center"
             style={{
               backgroundColor: "#E8E4DF",
@@ -119,7 +127,7 @@ export const ShareTombstoneScreen: React.FC<ShareTombstoneProps> = ({ burialId }
 
         <View className="mt-6 flex-row gap-2">
           <Button
-            label="Share Image"
+            label="Save Image"
             onPress={captureAndShare}
             variant="primary"
             loading={sharing}

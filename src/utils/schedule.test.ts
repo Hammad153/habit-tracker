@@ -102,4 +102,23 @@ describe("isHabitScheduledForDate", () => {
     expect(isHabitScheduledForDate(habit, new Date(2026, 6, 11))).toBe(false);
     expect(isHabitScheduledForDate(habit, new Date(2026, 6, 12))).toBe(true);
   });
+
+  it("uses consistent UTC weekday for specific_days across timezones", () => {
+    const habit = { scheduleType: "specific_days", scheduleDays: ["Sun"] } as any;
+    // 2026-11-15 is a Sunday in UTC
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 15, 0, 0, 0))).toBe(true);
+    // Same UTC day, different local representation near DST boundary
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 15, 23, 0, 0))).toBe(true);
+    // Monday in UTC
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 16, 0, 0, 0))).toBe(false);
+  });
+
+  it("handles DST transition without shifting scheduled day", () => {
+    // US DST ends Nov 1 2026 at 2:00 AM local -> clocks fall back to 1:00 AM
+    const habit = { scheduleType: "specific_days", scheduleDays: ["Sun"] } as any;
+    // Nov 1 2026 is a Sunday
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 1, 5, 0, 0))).toBe(true);
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 1, 6, 0, 0))).toBe(true);
+    expect(isHabitScheduledForDate(habit, new Date(2026, 10, 1, 7, 0, 0))).toBe(true);
+  });
 });

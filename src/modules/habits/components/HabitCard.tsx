@@ -183,9 +183,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         visible={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={() => deleteHabit(id)}
-        title="Delete Habit"
-        description="Are you sure you want to delete this habit? This action cannot be undone."
-        confirmText="Delete"
+        title="Archive Habit"
+        description="This archives the habit and stops reminders. It can be restored later from settings."
+        confirmText="Archive"
+        cancelText="Cancel"
         isDestructive
       />
     </>

@@ -11,7 +11,7 @@ const dayOrdinal = (key: string) => {
 
 const startOfWeek = (date: Date) => {
   const start = startOfLocalDay(date);
-  start.setDate(start.getDate() - start.getDay());
+  start.setDate(start.getDate() - start.getUTCDay());
   return start;
 };
 
@@ -55,7 +55,8 @@ export const isHabitScheduledForDate = (habit: IHabit, date: Date): boolean => {
       return true;
 
     case "specific_days": {
-      const dayName = DAY_NAMES[date.getDay()];
+      const dateKey = toDateKey(date);
+      const dayName = DAY_NAMES[new Date(`${dateKey}T12:00:00.000Z`).getUTCDay()];
       return habit.scheduleDays?.length ? habit.scheduleDays.includes(dayName) : true;
     }
 
