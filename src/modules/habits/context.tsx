@@ -4,10 +4,11 @@ import React, {
   SetStateAction,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import { AppState } from 'react-native';
 import {
-  isOfflineQueuedPayload,
   ToastService,
   NotificationService,
 } from "@/src/services";
@@ -17,6 +18,8 @@ import { isSameDateKey } from "@/src/utils/date";
 import { CompletionKind } from "@/src/modules/identities/model";
 import { IHabit, ICompletion } from "./model";
 import { HabitService } from "./api";
+import type { HabitBurial } from './local-state';
+import { loadHabitState, newLocalId, refreshHabitSnapshots, saveComputedHabitCommand, saveHabitCommand, syncHabitCommands } from './synchronization';
 
 interface IProps {
   children: ReactNode;
@@ -27,12 +30,19 @@ type THabitContext = {
   error: boolean;
   habits: IHabit[];
   habit: IHabit;
+  burials: HabitBurial[];
+  pendingChanges: number;
+  syncErrors: string[];
   setHabit: React.Dispatch<SetStateAction<IHabit>>;
   fetchHabits: (options?: { silent?: boolean }) => Promise<void>;
   fetchOneHabit: (id: string) => Promise<void>;
   createHabit: (data: Partial<IHabit>) => Promise<IHabit | void>;
   updateHabit: (id: string, data: Partial<IHabit>) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
+  buryHabit: (id: string, reason: string | undefined, epitaph: string) => Promise<void>;
+  restoreBurial: (burialId: string) => Promise<void>;
+  restartBurial: (burialId: string) => Promise<void>;
+  transitionHabit: (id: string, status: NonNullable<IHabit['lifecycleStatus']>) => Promise<void>;
   toggleHabit: (
     id: string,
     date: string,
@@ -61,6 +71,26 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
   const [error, setError] = useState(false);
   const [habits, setHabits] = useState<IHabit[]>([]);
   const [habit, setHabit] = useState<IHabit>({} as IHabit);
+  const [burials, setBurials] = useState<HabitBurial[]>([]);
+  const [pendingChanges, setPendingChanges] = useState(0);
+  const [syncErrors, setSyncErrors] = useState<string[]>([]);
+  const activeUser = useRef(user?.id);
+  activeUser.current = user?.id;
+
+  const applyState = (userId: string, state: Awaited<ReturnType<typeof loadHabitState>>) => {
+    if (activeUser.current !== userId) return;
+    setHabits(state.habits);
+    setBurials(state.burials);
+    setPendingChanges(state.pending.length);
+    setSyncErrors(Object.values(state.failures));
+    setHabit((current) => state.habits.find((item) => item.id === current?.id) ?? current);
+  };
+
+  const syncNow = (userId: string) => {
+    void syncHabitCommands(userId, (state) => applyState(userId, state))
+      .then((state) => applyState(userId, state))
+      .catch((cause) => { if (activeUser.current === userId) ToastService.ApiError(cause); });
+  };
 
   const getOptimisticCompletions = (
     currentHabit: IHabit,
@@ -198,14 +228,31 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
 
   const createHabit = (data: Partial<IHabit>) => {
     if (!user?.id) return Promise.resolve();
+    const localId = newLocalId();
+    const habitData: IHabit = {
+      ...data,
+      id: localId,
+      userId: user.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isArchived: false,
+      lifecycleStatus: "ACTIVE",
+      version: 0,
+      completions: [],
+      goal: data.goal ?? 1,
+    } as IHabit;
     setLoading(true);
-    return HabitService.create(data, user.id)
-      .then((created: IHabit) => {
+    return saveHabitCommand(user.id, {
+      id: localId,
+      type: "create",
+      habit: habitData,
+    })
+      .then(() => syncHabitCommands(user.id))
+      .then((state) => applyState(user.id, state))
+      .then(() => {
         ToastService.Success("Habit created successfully");
         fetchSubscription();
-        // Refresh the list, but resolve with the created habit so callers can
-        // attach reminders or navigate to it.
-        return fetchHabits().then(() => created);
+        return habitData;
       })
       .catch((err) => {
         const errorData = err?.response?.data;
@@ -226,10 +273,16 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
 
   const updateHabit = (id: string, data: Partial<IHabit>) => {
     setLoading(true);
-    return HabitService.update(id, data)
+    return saveHabitCommand(user?.id ?? "", {
+      id: newLocalId(),
+      type: "update",
+      habitId: id,
+      patch: data,
+    })
+      .then(() => syncHabitCommands(user?.id ?? ""))
+      .then((state) => applyState(user?.id ?? "", state))
       .then(() => {
         ToastService.Success("Habit updated successfully");
-        return fetchHabits();
       })
       .catch((err) => {
         ToastService.ApiError(err);
@@ -241,11 +294,17 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
 
   const deleteHabit = (id: string) => {
     setLoading(true);
-    return HabitService.delete(id)
+    return saveHabitCommand(user?.id ?? "", {
+      id: newLocalId(),
+      type: "update",
+      habitId: id,
+      patch: { isArchived: true, lifecycleStatus: "ARCHIVED" },
+    })
+      .then(() => syncHabitCommands(user?.id ?? ""))
+      .then((state) => applyState(user?.id ?? "", state))
       .then(() => {
         NotificationService.cancelHabitReminder(id);
-        ToastService.Success("Habit deleted successfully");
-        return fetchHabits();
+        ToastService.Success("Habit archived successfully");
       })
       .catch((err) => {
         ToastService.ApiError(err);
@@ -255,25 +314,154 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
       });
   };
 
-  const toggleHabit = (id: string, date: string, value?: number, kind?: CompletionKind) => {
+  const toggleHabit = (id: string, date: string, value?: number, kind?: CompletionKind): Promise<{ coinsAwarded: number; newStreakMilestones?: number[] } | null> => {
     const previousHabits = habits;
     const previousHabit = habit;
     applyOptimisticToggle(id, date, value);
 
-    return HabitService.toggle(id, date, value, kind)
-      .then((result) => {
-        if (isOfflineQueuedPayload(result)) {
-          ToastService.Success("Habit update saved offline");
-          return null;
+    const commandId = newLocalId();
+    const currentHabit = habits.find((h) => h.id === id);
+    const completionValue = value ?? currentHabit?.goal ?? 1;
+    const isCompleted = value === undefined ? true : value >= (currentHabit?.goal ?? 1);
+    const completionKind = kind ?? "FULL";
+    const uid = user?.id ?? "";
+
+    if (!uid) return Promise.resolve(null);
+
+    return saveHabitCommand(uid, {
+      id: commandId,
+      type: "completion",
+      habitId: id,
+      date,
+      status: isCompleted,
+      value: completionValue,
+      kind: completionKind,
+    })
+      .then(() => syncHabitCommands(uid))
+      .then((state) => {
+        applyState(uid, state);
+        return state;
+      })
+      .then((state) => {
+        const rewards = state.rewards[commandId];
+        if (rewards) {
+          ToastService.Success("+" + rewards.coinsAwarded + " coins earned!");
+        } else {
+          ToastService.Success("Habit logged for today!");
         }
-        // Surface the reward breakdown so callers can celebrate wins.
-        const rewards = result?.rewards ?? null;
-        return fetchHabits({ silent: true }).then(() => rewards);
+        return rewards ?? null;
       })
       .catch((err) => {
         setHabits(previousHabits);
         setHabit(previousHabit);
         ToastService.ApiError(err);
+        return null;
+      });
+  };
+
+  const buryHabit = (id: string, reason: string | undefined, epitaph: string) => {
+    if (!user?.id) return Promise.resolve();
+    const commandId = newLocalId();
+    const habit = habits.find((h) => h.id === id);
+    const burial: HabitBurial = {
+      id: commandId,
+      habitId: id,
+      userId: user.id,
+      title: habit?.title ?? "",
+      habitCreatedAt: habit?.createdAt ?? new Date().toISOString(),
+      buriedAt: new Date().toISOString(),
+      lastCompletedDay: null,
+      totalCompletions: 0,
+      bestStreak: 0,
+      reason,
+      epitaph,
+      theme: "stone",
+    };
+    setLoading(true);
+    return saveHabitCommand(user.id, {
+      id: commandId,
+      type: "bury",
+      habitId: id,
+      burial,
+    })
+      .then(() => syncHabitCommands(user.id))
+      .then((state) => applyState(user.id, state))
+      .then(() => {
+        ToastService.Success("Habit buried");
+        NotificationService.cancelHabitReminder(id);
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const restoreBurial = (burialId: string) => {
+    if (!user?.id) return Promise.resolve();
+    setLoading(true);
+    return saveHabitCommand(user.id, {
+      id: newLocalId(),
+      type: "restore",
+      habitId: "",
+      burialId,
+    })
+      .then(() => syncHabitCommands(user.id))
+      .then((state) => applyState(user.id, state))
+      .then(() => {
+        ToastService.Success("Habit restored");
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const restartBurial = (burialId: string) => {
+    if (!user?.id) return Promise.resolve();
+    const newHabitId = newLocalId();
+    setLoading(true);
+    return saveHabitCommand(user.id, {
+      id: newLocalId(),
+      type: "restart",
+      habit: { id: newHabitId } as IHabit,
+      burialId,
+    })
+      .then(() => syncHabitCommands(user.id))
+      .then((state) => applyState(user.id, state))
+      .then(() => {
+        ToastService.Success("Habit restarted");
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const transitionHabit = (id: string, status: NonNullable<IHabit['lifecycleStatus']>) => {
+    if (!user?.id) return Promise.resolve();
+    setLoading(true);
+    return saveHabitCommand(user.id, {
+      id: newLocalId(),
+      type: "transition",
+      habitId: id,
+      status,
+    })
+      .then(() => syncHabitCommands(user.id))
+      .then((state) => applyState(user.id, state))
+      .then(() => {
+        ToastService.Success("Habit status updated");
+      })
+      .catch((err) => {
+        ToastService.ApiError(err);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -284,6 +472,9 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
         error,
         habits,
         habit,
+        burials,
+        pendingChanges,
+        syncErrors,
         setHabit,
         fetchHabits,
         fetchOneHabit,
@@ -291,6 +482,10 @@ export const HabitProvider: React.FC<IProps> = ({ children }) => {
         updateHabit,
         deleteHabit,
         toggleHabit,
+        buryHabit,
+        restoreBurial,
+        restartBurial,
+        transitionHabit,
       }}
     >
       {children}

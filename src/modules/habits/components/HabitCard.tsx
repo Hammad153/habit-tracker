@@ -21,7 +21,7 @@ export interface HabitCardProps {
   iconColor?: string;
   iconBg?: string;
   customIconNode?: React.ReactNode;
-  variant?: "toggle" | "edit" | "restore";
+  variant?: "toggle" | "edit" | "restore" | "view";
   isCompleted?: boolean;
   onRefresh?: () => void;
   selectedDate: string;
@@ -78,7 +78,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         pathname: "/edit-habit",
         params: { habitId: id },
       });
-    } else if (variant === "toggle") {
+    } else if (variant === "toggle" || variant === "view") {
       router.push({
         pathname: "/habit-detail",
         params: { habitId: id },
@@ -127,7 +127,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({
         trackColor={habitBg}
       />
     );
-  } else if (variant === "edit") {
+  } else if (variant === "edit" || variant === "view") {
     trailingControl = (
       <ChevronRight size={20} color={colors.inkTertiary} strokeWidth={2} />
     );

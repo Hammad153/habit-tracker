@@ -14,13 +14,14 @@ import { useHabitState } from "./context";
 import HabitCard from "./components/HabitCard";
 import HabitMetrics from "./components/HabitMetrics";
 import { isSameDateKey, toDateKey } from "@/src/utils/date";
+import { getTodaySections } from './today';
 
 export const HabitPageScreen = () => {
   const colors = useTheme();
   const { user } = useAuthState();
   const { loading, error, habits, fetchHabits } = useHabitState();
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<"all" | "todo" | "done">("all");
+  const [filter, setFilter] = useState<"all" | "todo" | "done" | "rest">("all");
   const today = toDateKey(new Date());
 
   useEffect(() => {
@@ -34,34 +35,17 @@ export const HabitPageScreen = () => {
     });
   }, [fetchHabits]);
 
-  const activeHabits = useMemo(() => {
-    return habits.filter((h: any) => !h.isArchived);
-  }, [habits]);
-
-  const todoCount = useMemo(() => {
-    return activeHabits.filter(
-      (h: any) => !h.completions?.some((c: any) => isSameDateKey(c.date, today) && c.status)
-    ).length;
-  }, [activeHabits, today]);
-
-  const doneCount = activeHabits.length - todoCount;
+  const sections = useMemo(() => getTodaySections(habits, new Date()), [habits, today]);
+  const activeHabits = [...sections.due, ...sections.completed, ...sections.notScheduled];
+  const todoCount = sections.due.length;
+  const doneCount = sections.completed.length;
 
   const filteredHabits = useMemo(() => {
-    const list = activeHabits.filter((h: any) => {
-      const isDone = h.completions?.some(
-        (c: any) => isSameDateKey(c?.date, today) && c.status
-      );
-      if (filter === "todo") return !isDone;
-      if (filter === "done") return isDone;
-      return true;
-    });
-
-    return [...list].sort((a: any, b: any) => {
-      const aDone = a.completions?.some((c: any) => isSameDateKey(c?.date, today) && c.status) ? 1 : 0;
-      const bDone = b.completions?.some((c: any) => isSameDateKey(c?.date, today) && c.status) ? 1 : 0;
-      return aDone - bDone;
-    });
-  }, [activeHabits, filter, today]);
+    if (filter === 'todo') return sections.due;
+    if (filter === 'done') return sections.completed;
+    if (filter === 'rest') return sections.notScheduled;
+    return activeHabits;
+  }, [sections, filter]);
 
   const isInitialLoading = loading && !refreshing && habits.length === 0;
 
@@ -122,7 +106,7 @@ export const HabitPageScreen = () => {
         <HabitMetrics habits={habits} />
 
         {/* Filter Tags */}
-        <View className="flex-row gap-2 mb-4">
+        <View className="flex-row flex-wrap gap-2 mb-4">
           <Tag
             label={"All · " + activeHabits.length}
             active={filter === "all"}
@@ -137,6 +121,11 @@ export const HabitPageScreen = () => {
             label={"Done · " + doneCount}
             active={filter === "done"}
             onPress={() => setFilter("done")}
+          />
+          <Tag
+            label={"Rest · " + sections.notScheduled.length}
+            active={filter === "rest"}
+            onPress={() => setFilter("rest")}
           />
         </View>
 
@@ -166,6 +155,7 @@ export const HabitPageScreen = () => {
                 iconColor={habit.iconColor}
                 iconBg={habit.iconBg}
                 selectedDate={today}
+                variant={sections.notScheduled.some((item) => item.id === habit.id) ? 'view' : 'toggle'}
                 isCompleted={habit.completions?.some(
                   (c: any) => isSameDateKey(c.date, today) && c.status
                 )}

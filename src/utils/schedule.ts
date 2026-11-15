@@ -2,21 +2,11 @@ import { IHabit } from "@/src/modules/habits/model";
 import { normalizeDateKey, parseDateKey, toDateKey } from "@/src/utils/date";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
 const startOfLocalDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-const getHabitStartDate = (habit: IHabit) =>
-  habit.createdAt ? startOfLocalDay(new Date(habit.createdAt)) : startOfLocalDay(new Date());
-
-const getTimesPerWeekDays = (habit: IHabit) => {
-  const times = Math.min(Math.max(habit.timesPerWeek || 1, 1), 7);
-  const startDay = getHabitStartDate(habit).getDay();
-
-  return Array.from({ length: times }, (_, index) =>
-    DAY_NAMES[(startDay + Math.floor((index * 7) / times)) % 7],
-  );
+const dayOrdinal = (key: string) => {
+  const [year, month, day] = key.split("-").map(Number);
+  return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
 };
 
 const startOfWeek = (date: Date) => {
@@ -50,6 +40,9 @@ const isTimesPerWeekComplete = (
 export const isHabitScheduledForDate = (habit: IHabit, date: Date): boolean => {
   const dateStr = toDateKey(date);
 
+  if (habit.startDate && dateStr < habit.startDate.slice(0, 10)) return false;
+  if (habit.endDate && dateStr > habit.endDate.slice(0, 10)) return false;
+
   // Check if it's a rest day
   if (habit.restDays?.includes(dateStr)) {
     return false;
@@ -67,15 +60,15 @@ export const isHabitScheduledForDate = (habit: IHabit, date: Date): boolean => {
     }
 
     case "times_per_week": {
-      const dayName = DAY_NAMES[date.getDay()];
-      return getTimesPerWeekDays(habit).includes(dayName);
+      // Any day is eligible; the target applies to the whole calendar week.
+      return true;
     }
 
     case "interval": {
-      if (!habit.intervalDays || !habit.createdAt) return true;
-      const createdDate = getHabitStartDate(habit);
-      const diffTime = startOfLocalDay(date).getTime() - createdDate.getTime();
-      const diffDays = Math.floor(diffTime / MS_PER_DAY);
+      if (!habit.intervalDays) return true;
+      const anchor = (habit.startDate ?? habit.createdAt)?.slice(0, 10);
+      if (!anchor) return true;
+      const diffDays = dayOrdinal(dateStr) - dayOrdinal(anchor);
       return diffDays >= 0 && diffDays % habit.intervalDays === 0;
     }
 
@@ -147,7 +140,7 @@ export const getScheduleLabel = (habit: IHabit): string => {
     case "specific_days":
       return habit.scheduleDays?.join(", ") || "No days set";
     case "times_per_week":
-      return `${habit.timesPerWeek || 0}x per week (${getTimesPerWeekDays(habit).join(", ")})`;
+      return `${habit.timesPerWeek || 0}x per week (any day)`;
     case "interval":
       return `Every ${habit.intervalDays || 0} days`;
     default:

@@ -83,13 +83,21 @@ describe("isHabitScheduledForDate", () => {
     expect(isHabitScheduledForDate(habit, saturday)).toBe(false);
   });
 
-  it("spreads times-per-week habits from the creation weekday", () => {
+  it("allows weekly quota completions on any eligible day", () => {
     const habit = {
       scheduleType: "times_per_week",
       timesPerWeek: 3,
       createdAt: "2026-07-10T09:00:00.000Z",
     } as any;
 
+    expect(isHabitScheduledForDate(habit, new Date(2026, 6, 10))).toBe(true);
+    expect(isHabitScheduledForDate(habit, new Date(2026, 6, 11))).toBe(true);
+    expect(isHabitScheduledForDate(habit, new Date(2026, 6, 12))).toBe(true);
+  });
+
+  it("anchors an interval to the configured start date", () => {
+    const habit = { scheduleType: "interval", intervalDays: 2, startDate: "2026-07-10T00:00:00.000Z", createdAt: "2026-07-01T00:00:00.000Z" } as any;
+    expect(isHabitScheduledForDate(habit, new Date(2026, 6, 9))).toBe(false);
     expect(isHabitScheduledForDate(habit, new Date(2026, 6, 10))).toBe(true);
     expect(isHabitScheduledForDate(habit, new Date(2026, 6, 11))).toBe(false);
     expect(isHabitScheduledForDate(habit, new Date(2026, 6, 12))).toBe(true);

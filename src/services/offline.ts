@@ -81,6 +81,11 @@ const isAuthRequest = (url?: string) => {
   }
 };
 
+const isHabitRequest = (url?: string) => {
+  const path = new URL(url || '', 'https://offline.invalid').pathname;
+  return /(?:^|\/)habit(?:\/|$)/.test(path);
+};
+
 export const requestCacheKey = (config: AxiosRequestConfig) => {
   const baseURL = config.baseURL ?? "";
   const url = config.url ?? "";
@@ -105,7 +110,7 @@ export const isLikelyOfflineError = (error: AxiosError) => {
 };
 
 export const cacheGetResponse = async (response: AxiosResponse) => {
-  if (requestMethod(response.config) !== "get" || isSubscriptionRequest(response.config.url)) return;
+  if (requestMethod(response.config) !== "get" || isSubscriptionRequest(response.config.url) || isHabitRequest(response.config.url)) return;
 
   try {
     const cache = await readRecord<CachedResponse>(ApStorageKeys.OfflineRequestCache);
@@ -121,7 +126,7 @@ export const cacheGetResponse = async (response: AxiosResponse) => {
 };
 
 export const getCachedResponse = async (config: InternalAxiosRequestConfig) => {
-  if (requestMethod(config) !== "get" || isSubscriptionRequest(config.url)) return null;
+  if (requestMethod(config) !== "get" || isSubscriptionRequest(config.url) || isHabitRequest(config.url)) return null;
 
   const cache = await readRecord<CachedResponse>(ApStorageKeys.OfflineRequestCache);
   const cached = cache[requestCacheKey(config)];
@@ -143,6 +148,7 @@ export const enqueueOfflineMutation = async (config: OfflineRequestConfig) => {
     !config.url ||
     config.__skipOfflineQueue ||
     isSubscriptionRequest(config.url) ||
+    isHabitRequest(config.url) ||
     isAuthRequest(config.url)
   ) {
     return null;

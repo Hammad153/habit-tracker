@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { ArrowLeft, MoreHorizontal, Calendar, Bell, Clock, Sparkles, Check } from "lucide-react-native";
 import { router } from "expo-router";
 import {
@@ -10,6 +10,8 @@ import {
 import { Card } from "@/src/components/Card";
 import { Button } from "@/src/components/buttons/Button";
 import { ListRow } from "@/src/components/ListRow";
+import { BottomSheet } from "@/src/components/BottomSheet";
+import { ApConfirmModal } from "@/src/components/ConfirmModal";
 import { useTheme } from "@/src/modules/settings/context";
 import { useHabitState } from "@/src/modules/habits/context";
 import LogValueModal from "./LogValueModal";
@@ -46,7 +48,8 @@ const todayStr = () => toDateKey(new Date());
 
 export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId }) => {
   const colors = useTheme();
-  const { toggleHabit } = useHabitState();
+  const { toggleHabit, updateHabit, deleteHabit, buryHabit, transitionHabit } =
+    useHabitState();
   const { freezeDay } = useRewardsState();
 
   const [habit, setHabit] = useState<IHabit | null>(null);
@@ -58,6 +61,10 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
   const [coach, setCoach] = useState<ICoach | null>(null);
   const [adaptive, setAdaptive] = useState<IAdaptiveSuggestion | null>(null);
   const [completing, setCompleting] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showBuryConfirm, setShowBuryConfirm] = useState(false);
+  const [buryReason, setBuryReason] = useState("");
+  const [buryEpitaph, setBuryEpitaph] = useState("");
 
   const load = useCallback(() => {
     setLoading(true);
@@ -143,6 +150,33 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
       .finally(() => setCompleting(false));
   }, [habit, isCompletedToday, load, toggleHabit, today]);
 
+  const handleBury = useCallback(() => {
+    if (!habit) return;
+    setBuryReason("");
+    setBuryEpitaph("");
+    setShowBuryConfirm(true);
+    setShowActionMenu(false);
+  }, [habit]);
+
+  const handleConfirmBury = useCallback(() => {
+    if (!habit) return;
+    buryHabit(habit.id, buryReason.length > 0 ? buryReason : undefined, buryEpitaph);
+    setShowBuryConfirm(false);
+  }, [habit, buryReason, buryEpitaph, buryHabit]);
+
+  const handlePause = useCallback(() => {
+    if (!habit) return;
+    const target = habit.lifecycleStatus === "PAUSED" ? "ACTIVE" : "PAUSED";
+    transitionHabit(habit.id, target);
+    setShowActionMenu(false);
+  }, [habit, transitionHabit]);
+
+  const handleArchive = useCallback(() => {
+    if (!habit) return;
+    updateHabit(habit.id, { isArchived: true });
+    setShowActionMenu(false);
+  }, [habit, updateHabit]);
+
   if (error || (!loading && !habit)) {
     return (
       <View className="flex-1 bg-background">
@@ -178,12 +212,7 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
         </Pressable>
         {habit && (
           <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/edit-habit",
-                params: { habitId: habit.id },
-              })
-            }
+            onPress={() => setShowActionMenu(true)}
             hitSlop={8}
             className="w-10 h-10 rounded-pill bg-background-surface items-center justify-center active:opacity-80"
           >
@@ -390,6 +419,57 @@ export const HabitDetailScreen: React.FC<HabitDetailScreenProps> = ({ habitId })
         )}
       </>
     )}
+    
+    <BottomSheet
+      visible={showActionMenu}
+      onClose={() => setShowActionMenu(false)}
+      title="Habit actions"
+    >
+      <View className="flex-col gap-1">
+        <Pressable
+          onPress={() => {
+            setShowActionMenu(false);
+            router.push({
+              pathname: "/edit-habit",
+              params: { habitId: habit!.id },
+            });
+          }}
+          className="flex-row items-center justify-between px-4 py-3 border-b border-border"
+        >
+          <Text className="text-[14px] text-ink-primary">Edit habit</Text>
+        </Pressable>
+        <Pressable
+          onPress={handlePause}
+          className="flex-row items-center justify-between px-4 py-3 border-b border-border"
+        >
+          <Text className="text-[14px] text-ink-primary">
+            {habit?.lifecycleStatus === "PAUSED" ? "Resume habit" : "Pause habit"}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={handleArchive}
+          className="flex-row items-center justify-between px-4 py-3 border-b border-border"
+        >
+          <Text className="text-[14px] text-ink-primary">Archive habit</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleBury}
+          className="flex-row items-center justify-between px-4 py-3"
+        >
+          <Text className="text-[14px] text-danger">Bury habit</Text>
+        </Pressable>
+      </View>
+    </BottomSheet>
+    
+    <ApConfirmModal
+      visible={showBuryConfirm}
+      onClose={() => setShowBuryConfirm(false)}
+      onConfirm={handleConfirmBury}
+      title="Bury Habit"
+      description="This creates a tombstone in the graveyard and stops reminders. The habit can be restored or restarted later."
+      confirmText="Bury"
+      cancelText="Cancel"
+    />
   </View>
 );
 };
